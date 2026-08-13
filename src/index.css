@@ -1,0 +1,83 @@
+:root {
+  /* Surfaces */
+  --bg: #0a0f1c;
+  --panel: #101827;
+  --panel-raised: #141f33;
+  --panel-border: #1f2c42;
+  --grid-line: #172238;
+
+  /* Text */
+  --text: #eaf0fa;
+  --text-dim: #8496b8;
+  --text-faint: #4c5b7a;
+
+  /* Signal colors, following anatomical/monitor convention */
+  --artery: #e8544a; /* oxygenated blood, heart, arterial flow */
+  --kidney: #f4b942; /* renal function / GFR */
+  --raas: #b98cff; /* renin-angiotensin-aldosterone pathway */
+  --anp: #3fd6c0; /* ANP counter-regulatory pathway */
+  --urine: #e2c168; /* excretion */
+  --ok: #3fd6c0;
+  --warn: #f4b942;
+  --danger: #e8544a;
+
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background:
+    radial-gradient(ellipse at top, rgba(31, 44, 66, 0.4), transparent 60%),
+    var(--bg);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Utility: clinical instrument label treatment — tracked, uppercase, muted */
+.label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Utility: tabular monospace numerals for live readouts */
+.numeral {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
