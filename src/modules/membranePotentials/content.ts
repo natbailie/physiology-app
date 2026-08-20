@@ -1,0 +1,11 @@
+import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+
+export const membranePotentialsContent: ExplainerContent = {
+  title: 'How ion gradients become an all-or-nothing signal',
+  paragraphs: [
+    'Each ion has an equilibrium potential given by the Nernst equation — the voltage at which its concentration gradient is exactly balanced by the electrical gradient (about −95 mV for K+, +61 mV for Na+). Membrane potential always sits nearest the equilibrium potential of whichever ion the membrane is currently most permeable to. At rest that is potassium, via leak channels, which is why resting potential lands near E_K and why extracellular potassium is its strongest determinant.',
+    'The action potential comes from three voltage-gated processes running at different speeds. Sodium activation (m) opens fastest, so depolarization past threshold lets Na+ rush in and depolarize further — a regenerative loop that produces the steep upstroke. Sodium inactivation (h) closes more slowly, shutting the sodium current off from behind, while the delayed-rectifier potassium gate (n) opens slowest and drives repolarization. That staggering of time constants, not any single channel, is the entire mechanism.',
+    'Because h takes time to recover, a cell that has just fired cannot fire again — the refractory period. This is also why hyperkalemia is deceptive: raising extracellular K+ moves E_K toward zero and depolarizes the resting membrane, which brings the cell closer to threshold but simultaneously leaves a large fraction of its sodium channels already inactivated. The net effect is reduced excitability despite sitting closer to firing.',
+    'Drugs and disease map cleanly onto these parameters. Local anesthetics and class I antiarrhythmics block sodium channels, abolishing the upstroke; class III antiarrhythmics block potassium channels, delaying repolarization and prolonging both the action potential and the refractory period. Cooling slows every gate through the same Q10 relationship, prolonging the spike and slowing conduction. Demyelination is different in kind — the axon still fires perfectly well, but saltatory conduction collapses, so this is a conduction problem rather than an excitability one.',
+  ],
+};

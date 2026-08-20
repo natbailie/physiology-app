@@ -1,0 +1,86 @@
+/* --- Heart --- */
+
+.heart {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: beat calc(60s / var(--hr-bpm, 70)) ease-in-out infinite;
+}
+
+.heartShape {
+  fill: color-mix(in srgb, var(--artery) var(--wash-soft), transparent);
+  stroke: var(--artery);
+  stroke-width: 2.5;
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: scale(var(--sv-scale, 1));
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 0 calc(6px * var(--glow-blur)) color-mix(in srgb, var(--artery) var(--glow-mix), transparent));
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.08);
+  }
+  40% {
+    transform: scale(0.97);
+  }
+}
+
+/* --- Kidneys --- */
+
+.kidneyShape {
+  stroke: var(--kidney);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--kidney) calc(var(--gfr-intensity, 1) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--gfr-intensity, 1) * 6px * var(--glow-blur)) color-mix(in srgb, var(--kidney) var(--glow-mix), transparent));
+  transition:
+    fill 0.4s ease,
+    filter 0.4s ease;
+}
+
+.urineFlow {
+  stroke: var(--urine);
+  stroke-width: 2.5;
+  stroke-dasharray: 2 6;
+  fill: none;
+  stroke-linecap: round;
+  animation: dripFlow calc(2.4s / max(var(--urine-speed, 0.5), 0.05)) linear infinite;
+}
+
+@keyframes dripFlow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+/* --- Labels --- */
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart,
+  .heartShape,
+  .urineFlow {
+    animation: none !important;
+  }
+}

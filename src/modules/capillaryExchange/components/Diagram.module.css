@@ -1,0 +1,139 @@
+/* --- Capillary --- */
+
+.capillaryWall {
+  fill: color-mix(in srgb, var(--capillary) var(--wash-faint), transparent);
+  stroke: var(--capillary);
+  stroke-width: 1.5;
+}
+
+.feedVessel {
+  stroke: var(--artery);
+  stroke-width: 8;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.drainVessel {
+  stroke: var(--venous, var(--capillary));
+  stroke-width: 8;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+/* Net flux at each station along the capillary: length and direction both carry meaning, so
+   filtration at the arteriolar end and reabsorption at the venular end are visible at once. */
+.fluxArrow {
+  stroke: var(--capillary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  marker-end: url(#flux-arrowhead);
+}
+
+.fluxArrowIn {
+  stroke: var(--lymph);
+  stroke-width: 2;
+  stroke-linecap: round;
+  marker-end: url(#flux-arrowhead-in);
+}
+
+.arrowHeadOut {
+  fill: var(--capillary);
+}
+
+.arrowHeadIn {
+  fill: var(--lymph);
+}
+
+/* --- Tissue --- */
+
+.tissueBlock {
+  fill: color-mix(in srgb, var(--interstitium) calc(var(--wash-faint) + var(--oedema, 0) * var(--wash-strong)), transparent);
+  stroke: var(--interstitium);
+  stroke-width: 1.5;
+  transition:
+    height 0.3s ease,
+    fill 0.3s ease;
+}
+
+.tissueBaseline {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.7;
+}
+
+/* --- Lymphatics --- */
+
+.lymphVessel {
+  stroke: var(--lymph);
+  stroke-width: 5;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.reserveTrack {
+  fill: color-mix(in srgb, var(--text-faint) var(--wash-faint), transparent);
+}
+
+.reserveFill {
+  fill: var(--lymph);
+  transition: width 0.3s ease;
+}
+
+.reserveExhausted {
+  fill: var(--danger);
+}
+
+/* --- Force legend --- */
+
+.forceOut {
+  fill: var(--capillary);
+}
+
+.forceIn {
+  fill: var(--lymph);
+}
+
+/* --- Badges --- */
+
+.mechanismBadge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--capillary);
+  text-transform: uppercase;
+}
+
+.warningBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--danger);
+  text-transform: uppercase;
+  opacity: var(--warn, 0);
+  transition: opacity 0.25s linear;
+}
+
+/* --- Labels --- */
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}

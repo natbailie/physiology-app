@@ -1,0 +1,92 @@
+.hypothalamusShape {
+  fill: color-mix(in srgb, var(--gnrh) calc(var(--wash-faint) + var(--gnrh-drive, 0) * var(--wash-strong)), transparent);
+  stroke: var(--gnrh);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--gnrh-drive, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--gnrh) var(--glow-mix), transparent));
+  transition:
+    fill 0.4s ease,
+    filter 0.4s ease;
+}
+
+.pituitaryShape {
+  fill: color-mix(in srgb, var(--lh) calc(var(--wash-faint) + var(--lh-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--lh);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--lh-level, 0) * 8px * var(--glow-blur)) color-mix(in srgb, var(--lh) var(--glow-mix), transparent));
+  transition:
+    fill 0.3s ease,
+    filter 0.3s ease;
+}
+
+/* Ovary with a follicle that grows through the follicular phase. */
+.gonadShape {
+  fill: color-mix(in srgb, var(--gonad-color, var(--estrogen)) calc(var(--wash-faint) + var(--steroid-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--gonad-color, var(--estrogen));
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--steroid-level, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--gonad-color, var(--estrogen)) 55%, transparent));
+  transition:
+    fill 0.4s ease,
+    filter 0.4s ease;
+}
+
+.follicle {
+  fill: color-mix(in srgb, var(--estrogen) var(--wash-strong), transparent);
+  stroke: var(--estrogen);
+  stroke-width: 1.5;
+  transition: r 0.5s ease;
+}
+
+.corpusLuteum {
+  fill: color-mix(in srgb, var(--progesterone) calc(var(--cl-activity, 0) * var(--wash-strong)), transparent);
+  stroke: var(--progesterone);
+  stroke-width: 1.5;
+  opacity: var(--cl-activity, 0);
+  transition:
+    opacity 0.5s ease,
+    fill 0.5s ease;
+}
+
+/* The feedback-mode badge is the module's headline: it is the only place in the app where a
+   feedback loop changes sign. */
+.feedbackBadge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.feedbackNegative {
+  composes: feedbackBadge;
+  fill: var(--text-dim);
+}
+
+.feedbackPositive {
+  composes: feedbackBadge;
+  fill: var(--lh);
+}
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}

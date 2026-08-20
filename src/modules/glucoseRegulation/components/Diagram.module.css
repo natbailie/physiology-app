@@ -1,0 +1,74 @@
+/* --- Pancreas with alpha/beta islet detail --- */
+
+.pancreasShape {
+  fill: color-mix(in srgb, var(--insulin) var(--wash-faint), transparent);
+  stroke: var(--insulin);
+  stroke-width: 2;
+  transition: fill 0.4s ease;
+}
+
+/* Beta-cell islet: brightens with insulin secretion. */
+.betaIslet {
+  fill: color-mix(in srgb, var(--insulin) calc(var(--wash-soft) + var(--insulin-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--insulin);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 calc(var(--insulin-level, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--insulin) var(--glow-mix), transparent));
+  transition:
+    fill 0.35s ease,
+    filter 0.35s ease;
+}
+
+/* Alpha-cell islet: brightens with glucagon secretion — reciprocal to the beta islet. */
+.alphaIslet {
+  fill: color-mix(in srgb, var(--glucagon) calc(var(--wash-soft) + var(--glucagon-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--glucagon);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 calc(var(--glucagon-level, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--glucagon) var(--glow-mix), transparent));
+  transition:
+    fill 0.35s ease,
+    filter 0.35s ease;
+}
+
+/* --- Liver with glycogen fill-level indicator --- */
+
+.liverShape {
+  fill: color-mix(in srgb, var(--glucagon) var(--wash-faint), transparent);
+  stroke: var(--glucagon);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--hepatic-output, 0) * 8px * var(--glow-blur)) color-mix(in srgb, var(--glucagon) var(--glow-mix), transparent));
+  transition: filter 0.4s ease;
+}
+
+/* Glycogen reserve shown as a fill level rising from the base of the liver. */
+.glycogenFill {
+  fill: color-mix(in srgb, var(--glucose) var(--wash-strong), transparent);
+  transition: all 0.6s ease;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.isletLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}

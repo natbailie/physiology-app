@@ -1,0 +1,133 @@
+/* --- Plot frame --- */
+
+.axis {
+  stroke: var(--text-faint);
+  stroke-width: 1.2;
+}
+
+.gridLine {
+  stroke: var(--grid-line);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+/* --- The two curves --- */
+
+.cardiacCurve {
+  fill: none;
+  stroke: var(--artery);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.venousCurve {
+  fill: none;
+  stroke: var(--venous);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The normal circulation, held faintly behind whatever the sliders are doing, so that a change
+   reads as a SHIFT of a curve rather than as a new picture. */
+.referenceCurve {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.65;
+}
+
+/* --- Operating point --- */
+
+.operatingPoint {
+  fill: var(--pv-loop);
+  stroke: var(--panel);
+  stroke-width: 1.5;
+}
+
+.operatingGuide {
+  stroke: var(--pv-loop);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.65;
+}
+
+/* Where the system is right now, if it has not yet reached the crossing. */
+.livePoint {
+  fill: none;
+  stroke: var(--pv-loop);
+  stroke-width: 1.5;
+}
+
+.fillingPressureMark {
+  stroke: var(--venous);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+/* --- Venous reservoir --- */
+
+.reservoirBody {
+  fill: none;
+  stroke: var(--venous);
+  stroke-width: 1.5;
+}
+
+.unstressedFill {
+  fill: color-mix(in srgb, var(--venous) var(--wash-faint), transparent);
+  transition: height 0.25s ease, y 0.25s ease;
+}
+
+/* Only this part generates any pressure at all. */
+.stressedFill {
+  fill: color-mix(in srgb, var(--venous) var(--wash-strong), transparent);
+  transition: height 0.25s ease, y 0.25s ease;
+}
+
+.heartShape {
+  fill: color-mix(in srgb, var(--artery) var(--wash), transparent);
+  stroke: var(--artery);
+  stroke-width: 1.5;
+}
+
+/* --- Labels --- */
+
+.curveLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cardiacLabel {
+  fill: var(--artery);
+}
+
+.venousLabel {
+  fill: var(--venous);
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}

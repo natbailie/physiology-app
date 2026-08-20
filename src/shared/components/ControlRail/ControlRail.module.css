@@ -1,0 +1,60 @@
+.rail {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  padding: 0.9rem 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.railHeader {
+  color: var(--text-faint);
+}
+
+/* Single column: the old auto-fit grid wrapped 8-9 slider modules into ragged rows. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+.group:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.groupLabel {
+  font-size: 0.625rem;
+  color: var(--text-faint);
+}
+
+@media (max-width: 1024px) {
+  /* In dock mode the dock's own grab-handle carries the "Controls" label,
+   * and the dock supplies the surface and border. */
+  .rail {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0 1.1rem 1.1rem;
+  }
+
+  .railHeader {
+    display: none;
+  }
+
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.9rem 1.4rem;
+  }
+}

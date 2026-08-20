@@ -1,0 +1,58 @@
+/* --- Hypothalamus --- */
+
+.hypothalamusShape {
+  fill: color-mix(in srgb, var(--co2) var(--wash-soft), transparent);
+  stroke: var(--co2);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--trh-intensity, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--co2) var(--glow-mix), transparent));
+  transition:
+    filter 0.4s ease,
+    fill 0.4s ease;
+}
+
+/* --- Pituitary --- */
+
+.pituitaryShape {
+  fill: color-mix(in srgb, var(--tsh) var(--wash-soft), transparent);
+  stroke: var(--tsh);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--tsh-intensity, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--tsh) var(--glow-mix), transparent));
+  transition:
+    filter 0.4s ease,
+    fill 0.4s ease;
+}
+
+/* --- Thyroid gland --- */
+
+.thyroidShape {
+  stroke: var(--thyroid);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--thyroid) calc(var(--thyroid-intensity, 0.3) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--thyroid-intensity, 0.3) * 6px * var(--glow-blur)) color-mix(in srgb, var(--thyroid) var(--glow-mix), transparent));
+  transition:
+    fill 0.4s ease,
+    filter 0.4s ease;
+}
+
+/* A ring around the gland whose opacity reflects peripheral T4->T3 conversion efficiency —
+   visualizes that sick-euthyroid syndrome acts in the periphery, not the gland itself. */
+.conversionRing {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  opacity: var(--conversion-efficiency, 1);
+  transition: opacity 0.5s ease;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}

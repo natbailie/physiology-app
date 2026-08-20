@@ -1,0 +1,67 @@
+/* Medullary gradient background: deepens toward the papilla, fading as the gradient washes out. */
+.medullaBand {
+  fill: color-mix(in srgb, var(--medulla) calc(var(--gradient-strength, 1) * var(--wash-soft)), transparent);
+  transition: fill 0.6s ease;
+}
+
+.medullaLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  fill: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.cortexDivider {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+/* Each tubule segment is filled by its own osmolality, so the concentrate-then-dilute
+   profile reads directly off the diagram. */
+.tubuleSegment {
+  stroke: var(--tubule);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.osmolalityMarker {
+  stroke: none;
+  fill: color-mix(in srgb, var(--medulla) calc(var(--osm-intensity, 0) * var(--wash-strong)), var(--tubule));
+  transition: fill 0.4s ease;
+}
+
+.segmentLabel {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  letter-spacing: 0.03em;
+  fill: var(--text-dim);
+  text-anchor: middle;
+}
+
+.osmolalityValue {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}
+
+/* Collecting duct water permeability — visibly "opens" with ADH action. */
+.aquaporinArrow {
+  stroke: var(--adh);
+  stroke-width: 2;
+  opacity: var(--adh-action, 0);
+  transition: opacity 0.4s ease;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}

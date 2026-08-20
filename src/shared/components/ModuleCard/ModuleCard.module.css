@@ -1,0 +1,56 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  text-decoration: none;
+  color: inherit;
+  border-left: 3px solid var(--card-accent, var(--panel-border));
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+a.card:hover {
+  border-color: var(--card-accent, var(--text-faint));
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+
+a.card:focus-visible {
+  outline: 2px solid var(--card-accent, var(--anp));
+  outline-offset: 2px;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tagline {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.comingSoon {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.badge {
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}

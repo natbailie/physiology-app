@@ -1,0 +1,148 @@
+/* --- Sarcomere --- */
+
+.zDisc {
+  stroke: var(--sarcomere);
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.zLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  fill: var(--text-faint);
+  text-anchor: middle;
+  text-transform: uppercase;
+}
+
+/* Thin (actin) filaments are anchored to the Z-discs and slide inward as the muscle shortens. */
+.thinFilament {
+  stroke: color-mix(in srgb, var(--sarcomere) 55%, var(--text-faint));
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* The thick (myosin) filament never changes length — sliding, not shortening, is the mechanism. */
+.thickFilament {
+  stroke: var(--sarcomere);
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+/* One head per tick, drawn only where the filaments actually overlap. Their angle is the power
+   stroke: they swing over as the attached fraction rises. */
+.crossBridge {
+  stroke: var(--sarcomere);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: calc(0.12 + var(--attached, 0) * 0.88);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(calc(var(--attached, 0) * 42deg));
+  transition:
+    opacity 0.08s linear,
+    transform 0.08s linear;
+}
+
+.overlapBand {
+  fill: color-mix(in srgb, var(--sarcomere) var(--wash-faint), transparent);
+}
+
+/* --- Calcium --- */
+
+.calciumIon {
+  fill: var(--calcium);
+  opacity: var(--visible, 0);
+  transition: opacity 0.1s linear;
+}
+
+.srBody {
+  fill: color-mix(in srgb, var(--calcium) var(--wash-faint), transparent);
+  stroke: var(--calcium);
+  stroke-width: 1.5;
+}
+
+.srFill {
+  fill: color-mix(in srgb, var(--calcium) var(--wash-strong), transparent);
+}
+
+.tTubule {
+  stroke: var(--vm);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: calc(0.3 + var(--excitation, 0) * 0.7);
+  filter: drop-shadow(0 0 calc(var(--excitation, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--vm) var(--glow-mix), transparent));
+  transition:
+    opacity 0.08s linear,
+    filter 0.08s linear;
+}
+
+/* --- Tension gauge --- */
+
+.tensionTrack {
+  fill: color-mix(in srgb, var(--text-faint) var(--wash-faint), transparent);
+}
+
+.tensionActive {
+  fill: var(--sarcomere);
+}
+
+.tensionPassive {
+  fill: color-mix(in srgb, var(--sarcomere) 45%, var(--text-faint));
+}
+
+/* --- Status badges --- */
+
+.rigorBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--danger);
+  text-transform: uppercase;
+  text-anchor: middle;
+  opacity: var(--rigor, 0);
+  transition: opacity 0.2s linear;
+}
+
+.latchBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--ok);
+  text-transform: uppercase;
+  text-anchor: middle;
+  opacity: var(--latched, 0);
+  transition: opacity 0.2s linear;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}

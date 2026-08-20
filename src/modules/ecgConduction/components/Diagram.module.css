@@ -1,0 +1,135 @@
+/* Myocardial regions are tinted by membrane state, so the depolarisation wavefront is
+   visible sweeping the heart while its wave is being written on the strip. */
+.chamber {
+  stroke-width: 2;
+  transition:
+    fill 0.06s linear,
+    stroke 0.06s linear,
+    filter 0.06s linear;
+}
+
+.resting {
+  composes: chamber;
+  fill: color-mix(in srgb, var(--text-faint) var(--wash-faint), transparent);
+  stroke: var(--text-faint);
+}
+
+.depolarizing {
+  composes: chamber;
+  fill: color-mix(in srgb, var(--depolarized) calc(var(--wash) + var(--phase, 0) * var(--wash-strong)), transparent);
+  stroke: var(--depolarized);
+  filter: drop-shadow(0 0 calc((4px + var(--phase, 0) * 7px) * var(--glow-blur)) color-mix(in srgb, var(--depolarized) var(--glow-mix), transparent));
+}
+
+.depolarized {
+  composes: chamber;
+  /* Uniformly depolarised: still active, but no potential DIFFERENCE, hence the flat ST. */
+  fill: color-mix(in srgb, var(--depolarized) var(--wash), transparent);
+  stroke: color-mix(in srgb, var(--depolarized) var(--stroke-mix), transparent);
+}
+
+.repolarizing {
+  composes: chamber;
+  fill: color-mix(in srgb, var(--repolarizing) calc(var(--wash-soft) + var(--phase, 0) * var(--wash)), transparent);
+  stroke: var(--repolarizing);
+  filter: drop-shadow(0 0 calc((2px + var(--phase, 0) * 5px) * var(--glow-blur)) color-mix(in srgb, var(--repolarizing) var(--glow-mix), transparent));
+}
+
+/* Specialised conduction tissue: drawn as thin paths and nodes. Deliberately styled to read
+   as "electrically busy but mechanically tiny" — this is why the PR segment is flat. */
+.conductionPath {
+  fill: none;
+  stroke: var(--conduction-path);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.conductionPathActive {
+  composes: conductionPath;
+  opacity: 1;
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--conduction-path) var(--glow-mix), transparent));
+}
+
+.node {
+  stroke: var(--conduction-path);
+  stroke-width: 1.5;
+  fill: color-mix(in srgb, var(--conduction-path) var(--wash-soft), transparent);
+  transition: fill 0.06s linear;
+}
+
+.nodeActive {
+  composes: node;
+  fill: var(--conduction-path);
+  filter: drop-shadow(0 0 calc(7px * var(--glow-blur)) color-mix(in srgb, var(--conduction-path) var(--glow-mix), transparent));
+}
+
+/* --- Hexaxial lead-axis inset --- */
+
+.leadAxis {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.leadAxisSelected {
+  stroke: var(--ecg-trace);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.dipoleVector {
+  stroke: var(--depolarized);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--depolarized) var(--glow-mix), transparent));
+}
+
+.axisRing {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.leadLabel {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+.segmentBadge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--ecg-trace);
+  text-transform: uppercase;
+}

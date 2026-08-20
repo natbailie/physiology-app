@@ -1,0 +1,11 @@
+import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+
+export const cardiacElectroContent: ExplainerContent = {
+  title: 'Reading the pressure-volume loop',
+  paragraphs: [
+    'The loop is traced anticlockwise through four phases, and every corner is a valve opening or closing. Filling runs along the bottom as the mitral valve admits blood. Both valves then shut for isovolumic contraction — pressure climbs with volume fixed, which is the loop\'s vertical right limb. When ventricular pressure exceeds aortic pressure the aortic valve opens and ejection sweeps leftward. Finally both valves shut again for isovolumic relaxation, the vertical left limb. Note that the phases are set by pressure comparisons, not by a clock: that is why raising afterload delays valve opening and shortens ejection all by itself.',
+    'The three levers reshape the loop in characteristic ways. More preload widens it to the right (Frank-Starling — a more stretched ventricle ejects more). More afterload raises the ejection plateau and cuts stroke volume short, leaving a larger end-systolic volume. More contractility steepens the end-systolic pressure-volume relationship, letting the ventricle empty further from the same starting volume. Watch which corner of the loop moves and you can identify which lever changed.',
+    'Ventricular mechanics here come from time-varying elastance: treat the chamber as having a stiffness that rises through systole and falls through diastole, with pressure at any instant equal to E(t) × (V − V0). Contractility is simply how high that elastance peaks — which is why it maps so directly onto the ESPVR line and onto ejection fraction.',
+    'The electrical side sets the timing. Autonomic tone changes heart rate by changing the SLOPE of the SA node\'s diastolic depolarization ramp, not by setting a rate directly — sympathetic activity steepens it so threshold arrives sooner, vagal activity flattens it. The AV delay then buys time for atrial contraction to finish before the ventricles fire; stretch it far enough and atria and ventricles decouple entirely, which is complete heart block. All of this resolves to the bedside numbers: SV = EDV − ESV, EF = SV/EDV, and CO = SV × HR — the same cardiac output the Fick principle estimates from oxygen consumption in the Formula Reference.',
+  ],
+};

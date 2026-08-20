@@ -1,0 +1,83 @@
+/* Ventricle wall contracts and relaxes with actual chamber volume. */
+.ventricleWall {
+  fill: none;
+  stroke: var(--artery);
+  stroke-width: 3;
+  opacity: 0.75;
+}
+
+.ventricleChamber {
+  fill: color-mix(in srgb, var(--artery) calc(var(--wash-soft) + var(--chamber-pressure, 0) * var(--wash-strong)), transparent);
+  transition: fill 0.1s linear;
+}
+
+/* SA and AV nodes light up as they fire. */
+.node {
+  fill: color-mix(in srgb, var(--sa-node) calc(var(--wash-faint) + var(--node-activation, 0) * var(--wash-strong)), transparent);
+  stroke: var(--sa-node);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 calc(var(--node-activation, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--sa-node) var(--glow-mix), transparent));
+  transition:
+    fill 0.08s linear,
+    filter 0.08s linear;
+}
+
+.conductionPath {
+  stroke: var(--conduction);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 3 3;
+  opacity: 0.5;
+}
+
+/* Valves open and shut with the phase — the mechanism behind the loop's four limbs. */
+.valve {
+  stroke: var(--text-dim);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: opacity 0.1s linear;
+}
+
+.valveOpen {
+  composes: valve;
+  opacity: 0.25;
+}
+
+.valveShut {
+  composes: valve;
+  opacity: 1;
+}
+
+.phaseBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--pv-loop);
+  text-transform: uppercase;
+}
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}

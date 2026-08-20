@@ -1,0 +1,117 @@
+/* --- Darrow-Yannet compartments: width is volume, height is tonicity --- */
+
+.icfBlock {
+  fill: color-mix(in srgb, var(--potassium) var(--wash), transparent);
+  stroke: var(--potassium);
+  stroke-width: 1.5;
+  transition:
+    x 0.25s ease,
+    width 0.25s ease,
+    height 0.25s ease,
+    y 0.25s ease;
+}
+
+.ecfBlock {
+  fill: color-mix(in srgb, var(--sodium) var(--wash), transparent);
+  stroke: var(--sodium);
+  stroke-width: 1.5;
+  transition:
+    x 0.25s ease,
+    width 0.25s ease,
+    height 0.25s ease,
+    y 0.25s ease;
+}
+
+/* The normal compartments, so any deviation is read as a change rather than an absolute. */
+.baselineOutline {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.75;
+}
+
+.axisLine {
+  stroke: var(--grid-line);
+  stroke-width: 1;
+}
+
+/* --- Potassium cell --- */
+
+.cellBody {
+  fill: color-mix(in srgb, var(--potassium) var(--wash-faint), transparent);
+  stroke: var(--potassium);
+  stroke-width: 1.5;
+}
+
+.potassiumIon {
+  fill: var(--potassium);
+  opacity: var(--visible, 0);
+  transition: opacity 0.2s linear;
+}
+
+/* Direction and thickness of the arrow show which way potassium is being driven and how hard. */
+.shiftArrow {
+  stroke: var(--potassium);
+  stroke-width: calc(1.5 + var(--magnitude, 0) * 3);
+  stroke-linecap: round;
+  marker-end: url(#shift-arrowhead);
+  opacity: calc(0.2 + var(--magnitude, 0) * 0.8);
+  transition:
+    stroke-width 0.2s linear,
+    opacity 0.2s linear;
+}
+
+.arrowHead {
+  fill: var(--potassium);
+}
+
+/* --- Urine --- */
+
+.urineDrop {
+  fill: color-mix(in srgb, var(--urine) var(--wash), transparent);
+  stroke: var(--urine);
+  stroke-width: 1.5;
+}
+
+/* --- Warning --- */
+
+.riskBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--danger);
+  text-transform: uppercase;
+  text-anchor: middle;
+  opacity: var(--risk, 0);
+  transition: opacity 0.25s linear;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}

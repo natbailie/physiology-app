@@ -1,0 +1,62 @@
+/* --- Hypothalamus --- */
+
+.hypothalamusShape {
+  fill: color-mix(in srgb, var(--co2) var(--wash-soft), transparent);
+  stroke: var(--co2);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--crh-intensity, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--co2) var(--glow-mix), transparent));
+  transition:
+    filter 0.4s ease,
+    fill 0.4s ease;
+}
+
+/* --- Pituitary --- */
+
+.pituitaryShape {
+  fill: color-mix(in srgb, var(--acth) var(--wash-soft), transparent);
+  stroke: var(--acth);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--acth-intensity, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--acth) var(--glow-mix), transparent));
+  transition:
+    filter 0.4s ease,
+    fill 0.4s ease;
+}
+
+/* --- Adrenal gland --- */
+
+.adrenalShape {
+  stroke: var(--cortisol);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--cortisol) calc(var(--cortisol-intensity, 0.3) * var(--wash-strong)), transparent);
+  filter: drop-shadow(0 0 calc(var(--cortisol-intensity, 0.3) * 6px * var(--glow-blur)) color-mix(in srgb, var(--cortisol) var(--glow-mix), transparent));
+  transform-origin: center;
+  transform-box: fill-box;
+  /* Reserve depletion (steroid-induced atrophy) visibly shrinks and desaturates the gland. */
+  transform: scale(calc(0.55 + var(--adrenal-reserve, 1) * 0.45));
+  opacity: calc(0.4 + var(--adrenal-reserve, 1) * 0.6);
+  transition:
+    fill 0.5s ease,
+    filter 0.5s ease,
+    transform 0.6s ease,
+    opacity 0.6s ease;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}

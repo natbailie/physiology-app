@@ -1,0 +1,11 @@
+import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+
+export const renalTubularContent: ExplainerContent = {
+  title: 'How the nephron builds — and then spends — an osmotic gradient',
+  paragraphs: [
+    'Follow the osmolality along the tubule and the logic falls out. The proximal tubule reabsorbs about two-thirds of the filtered volume ISO-osmotically: a lot of fluid disappears, but its concentration barely changes, so no concentrating work has happened yet. The descending limb is water-permeable and solute-impermeable, so it passively concentrates as water is drawn into the hypertonic medulla. Then the thick ascending limb pumps NaCl out via NKCC2 while staying water-tight, so fluid leaves it HYPOTONIC no matter how concentrated it arrived.',
+    'That ascending limb does double duty, and this is the heart of countercurrent multiplication: the salt it deposits in the interstitium is what creates the medullary gradient in the first place, and the descending limb and collecting duct then both depend on that gradient. The loop is quite literally building the tool it later uses.',
+    'The collecting duct is the final, ADH-controlled step. Without ADH it stays water-tight and dilute urine pours out; with ADH, aquaporin channels insert and water equilibrates with the medulla. Note the ceiling: however much ADH is present, urine can never become more concentrated than the medullary interstitium — which is why a loop diuretic, by washing out that gradient, blunts concentrating ability even when ADH is given. A thiazide acts further downstream and leaves the gradient intact, which is why it is the milder diuretic.',
+    'Central and nephrogenic diabetes insipidus look identical at the bedside — dilute urine, rising plasma osmolality, unquenchable thirst — and the model shows why they are nonetheless easy to separate. In central DI, ADH is simply absent; in nephrogenic DI, ADH is maximal but the duct cannot respond. Give desmopressin and the two diverge instantly: central DI concentrates its urine sharply, nephrogenic DI barely moves. Meanwhile tubuloglomerular feedback runs quietly underneath all of this, with the macula densa sensing NaCl delivery and constricting the afferent arteriole to protect the nephron from over-filtering.',
+  ],
+};

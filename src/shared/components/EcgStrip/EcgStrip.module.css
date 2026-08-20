@@ -1,0 +1,63 @@
+.wrap {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem 0.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.segment {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--chart-color, var(--text));
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 120px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gridFine {
+  fill: none;
+  stroke: color-mix(in srgb, var(--chart-color, var(--artery)) var(--stroke-mix), transparent);
+  stroke-width: 0.5;
+}
+
+.gridMajor {
+  fill: none;
+  stroke: color-mix(in srgb, var(--chart-color, var(--artery)) var(--stroke-mix), transparent);
+  stroke-width: 1;
+}
+
+.baseline {
+  stroke: var(--text-faint);
+  stroke-width: 0.75;
+  stroke-dasharray: 3 4;
+  opacity: 0.55;
+}
+
+.trace {
+  fill: none;
+  stroke: var(--chart-color, var(--artery));
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.leadingDot {
+  fill: var(--chart-color, var(--artery));
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--chart-color, var(--artery)) 75%, transparent));
+}

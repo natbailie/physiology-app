@@ -1,0 +1,56 @@
+.wrap {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem 0.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.current {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  color: var(--chart-color, var(--text));
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 46px;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--chart-color, var(--artery));
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.area {
+  fill: var(--chart-color, var(--artery));
+  opacity: 0.12;
+  stroke: none;
+}
+
+.dot {
+  fill: var(--chart-color, var(--artery));
+}
+
+/* Optional second series, drawn dashed on the same axes so two quantities that are usually
+   confused with each other can be compared directly — e.g. serum vs total-body potassium. */
+.secondaryLine {
+  fill: none;
+  stroke: var(--secondary-color, var(--text-dim));
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

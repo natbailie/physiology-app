@@ -1,0 +1,93 @@
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.sliderValue {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  /* Transparent box padded out to a comfortable pointer target; the visible
+   * 6px track is painted on the runnable-track pseudo-elements below. */
+  background: none;
+  padding: 0.55rem 0;
+  margin: 0;
+  cursor: pointer;
+  outline-offset: 2px;
+}
+
+.range:focus-visible {
+  outline: 2px solid var(--accent, var(--artery));
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--accent, var(--artery)) var(--fill, 0%),
+    var(--panel-raised) var(--fill, 0%)
+  );
+  border: 1px solid var(--panel-border);
+}
+
+.range::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--accent, var(--artery)) var(--fill, 0%),
+    var(--panel-raised) var(--fill, 0%)
+  );
+  border: 1px solid var(--panel-border);
+}
+
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 3px solid var(--accent, var(--artery));
+  box-shadow: var(--shadow-1);
+  /* Centre an 18px thumb on an 8px-tall (6px + 2px border) track. */
+  margin-top: -5px;
+  cursor: pointer;
+}
+
+.range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 3px solid var(--accent, var(--artery));
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+}
+
+.bounds {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.625rem;
+  color: var(--text-faint);
+}

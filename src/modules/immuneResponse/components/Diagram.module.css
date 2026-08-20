@@ -1,0 +1,119 @@
+/* Infection site: pathogen density and the innate cells recruited to it. */
+.tissueSite {
+  fill: color-mix(in srgb, var(--pathogen) calc(var(--wash-faint) + var(--pathogen-load, 0) * var(--wash)), transparent);
+  stroke: color-mix(in srgb, var(--pathogen) var(--stroke-mix), transparent);
+  stroke-width: 2;
+  transition: fill 0.4s ease;
+}
+
+.pathogenDot {
+  fill: var(--pathogen);
+  opacity: var(--pathogen-load, 0);
+  transition: opacity 0.4s ease;
+}
+
+.innateCell {
+  fill: color-mix(in srgb, var(--innate) calc(var(--wash-soft) + var(--innate-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--innate);
+  stroke-width: 1.2;
+  opacity: calc(0.12 + var(--innate-level, 0) * 0.88);
+  filter: drop-shadow(0 0 calc(var(--innate-level, 0) * 5px * var(--glow-blur)) color-mix(in srgb, var(--innate) var(--glow-mix), transparent));
+  transition:
+    opacity 0.4s ease,
+    fill 0.4s ease;
+}
+
+/* Lymph node: where naive lymphocytes are primed. */
+.lymphNode {
+  fill: color-mix(in srgb, var(--adaptive) calc(var(--wash-faint) + var(--adaptive-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--adaptive);
+  stroke-width: 2;
+  transform-origin: center;
+  transform-box: fill-box;
+  /* The node visibly swells as lymphocytes proliferate — clinically, the palpable node. */
+  transform: scale(calc(0.82 + var(--adaptive-level, 0) * 0.3));
+  filter: drop-shadow(0 0 calc(var(--adaptive-level, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--adaptive) var(--glow-mix), transparent));
+  transition:
+    fill 0.5s ease,
+    transform 0.6s ease,
+    filter 0.5s ease;
+}
+
+.lymphocyte {
+  stroke-width: 1.2;
+  transition:
+    fill 0.4s ease,
+    opacity 0.4s ease;
+}
+
+/* Memory cells persist after clearance — drawn as a distinct, durable population. */
+.memoryCell {
+  fill: color-mix(in srgb, var(--memory) calc(var(--wash) + var(--memory-level, 0) * var(--wash-strong)), transparent);
+  stroke: var(--memory);
+  stroke-width: 1.2;
+  opacity: calc(0.1 + var(--memory-level, 0) * 0.9);
+  filter: drop-shadow(0 0 calc(var(--memory-level, 0) * 5px * var(--glow-blur)) color-mix(in srgb, var(--memory) var(--glow-mix), transparent));
+  transition:
+    opacity 0.5s ease,
+    fill 0.5s ease;
+}
+
+.antibodyMark {
+  stroke: var(--antibody);
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linecap: round;
+  opacity: var(--antibody-level, 0);
+  transition: opacity 0.4s ease;
+}
+
+.traffickingPath {
+  fill: none;
+  stroke: var(--adaptive);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  opacity: calc(0.15 + var(--presentation, 0) * 0.85);
+  transition: opacity 0.4s ease;
+}
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+.phaseBadge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  fill: var(--adaptive);
+}
+
+.feverBadge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--pathogen);
+}

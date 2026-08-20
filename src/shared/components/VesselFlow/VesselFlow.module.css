@@ -1,0 +1,26 @@
+.vessel {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.vesselFlow {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 10 8;
+  animation: flow calc(2.2s / max(var(--flow-speed, 1), 0.05)) linear infinite;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vesselFlow {
+    animation: none !important;
+  }
+}

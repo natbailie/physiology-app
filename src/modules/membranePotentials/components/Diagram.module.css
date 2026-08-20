@@ -1,0 +1,107 @@
+/* --- Soma --- */
+
+.somaShape {
+  /* Depolarization visibly floods the cell body with color as Vm rises. */
+  fill: color-mix(in srgb, var(--na-current) calc(var(--depolarization, 0) * var(--wash-strong)), color-mix(in srgb, var(--k-current) var(--wash-faint), transparent));
+  stroke: var(--axon);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 calc(var(--depolarization, 0) * 9px * var(--glow-blur)) color-mix(in srgb, var(--na-current) var(--glow-mix), transparent));
+  transition:
+    fill 0.12s linear,
+    filter 0.12s linear;
+}
+
+.dendrite {
+  stroke: var(--axon);
+  stroke-width: 2;
+  fill: none;
+  opacity: 0.55;
+}
+
+/* --- Axon and myelin --- */
+
+.axonShaft {
+  stroke: var(--axon);
+  stroke-width: 6;
+  fill: none;
+  opacity: 0.35;
+  stroke-linecap: round;
+}
+
+/* Myelin segments shrink toward bare axon as myelination falls. */
+.myelinSegment {
+  fill: color-mix(in srgb, var(--axon) var(--wash), transparent);
+  stroke: var(--axon);
+  stroke-width: 1.5;
+  opacity: var(--myelination, 1);
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: scaleY(calc(0.35 + var(--myelination, 1) * 0.65));
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* --- Ion channels --- */
+
+.sodiumChannel {
+  fill: color-mix(in srgb, var(--na-current) calc(var(--wash-faint) + var(--gna, 0) * var(--wash-strong)), transparent);
+  stroke: var(--na-current);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 calc(var(--gna, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--na-current) var(--glow-mix), transparent));
+  transition:
+    fill 0.1s linear,
+    filter 0.1s linear;
+}
+
+.potassiumChannel {
+  fill: color-mix(in srgb, var(--k-current) calc(var(--wash-faint) + var(--gk, 0) * var(--wash-strong)), transparent);
+  stroke: var(--k-current);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 calc(var(--gk, 0) * 6px * var(--glow-blur)) color-mix(in srgb, var(--k-current) var(--glow-mix), transparent));
+  transition:
+    fill 0.1s linear,
+    filter 0.1s linear;
+}
+
+/* --- Refractory indicator --- */
+
+.refractoryBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: var(--danger);
+  text-transform: uppercase;
+  text-anchor: middle;
+  opacity: var(--refractory, 0);
+  transition: opacity 0.15s linear;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}

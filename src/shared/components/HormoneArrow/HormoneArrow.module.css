@@ -1,0 +1,36 @@
+.hormoneArrow {
+  fill: none;
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  opacity: var(--activation, 0);
+  filter: drop-shadow(0 0 calc(var(--activation, 0) * 4px * var(--glow-blur)) currentColor);
+  transition:
+    opacity 0.5s ease,
+    filter 0.5s ease;
+  animation: hormoneFlow 1.4s linear infinite;
+}
+
+@keyframes hormoneFlow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.inhibitory {
+  stroke-dasharray: 1.5 4;
+  stroke-linecap: round;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hormoneArrow {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,72 @@
+/* --- Lungs --- */
+
+.lungs {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: breathe calc(60s / var(--breath-rate, 14)) ease-in-out infinite;
+}
+
+.lungShape {
+  fill: color-mix(in srgb, var(--o2) var(--wash-soft), transparent);
+  stroke: var(--o2);
+  stroke-width: 2.5;
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: scale(var(--vent-depth, 1));
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 0 calc(6px * var(--glow-blur)) color-mix(in srgb, var(--o2) var(--glow-mix), transparent));
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+}
+
+.trachea {
+  stroke: var(--text-faint);
+  stroke-width: 2;
+  fill: none;
+}
+
+/* --- Renal compensation organ --- */
+
+.kidneyShape {
+  stroke: var(--bicarb);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--bicarb) calc(var(--hco3-intensity, 0.5) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--hco3-intensity, 0.5) * 6px * var(--glow-blur)) color-mix(in srgb, var(--bicarb) var(--glow-mix), transparent));
+  transition:
+    fill 0.4s ease,
+    filter 0.4s ease;
+}
+
+/* --- Labels --- */
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lungs {
+    animation: none !important;
+  }
+}

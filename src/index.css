@@ -1,30 +1,115 @@
 :root {
-  /* Surfaces */
-  --bg: #0a0f1c;
-  --panel: #101827;
-  --panel-raised: #141f33;
-  --panel-border: #1f2c42;
-  --grid-line: #172238;
+  /* Surfaces — clinical/laboratory light: paper panels on a cool bench grey */
+  --bg: #f2f5f8;
+  --panel: #ffffff;
+  --panel-raised: #eaeff5;
+  --panel-border: #cfd8e3;
+  --grid-line: #dde5ef; /* graph-paper major rule on diagram screens */
+  --grid-line-minor: #edf1f6; /* graph-paper minor rule */
 
   /* Text */
-  --text: #eaf0fa;
-  --text-dim: #8496b8;
-  --text-faint: #4c5b7a;
+  --text: #14202e;
+  --text-dim: #55677f;
+  --text-faint: #67768e;
 
-  /* Signal colors, following anatomical/monitor convention */
-  --artery: #e8544a; /* oxygenated blood, heart, arterial flow */
-  --kidney: #f4b942; /* renal function / GFR */
-  --raas: #b98cff; /* renin-angiotensin-aldosterone pathway */
-  --anp: #3fd6c0; /* ANP counter-regulatory pathway */
-  --urine: #e2c168; /* excretion */
-  --ok: #3fd6c0;
-  --warn: #f4b942;
-  --danger: #e8544a;
+  /* Elevation — on paper, panels need a hairline plus a whisper of shadow */
+  --shadow-1: 0 1px 2px rgba(20, 32, 46, 0.05);
+  --shadow-2: 0 2px 6px rgba(20, 32, 46, 0.08);
+
+  /* Diagram effect tuning. The diagrams encode physiological intensity as
+   * translucent washes and coloured halos; these tokens let the whole set be
+   * retuned from one place instead of editing ~160 individual declarations. */
+  --wash-faint: 14%;
+  --wash-soft: 22%;
+  --wash: 32%;
+  --wash-strong: 48%;
+  --stroke-mix: 70%; /* translucent strokes: heavier than on dark, to hold the line on paper */
+  --glow-blur: 0.7; /* multiplier on halo blur radius — tighter than a dark-mode neon glow */
+  --glow-mix: 42%; /* colour strength inside the halo */
+
+  /* Signal colors, following anatomical/monitor convention. Tuned for legibility
+   * on white: >=4.5:1 against --panel where used as label text, >=3:1 as a 2px stroke. */
+  --artery: #c62828; /* oxygenated blood, heart, arterial flow */
+  --kidney: #9c6608; /* renal function / GFR */
+  --raas: #6a3fc9; /* renin-angiotensin-aldosterone pathway */
+  --anp: #007a6f; /* ANP counter-regulatory pathway */
+  --urine: #7d6c0a; /* excretion */
+  --o2: #0a72b8; /* oxygenation: PaO2, SaO2, O2-Hb curve */
+  --co2: #b4500c; /* CO2 / ventilation / chemoreceptor drive */
+  --ph: #c2258c; /* acid-base status */
+  --bicarb: #177d36; /* HCO3- / renal acid-base compensation */
+  --cortisol: #9e6215; /* HPA axis: cortisol / adrenal output */
+  --acth: #1c6ee0; /* HPA axis: ACTH / pituitary drive */
+  --thyroid: #0b7d6b; /* HPT axis: T4/T3 / thyroid output */
+  --tsh: #9b45d1; /* HPT axis: TSH / pituitary drive */
+  --gastrin: #8f6a10; /* GI: gastrin / gastric acid drive */
+  --somatostatin: #5a6c96; /* GI: somatostatin brake on gastrin/acid */
+  --cck: #177a57; /* GI: cholecystokinin (fat/protein signal) */
+  --secretin: #31659c; /* GI: secretin / pancreatic bicarbonate signal */
+  --motility: #8f4aa8; /* GI: peristalsis / migrating motor complex */
+  --glucose: #8a6c00; /* glucose regulation: blood glucose */
+  --insulin: #0a72b8; /* glucose regulation: insulin / beta cell */
+  --glucagon: #b4500c; /* glucose regulation: glucagon / alpha cell */
+  --epinephrine: #c2258c; /* glucose regulation: counter-regulatory hormones */
+  --calcium: #7a6f52; /* calcium homeostasis: serum calcium / bone mineral */
+  --pth: #c43d75; /* calcium homeostasis: parathyroid hormone */
+  --calcitriol: #357c35; /* calcium homeostasis: active vitamin D */
+  --phosphate: #4a5fd0; /* calcium homeostasis: serum phosphate */
+  --calcitonin: #0e7d94; /* calcium homeostasis: calcitonin */
+  --vm: #7c6d00; /* membrane potentials: membrane voltage trace */
+  --na-current: #cf3f26; /* membrane potentials: sodium current / conductance */
+  --k-current: #0b7ea8; /* membrane potentials: potassium current / conductance */
+  --axon: #6b4fa8; /* membrane potentials: axon / myelin / conduction */
+  --sympathetic: #bd481a; /* ANS: sympathetic outflow */
+  --parasympathetic: #0e8468; /* ANS: parasympathetic / vagal outflow */
+  --second-messenger: #8a3fb5; /* ANS: cAMP / IP3 second-messenger cascades */
+  --tubule: #0e7d94; /* renal tubular: nephron segments / tubular fluid */
+  --adh: #6a3fc9; /* renal tubular: antidiuretic hormone */
+  --medulla: #9c6608; /* renal tubular: medullary osmotic gradient */
+  --sa-node: #8a6c00; /* cardiac electro: SA node / pacemaker */
+  --conduction: #1c6ee0; /* cardiac electro: AV conduction / ECG trace */
+  --pv-loop: #b02a5e; /* cardiac electro: pressure-volume loop */
+  --ecg-trace: #177d36; /* ECG: the recorded trace */
+  --depolarized: #cf3f26; /* ECG: tissue actively depolarising */
+  --repolarizing: #1c6ee0; /* ECG: tissue repolarising */
+  --conduction-path: #8a6c00; /* ECG: specialised conduction tissue */
+  --fibrin: #9b45d1; /* coagulation: fibrin mesh */
+  --thrombin: #c2258c; /* coagulation: thrombin burst */
+  --platelet: #8a6c00; /* coagulation: platelets / primary haemostasis */
+  --plasmin: #177a57; /* coagulation: fibrinolysis / D-dimer */
+  --hemoglobin: #c62828; /* erythropoiesis: haemoglobin / red cell mass */
+  --epo: #0b7d6b; /* erythropoiesis: erythropoietin */
+  --marrow: #9e6215; /* erythropoiesis: bone marrow output */
+  --iron: #9a6b2e; /* erythropoiesis: iron stores / ferritin */
+  --pathogen: #c62828; /* immune: pathogen burden */
+  --innate: #9e6215; /* immune: innate first line */
+  --adaptive: #1c6ee0; /* immune: adaptive / T cells */
+  --antibody: #0b7d6b; /* immune: antibody titres */
+  --memory: #8a3fb5; /* immune: immunological memory */
+  --compliance: #0f7c66; /* respiratory mechanics: lung compliance / volumes */
+  --resistance: #ab5814; /* respiratory mechanics: airway resistance / flow */
+  --vq: #5b4fd0; /* respiratory mechanics: ventilation-perfusion matching */
+  --gnrh: #9e6215; /* HPG axis: GnRH / hypothalamic drive */
+  --lh: #c2258c; /* HPG axis: luteinizing hormone */
+  --fsh: #1c6ee0; /* HPG axis: follicle-stimulating hormone */
+  --estrogen: #9b45d1; /* HPG axis: estrogen */
+  --progesterone: #0b7d6b; /* HPG axis: progesterone */
+  --testosterone: #0b7ea8; /* HPG axis: testosterone */
+  --sarcomere: #a8452b; /* muscle: sarcomere filaments / developed tension */
+  --potassium: #0b6f93; /* electrolytes: serum & total-body potassium */
+  --sodium: #b8431f; /* electrolytes: serum sodium / tonicity */
+  --capillary: #c0396b; /* capillary exchange: capillary & hydrostatic pressure */
+  --interstitium: #6f8a2e; /* capillary exchange: interstitial compartment / oedema */
+  --lymph: #2f8a7a; /* capillary exchange: lymphatic return */
+  --venous: #3b4fa0; /* venous return: venous reservoir & filling pressure */
+  --ok: #007a6f;
+  --warn: #9c6608;
+  --danger: #c62828;
 
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-family: var(--sans);
@@ -41,9 +126,7 @@
 body {
   margin: 0;
   min-height: 100svh;
-  background:
-    radial-gradient(ellipse at top, rgba(31, 44, 66, 0.4), transparent 60%),
-    var(--bg);
+  background: var(--bg);
 }
 
 #root {

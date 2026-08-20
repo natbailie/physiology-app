@@ -1,0 +1,89 @@
+/* Lungs inflate and deflate with actual lung volume. */
+.lungShape {
+  fill: color-mix(in srgb, var(--compliance) calc(var(--wash-faint) + var(--inflation, 0.4) * var(--wash)), transparent);
+  stroke: var(--compliance);
+  stroke-width: 2;
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: scale(calc(0.72 + var(--inflation, 0.4) * 0.4));
+  transition:
+    fill 0.1s linear,
+    transform 0.1s linear;
+}
+
+.trachea {
+  stroke: var(--text-faint);
+  stroke-width: 4;
+  fill: none;
+  stroke-linecap: round;
+}
+
+/* Alveolus inset: shrinks and stiffens visibly as surfactant is lost. */
+.alveolus {
+  fill: color-mix(in srgb, var(--compliance) calc(var(--surfactant, 1) * var(--wash-strong)), transparent);
+  stroke: var(--compliance);
+  stroke-width: 1.5;
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: scale(calc(0.55 + var(--surfactant, 1) * 0.45));
+  transition:
+    fill 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* V/Q compartments: each unit tinted by how far its ratio departs from 1. */
+.vqUnit {
+  fill: color-mix(in srgb, var(--vq) calc(var(--wash-faint) + var(--vq-deviation, 0) * var(--wash-strong)), transparent);
+  stroke: var(--vq);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+.ventilationArrow {
+  stroke: var(--compliance);
+  stroke-width: 2;
+  opacity: var(--ventilation, 1);
+  transition: opacity 0.4s ease;
+}
+
+.perfusionArrow {
+  stroke: var(--artery);
+  stroke-width: 2;
+  opacity: var(--perfusion, 1);
+  transition: opacity 0.4s ease;
+}
+
+.organLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  text-anchor: middle;
+}
+
+.patternBadge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  fill: var(--resistance);
+  text-transform: uppercase;
+}

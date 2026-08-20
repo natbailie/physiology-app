@@ -1,0 +1,97 @@
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  padding: 1rem 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.formulaDisplay {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.inputControl {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.numberInput {
+  width: 5.5rem;
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.8rem;
+}
+
+.numberInput:focus-visible {
+  outline: 2px solid var(--text-dim);
+  outline-offset: 1px;
+}
+
+.unit {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  min-width: 2.5ch;
+}
+
+.resultRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  background: var(--panel-raised);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+}
+
+.result {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.resultUnit {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.explanation {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
