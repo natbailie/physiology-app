@@ -34,6 +34,7 @@ export function ElectrolyteBalancePage() {
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
+    resetEngine: reset,
   });
   const { derived } = snapshot;
 

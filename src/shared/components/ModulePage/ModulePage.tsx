@@ -19,6 +19,9 @@ interface ModulePageProps {
   charts?: ReactNode;
   /** Slider stack. Sticky side rail on wide screens, bottom dock on narrow ones. */
   controls: ReactNode;
+  /** Hides the control values while a pattern-discrimination question is unanswered —
+   * the slider positions ARE the answer, so leaving them visible removes the exercise. */
+  blindControls?: boolean;
   explainer: ReactNode;
   footnote: ReactNode;
 }
@@ -37,6 +40,7 @@ export function ModulePage({
   transport,
   charts,
   controls,
+  blindControls = false,
   explainer,
   footnote,
 }: ModulePageProps) {
@@ -99,7 +103,15 @@ export function ModulePage({
               {dockOpen ? '▾' : '▴'}
             </span>
           </button>
-          <div className={styles.railScroll}>{controls}</div>
+          <div className={styles.railScroll}>
+            {blindControls ? (
+              <p className={styles.blinded}>
+                Controls hidden while you identify the scenario. Work from the readouts.
+              </p>
+            ) : (
+              controls
+            )}
+          </div>
         </div>
       </div>
     </div>

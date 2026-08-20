@@ -14,16 +14,32 @@ interface PresetBarProps<T extends string> {
   onApply: (name: T) => void;
   actions?: PresetAction[];
   onReset: () => void;
+  /** Locks the bar while a pattern question is open. Loading a different scenario mid-question
+   * would silently replace the one being asked about. */
+  disabled?: boolean;
 }
 
 /** Scenario presets and one-off actions, pinned in ModulePage's sticky top bar —
  * the fastest path to a teaching point, so it stays reachable at every scroll position. */
-export function PresetBar<T extends string>({ order, labels, onApply, actions, onReset }: PresetBarProps<T>) {
+export function PresetBar<T extends string>({
+  order,
+  labels,
+  onApply,
+  actions,
+  onReset,
+  disabled = false,
+}: PresetBarProps<T>) {
   return (
     <div className={styles.bar}>
       <div className={styles.presets}>
         {order.map((name) => (
-          <button key={name} type="button" className={styles.preset} onClick={() => onApply(name)}>
+          <button
+            key={name}
+            type="button"
+            className={styles.preset}
+            disabled={disabled}
+            onClick={() => onApply(name)}
+          >
             {labels[name]}
           </button>
         ))}
@@ -35,12 +51,13 @@ export function PresetBar<T extends string>({ order, labels, onApply, actions, o
             key={action.label}
             type="button"
             className={action.variant === 'danger' ? styles.danger : styles.impulse}
+            disabled={disabled}
             onClick={action.onClick}
           >
             {action.label}
           </button>
         ))}
-        <button type="button" className={styles.reset} onClick={onReset}>
+        <button type="button" className={styles.reset} disabled={disabled} onClick={onReset}>
           Reset
         </button>
       </div>

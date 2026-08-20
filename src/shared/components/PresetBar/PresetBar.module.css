@@ -35,7 +35,12 @@
     background-color 0.15s ease;
 }
 
-.preset:hover {
+.preset:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.preset:hover:not(:disabled) {
   color: var(--text);
   border-color: var(--text-faint);
   background: var(--panel-raised);
@@ -54,7 +59,7 @@
   background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
 }
 
-.impulse:hover {
+.impulse:hover:not(:disabled) {
   color: var(--accent, var(--text));
   border-color: var(--accent, var(--text-faint));
   background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
@@ -68,7 +73,7 @@
   background: color-mix(in srgb, var(--danger) 7%, var(--panel));
 }
 
-.danger:hover {
+.danger:hover:not(:disabled) {
   color: var(--danger);
   border-color: var(--danger);
   background: color-mix(in srgb, var(--danger) 13%, var(--panel));
@@ -82,7 +87,7 @@
   color: var(--text-faint);
 }
 
-.reset:hover {
+.reset:hover:not(:disabled) {
   background: var(--panel-raised);
   border-color: var(--panel-border);
   color: var(--text);

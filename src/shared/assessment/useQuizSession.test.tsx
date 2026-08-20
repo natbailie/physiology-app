@@ -42,6 +42,7 @@ function setup() {
   const applyInputs = vi.fn();
   const captureBaseline = vi.fn();
   const clearBaseline = vi.fn();
+  const resetEngine = vi.fn();
   const store = createMemoryProgressStore();
 
   const hook = renderHook(() =>
@@ -51,11 +52,12 @@ function setup() {
       applyInputs,
       captureBaseline,
       clearBaseline,
+      resetEngine,
       store,
     }),
   );
 
-  return { ...hook, applyInputs, captureBaseline, clearBaseline, store };
+  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, store };
 }
 
 describe('useQuizSession', () => {
@@ -72,6 +74,30 @@ describe('useQuizSession', () => {
     expect(result.current.phase).toBe('predicting');
     expect(result.current.question?.id).toBe('q1');
     expect(applyInputs).toHaveBeenCalledWith({ dial: 1 }, 'normal');
+  });
+
+  it('resets the engine BEFORE applying the setup, so questions cannot contaminate each other', () => {
+    const { result, resetEngine, applyInputs } = setup();
+    act(() => result.current.start());
+
+    // The verification harness settles each question from createInitialState. If the app did
+    // not do the same, a verified-unambiguous question could present differently to a learner.
+    expect(resetEngine).toHaveBeenCalledOnce();
+    const [resetOrder] = resetEngine.mock.invocationCallOrder;
+    const [applyOrder] = applyInputs.mock.invocationCallOrder;
+    expect(resetOrder).toBeDefined();
+    expect(applyOrder).toBeDefined();
+    expect(resetOrder!).toBeLessThan(applyOrder!);
+  });
+
+  it('resets again when advancing to the next question', () => {
+    const { result, resetEngine } = setup();
+    act(() => result.current.start());
+    act(() => result.current.commit('rises'));
+    resetEngine.mockClear();
+
+    act(() => result.current.next());
+    expect(resetEngine).toHaveBeenCalledOnce();
   });
 
   it('does not reveal the answer before the learner commits', () => {

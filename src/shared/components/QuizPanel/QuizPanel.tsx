@@ -1,4 +1,9 @@
-import { DIRECTION_CHOICES, type Direction } from '@/shared/assessment/types';
+import {
+  DIRECTION_CHOICES,
+  isPatternQuestion,
+  orderedOptions,
+  type Direction,
+} from '@/shared/assessment/types';
 import type { QuizSession } from '@/shared/assessment/useQuizSession';
 import type { ModuleSummary } from '@/shared/assessment/progressStore';
 import styles from './QuizPanel.module.css';
@@ -6,22 +11,26 @@ import styles from './QuizPanel.module.css';
 interface QuizPanelProps<TInputs, TPreset extends string, TSnapshot> {
   session: QuizSession<TInputs, TPreset, TSnapshot>;
   summary: ModuleSummary;
+  /** Display names for scenario options. Required for pattern-discrimination questions. */
+  presetLabels?: Record<TPreset, string>;
 }
 
-function directionLabel(direction: Direction): string {
+function directionLabel(direction: string): string {
   return DIRECTION_CHOICES.find((choice) => choice.id === direction)?.label ?? direction;
 }
 
 /**
- * Predict-then-run practice, sitting between the readouts and the charts so the question and
- * the traces that answer it are visible at once.
+ * Practice, sitting between the readouts and the charts so a question and the numbers that
+ * answer it are on screen together.
  *
- * The learner commits before anything moves. That commitment is the mechanism: being wrong and
- * then watching why is a far stronger memory than being shown the right answer up front.
+ * Two formats share this shell. In predict-then-run the learner commits before anything moves;
+ * in pattern discrimination the scenario is already running with the controls hidden, and the
+ * learner names it from the labs. Both depend on committing before the answer is visible.
  */
 export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   session,
   summary,
+  presetLabels,
 }: QuizPanelProps<TInputs, TPreset, TSnapshot>) {
   const { phase, question, index, total, answer, correct, score } = session;
 
@@ -32,7 +41,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
           <div>
             <h2 className={styles.idleTitle}>Practice</h2>
             <p className={styles.idleBlurb}>
-              Predict what the model will do, then watch whether you were right.
+              Commit to an answer, then find out whether the model agrees.
             </p>
           </div>
           <div className={styles.idleActions}>
@@ -60,7 +69,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
             </h2>
             <p className={styles.idleBlurb}>
               {score === total
-                ? 'Every prediction matched the model.'
+                ? 'Every answer matched the model.'
                 : 'The ones you missed are the ones worth coming back to.'}
             </p>
           </div>
@@ -79,6 +88,9 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
 
   if (!question) return null;
 
+  const pattern = isPatternQuestion<TInputs, TPreset, TSnapshot>(question);
+  const label = (id: string) => (pattern ? (presetLabels?.[id as TPreset] ?? id) : directionLabel(id));
+
   return (
     <section className={styles.panel} aria-label="Practice question">
       <header className={styles.header}>
@@ -92,25 +104,47 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
 
       <p className={styles.stem}>{question.stem}</p>
 
-      <p className={styles.prompt}>
-        <strong>{question.intervention.label}</strong> {question.prompt}
-      </p>
+      {!pattern && (
+        <p className={styles.prompt}>
+          <strong>{question.intervention.label}</strong> {question.prompt}
+        </p>
+      )}
+      {pattern && <p className={styles.prompt}>Which of these fits what you are seeing?</p>}
 
       {phase === 'predicting' && (
         <>
-          <div className={styles.choices} role="group" aria-label={question.prompt}>
-            {DIRECTION_CHOICES.map((choice) => (
-              <button
-                key={choice.id}
-                type="button"
-                className={styles.choice}
-                onClick={() => session.commit(choice.id)}
-              >
-                {choice.label}
-              </button>
-            ))}
+          <div
+            className={pattern ? styles.options : styles.choices}
+            role="group"
+            aria-label={pattern ? 'Candidate scenarios' : question.prompt}
+          >
+            {pattern
+              ? orderedOptions(question.id, question.options).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={styles.choice}
+                    onClick={() => session.commit(option)}
+                  >
+                    {presetLabels?.[option] ?? option}
+                  </button>
+                ))
+              : DIRECTION_CHOICES.map((choice: { id: Direction; label: string }) => (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    className={styles.choice}
+                    onClick={() => session.commit(choice.id)}
+                  >
+                    {choice.label}
+                  </button>
+                ))}
           </div>
-          <p className={styles.watch}>Commit to an answer, then watch {question.watch}.</p>
+          <p className={styles.watch}>
+            {pattern
+              ? 'The controls are hidden — work from the readouts above.'
+              : `Commit to an answer, then watch ${question.watch}.`}
+          </p>
         </>
       )}
 
@@ -120,9 +154,11 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
             {correct ? 'Correct — ' : 'Not quite — '}
             <span className={styles.verdictDetail}>
               {correct
-                ? `${question.watch} ${directionLabel(question.correctDirection).toLowerCase()}.`
-                : `you said "${directionLabel(answer!)}"; the model says "${directionLabel(
-                    question.correctDirection,
+                ? pattern
+                  ? `this is ${label(answer ?? '')}.`
+                  : `${question.watch} ${directionLabel(question.correctDirection).toLowerCase()}.`
+                : `you said "${label(answer ?? '')}"; the model says "${label(
+                    pattern ? question.answer : question.correctDirection,
                   )}".`}
             </span>
           </p>

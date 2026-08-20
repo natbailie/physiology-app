@@ -4,12 +4,12 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { QuizPanel } from './QuizPanel';
 import type { QuizSession } from '@/shared/assessment/useQuizSession';
 import type { ModuleSummary } from '@/shared/assessment/progressStore';
-import type { PredictQuestion } from '@/shared/assessment/types';
+import type { ModuleQuestion, PredictQuestion } from '@/shared/assessment/types';
 
 afterEach(cleanup);
 
 type Inputs = { dial: number };
-type Preset = 'normal';
+type Preset = 'normal' | 'alpha' | 'beta';
 type Snapshot = { value: number };
 
 const QUESTION: PredictQuestion<Inputs, Preset, Snapshot> = {
@@ -23,6 +23,21 @@ const QUESTION: PredictQuestion<Inputs, Preset, Snapshot> = {
   explanation: 'It rises because of the mechanism.',
   metric: (s) => s.value,
 };
+
+const PATTERN: ModuleQuestion<Inputs, Preset, Snapshot> = {
+  id: 'p1',
+  stem: 'A patient whose panel points somewhere specific.',
+  answer: 'normal',
+  options: ['normal', 'alpha', 'beta'],
+  panel: [
+    { label: 'Marker', value: (s: Snapshot) => s.value },
+    { label: 'Other', value: (s: Snapshot) => s.value },
+    { label: 'Third', value: (s: Snapshot) => s.value },
+  ],
+  explanation: 'The characteristic combination is what identifies it, as described at length here.',
+};
+
+const PRESET_LABELS = { normal: 'Normal', alpha: 'Alpha disease', beta: 'Beta disease' };
 
 function makeSession(overrides: Partial<QuizSession<Inputs, Preset, Snapshot>> = {}) {
   return {
@@ -144,5 +159,74 @@ describe('QuizPanel', () => {
     expect(screen.getByText('2 of 3 correct')).toBeTruthy();
     screen.getByRole('button', { name: 'Again' }).click();
     expect(session.start).toHaveBeenCalledOnce();
+  });
+
+});
+
+describe('QuizPanel — pattern discrimination', () => {
+  it('offers every candidate scenario by its label', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ question: PATTERN })}
+        summary={NO_HISTORY}
+        presetLabels={PRESET_LABELS}
+      />,
+    );
+
+    for (const label of ['Normal', 'Alpha disease', 'Beta disease']) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+    }
+  });
+
+  it('does not leak the answer or the explanation before commitment', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ question: PATTERN })}
+        summary={NO_HISTORY}
+        presetLabels={PRESET_LABELS}
+      />,
+    );
+
+    expect(screen.queryByText(PATTERN.explanation)).toBeNull();
+    expect(screen.queryByText(/Correct/)).toBeNull();
+    // Every option must look identical — no styling tell.
+    const classes = ['Normal', 'Alpha disease', 'Beta disease'].map(
+      (label) => screen.getByRole('button', { name: label }).className,
+    );
+    expect(new Set(classes).size).toBe(1);
+  });
+
+  it('tells the learner the controls are hidden', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ question: PATTERN })}
+        summary={NO_HISTORY}
+        presetLabels={PRESET_LABELS}
+      />,
+    );
+    expect(screen.getByText(/controls are hidden/i)).toBeTruthy();
+  });
+
+  it('commits the chosen scenario id, not its label', () => {
+    const session = makeSession({ question: PATTERN });
+    render(<QuizPanel session={session} summary={NO_HISTORY} presetLabels={PRESET_LABELS} />);
+
+    screen.getByRole('button', { name: 'Alpha disease' }).click();
+    expect(session.commit).toHaveBeenCalledWith('alpha');
+  });
+
+  it('names both scenarios in a wrong-answer verdict', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ question: PATTERN, phase: 'revealed', answer: 'alpha', correct: false })}
+        summary={NO_HISTORY}
+        presetLabels={PRESET_LABELS}
+      />,
+    );
+
+    const detail = screen.getByText(/you said/).textContent ?? '';
+    expect(detail).toContain('Alpha disease');
+    expect(detail).toContain('Normal');
+    expect(screen.getByText(PATTERN.explanation)).toBeTruthy();
   });
 });

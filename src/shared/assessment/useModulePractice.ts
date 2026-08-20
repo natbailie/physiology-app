@@ -1,16 +1,17 @@
 import { useCallback, useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { createLocalStorageProgressStore, type ModuleSummary, type ProgressStore } from './progressStore';
-import type { PredictQuestion } from './types';
+import type { ModuleQuestion } from './types';
 import { useQuizSession, type QuizSession } from './useQuizSession';
 
 interface ModulePracticeOptions<TInputs, TPreset extends string, TSnapshot> {
   moduleId: string;
-  questions: readonly PredictQuestion<TInputs, TPreset, TSnapshot>[];
+  questions: readonly ModuleQuestion<TInputs, TPreset, TSnapshot>[];
   presets: Record<TPreset, Partial<TInputs>>;
   setInputs: Dispatch<SetStateAction<TInputs>>;
   captureBaseline: () => void;
   clearBaseline: () => void;
+  resetEngine: () => void;
   /** Injectable for tests; defaults to the localStorage-backed store. */
   store?: ProgressStore;
 }
@@ -32,6 +33,7 @@ export function useModulePractice<TInputs, TPreset extends string, TSnapshot>({
   setInputs,
   captureBaseline,
   clearBaseline,
+  resetEngine,
   store,
 }: ModulePracticeOptions<TInputs, TPreset, TSnapshot>): {
   session: QuizSession<TInputs, TPreset, TSnapshot>;
@@ -52,6 +54,7 @@ export function useModulePractice<TInputs, TPreset extends string, TSnapshot>({
     applyInputs,
     captureBaseline,
     clearBaseline,
+    resetEngine,
     store: activeStore,
   });
 

@@ -30,6 +30,7 @@ export function RespiratoryPage() {
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
+    resetEngine: reset,
   });
 
   function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {

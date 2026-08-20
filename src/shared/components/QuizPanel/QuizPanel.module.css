@@ -185,3 +185,11 @@
     min-width: 0;
   }
 }
+
+/* Scenario options wrap freely — there are more of them than the three directions, and their
+   labels are long enough that a single row would overflow. */
+.options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

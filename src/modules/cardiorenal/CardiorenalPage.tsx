@@ -29,6 +29,7 @@ export function CardiorenalPage() {
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
+    resetEngine: reset,
   });
 
   function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {

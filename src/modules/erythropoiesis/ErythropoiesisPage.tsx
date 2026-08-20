@@ -4,10 +4,13 @@ import { ErythropoiesisDiagram } from './components/ErythropoiesisDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { ERYTHROPOIESIS_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { erythropoiesisContent } from './content';
 import { erythroLoopConfig } from './engine/loopConfig';
 import { perturbAcuteBloodLoss } from './engine/engine';
@@ -17,6 +20,16 @@ import type { ErythroInputs } from './engine/types';
 export function ErythropoiesisPage() {
   const [inputs, setInputs] = useState<ErythroInputs>(DEFAULT_ERYTHRO_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, erythroLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'erythropoiesis',
+    questions: ERYTHROPOIESIS_QUESTIONS,
+    presets: ERYTHRO_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+  });
 
   function handleChange<K extends keyof ErythroInputs>(key: K, value: ErythroInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -49,10 +62,12 @@ export function ErythropoiesisPage() {
           onApply={handleApplyPreset}
           actions={[{ label: 'Acute bleed', onClick: triggerAcuteBleed, variant: 'danger' }]}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={<ErythropoiesisDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={ERYTHRO_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -61,6 +76,7 @@ export function ErythropoiesisPage() {
   <Sparkline label="Retic index" data={reticHistory} baselineData={reticHistoryBaseline} domainMin={0} domainMax={6} colorVar="var(--marrow)" />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={erythropoiesisContent} />}
       footnote={'A simplified, conceptual model of red cell production — not a clinical or diagnostic tool. Compare the presets on MCV and reticulocyte index together rather than on haemoglobin alone: that pair is what classifies an anemia. Aplastic anemia and anemia of CKD both show a low retic index, but only CKD has a LOW EPO to go with it. Simulated time is heavily compressed, since erythropoiesis plays out over weeks — try "Acute bleed" and watch the reticulocyte response lag behind the fall in haemoglobin before it catches up.'}

@@ -190,3 +190,15 @@
     display: none;
   }
 }
+
+/* Shown in place of the sliders while a pattern question is open. Deliberately plain: it is a
+   statement about the exercise, not a control. */
+.blinded {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-faint);
+  border: 1px dashed var(--panel-border);
+  border-radius: 8px;
+  padding: 0.85rem;
+  margin: 0;
+}

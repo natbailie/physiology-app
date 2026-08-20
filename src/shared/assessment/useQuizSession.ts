@@ -1,35 +1,43 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { Direction, PredictQuestion } from './types';
+import { correctAnswerOf, isPatternQuestion, type ModuleQuestion } from './types';
 import type { ProgressStore } from './progressStore';
 
 export type QuizPhase = 'idle' | 'predicting' | 'revealed' | 'complete';
 
 export interface QuizSession<TInputs, TPreset extends string, TSnapshot> {
   phase: QuizPhase;
-  question: PredictQuestion<TInputs, TPreset, TSnapshot> | null;
+  question: ModuleQuestion<TInputs, TPreset, TSnapshot> | null;
   /** 1-based, for "Question 2 of 3". */
   index: number;
   total: number;
-  /** What the learner committed to, once they have. */
-  answer: Direction | null;
+  /** What the learner committed to, once they have — a direction, or a scenario id. */
+  answer: string | null;
+  /** True while a pattern question is unanswered: the controls must stay hidden, or the
+   * scenario is legible from the slider positions and there is nothing left to work out. */
+  blinded: boolean;
   correct: boolean | null;
   /** Correct answers this session. */
   score: number;
   start: () => void;
-  commit: (answer: Direction) => void;
+  commit: (answer: string) => void;
   next: () => void;
   exit: () => void;
 }
 
 interface QuizSessionOptions<TInputs, TPreset extends string, TSnapshot> {
   moduleId: string;
-  questions: readonly PredictQuestion<TInputs, TPreset, TSnapshot>[];
+  questions: readonly ModuleQuestion<TInputs, TPreset, TSnapshot>[];
   /** Applies a question's setup or intervention to the page's live inputs. */
   applyInputs: (patch: Partial<TInputs>, preset?: TPreset) => void;
   /** Freezes the trace at the moment of commitment, so the prediction is watched as a
    * divergence from where the model was rather than as an unanchored wiggle. */
   captureBaseline: () => void;
   clearBaseline: () => void;
+  /** Returns the engine to its initial state. Called before every question so what the learner
+   * sees matches what the verification harness ran: both start from `createInitialState`. Without
+   * it a question inherits the previous one's state, and a panel verified as unambiguous can
+   * appear contaminated. */
+  resetEngine: () => void;
   store: ProgressStore;
 }
 
@@ -46,11 +54,12 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   applyInputs,
   captureBaseline,
   clearBaseline,
+  resetEngine,
   store,
 }: QuizSessionOptions<TInputs, TPreset, TSnapshot>): QuizSession<TInputs, TPreset, TSnapshot> {
   const [phase, setPhase] = useState<QuizPhase>('idle');
   const [index, setIndex] = useState(0);
-  const [answer, setAnswer] = useState<Direction | null>(null);
+  const [answer, setAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
 
   // Read through a ref so a changing callback identity never restarts a session.
@@ -67,12 +76,17 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
         return;
       }
       clearBaseline();
-      applyRef.current(next.setup.inputs ?? {}, next.setup.preset);
+      resetEngine();
+      if (isPatternQuestion(next)) {
+        applyRef.current({}, next.answer);
+      } else {
+        applyRef.current(next.setup.inputs ?? {}, next.setup.preset);
+      }
       setIndex(at);
       setAnswer(null);
       setPhase('predicting');
     },
-    [questions, clearBaseline],
+    [questions, clearBaseline, resetEngine],
   );
 
   const start = useCallback(() => {
@@ -81,18 +95,22 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   }, [load]);
 
   const commit = useCallback(
-    (choice: Direction) => {
+    (choice: string) => {
       const current = questions[index];
       if (!current) return;
 
-      const isCorrect = choice === current.correctDirection;
+      const isCorrect = choice === correctAnswerOf(current);
       setAnswer(choice);
       setScore((s) => s + (isCorrect ? 1 : 0));
       store.record(moduleId, current.id, isCorrect);
 
-      // Freeze first, THEN intervene, so the frozen trace is the pre-intervention state.
-      captureBaseline();
-      applyRef.current(current.intervention.inputs);
+      // A pattern question has nothing to apply — the scenario is already running, and the
+      // reveal is simply un-hiding the controls that produced it.
+      if (!isPatternQuestion(current)) {
+        // Freeze first, THEN intervene, so the frozen trace is the pre-intervention state.
+        captureBaseline();
+        applyRef.current(current.intervention.inputs);
+      }
       setPhase('revealed');
     },
     [questions, index, store, moduleId, captureBaseline],
@@ -107,13 +125,14 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   }, [clearBaseline]);
 
   const correct = useMemo(
-    () => (answer === null || !question ? null : answer === question.correctDirection),
+    () => (answer === null || !question ? null : answer === correctAnswerOf(question)),
     [answer, question],
   );
 
   return {
     phase,
     question,
+    blinded: phase === 'predicting' && question !== null && isPatternQuestion(question),
     index: index + 1,
     total: questions.length,
     answer,
