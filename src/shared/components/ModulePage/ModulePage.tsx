@@ -10,6 +10,9 @@ interface ModulePageProps {
   presets: ReactNode;
   diagram: ReactNode;
   readouts: ReactNode;
+  /** Predict-then-run practice. Sits between the readouts and the charts so a question
+   * and the traces that answer it are on screen together. */
+  practice?: ReactNode;
   /** Play/pause/speed + baseline capture. Sits directly above the charts because
    * that is where simulated time is legible. */
   transport?: ReactNode;
@@ -30,6 +33,7 @@ export function ModulePage({
   presets,
   diagram,
   readouts,
+  practice,
   transport,
   charts,
   controls,
@@ -72,6 +76,7 @@ export function ModulePage({
         <div className={styles.main}>
           {diagram}
           {readouts}
+          {practice}
           {(transport || charts) && (
             <div className={styles.charts}>
               {transport}

@@ -5,10 +5,13 @@ import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { OxygenDissociationCurve } from '@/shared/components/OxygenDissociationCurve/OxygenDissociationCurve';
+import { RESPIRATORY_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryContent } from './content';
 import { respiratoryLoopConfig } from './engine/loopConfig';
 import { perturbAirwayObstruction } from './engine/engine';
@@ -19,6 +22,15 @@ import type { RespInputs } from './engine/types';
 export function RespiratoryPage() {
   const [inputs, setInputs] = useState<RespInputs>(DEFAULT_RESP_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'respiratory',
+    questions: RESPIRATORY_QUESTIONS,
+    presets: RESP_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+  });
 
   function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -55,6 +67,7 @@ export function RespiratoryPage() {
       }
       diagram={<RespiratoryDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

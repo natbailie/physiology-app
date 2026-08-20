@@ -3,10 +3,13 @@ import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { PhysiologyDiagram } from './components/PhysiologyDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ControlPanel } from './components/ControlPanel';
+import { CARDIORENAL_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { cardiorenalContent } from './content';
 import { cardiorenalLoopConfig } from './engine/loopConfig';
@@ -18,6 +21,15 @@ import type { SimInputs } from './engine/types';
 export function CardiorenalPage() {
   const [inputs, setInputs] = useState<SimInputs>(DEFAULT_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'cardiorenal',
+    questions: CARDIORENAL_QUESTIONS,
+    presets: PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+  });
 
   function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -54,6 +66,7 @@ export function CardiorenalPage() {
       }
       diagram={<PhysiologyDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel state={snapshot.state} derived={snapshot.derived} inputs={inputs} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

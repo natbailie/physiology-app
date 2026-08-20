@@ -1,0 +1,187 @@
+.panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 0.85rem 1rem;
+}
+
+/* --- Idle / complete --- */
+
+.idleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.idleTitle {
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--text);
+  margin: 0 0 0.15rem;
+}
+
+.idleBlurb {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 46ch;
+}
+
+.idleActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* --- Question --- */
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.stem {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+}
+
+.prompt {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0 0 0.7rem;
+}
+
+.choices {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.watch {
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  margin: 0.55rem 0 0;
+}
+
+/* --- Buttons --- */
+
+.button {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-dim);
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.button:hover {
+  color: var(--text);
+  border-color: var(--text-faint);
+  background: var(--panel-raised);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent, var(--text-dim));
+  outline-offset: 2px;
+}
+
+.primary {
+  composes: button;
+  color: var(--accent, var(--text));
+  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
+}
+
+.primary:hover {
+  border-color: var(--accent, var(--text-faint));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
+}
+
+.secondary {
+  composes: button;
+}
+
+/* Choices are deliberately uniform — no styling hints at which one is right. */
+.choice {
+  composes: button;
+  min-width: 7.5rem;
+  text-align: center;
+}
+
+.exit {
+  composes: button;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-color: transparent;
+  background: none;
+  color: var(--text-faint);
+}
+
+/* --- Reveal --- */
+
+.reveal {
+  margin-top: 0.4rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+.verdict {
+  font-size: 0.85rem;
+  font-weight: 650;
+  margin: 0 0 0.4rem;
+  color: var(--danger);
+}
+
+.reveal[data-correct='true'] .verdict {
+  color: var(--accent, var(--text));
+}
+
+.verdictDetail {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.explanation {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.revealActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.record {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.74rem;
+  color: var(--text-faint);
+}
+
+@media (max-width: 700px) {
+  .choice {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
