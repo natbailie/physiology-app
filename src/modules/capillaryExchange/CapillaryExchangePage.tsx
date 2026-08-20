@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { capillaryExchangeContent } from './content';
 import { capillaryLoopConfig } from './engine/loopConfig';
 import { perturbAlbuminInfusion, perturbStandUp } from './engine/engine';
@@ -22,7 +23,7 @@ import type { CapillaryInputs, TissueBed } from './engine/types';
 
 export function CapillaryExchangePage() {
   const [inputs, setInputs] = useState<CapillaryInputs>(DEFAULT_CAPILLARY_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, capillaryLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, capillaryLoopConfig);
   const { derived } = snapshot;
 
   function handleChange<K extends keyof CapillaryInputs>(key: K, value: CapillaryInputs[K]) {
@@ -56,6 +57,7 @@ export function CapillaryExchangePage() {
       }
       diagram={<CapillaryDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
           <Sparkline

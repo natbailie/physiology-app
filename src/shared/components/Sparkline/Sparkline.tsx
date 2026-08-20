@@ -13,6 +13,9 @@ interface SparklineProps {
   secondaryData?: number[];
   secondaryLabel?: string;
   secondaryColorVar?: string;
+  /** Frozen earlier run of THIS series, drawn faint behind the live trace so a
+   * changed scenario can be read against the one it replaced. */
+  baselineData?: number[] | null;
   width?: number;
   height?: number;
 }
@@ -43,6 +46,7 @@ export function Sparkline({
   secondaryData,
   secondaryLabel,
   secondaryColorVar,
+  baselineData,
   width = 220,
   height = 46,
 }: SparklineProps) {
@@ -50,6 +54,10 @@ export function Sparkline({
   const secondaryPath = useMemo(
     () => (secondaryData ? buildPath(secondaryData, domainMin, domainMax, width, height) : ''),
     [secondaryData, domainMin, domainMax, width, height],
+  );
+  const baselinePath = useMemo(
+    () => (baselineData && baselineData.length > 1 ? buildPath(baselineData, domainMin, domainMax, width, height) : ''),
+    [baselineData, domainMin, domainMax, width, height],
   );
   const areaPath = linePath ? `${linePath} L${width},${height} L0,${height} Z` : '';
   const current = data.at(-1);
@@ -76,6 +84,7 @@ export function Sparkline({
       </div>
       <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         {areaPath && <path className={styles.area} d={areaPath} />}
+        {baselinePath && <path className={styles.baselineLine} d={baselinePath} />}
         {secondaryPath && <path className={styles.secondaryLine} d={secondaryPath} />}
         {linePath && <path className={styles.line} d={linePath} />}
         {current !== undefined && <circle className={styles.dot} cx={lastX} cy={lastY} r={2.25} />}

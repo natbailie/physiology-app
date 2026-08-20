@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { gastrointestinalContent } from './content';
 import { giLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal } from './engine/engine';
@@ -15,7 +16,7 @@ import type { GiInputs } from './engine/types';
 
 export function GastrointestinalPage() {
   const [inputs, setInputs] = useState<GiInputs>(DEFAULT_GI_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, giLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
 
   function handleChange<K extends keyof GiInputs>(key: K, value: GiInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -30,8 +31,11 @@ export function GastrointestinalPage() {
   }
 
   const gastricPHHistory = history.map((h) => h.gastricPH);
+  const gastricPHHistoryBaseline = baseline.history?.map((h) => h.gastricPH) ?? null;
   const duodenalPHHistory = history.map((h) => h.duodenalPH);
+  const duodenalPHHistoryBaseline = baseline.history?.map((h) => h.duodenalPH) ?? null;
   const gastrinHistory = history.map((h) => h.gastrinDrive * 100);
+  const gastrinHistoryBaseline = baseline.history?.map((h) => h.gastrinDrive * 100) ?? null;
 
   return (
     <ModulePage
@@ -49,11 +53,12 @@ export function GastrointestinalPage() {
       }
       diagram={<GiDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Gastric pH" data={gastricPHHistory} domainMin={1} domainMax={7} colorVar="var(--gastrin)" />
-  <Sparkline label="Duodenal pH" data={duodenalPHHistory} domainMin={2} domainMax={8} colorVar="var(--secretin)" />
-  <Sparkline label="Gastrin" unit="%" data={gastrinHistory} domainMin={0} domainMax={100} colorVar="var(--gastrin)" />
+  <Sparkline label="Gastric pH" data={gastricPHHistory} baselineData={gastricPHHistoryBaseline} domainMin={1} domainMax={7} colorVar="var(--gastrin)" />
+  <Sparkline label="Duodenal pH" data={duodenalPHHistory} baselineData={duodenalPHHistoryBaseline} domainMin={2} domainMax={8} colorVar="var(--secretin)" />
+  <Sparkline label="Gastrin" unit="%" data={gastrinHistory} baselineData={gastrinHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--gastrin)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

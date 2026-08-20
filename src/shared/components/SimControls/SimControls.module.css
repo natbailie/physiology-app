@@ -1,0 +1,137 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.button {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text-faint);
+  background: var(--panel-raised);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent, var(--text-dim));
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Play/pause is the one control that is always actionable, so it carries the accent. */
+.play {
+  composes: button;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 5.25rem;
+  color: var(--accent, var(--text));
+  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
+}
+
+.play:hover:not(:disabled) {
+  color: var(--accent, var(--text));
+  border-color: var(--accent, var(--text-faint));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
+}
+
+.glyph {
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.playLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.step {
+  composes: button;
+}
+
+/* Segmented control — one visual unit, so the borders collapse together. */
+.speeds {
+  display: inline-flex;
+  margin-left: 0.25rem;
+}
+
+.speed {
+  composes: button;
+  border-radius: 0;
+  padding: 0.3rem 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.speed:not(:first-child) {
+  margin-left: -1px;
+}
+
+.speed:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.speed:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.speed[aria-pressed='true'] {
+  color: var(--accent, var(--text));
+  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 55%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 12%, var(--panel));
+  z-index: 1;
+}
+
+.baseline {
+  composes: button;
+  margin-left: auto;
+}
+
+/* Matches the dashed baseline stroke in the charts, so the button and the trace
+ * it produces read as the same object. */
+.baselineOn {
+  composes: button;
+  margin-left: auto;
+  color: var(--text);
+  border-style: dashed;
+  border-color: var(--text-faint);
+  background: var(--panel-raised);
+}
+
+@media (max-width: 700px) {
+  .bar {
+    gap: 0.4rem;
+  }
+
+  .baseline,
+  .baselineOn {
+    margin-left: 0;
+  }
+}

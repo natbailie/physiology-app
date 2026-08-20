@@ -8,6 +8,7 @@ import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTraje
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { venousReturnContent } from './content';
 import { venousReturnLoopConfig } from './engine/loopConfig';
 import { perturbHemorrhage, perturbTransfusion, perturbValsalva } from './engine/engine';
@@ -23,7 +24,7 @@ import type { VenousReturnInputs } from './engine/types';
 
 export function VenousReturnPage() {
   const [inputs, setInputs] = useState<VenousReturnInputs>(DEFAULT_VENOUS_RETURN_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, venousReturnLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
   const { derived } = snapshot;
 
   function handleChange<K extends keyof VenousReturnInputs>(key: K, value: VenousReturnInputs[K]) {
@@ -54,6 +55,7 @@ export function VenousReturnPage() {
       }
       diagram={<GuytonDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
           {/* The operating point's path through the same state space the diagram plots. */}

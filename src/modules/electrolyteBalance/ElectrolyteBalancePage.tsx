@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { electrolyteBalanceContent } from './content';
 import { electrolyteLoopConfig } from './engine/loopConfig';
 import { perturbGiveInsulin, perturbPotassiumBolus, perturbSalineBolus } from './engine/engine';
@@ -21,7 +22,7 @@ import type { ElectrolyteInputs } from './engine/types';
 
 export function ElectrolyteBalancePage() {
   const [inputs, setInputs] = useState<ElectrolyteInputs>(DEFAULT_ELECTROLYTE_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, electrolyteLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, electrolyteLoopConfig);
   const { derived } = snapshot;
 
   function handleChange<K extends keyof ElectrolyteInputs>(key: K, value: ElectrolyteInputs[K]) {
@@ -52,6 +53,7 @@ export function ElectrolyteBalancePage() {
       }
       diagram={<CompartmentDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
           <Sparkline

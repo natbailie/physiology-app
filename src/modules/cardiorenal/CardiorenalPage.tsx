@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { PhysiologyDiagram } from './components/PhysiologyDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -16,7 +17,7 @@ import type { SimInputs } from './engine/types';
 
 export function CardiorenalPage() {
   const [inputs, setInputs] = useState<SimInputs>(DEFAULT_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, cardiorenalLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
 
   function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -31,8 +32,11 @@ export function CardiorenalPage() {
   }
 
   const mapHistory = history.map((h) => h.map);
+  const mapHistoryBaseline = baseline.history?.map((h) => h.map) ?? null;
   const gfrHistory = history.map((h) => h.gfr);
+  const gfrHistoryBaseline = baseline.history?.map((h) => h.gfr) ?? null;
   const bvHistory = history.map((h) => h.bloodVolume);
+  const bvHistoryBaseline = baseline.history?.map((h) => h.bloodVolume) ?? null;
 
   return (
     <ModulePage
@@ -50,14 +54,15 @@ export function CardiorenalPage() {
       }
       diagram={<PhysiologyDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel state={snapshot.state} derived={snapshot.derived} inputs={inputs} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-          <Sparkline label="MAP" unit="mmHg" data={mapHistory} domainMin={30} domainMax={180} colorVar="var(--artery)" />
-          <Sparkline label="GFR" unit="*" data={gfrHistory} domainMin={0} domainMax={150} colorVar="var(--kidney)" />
+          <Sparkline label="MAP" unit="mmHg" data={mapHistory} baselineData={mapHistoryBaseline} domainMin={30} domainMax={180} colorVar="var(--artery)" />
+          <Sparkline label="GFR" unit="*" data={gfrHistory} baselineData={gfrHistoryBaseline} domainMin={0} domainMax={150} colorVar="var(--kidney)" />
           <Sparkline
             label="Blood volume"
             unit="%"
-            data={bvHistory}
+            data={bvHistory} baselineData={bvHistoryBaseline}
             domainMin={40}
             domainMax={220}
             colorVar="var(--text)"

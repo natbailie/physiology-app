@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { immuneResponseContent } from './content';
 import { immuneLoopConfig } from './engine/loopConfig';
 import { perturbInfect, perturbVaccinate } from './engine/engine';
@@ -15,7 +16,7 @@ import type { ImmuneInputs } from './engine/types';
 
 export function ImmuneResponsePage() {
   const [inputs, setInputs] = useState<ImmuneInputs>(DEFAULT_IMMUNE_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, immuneLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, immuneLoopConfig);
 
   function handleChange<K extends keyof ImmuneInputs>(key: K, value: ImmuneInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -26,8 +27,11 @@ export function ImmuneResponsePage() {
   }
 
   const loadHistory = history.map((h) => h.pathogenLoad * 100);
+  const loadHistoryBaseline = baseline.history?.map((h) => h.pathogenLoad * 100) ?? null;
   const iggHistory = history.map((h) => h.iggTitre * 100);
+  const iggHistoryBaseline = baseline.history?.map((h) => h.iggTitre * 100) ?? null;
   const memoryHistory = history.map((h) => h.memoryLevel * 100);
+  const memoryHistoryBaseline = baseline.history?.map((h) => h.memoryLevel * 100) ?? null;
 
   return (
     <ModulePage
@@ -45,11 +49,12 @@ export function ImmuneResponsePage() {
       }
       diagram={<ImmuneDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Pathogen load" unit="%" data={loadHistory} domainMin={0} domainMax={100} colorVar="var(--pathogen)" />
-  <Sparkline label="IgG" unit="%" data={iggHistory} domainMin={0} domainMax={100} colorVar="var(--antibody)" />
-  <Sparkline label="Memory" unit="%" data={memoryHistory} domainMin={0} domainMax={100} colorVar="var(--memory)" />
+  <Sparkline label="Pathogen load" unit="%" data={loadHistory} baselineData={loadHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--pathogen)" />
+  <Sparkline label="IgG" unit="%" data={iggHistory} baselineData={iggHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--antibody)" />
+  <Sparkline label="Memory" unit="%" data={memoryHistory} baselineData={memoryHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--memory)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

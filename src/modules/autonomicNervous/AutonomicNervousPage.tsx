@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { autonomicNervousContent } from './content';
 import { ansLoopConfig } from './engine/loopConfig';
 import { ANS_PRESETS, DEFAULT_ANS_INPUTS, type AnsPresetName, ANS_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
@@ -14,7 +15,7 @@ import type { AnsInputs } from './engine/types';
 
 export function AutonomicNervousPage() {
   const [inputs, setInputs] = useState<AnsInputs>(DEFAULT_ANS_INPUTS);
-  const { snapshot, history, reset } = useEngineLoop(inputs, ansLoopConfig);
+  const { snapshot, history, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
 
   function handleChange<K extends keyof AnsInputs>(key: K, value: AnsInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -25,8 +26,11 @@ export function AutonomicNervousPage() {
   }
 
   const heartRateHistory = history.map((h) => h.heartRate);
+  const heartRateHistoryBaseline = baseline.history?.map((h) => h.heartRate) ?? null;
   const giMotilityHistory = history.map((h) => h.giMotility);
+  const giMotilityHistoryBaseline = baseline.history?.map((h) => h.giMotility) ?? null;
   const pupilHistory = history.map((h) => h.pupilDiameter);
+  const pupilHistoryBaseline = baseline.history?.map((h) => h.pupilDiameter) ?? null;
 
   return (
     <ModulePage
@@ -43,11 +47,12 @@ export function AutonomicNervousPage() {
       }
       diagram={<AnsDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Heart rate" unit="bpm" data={heartRateHistory} domainMin={30} domainMax={200} colorVar="var(--sympathetic)" />
-  <Sparkline label="Gut motility" data={giMotilityHistory} domainMin={0} domainMax={100} colorVar="var(--parasympathetic)" />
-  <Sparkline label="Pupil" unit="mm" data={pupilHistory} domainMin={1} domainMax={9} colorVar="var(--sympathetic)" />
+  <Sparkline label="Heart rate" unit="bpm" data={heartRateHistory} baselineData={heartRateHistoryBaseline} domainMin={30} domainMax={200} colorVar="var(--sympathetic)" />
+  <Sparkline label="Gut motility" data={giMotilityHistory} baselineData={giMotilityHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--parasympathetic)" />
+  <Sparkline label="Pupil" unit="mm" data={pupilHistory} baselineData={pupilHistoryBaseline} domainMin={1} domainMax={9} colorVar="var(--sympathetic)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

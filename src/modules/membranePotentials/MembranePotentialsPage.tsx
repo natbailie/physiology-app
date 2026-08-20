@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { membranePotentialsContent } from './content';
 import { membraneLoopConfig } from './engine/loopConfig';
 import { perturbStimulate } from './engine/engine';
@@ -16,7 +17,7 @@ import type { MembraneInputs } from './engine/types';
 
 export function MembranePotentialsPage() {
   const [inputs, setInputs] = useState<MembraneInputs>(DEFAULT_MEMBRANE_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, membraneLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
 
   function handleChange<K extends keyof MembraneInputs>(key: K, value: MembraneInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -31,8 +32,11 @@ export function MembranePotentialsPage() {
   }
 
   const vmHistory = history.map((h) => h.vm);
+  const vmHistoryBaseline = baseline.history?.map((h) => h.vm) ?? null;
   const gNaHistory = history.map((h) => h.gNa);
+  const gNaHistoryBaseline = baseline.history?.map((h) => h.gNa) ?? null;
   const gKHistory = history.map((h) => h.gK);
+  const gKHistoryBaseline = baseline.history?.map((h) => h.gK) ?? null;
 
   return (
     <ModulePage
@@ -50,19 +54,20 @@ export function MembranePotentialsPage() {
       }
       diagram={<MembraneDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Membrane potential" unit="mV" data={vmHistory} domainMin={-100} domainMax={60} colorVar="var(--vm)" />
+  <Sparkline label="Membrane potential" unit="mV" data={vmHistory} baselineData={vmHistoryBaseline} domainMin={-100} domainMax={60} colorVar="var(--vm)" />
   <Sparkline
     label="Na+ conductance"
-    data={gNaHistory}
+    data={gNaHistory} baselineData={gNaHistoryBaseline}
     domainMin={0}
     domainMax={CONDUCTANCE.MAX_GNA * 0.6}
     colorVar="var(--na-current)"
   />
   <Sparkline
     label="K+ conductance"
-    data={gKHistory}
+    data={gKHistory} baselineData={gKHistoryBaseline}
     domainMin={0}
     domainMax={CONDUCTANCE.MAX_GK * 0.6}
     colorVar="var(--k-current)"

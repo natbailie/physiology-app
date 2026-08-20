@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { calciumHomeostasisContent } from './content';
 import { calciumLoopConfig } from './engine/loopConfig';
 import { perturbCalciumInfusion } from './engine/engine';
@@ -15,7 +16,7 @@ import type { CalciumInputs } from './engine/types';
 
 export function CalciumHomeostasisPage() {
   const [inputs, setInputs] = useState<CalciumInputs>(DEFAULT_CALCIUM_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, calciumLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
 
   function handleChange<K extends keyof CalciumInputs>(key: K, value: CalciumInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -30,8 +31,11 @@ export function CalciumHomeostasisPage() {
   }
 
   const calciumHistory = history.map((h) => h.calcium);
+  const calciumHistoryBaseline = baseline.history?.map((h) => h.calcium) ?? null;
   const phosphateHistory = history.map((h) => h.phosphate);
+  const phosphateHistoryBaseline = baseline.history?.map((h) => h.phosphate) ?? null;
   const pthHistory = history.map((h) => h.pth * 100);
+  const pthHistoryBaseline = baseline.history?.map((h) => h.pth * 100) ?? null;
 
   return (
     <ModulePage
@@ -49,11 +53,12 @@ export function CalciumHomeostasisPage() {
       }
       diagram={<CalciumDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Serum calcium" unit="mg/dL" data={calciumHistory} domainMin={4} domainMax={16} colorVar="var(--calcium)" />
-  <Sparkline label="Serum phosphate" unit="mg/dL" data={phosphateHistory} domainMin={0} domainMax={12} colorVar="var(--phosphate)" />
-  <Sparkline label="PTH" unit="%" data={pthHistory} domainMin={0} domainMax={100} colorVar="var(--pth)" />
+  <Sparkline label="Serum calcium" unit="mg/dL" data={calciumHistory} baselineData={calciumHistoryBaseline} domainMin={4} domainMax={16} colorVar="var(--calcium)" />
+  <Sparkline label="Serum phosphate" unit="mg/dL" data={phosphateHistory} baselineData={phosphateHistoryBaseline} domainMin={0} domainMax={12} colorVar="var(--phosphate)" />
+  <Sparkline label="PTH" unit="%" data={pthHistory} baselineData={pthHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--pth)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

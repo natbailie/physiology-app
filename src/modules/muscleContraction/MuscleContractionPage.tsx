@@ -8,6 +8,7 @@ import { OxygenDissociationCurve } from '@/shared/components/OxygenDissociationC
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { muscleContractionContent } from './content';
 import { muscleLoopConfig } from './engine/loopConfig';
 import { perturbCaffeine, perturbStimulate } from './engine/engine';
@@ -25,7 +26,7 @@ import type { MuscleInputs } from './engine/types';
 
 export function MuscleContractionPage() {
   const [inputs, setInputs] = useState<MuscleInputs>(DEFAULT_MUSCLE_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, muscleLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
   const { derived, state } = snapshot;
 
   function handleChange<K extends keyof MuscleInputs>(key: K, value: MuscleInputs[K]) {
@@ -66,6 +67,7 @@ export function MuscleContractionPage() {
       }
       diagram={<MuscleDiagram derived={derived} excitationPulse={state.excitationPulse} />}
       readouts={<ReadoutPanel derived={derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
           <Sparkline

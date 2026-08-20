@@ -8,6 +8,7 @@ import { OxygenDissociationCurve } from '@/shared/components/OxygenDissociationC
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { respiratoryContent } from './content';
 import { respiratoryLoopConfig } from './engine/loopConfig';
 import { perturbAirwayObstruction } from './engine/engine';
@@ -17,7 +18,7 @@ import type { RespInputs } from './engine/types';
 
 export function RespiratoryPage() {
   const [inputs, setInputs] = useState<RespInputs>(DEFAULT_RESP_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, respiratoryLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
 
   function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -32,8 +33,11 @@ export function RespiratoryPage() {
   }
 
   const pHHistory = history.map((h) => h.pH);
+  const pHHistoryBaseline = baseline.history?.map((h) => h.pH) ?? null;
   const paCO2History = history.map((h) => h.paCO2);
+  const paCO2HistoryBaseline = baseline.history?.map((h) => h.paCO2) ?? null;
   const saO2History = history.map((h) => h.saO2);
+  const saO2HistoryBaseline = baseline.history?.map((h) => h.saO2) ?? null;
 
   return (
     <ModulePage
@@ -51,11 +55,12 @@ export function RespiratoryPage() {
       }
       diagram={<RespiratoryDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="pH" data={pHHistory} domainMin={6.9} domainMax={7.7} colorVar="var(--ph)" />
-  <Sparkline label="PaCO2" unit="mmHg" data={paCO2History} domainMin={10} domainMax={100} colorVar="var(--co2)" />
-  <Sparkline label="SaO2" unit="%" data={saO2History} domainMin={0} domainMax={100} colorVar="var(--o2)" />
+  <Sparkline label="pH" data={pHHistory} baselineData={pHHistoryBaseline} domainMin={6.9} domainMax={7.7} colorVar="var(--ph)" />
+  <Sparkline label="PaCO2" unit="mmHg" data={paCO2History} baselineData={paCO2HistoryBaseline} domainMin={10} domainMax={100} colorVar="var(--co2)" />
+  <Sparkline label="SaO2" unit="%" data={saO2History} baselineData={saO2HistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--o2)" />
   <OxygenDissociationCurve
     curveFn={saO2}
     currentX={snapshot.derived.paO2}

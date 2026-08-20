@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { glucoseRegulationContent } from './content';
 import { glucoseLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal, perturbGiveInsulin } from './engine/engine';
@@ -15,7 +16,7 @@ import type { GlucoseInputs } from './engine/types';
 
 export function GlucoseRegulationPage() {
   const [inputs, setInputs] = useState<GlucoseInputs>(DEFAULT_GLUCOSE_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, glucoseLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
 
   function handleChange<K extends keyof GlucoseInputs>(key: K, value: GlucoseInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -34,8 +35,11 @@ export function GlucoseRegulationPage() {
   }
 
   const glucoseHistory = history.map((h) => h.bloodGlucose);
+  const glucoseHistoryBaseline = baseline.history?.map((h) => h.bloodGlucose) ?? null;
   const insulinHistory = history.map((h) => h.insulin * 100);
+  const insulinHistoryBaseline = baseline.history?.map((h) => h.insulin * 100) ?? null;
   const glucagonHistory = history.map((h) => h.glucagon * 100);
+  const glucagonHistoryBaseline = baseline.history?.map((h) => h.glucagon * 100) ?? null;
 
   return (
     <ModulePage
@@ -53,11 +57,12 @@ export function GlucoseRegulationPage() {
       }
       diagram={<GlucoseDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Blood glucose" unit="mg/dL" data={glucoseHistory} domainMin={20} domainMax={400} colorVar="var(--glucose)" />
-  <Sparkline label="Insulin" unit="%" data={insulinHistory} domainMin={0} domainMax={200} colorVar="var(--insulin)" />
-  <Sparkline label="Glucagon" unit="%" data={glucagonHistory} domainMin={0} domainMax={100} colorVar="var(--glucagon)" />
+  <Sparkline label="Blood glucose" unit="mg/dL" data={glucoseHistory} baselineData={glucoseHistoryBaseline} domainMin={20} domainMax={400} colorVar="var(--glucose)" />
+  <Sparkline label="Insulin" unit="%" data={insulinHistory} baselineData={insulinHistoryBaseline} domainMin={0} domainMax={200} colorVar="var(--insulin)" />
+  <Sparkline label="Glucagon" unit="%" data={glucagonHistory} baselineData={glucagonHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--glucagon)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

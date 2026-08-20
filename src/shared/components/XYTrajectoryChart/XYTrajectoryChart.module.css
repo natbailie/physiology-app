@@ -48,3 +48,15 @@
   fill: var(--chart-color, var(--artery));
   filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--chart-color, var(--artery)) 70%, transparent));
 }
+
+/* A frozen earlier trajectory. Same dashed, low-contrast treatment as the Sparkline
+   baseline so "the run you froze" looks the same wherever it appears. */
+.baseline {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}

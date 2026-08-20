@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { hpgAxisContent } from './content';
 import { hpgLoopConfig } from './engine/loopConfig';
 import { DEFAULT_HPG_INPUTS, HPG_PRESETS, type HpgPresetName, HPG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
@@ -14,7 +15,7 @@ import type { HpgInputs } from './engine/types';
 
 export function HpgAxisPage() {
   const [inputs, setInputs] = useState<HpgInputs>(DEFAULT_HPG_INPUTS);
-  const { snapshot, history, reset } = useEngineLoop(inputs, hpgLoopConfig);
+  const { snapshot, history, reset, transport, baseline } = useEngineLoop(inputs, hpgLoopConfig);
 
   function handleChange<K extends keyof HpgInputs>(key: K, value: HpgInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -26,8 +27,11 @@ export function HpgAxisPage() {
 
   const isFemale = snapshot.derived.sex === 'female';
   const lhHistory = history.map((h) => h.lh * 100);
+  const lhHistoryBaseline = baseline.history?.map((h) => h.lh * 100) ?? null;
   const fshHistory = history.map((h) => h.fsh * 100);
+  const fshHistoryBaseline = baseline.history?.map((h) => h.fsh * 100) ?? null;
   const steroidHistory = history.map((h) => h.gonadalSteroid * 100);
+  const steroidHistoryBaseline = baseline.history?.map((h) => h.gonadalSteroid * 100) ?? null;
 
   return (
     <ModulePage
@@ -44,14 +48,15 @@ export function HpgAxisPage() {
       }
       diagram={<HpgDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="LH" unit="%" data={lhHistory} domainMin={0} domainMax={100} colorVar="var(--lh)" />
-  <Sparkline label="FSH" unit="%" data={fshHistory} domainMin={0} domainMax={100} colorVar="var(--fsh)" />
+  <Sparkline label="LH" unit="%" data={lhHistory} baselineData={lhHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--lh)" />
+  <Sparkline label="FSH" unit="%" data={fshHistory} baselineData={fshHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--fsh)" />
   <Sparkline
     label={isFemale ? 'Estrogen' : 'Testosterone'}
     unit="%"
-    data={steroidHistory}
+    data={steroidHistory} baselineData={steroidHistoryBaseline}
     domainMin={0}
     domainMax={100}
     colorVar={isFemale ? 'var(--estrogen)' : 'var(--testosterone)'}

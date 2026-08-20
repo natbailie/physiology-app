@@ -8,6 +8,7 @@ import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTraje
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { cardiacElectroContent } from './content';
 import { cardiacLoopConfig } from './engine/loopConfig';
 import { CARDIAC_PRESETS, DEFAULT_CARDIAC_INPUTS, type CardiacPresetName, CARDIAC_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
@@ -15,7 +16,7 @@ import type { CardiacInputs } from './engine/types';
 
 export function CardiacElectroPage() {
   const [inputs, setInputs] = useState<CardiacInputs>(DEFAULT_CARDIAC_INPUTS);
-  const { snapshot, history, reset } = useEngineLoop(inputs, cardiacLoopConfig);
+  const { snapshot, history, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
 
   function handleChange<K extends keyof CardiacInputs>(key: K, value: CardiacInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -26,7 +27,9 @@ export function CardiacElectroPage() {
   }
 
   const pvPoints = history.map((h) => ({ x: h.lvVolume, y: h.lvPressure }));
+  const pvPointsBaseline = baseline.history?.map((h) => ({ x: h.lvVolume, y: h.lvPressure })) ?? null;
   const ecgHistory = history.map((h) => h.ecgVoltage);
+  const ecgHistoryBaseline = baseline.history?.map((h) => h.ecgVoltage) ?? null;
 
   return (
     <ModulePage
@@ -43,10 +46,12 @@ export function CardiacElectroPage() {
       }
       diagram={<CardiacDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
   <XYTrajectoryChart
     points={pvPoints}
+            baselinePoints={pvPointsBaseline}
     currentPoint={{ x: snapshot.derived.lvVolumeML, y: snapshot.derived.lvPressureMmHg }}
     xDomain={[0, 240]}
     yDomain={[0, 200]}
@@ -54,7 +59,7 @@ export function CardiacElectroPage() {
     xLabel="LV volume (mL)"
     yLabel="LV pressure (mmHg)"
   />
-  <Sparkline label="ECG" data={ecgHistory} domainMin={-0.4} domainMax={1.2} colorVar="var(--conduction)" />
+  <Sparkline label="ECG" data={ecgHistory} baselineData={ecgHistoryBaseline} domainMin={-0.4} domainMax={1.2} colorVar="var(--conduction)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

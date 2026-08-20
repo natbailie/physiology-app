@@ -8,6 +8,7 @@ import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTraje
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { respiratoryMechanicsContent } from './content';
 import { respMechLoopConfig } from './engine/loopConfig';
 import { perturbFvcManeuver } from './engine/engine';
@@ -16,7 +17,7 @@ import type { RespMechInputs } from './engine/types';
 
 export function RespiratoryMechanicsPage() {
   const [inputs, setInputs] = useState<RespMechInputs>(DEFAULT_RESP_MECH_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, respMechLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
 
   function handleChange<K extends keyof RespMechInputs>(key: K, value: RespMechInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -33,7 +34,9 @@ export function RespiratoryMechanicsPage() {
   // Flow-volume loop: expiratory flow against lung volume, the same trajectory chart the
   // cardiac module uses for its PV loop.
   const flowVolumePoints = history.map((h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 }));
+  const flowVolumePointsBaseline = baseline.history?.map((h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 })) ?? null;
   const volumeHistory = history.map((h) => h.lungVolume / 1000);
+  const volumeHistoryBaseline = baseline.history?.map((h) => h.lungVolume / 1000) ?? null;
 
   return (
     <ModulePage
@@ -51,10 +54,12 @@ export function RespiratoryMechanicsPage() {
       }
       diagram={<RespMechDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
   <XYTrajectoryChart
     points={flowVolumePoints}
+            baselinePoints={flowVolumePointsBaseline}
     currentPoint={{ x: snapshot.derived.lungVolumeML / 1000, y: snapshot.derived.airflowMLPerSec / 1000 }}
     xDomain={[0, 8]}
     yDomain={[-4, 10]}
@@ -62,7 +67,7 @@ export function RespiratoryMechanicsPage() {
     xLabel="volume (L)"
     yLabel="flow (L/s)"
   />
-  <Sparkline label="Lung volume" unit="L" data={volumeHistory} domainMin={0} domainMax={8} colorVar="var(--compliance)" />
+  <Sparkline label="Lung volume" unit="L" data={volumeHistory} baselineData={volumeHistoryBaseline} domainMin={0} domainMax={8} colorVar="var(--compliance)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

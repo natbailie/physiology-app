@@ -54,3 +54,14 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* A frozen earlier run of the same series. Deliberately neutral and low-contrast: it is a
+   reference the live trace is read against, never something competing with it for attention. */
+.baselineLine {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 4;
+  stroke-linecap: round;
+  opacity: 0.85;
+}

@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { hpaAxisContent } from './content';
 import { hpaLoopConfig } from './engine/loopConfig';
 import { perturbAcuteStressor } from './engine/engine';
@@ -15,7 +16,7 @@ import type { HpaInputs } from './engine/types';
 
 export function HpaPage() {
   const [inputs, setInputs] = useState<HpaInputs>(DEFAULT_HPA_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, hpaLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
 
   function handleChange<K extends keyof HpaInputs>(key: K, value: HpaInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -30,8 +31,11 @@ export function HpaPage() {
   }
 
   const cortisolHistory = history.map((h) => h.cortisol);
+  const cortisolHistoryBaseline = baseline.history?.map((h) => h.cortisol) ?? null;
   const acthHistory = history.map((h) => h.acth * 100);
+  const acthHistoryBaseline = baseline.history?.map((h) => h.acth * 100) ?? null;
   const reserveHistory = history.map((h) => h.adrenalReserve * 100);
+  const reserveHistoryBaseline = baseline.history?.map((h) => h.adrenalReserve * 100) ?? null;
 
   return (
     <ModulePage
@@ -49,11 +53,12 @@ export function HpaPage() {
       }
       diagram={<HpaDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Cortisol" unit="µg/dL" data={cortisolHistory} domainMin={0} domainMax={40} colorVar="var(--cortisol)" />
-  <Sparkline label="ACTH" unit="%" data={acthHistory} domainMin={0} domainMax={100} colorVar="var(--acth)" />
-  <Sparkline label="Adrenal reserve" unit="%" data={reserveHistory} domainMin={0} domainMax={100} colorVar="var(--text)" />
+  <Sparkline label="Cortisol" unit="µg/dL" data={cortisolHistory} baselineData={cortisolHistoryBaseline} domainMin={0} domainMax={40} colorVar="var(--cortisol)" />
+  <Sparkline label="ACTH" unit="%" data={acthHistory} baselineData={acthHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--acth)" />
+  <Sparkline label="Adrenal reserve" unit="%" data={reserveHistory} baselineData={reserveHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--text)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

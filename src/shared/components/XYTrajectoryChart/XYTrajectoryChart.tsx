@@ -17,6 +17,9 @@ interface XYTrajectoryChartProps {
   yLabel: string;
   /** Optional static reference lines drawn beneath the trajectory (e.g. an ESPVR line). */
   referencePaths?: { d: string; label?: string }[];
+  /** Frozen earlier trajectory, drawn faint beneath the live one. A normal loop held
+   * behind a failing one is the whole comparison in a single picture. */
+  baselinePoints?: TrajectoryPoint[] | null;
   width?: number;
   height?: number;
 }
@@ -46,6 +49,7 @@ export function XYTrajectoryChart({
   xLabel,
   yLabel,
   referencePaths,
+  baselinePoints,
   width = 220,
   height = 150,
 }: XYTrajectoryChartProps) {
@@ -55,6 +59,16 @@ export function XYTrajectoryChart({
       return `${index === 0 ? 'M' : 'L'}${px.toFixed(1)},${py.toFixed(1)}`;
     })
     .join(' ');
+
+  const baselinePath =
+    baselinePoints && baselinePoints.length > 1
+      ? baselinePoints
+          .map((point, index) => {
+            const { px, py } = project(point, xDomain, yDomain, width, height);
+            return `${index === 0 ? 'M' : 'L'}${px.toFixed(1)},${py.toFixed(1)}`;
+          })
+          .join(' ')
+      : '';
 
   const dot = project(currentPoint, xDomain, yDomain, width, height);
 
@@ -72,6 +86,7 @@ export function XYTrajectoryChart({
         {referencePaths?.map((reference) => (
           <path key={reference.d} className={styles.reference} d={reference.d} />
         ))}
+        {baselinePath && <path className={styles.baseline} d={baselinePath} />}
         {points.length > 1 && <path className={styles.trajectory} d={trajectoryPath} />}
         <circle className={styles.dot} cx={dot.px} cy={dot.py} r={3.5} />
       </svg>

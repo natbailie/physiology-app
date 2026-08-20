@@ -10,6 +10,9 @@ interface ModulePageProps {
   presets: ReactNode;
   diagram: ReactNode;
   readouts: ReactNode;
+  /** Play/pause/speed + baseline capture. Sits directly above the charts because
+   * that is where simulated time is legible. */
+  transport?: ReactNode;
   charts?: ReactNode;
   /** Slider stack. Sticky side rail on wide screens, bottom dock on narrow ones. */
   controls: ReactNode;
@@ -27,6 +30,7 @@ export function ModulePage({
   presets,
   diagram,
   readouts,
+  transport,
   charts,
   controls,
   explainer,
@@ -68,7 +72,12 @@ export function ModulePage({
         <div className={styles.main}>
           {diagram}
           {readouts}
-          {charts && <div className={styles.charts}>{charts}</div>}
+          {(transport || charts) && (
+            <div className={styles.charts}>
+              {transport}
+              {charts}
+            </div>
+          )}
           {explainer}
           <p className={styles.footnote}>{footnote}</p>
         </div>

@@ -7,6 +7,7 @@ import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
+import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { coagulationContent } from './content';
 import { coagLoopConfig } from './engine/loopConfig';
 import { perturbInjury } from './engine/engine';
@@ -15,7 +16,7 @@ import type { CoagInputs } from './engine/types';
 
 export function CoagulationPage() {
   const [inputs, setInputs] = useState<CoagInputs>(DEFAULT_COAG_INPUTS);
-  const { snapshot, history, perturb, reset } = useEngineLoop(inputs, coagLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, coagLoopConfig);
 
   function handleChange<K extends keyof CoagInputs>(key: K, value: CoagInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -30,8 +31,11 @@ export function CoagulationPage() {
   }
 
   const thrombinHistory = history.map((h) => h.thrombin * 100);
+  const thrombinHistoryBaseline = baseline.history?.map((h) => h.thrombin * 100) ?? null;
   const fibrinHistory = history.map((h) => h.fibrin * 100);
+  const fibrinHistoryBaseline = baseline.history?.map((h) => h.fibrin * 100) ?? null;
   const plugHistory = history.map((h) => h.plateletPlug * 100);
+  const plugHistoryBaseline = baseline.history?.map((h) => h.plateletPlug * 100) ?? null;
 
   return (
     <ModulePage
@@ -49,11 +53,12 @@ export function CoagulationPage() {
       }
       diagram={<CoagulationDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
-  <Sparkline label="Thrombin" unit="%" data={thrombinHistory} domainMin={0} domainMax={100} colorVar="var(--thrombin)" />
-  <Sparkline label="Fibrin" unit="%" data={fibrinHistory} domainMin={0} domainMax={100} colorVar="var(--fibrin)" />
-  <Sparkline label="Platelet plug" unit="%" data={plugHistory} domainMin={0} domainMax={100} colorVar="var(--platelet)" />
+  <Sparkline label="Thrombin" unit="%" data={thrombinHistory} baselineData={thrombinHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--thrombin)" />
+  <Sparkline label="Fibrin" unit="%" data={fibrinHistory} baselineData={fibrinHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--fibrin)" />
+  <Sparkline label="Platelet plug" unit="%" data={plugHistory} baselineData={plugHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--platelet)" />
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
