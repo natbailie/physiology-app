@@ -11,6 +11,9 @@ export default defineConfig({
     },
   },
   test: {
+    // Background-task worktrees are full checkouts of this repo; without this every
+    // test runs once per worktree and failures appear duplicated.
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/worktrees/**'],
     environment: 'node',
     globals: false,
   },
