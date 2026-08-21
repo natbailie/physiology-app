@@ -26,27 +26,78 @@ function settle(inputs: ElectrolyteInputs, days = 5) {
 }
 
 describe('fluidCompartments — the Edelman relation', () => {
-  it('gives a normal serum sodium and the familiar one-third / two-thirds split', () => {
-    const naE = BASELINE.EXCHANGEABLE_SODIUM_MEQ;
-    const kE = BASELINE.EXCHANGEABLE_POTASSIUM_MEQ;
-    const tbw = BASELINE.TOTAL_BODY_WATER_L;
+  const naE = BASELINE.EXCHANGEABLE_SODIUM_MEQ;
+  const kE = BASELINE.EXCHANGEABLE_POTASSIUM_MEQ;
+  const tbw = BASELINE.TOTAL_BODY_WATER_L;
+  const NORMAL_GLUCOSE = BASELINE.SERUM_GLUCOSE_MG_DL;
 
-    expect(serumSodium(naE, kE, tbw)).toBeCloseTo(140, 0);
-    const ecf = ecfVolume(naE, kE, tbw);
+  it('gives a normal serum sodium and the familiar one-third / two-thirds split', () => {
+    expect(serumSodium(naE, kE, tbw, NORMAL_GLUCOSE)).toBeCloseTo(140, 0);
+    const ecf = ecfVolume(naE, kE, tbw, NORMAL_GLUCOSE);
     expect(ecf).toBeCloseTo(13.7, 1);
     expect(ecf / tbw).toBeCloseTo(1 / 3, 1);
   });
 
+  it('collapses to (Na + K) / TBW whenever glucose is not an extra osmole', () => {
+    // The compartment solve must not quietly perturb the relation the whole module is built on.
+    for (const glucose of [0, 40, NORMAL_GLUCOSE, 100]) {
+      expect(serumSodium(naE, kE, tbw, glucose)).toBeCloseTo((naE + kE) / tbw, 9);
+    }
+  });
+
   it('makes serum sodium fall when potassium is lost, with sodium untouched', () => {
-    const naE = BASELINE.EXCHANGEABLE_SODIUM_MEQ;
-    const tbw = BASELINE.TOTAL_BODY_WATER_L;
-    const depleted = serumSodium(naE, BASELINE.EXCHANGEABLE_POTASSIUM_MEQ - 400, tbw);
-    expect(depleted).toBeLessThan(serumSodium(naE, BASELINE.EXCHANGEABLE_POTASSIUM_MEQ, tbw) - 8);
+    const depleted = serumSodium(naE, kE - 400, tbw, NORMAL_GLUCOSE);
+    expect(depleted).toBeLessThan(serumSodium(naE, kE, tbw, NORMAL_GLUCOSE) - 8);
+  });
+
+  it('pulls water out of cells when glucose rises, diluting sodium without losing any', () => {
+    const normal = ecfVolume(naE, kE, tbw, NORMAL_GLUCOSE);
+    const hyperglycaemic = ecfVolume(naE, kE, tbw, 550);
+
+    // Water crosses the membrane; it does not leave the body. The ECF gains exactly what the
+    // ICF loses, and the sodium content is untouched — only the water holding it has changed.
+    expect(hyperglycaemic).toBeGreaterThan(normal + 0.5);
+    expect(tbw - hyperglycaemic).toBeLessThan(tbw - normal - 0.5);
+    expect(serumSodium(naE, kE, tbw, 550)).toBeLessThan(133);
+  });
+
+  it('dilutes sodium at roughly the 1.6-2.4 mEq/L per 100 mg/dL seen clinically', () => {
+    const normal = serumSodium(naE, kE, tbw, 100);
+    for (const glucose of [300, 550, 800]) {
+      const perHundred = ((normal - serumSodium(naE, kE, tbw, glucose)) / (glucose - 100)) * 100;
+      expect(perHundred, `at glucose ${glucose}`).toBeGreaterThan(1.6);
+      expect(perHundred, `at glucose ${glucose}`).toBeLessThan(2.4);
+    }
   });
 
   it('corrects sodium for hyperglycaemia', () => {
     expect(correctedSodium(128, 100)).toBeCloseTo(128, 5);
     expect(correctedSodium(128, 600)).toBeCloseTo(136, 0);
+  });
+
+  it('brings the corrected sodium back to normal without double-counting the shift', () => {
+    // The pair has to compose: the shift takes the sodium down, the bedside rule reads the same
+    // displacement back up, and the learner sees a normal sodium underneath the hyperglycaemia.
+    // Applying either half on top of an unshifted value would land this near 147 instead.
+    //
+    // The residual gap is the bedside rule's own approximation error — a flat 1.6 per 100 mg/dL
+    // against a true displacement nearer 1.8-2.0 — so the correction mildly UNDERSHOOTS, and
+    // does so more the higher the glucose. That is a property of the rule, not of the engine.
+    let previousGap = 0;
+    for (const glucose of [200, 300, 550, 800]) {
+      const measured = serumSodium(naE, kE, tbw, glucose);
+      const corrected = correctedSodium(measured, glucose);
+
+      expect(measured, `measured at glucose ${glucose}`).toBeLessThan(140);
+      expect(corrected, `corrected at glucose ${glucose}`).toBeGreaterThan(138);
+      expect(corrected, `corrected at glucose ${glucose}`).toBeLessThan(140.5);
+      // Whatever the residual, correcting must land far closer to normal than the raw value.
+      expect(140 - corrected, `at glucose ${glucose}`).toBeLessThan((140 - measured) / 4);
+
+      const gap = 140 - corrected;
+      expect(gap, `undershoot should grow with glucose, at ${glucose}`).toBeGreaterThan(previousGap);
+      previousGap = gap;
+    }
   });
 });
 
@@ -96,6 +147,55 @@ describe('engine — serum potassium is not total body potassium', () => {
   });
 });
 
+describe('engine — hyperglycaemia moves water, not sodium', () => {
+  const HYPERGLYCAEMIC = 550;
+
+  it('drops the measured sodium the moment glucose rises, with no sodium and no water lost', () => {
+    const inputs = presetInputs('normal');
+    const baseline = settle(inputs);
+
+    // Glucose is the ONLY thing that changes, and the reading is taken an hour later — far too
+    // soon for the kidney or thirst to have moved any water into or out of the patient.
+    const hyperglycaemic: ElectrolyteInputs = { ...inputs, serumGlucoseMgDl: HYPERGLYCAEMIC };
+    const after = computeDerived(run(hyperglycaemic, HOUR, baseline.state), hyperglycaemic);
+
+    expect(after.serumSodiumMeqL).toBeLessThan(baseline.derived.serumSodiumMeqL - 6);
+    expect(after.serumSodiumMeqL).toBeLessThan(135);
+
+    // Nothing left the body. Total body water is where it was, and so is the sodium content.
+    expect(after.totalBodyWaterL).toBeCloseTo(baseline.derived.totalBodyWaterL, 1);
+    expect(after.ecfVolumeL + after.icfVolumeL).toBeCloseTo(after.totalBodyWaterL, 6);
+
+    // The water simply crossed the membrane: the ECF gained what the ICF lost.
+    const ecfGain = after.ecfVolumeL - baseline.derived.ecfVolumeL;
+    const icfLoss = baseline.derived.icfVolumeL - after.icfVolumeL;
+    expect(ecfGain).toBeGreaterThan(0.5);
+    expect(icfLoss).toBeCloseTo(ecfGain, 1);
+  });
+
+  it('recovers a normal sodium once the reading is corrected for the glucose', () => {
+    const inputs = presetInputs('normal');
+    const baseline = settle(inputs);
+    const hyperglycaemic: ElectrolyteInputs = { ...inputs, serumGlucoseMgDl: HYPERGLYCAEMIC };
+    const after = computeDerived(run(hyperglycaemic, HOUR, baseline.state), hyperglycaemic);
+
+    // The readouts the learner compares side by side. Before the compartment model carried the
+    // glucose term these moved in OPPOSITE directions — the measured sodium sat at 140 while the
+    // correction pushed the corrected value to 147 — and taught precisely the wrong lesson.
+    expect(after.correctedSodiumMeqL).toBeGreaterThan(after.serumSodiumMeqL + 6);
+    expect(after.correctedSodiumMeqL).toBeGreaterThan(137);
+    expect(after.correctedSodiumMeqL).toBeLessThan(baseline.derived.correctedSodiumMeqL + 0.5);
+    expect(after.disorderClassification).toContain('dilution by glucose');
+  });
+
+  it('leaves both readouts alone at a normal glucose', () => {
+    const inputs = presetInputs('normal');
+    const { derived } = settle(inputs);
+    expect(derived.correctedSodiumMeqL).toBeCloseTo(derived.serumSodiumMeqL, 6);
+    expect(derived.serumSodiumMeqL).toBeGreaterThan(138);
+  });
+});
+
 describe('engine — DKA: the trap', () => {
   it('shows a high serum potassium sitting on a depleted total body store', () => {
     const { derived } = settle(presetInputs('dka'));
@@ -107,6 +207,23 @@ describe('engine — DKA: the trap', () => {
     expect(derived.serumSodiumMeqL).toBeLessThan(133);
     expect(derived.correctedSodiumMeqL).toBeGreaterThan(derived.serumSodiumMeqL + 5);
     expect(derived.disorderClassification).toContain('Non-hypotonic');
+  });
+
+  it('drops the sodium the instant the preset is applied, before any water has been lost', () => {
+    // Selecting a preset in the app changes the inputs without resetting the patient, so this
+    // is what a learner actually sees when they click DKA: the sodium falls at once, purely
+    // because water left the cells, and the corrected value says so.
+    const baseline = settle(presetInputs('normal'));
+    const dka = presetInputs('dka');
+    const after = computeDerived(run(dka, HOUR, baseline.state), dka);
+
+    expect(after.serumSodiumMeqL).toBeLessThan(135);
+    expect(after.correctedSodiumMeqL).toBeGreaterThan(137);
+    expect(after.totalBodyWaterL).toBeCloseTo(baseline.derived.totalBodyWaterL, 1);
+    expect(after.icfVolumeL).toBeLessThan(baseline.derived.icfVolumeL - 0.5);
+    // The other half of the trap is already showing: no insulin and a pH of 7.1 have pushed
+    // potassium out of cells within the hour.
+    expect(after.serumPotassiumMeqL).toBeGreaterThan(6);
   });
 
   it('crashes the serum potassium once insulin is given, exposing the real deficit', () => {

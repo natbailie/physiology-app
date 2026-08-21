@@ -46,10 +46,10 @@ export function createInitialState(): ElectrolyteState {
 
 export function computeDerived(state: ElectrolyteState, inputs: ElectrolyteInputs): ElectrolyteDerived {
   const totalBodyPotassiumMeq = state.exchangeablePotassiumMeq;
-  const ecfVolumeL = ecfVolume(state.exchangeableSodiumMeq, totalBodyPotassiumMeq, state.totalBodyWaterL);
+  const ecfVolumeL = ecfVolume(state.exchangeableSodiumMeq, totalBodyPotassiumMeq, state.totalBodyWaterL, inputs.serumGlucoseMgDl);
   const ecfVolumeRatio = ecfVolumeL / BASELINE.ECF_VOLUME_L;
 
-  const serumSodiumMeqL = serumSodium(state.exchangeableSodiumMeq, totalBodyPotassiumMeq, state.totalBodyWaterL);
+  const serumSodiumMeqL = serumSodium(state.exchangeableSodiumMeq, totalBodyPotassiumMeq, state.totalBodyWaterL, inputs.serumGlucoseMgDl);
   const serumPotassiumMeqL = serumPotassium(state.ecfPotassiumMeq, ecfVolumeL);
   const osmolality = serumOsmolality(serumSodiumMeqL, inputs.serumGlucoseMgDl);
   const effectiveOsm = effectiveOsmolality(serumSodiumMeqL, inputs.serumGlucoseMgDl);
@@ -182,7 +182,7 @@ export function tick(state: ElectrolyteState, derived: ElectrolyteDerived, dtSec
   );
 
   // --- Rate of change of serum sodium: the number that decides whether treatment is safe ---
-  const nextSerumSodium = serumSodium(exchangeableSodiumMeq, exchangeablePotassiumMeq, totalBodyWaterL);
+  const nextSerumSodium = serumSodium(exchangeableSodiumMeq, exchangeablePotassiumMeq, totalBodyWaterL, derived.serumGlucoseMgDl);
   const instantaneousRate = (nextSerumSodium - derived.serumSodiumMeqL) / Math.max(dtDays, 1e-9);
   const sodiumChangeRateMeqLPerDay = approach(
     state.sodiumChangeRateMeqLPerDay,
@@ -192,7 +192,8 @@ export function tick(state: ElectrolyteState, derived: ElectrolyteDerived, dtSec
   );
 
   // --- Actuators, each on its own time constant: shift fastest, then ADH, thirst, aldosterone ---
-  const ecfVolumeRatio = ecfVolume(exchangeableSodiumMeq, exchangeablePotassiumMeq, totalBodyWaterL) / BASELINE.ECF_VOLUME_L;
+  const ecfVolumeRatio =
+    ecfVolume(exchangeableSodiumMeq, exchangeablePotassiumMeq, totalBodyWaterL, derived.serumGlucoseMgDl) / BASELINE.ECF_VOLUME_L;
 
   return {
     simTimeSeconds: state.simTimeSeconds + dtSeconds,
