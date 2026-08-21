@@ -1,0 +1,127 @@
+/* The circuit is drawn as a loop so the four lesion sites sit at four different points on it —
+   volume in the veins, the pump, the lungs between the two pressures, and the arterial tone. */
+
+.vessel {
+  fill: none;
+  stroke: var(--artery);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.venous {
+  composes: vessel;
+  stroke: var(--venous);
+}
+
+.chamber {
+  stroke-width: 2.5;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
+}
+
+.rightHeart {
+  composes: chamber;
+  stroke: var(--venous);
+  fill: color-mix(in srgb, var(--venous) calc(var(--cvp-fill, 0.3) * 40%), transparent);
+}
+
+.leftHeart {
+  composes: chamber;
+  stroke: var(--artery);
+  fill: color-mix(in srgb, var(--artery) calc(var(--wedge-fill, 0.3) * 40%), transparent);
+}
+
+.lungs {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 2.5;
+  opacity: calc(1 - var(--pvr-block, 0) * 0.35);
+}
+
+/* A lesion marker only appears when that mechanism is actually contributing. */
+.lesion {
+  fill: var(--danger);
+  opacity: var(--lesion-opacity, 0);
+  transition: opacity 0.4s ease;
+}
+
+/* A lesion's LABEL must fade with its marker, or an inactive mechanism stays named on the
+   diagram and the picture stops telling you where the problem is. */
+.lesionLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  fill: var(--danger);
+  opacity: var(--lesion-opacity, 0);
+  transition: opacity 0.4s ease;
+}
+
+.lesionRing {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 2;
+  opacity: var(--lesion-opacity, 0);
+  transition: opacity 0.4s ease;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.value {
+  font-family: var(--mono);
+  font-size: 13px;
+  fill: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tissue {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+}
+
+/* Flow pips travel the loop at a rate set by cardiac output, so a failing circulation is
+   visibly slower rather than merely reading lower. */
+.flowPip {
+  fill: var(--artery);
+  opacity: 0.75;
+  animation: travel calc(var(--transit-seconds, 4) * 1s) linear infinite;
+}
+
+@keyframes travel {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowPip {
+    animation: none;
+  }
+}

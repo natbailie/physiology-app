@@ -21,6 +21,7 @@ import { MuscleContractionPage } from '@/modules/muscleContraction/MuscleContrac
 import { ElectrolyteBalancePage } from '@/modules/electrolyteBalance/ElectrolyteBalancePage';
 import { CapillaryExchangePage } from '@/modules/capillaryExchange/CapillaryExchangePage';
 import { VenousReturnPage } from '@/modules/venousReturn/VenousReturnPage';
+import { ShockStatesPage } from '@/modules/shockStates/ShockStatesPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
@@ -51,6 +52,7 @@ function App() {
       {route === 'electrolyteBalance' && <ElectrolyteBalancePage />}
       {route === 'capillaryExchange' && <CapillaryExchangePage />}
       {route === 'venousReturn' && <VenousReturnPage />}
+      {route === 'shockStates' && <ShockStatesPage />}
       {route === 'reference' && <ReferencePage />}
     </div>
   );

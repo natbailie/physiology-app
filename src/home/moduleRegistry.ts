@@ -158,6 +158,13 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--venous)',
   },
   {
+    id: 'shockStates',
+    name: 'Shock States',
+    tagline: 'Four ways to fail, and the numbers that separate them',
+    status: 'available',
+    accentColorVar: 'var(--artery)',
+  },
+  {
     id: 'reference',
     name: 'Formula Reference',
     tagline: 'High-yield equations & calculators for cardio, renal & respiratory',
