@@ -21,6 +21,7 @@ import { muscleContractionContent } from './muscleContraction/content';
 import { renalTubularContent } from './renalTubular/content';
 import { respiratoryContent } from './respiratory/content';
 import { respiratoryMechanicsContent } from './respiratoryMechanics/content';
+import { fetalCirculationContent } from './fetalCirculation/content';
 import { shockStatesContent } from './shockStates/content';
 import { venousReturnContent } from './venousReturn/content';
 
@@ -46,6 +47,7 @@ const ALL: [string, ExplainerContent][] = [
   ['respiratory', respiratoryContent],
   ['respiratoryMechanics', respiratoryMechanicsContent],
   ['shockStates', shockStatesContent],
+  ['fetalCirculation', fetalCirculationContent],
   ['venousReturn', venousReturnContent],
 ];
 
@@ -58,8 +60,8 @@ const words = (text: string) => text.trim().split(/\s+/).length;
  */
 describe('module explainer content', () => {
   it('covers every simulator module', () => {
-    // 22 simulators; the formula reference has no explainer.
-    expect(ALL).toHaveLength(22);
+    // 23 simulators; the formula reference has no explainer.
+    expect(ALL).toHaveLength(23);
     expect(new Set(ALL.map(([id]) => id)).size).toBe(ALL.length);
   });
 

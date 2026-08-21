@@ -24,6 +24,7 @@ export type RouteId =
   | 'capillaryExchange'
   | 'venousReturn'
   | 'shockStates'
+  | 'fetalCirculation'
   | 'reference';
 
 const VALID_ROUTES: RouteId[] = [
@@ -49,6 +50,7 @@ const VALID_ROUTES: RouteId[] = [
   'capillaryExchange',
   'venousReturn',
   'shockStates',
+  'fetalCirculation',
   'reference',
 ];
 

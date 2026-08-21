@@ -165,6 +165,13 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--artery)',
   },
   {
+    id: 'fetalCirculation',
+    name: 'Fetal & Neonatal Circulation',
+    tagline: 'Three shunts, and the minute two circulations become one',
+    status: 'available',
+    accentColorVar: 'var(--o2)',
+  },
+  {
     id: 'reference',
     name: 'Formula Reference',
     tagline: 'High-yield equations & calculators for cardio, renal & respiratory',

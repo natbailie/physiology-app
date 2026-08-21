@@ -22,6 +22,7 @@ import { ElectrolyteBalancePage } from '@/modules/electrolyteBalance/Electrolyte
 import { CapillaryExchangePage } from '@/modules/capillaryExchange/CapillaryExchangePage';
 import { VenousReturnPage } from '@/modules/venousReturn/VenousReturnPage';
 import { ShockStatesPage } from '@/modules/shockStates/ShockStatesPage';
+import { FetalCirculationPage } from '@/modules/fetalCirculation/FetalCirculationPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
@@ -53,6 +54,7 @@ function App() {
       {route === 'capillaryExchange' && <CapillaryExchangePage />}
       {route === 'venousReturn' && <VenousReturnPage />}
       {route === 'shockStates' && <ShockStatesPage />}
+      {route === 'fetalCirculation' && <FetalCirculationPage />}
       {route === 'reference' && <ReferencePage />}
     </div>
   );

@@ -1,0 +1,113 @@
+.vessel {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.systemic {
+  composes: vessel;
+  stroke: var(--artery);
+}
+
+.venous {
+  composes: vessel;
+  stroke: var(--venous);
+}
+
+/* A shunt's width tracks how much flow it is carrying, so the picture changes shape as the
+   circulation transitions rather than merely relabelling itself. */
+.shunt {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: calc(1px + var(--shunt-flow, 0) * 9px);
+  opacity: calc(0.25 + var(--shunt-open, 0) * 0.75);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease,
+    stroke 0.4s ease;
+}
+
+.shuntRightToLeft {
+  composes: shunt;
+  stroke: var(--venous);
+}
+
+.shuntLeftToRight {
+  composes: shunt;
+  stroke: var(--artery);
+}
+
+.closed {
+  composes: shunt;
+  stroke: var(--text-faint);
+  stroke-dasharray: 3 5;
+}
+
+.chamber {
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.rightSide {
+  composes: chamber;
+  stroke: var(--venous);
+}
+
+.leftSide {
+  composes: chamber;
+  stroke: var(--artery);
+}
+
+.placenta {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 2.5;
+  opacity: var(--placental, 1);
+  transition: opacity 0.5s ease;
+}
+
+.lung {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 2.5;
+  opacity: calc(0.25 + var(--inflation, 0) * 0.75);
+  transition: opacity 0.5s ease;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.probe {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.probeHigh {
+  composes: probe;
+  fill: var(--o2);
+}
+
+.probeLow {
+  composes: probe;
+  fill: var(--danger);
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
