@@ -1,0 +1,81 @@
+.curve {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 2;
+}
+
+.reserveZone {
+  fill: var(--o2);
+  opacity: 0.08;
+}
+
+.steepZone {
+  fill: var(--danger);
+  opacity: 0.08;
+}
+
+.operatingPoint {
+  fill: var(--artery);
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--artery) 70%, transparent));
+  transition: cx 0.3s ease, cy 0.3s ease;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+/* The skull as a fixed box, with its three contents drawn to scale. */
+.skull {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.brainBlock {
+  fill: color-mix(in srgb, var(--text-dim) 25%, transparent);
+}
+
+.bloodBlock {
+  fill: color-mix(in srgb, var(--artery) 45%, transparent);
+  transition: width 0.3s ease;
+}
+
+.csfBlock {
+  fill: color-mix(in srgb, var(--o2) 40%, transparent);
+  transition: width 0.3s ease;
+}
+
+.massBlock {
+  fill: color-mix(in srgb, var(--danger) 50%, transparent);
+  transition: width 0.3s ease;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

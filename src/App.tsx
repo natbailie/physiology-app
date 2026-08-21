@@ -24,6 +24,7 @@ import { VenousReturnPage } from '@/modules/venousReturn/VenousReturnPage';
 import { ShockStatesPage } from '@/modules/shockStates/ShockStatesPage';
 import { FetalCirculationPage } from '@/modules/fetalCirculation/FetalCirculationPage';
 import { NeuromuscularJunctionPage } from '@/modules/neuromuscularJunction/NeuromuscularJunctionPage';
+import { CerebralPerfusionPage } from '@/modules/cerebralPerfusion/CerebralPerfusionPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
@@ -57,6 +58,7 @@ function App() {
       {route === 'shockStates' && <ShockStatesPage />}
       {route === 'fetalCirculation' && <FetalCirculationPage />}
       {route === 'neuromuscularJunction' && <NeuromuscularJunctionPage />}
+      {route === 'cerebralPerfusion' && <CerebralPerfusionPage />}
       {route === 'reference' && <ReferencePage />}
     </div>
   );

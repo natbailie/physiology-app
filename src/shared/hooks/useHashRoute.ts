@@ -26,6 +26,7 @@ export type RouteId =
   | 'shockStates'
   | 'fetalCirculation'
   | 'neuromuscularJunction'
+  | 'cerebralPerfusion'
   | 'reference';
 
 const VALID_ROUTES: RouteId[] = [
@@ -53,6 +54,7 @@ const VALID_ROUTES: RouteId[] = [
   'shockStates',
   'fetalCirculation',
   'neuromuscularJunction',
+  'cerebralPerfusion',
   'reference',
 ];
 

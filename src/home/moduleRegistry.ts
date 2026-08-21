@@ -179,6 +179,13 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--vm)',
   },
   {
+    id: 'cerebralPerfusion',
+    name: 'Cerebral Perfusion, ICP & CSF',
+    tagline: 'Monro-Kellie, the pressure-volume curve and CPP = MAP − ICP',
+    status: 'available',
+    accentColorVar: 'var(--vm)',
+  },
+  {
     id: 'reference',
     name: 'Formula Reference',
     tagline: 'High-yield equations & calculators for cardio, renal & respiratory',
