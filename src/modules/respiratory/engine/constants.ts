@@ -34,6 +34,12 @@ export const CHEMORECEPTOR = {
   CO2_SENSITIVITY_MMHG: 15,
   // pH deviation that saturates the pH component of drive.
   PH_SENSITIVITY: 0.15,
+  // The CO2/pH (central) component alone cannot reach the top of the drive range. The
+  // reserved headroom belongs to the hypoxic component, so that withdrawing hypoxic drive
+  // — which is exactly what supplemental O2 does to a chronic CO2 retainer — costs real
+  // ventilation and raises PaCO2. Clamping the summed drive instead left every hypoxaemic
+  // hypoventilator pinned at 1 from CO2 alone, where oxygen was a free win.
+  CENTRAL_MAX_DRIVE: 0.7,
   // PaO2 below this recruits peripheral (hypoxic) chemoreceptor drive.
   HYPOXIC_THRESHOLD_MMHG: 60,
   HYPOXIC_SENSITIVITY_MMHG: 30,

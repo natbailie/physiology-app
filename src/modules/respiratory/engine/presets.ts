@@ -13,7 +13,10 @@ export type RespPresetName = 'normal' | 'copdChronicAcidosis' | 'panicHyperventi
 export const RESP_PRESETS: Record<RespPresetName, Partial<RespInputs>> = {
   normal: { ...DEFAULT_RESP_INPUTS },
   // Chronic hypoventilation — renal compensation (slow) partially normalizes pH over time.
-  copdChronicAcidosis: { minuteVentilation: 45 },
+  // Severe enough to be genuinely hypoxaemic on room air (PaO2 ~55, SaO2 ~88%), not just
+  // hypercapnic: a retainer who is not hypoxaemic is never given oxygen, so the milder
+  // setting this replaced could not show what oxygen does to such a patient.
+  copdChronicAcidosis: { minuteVentilation: 30 },
   // Acute hyperventilation, e.g. a panic attack — renal compensation hasn't had time to engage.
   panicHyperventilation: { minuteVentilation: 220 },
   // Ketoacid production drives a primary metabolic acidosis; Kussmaul hyperventilation

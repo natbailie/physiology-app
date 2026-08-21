@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { chemoreceptorDriveTarget } from './chemoreceptor';
+import { centralDriveTarget, chemoreceptorDriveTarget, hypoxicDriveTarget } from './chemoreceptor';
+import { CHEMORECEPTOR } from './constants';
 
 describe('chemoreceptorDriveTarget', () => {
   it('is ~0 at baseline PaCO2/PaO2/pH', () => {
@@ -24,5 +25,27 @@ describe('chemoreceptorDriveTarget', () => {
   it('is clamped to [-1, 1]', () => {
     expect(chemoreceptorDriveTarget(150, 20, 6.8)).toBeLessThanOrEqual(1);
     expect(chemoreceptorDriveTarget(10, 650, 7.9)).toBeGreaterThanOrEqual(-1);
+  });
+
+  it('caps the central component below the top of the range, leaving headroom for hypoxia', () => {
+    // A severe retainer: CO2 and pH both saturate the central component on their own.
+    const saturatedCentral = centralDriveTarget(90, 7.1);
+    expect(saturatedCentral).toBeCloseTo(CHEMORECEPTOR.CENTRAL_MAX_DRIVE, 5);
+    expect(saturatedCentral).toBeLessThan(1);
+  });
+
+  it('still gains drive from hypoxia when the central component is already saturated', () => {
+    // The regression this guards: with the two components summed and clamped together,
+    // both of these pinned at 1 and supplemental O2 became a consequence-free intervention.
+    const hypoxaemic = chemoreceptorDriveTarget(90, 45, 7.1);
+    const oxygenated = chemoreceptorDriveTarget(90, 250, 7.1);
+    expect(hypoxaemic).toBeGreaterThan(oxygenated);
+    expect(oxygenated).toBeCloseTo(CHEMORECEPTOR.CENTRAL_MAX_DRIVE, 5);
+  });
+
+  it('never lets hyperoxia push drive below the central set point', () => {
+    expect(hypoxicDriveTarget(650)).toBe(0);
+    expect(hypoxicDriveTarget(CHEMORECEPTOR.HYPOXIC_THRESHOLD_MMHG)).toBe(0);
+    expect(hypoxicDriveTarget(30)).toBeGreaterThan(0);
   });
 });
