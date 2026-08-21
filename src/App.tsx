@@ -23,6 +23,7 @@ import { CapillaryExchangePage } from '@/modules/capillaryExchange/CapillaryExch
 import { VenousReturnPage } from '@/modules/venousReturn/VenousReturnPage';
 import { ShockStatesPage } from '@/modules/shockStates/ShockStatesPage';
 import { FetalCirculationPage } from '@/modules/fetalCirculation/FetalCirculationPage';
+import { NeuromuscularJunctionPage } from '@/modules/neuromuscularJunction/NeuromuscularJunctionPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
@@ -55,6 +56,7 @@ function App() {
       {route === 'venousReturn' && <VenousReturnPage />}
       {route === 'shockStates' && <ShockStatesPage />}
       {route === 'fetalCirculation' && <FetalCirculationPage />}
+      {route === 'neuromuscularJunction' && <NeuromuscularJunctionPage />}
       {route === 'reference' && <ReferencePage />}
     </div>
   );

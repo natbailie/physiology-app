@@ -172,6 +172,13 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--o2)',
   },
   {
+    id: 'neuromuscularJunction',
+    name: 'Neuromuscular Junction',
+    tagline: 'Safety factor, fade, and telling presynaptic from postsynaptic',
+    status: 'available',
+    accentColorVar: 'var(--vm)',
+  },
+  {
     id: 'reference',
     name: 'Formula Reference',
     tagline: 'High-yield equations & calculators for cardio, renal & respiratory',

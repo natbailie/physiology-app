@@ -1,0 +1,73 @@
+.terminal {
+  fill: none;
+  stroke: var(--vm, var(--text));
+  stroke-width: 2.5;
+}
+
+.cleft {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.fibre {
+  fill: none;
+  stroke: var(--sarcomere, var(--artery));
+  stroke-width: 2.5;
+}
+
+/* Vesicles fade with the readily releasable pool, so the picture empties as the terminal does. */
+.vesicle {
+  fill: var(--vm, var(--text));
+  opacity: var(--pool, 1);
+  transition: opacity 0.3s ease;
+}
+
+/* Receptors dim as they are lost, blocked or desensitised. */
+.receptor {
+  fill: none;
+  stroke: var(--sarcomere, var(--artery));
+  stroke-width: 2;
+  opacity: calc(0.12 + var(--availability, 1) * 0.88);
+  transition: opacity 0.3s ease;
+}
+
+/* The end-plate potential drawn against its threshold — the safety factor made visible. */
+.eppBar {
+  fill: var(--o2);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.thresholdLine {
+  stroke: var(--danger);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.trainBar {
+  fill: var(--artery);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
