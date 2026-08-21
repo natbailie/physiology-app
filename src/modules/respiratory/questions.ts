@@ -33,6 +33,19 @@ export const RESPIRATORY_QUESTIONS: readonly RespQuestion[] = [
     metric: (s) => s.derived.paCO2,
   },
   {
+    id: 'copd-oxygen-hypercapnia',
+    stem: 'A patient with severe COPD has been retaining CO2 for years. Their kidneys have long since compensated, so their pH is nearly normal, but on room air they are hypoxaemic — saturations sit around 88%. Someone puts them on a high-flow mask.',
+    setup: { preset: 'copdChronicAcidosis' },
+    intervention: { label: 'High-flow oxygen (FiO2 0.6) is applied.', inputs: { fiO2: 0.6 } },
+    prompt: 'What happens to PaCO2?',
+    watch: 'PaCO2',
+    correctDirection: 'rises',
+    observeSeconds: 300,
+    explanation:
+      'This patient has been hypercapnic so long that the CO2 component of their ventilatory drive is maximal and stuck there — it has nothing left to give. What was still holding their ventilation up was the hypoxaemia, sensed by the peripheral chemoreceptors below about 60 mmHg. Flood them with oxygen and that component is withdrawn, ventilation falls, and PaCO2 climbs. Watch SaO2 at the same time: it improves, and genuinely so. That is the whole difficulty — oxygen is doing exactly what it was given to do while making the ventilation worse, which is why it is titrated to a target saturation (88-92% in a known retainer) rather than turned up until the number looks reassuring. Note this simulation shows only the loss of hypoxic drive; in a real patient, released hypoxic pulmonary vasoconstriction worsening V/Q matching contributes at least as much.',
+    metric: (s) => s.derived.paCO2,
+  },
+  {
     id: 'panic-hyperventilation-ph',
     stem: 'A young patient is brought in mid-panic attack, breathing hard and fast. Their lungs, kidneys and metabolism are all normal; nothing is producing acid.',
     setup: { preset: 'normal' },

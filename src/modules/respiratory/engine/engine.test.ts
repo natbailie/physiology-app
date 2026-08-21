@@ -93,6 +93,49 @@ describe('engine — COPD (chronic respiratory acidosis with renal compensation)
   });
 });
 
+describe('engine — supplemental O2 in a chronic CO2 retainer', () => {
+  const copd: RespInputs = { ...DEFAULT_RESP_INPUTS, ...RESP_PRESETS.copdChronicAcidosis };
+
+  it('leaves the retainer hypoxaemic on room air, which is what earns them oxygen', () => {
+    const { derived } = runFor(copd, 10800);
+    expect(derived.paO2).toBeLessThan(60);
+    expect(derived.saO2).toBeLessThan(90);
+    expect(derived.paCO2).toBeGreaterThan(60);
+  });
+
+  it('raises PaCO2 while improving SaO2 — the titrate-to-target trade-off, not a free win', () => {
+    const roomAir = runFor(copd, 10800);
+    const onOxygen = runFor({ ...copd, fiO2: 0.6 }, 900, 1, roomAir.state);
+
+    // Oxygenation genuinely improves — the intervention is not simply harmful.
+    expect(onOxygen.derived.saO2).toBeGreaterThan(roomAir.derived.saO2);
+    expect(onOxygen.derived.paO2).toBeGreaterThan(roomAir.derived.paO2);
+
+    // ...and it costs ventilation, because the hypoxic component of drive is withdrawn.
+    expect(onOxygen.derived.chemoreceptorDrive).toBeLessThan(roomAir.derived.chemoreceptorDrive);
+    expect(onOxygen.derived.effectiveMinuteVentilation).toBeLessThan(roomAir.derived.effectiveMinuteVentilation);
+
+    // A rise a learner can actually see on the readout, not a rounding artefact.
+    const rise = (onOxygen.derived.paCO2 - roomAir.derived.paCO2) / roomAir.derived.paCO2;
+    expect(rise).toBeGreaterThan(0.05);
+    expect(onOxygen.derived.pH).toBeLessThan(roomAir.derived.pH);
+  });
+
+  it('does not raise PaCO2 in a patient who was never hypoxaemic', () => {
+    // The same intervention on healthy lungs: no hypoxic drive to withdraw, so nothing to lose.
+    const roomAir = runFor(DEFAULT_RESP_INPUTS, 3600);
+    const onOxygen = runFor({ ...DEFAULT_RESP_INPUTS, fiO2: 0.6 }, 900, 1, roomAir.state);
+    expect(onOxygen.derived.paCO2).toBeCloseTo(roomAir.derived.paCO2, 1);
+  });
+
+  it('still cannot fully compensate the hypoventilation — the ventilation cap holds', () => {
+    // The reflex must not normalize PaCO2; that COPD stays hypercapnic is the point of the cap.
+    const { derived } = runFor(copd, 10800);
+    expect(derived.effectiveMinuteVentilation).toBeLessThan(DEFAULT_RESP_INPUTS.minuteVentilation);
+    expect(derived.paCO2).toBeGreaterThan(45);
+  });
+});
+
 describe('engine — panic attack (acute, uncompensated respiratory alkalosis)', () => {
   it('shows low PaCO2 and high pH with only mild HCO3- change at a short duration', () => {
     const inputs: RespInputs = { ...DEFAULT_RESP_INPUTS, ...RESP_PRESETS.panicHyperventilation };
