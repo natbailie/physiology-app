@@ -5,10 +5,13 @@ import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTrajectoryChart';
+import { VENOUS_RETURN_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { venousReturnContent } from './content';
 import { venousReturnLoopConfig } from './engine/loopConfig';
 import { perturbHemorrhage, perturbTransfusion, perturbValsalva } from './engine/engine';
@@ -25,6 +28,17 @@ import type { VenousReturnInputs } from './engine/types';
 export function VenousReturnPage() {
   const [inputs, setInputs] = useState<VenousReturnInputs>(DEFAULT_VENOUS_RETURN_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'venousReturn',
+    questions: VENOUS_RETURN_QUESTIONS,
+    presets: VENOUS_RETURN_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
   const { derived } = snapshot;
 
   function handleChange<K extends keyof VenousReturnInputs>(key: K, value: VenousReturnInputs[K]) {
@@ -55,6 +69,7 @@ export function VenousReturnPage() {
       }
       diagram={<GuytonDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -100,7 +115,7 @@ export function VenousReturnPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={venousReturnContent} />}
+      explainer={<ExplainerPanel content={venousReturnContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of the systemic circulation — not a clinical tool. This module runs in real time: right atrial pressure is not solved for, it obeys mass balance, rising when venous return exceeds cardiac output and falling when it does not, so the crossing of the two curves emerges rather than being assumed. The Cardiorenal module deliberately uses the simpler MAP = CO x SVR shortcut instead; this is where that shortcut is unpacked.'
       }

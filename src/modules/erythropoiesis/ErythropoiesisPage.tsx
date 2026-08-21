@@ -29,6 +29,7 @@ export function ErythropoiesisPage() {
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
+    perturbEngine: perturb,
   });
 
   function handleChange<K extends keyof ErythroInputs>(key: K, value: ErythroInputs[K]) {
@@ -78,7 +79,7 @@ export function ErythropoiesisPage() {
       }
       blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={erythropoiesisContent} />}
+      explainer={<ExplainerPanel content={erythropoiesisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of red cell production — not a clinical or diagnostic tool. Compare the presets on MCV and reticulocyte index together rather than on haemoglobin alone: that pair is what classifies an anemia. Aplastic anemia and anemia of CKD both show a low retic index, but only CKD has a LOW EPO to go with it. Simulated time is heavily compressed, since erythropoiesis plays out over weeks — try "Acute bleed" and watch the reticulocyte response lag behind the fall in haemoglobin before it catches up.'}
     />
   );

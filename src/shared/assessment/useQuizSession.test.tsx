@@ -43,6 +43,7 @@ function setup() {
   const captureBaseline = vi.fn();
   const clearBaseline = vi.fn();
   const resetEngine = vi.fn();
+  const perturbEngine = vi.fn();
   const store = createMemoryProgressStore();
 
   const hook = renderHook(() =>
@@ -53,11 +54,12 @@ function setup() {
       captureBaseline,
       clearBaseline,
       resetEngine,
+      perturbEngine,
       store,
     }),
   );
 
-  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, store };
+  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, store };
 }
 
 describe('useQuizSession', () => {
@@ -123,6 +125,49 @@ describe('useQuizSession', () => {
     expect(applyOrder).toBeDefined();
     expect(captureOrder!).toBeLessThan(applyOrder!);
     expect(applyInputs).toHaveBeenCalledWith({ dial: 9 });
+  });
+
+  it('fires a question\'s perturbation on commit, after the baseline is frozen', () => {
+    const perturbed: string[] = [];
+    const question: PredictQuestion<Inputs, Preset, Snapshot> = {
+      ...QUESTIONS[0]!,
+      id: 'perturbing',
+      intervention: {
+        label: 'An event happens.',
+        perturb: (state) => {
+          perturbed.push('called');
+          return state;
+        },
+      },
+    };
+    const applyInputs = vi.fn();
+    const captureBaseline = vi.fn();
+    const perturbEngine = vi.fn((fn: (s: Snapshot['value'] extends never ? never : never) => never) => {
+      void fn;
+    });
+
+    const { result } = renderHook(() =>
+      useQuizSession({
+        moduleId: 'test',
+        questions: [question],
+        applyInputs,
+        captureBaseline,
+        clearBaseline: vi.fn(),
+        resetEngine: vi.fn(),
+        perturbEngine: perturbEngine as never,
+        store: createMemoryProgressStore(),
+      }),
+    );
+
+    act(() => result.current.start());
+    act(() => result.current.commit('rises'));
+
+    expect(perturbEngine).toHaveBeenCalledOnce();
+    // An event-based question changes no settings, so applyInputs must not be called for it.
+    expect(applyInputs).toHaveBeenCalledTimes(1); // setup only
+    expect(captureBaseline.mock.invocationCallOrder[0]!).toBeLessThan(
+      perturbEngine.mock.invocationCallOrder[0]!,
+    );
   });
 
   it('scores a correct commit and records it', () => {

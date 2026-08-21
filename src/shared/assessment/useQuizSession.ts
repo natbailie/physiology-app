@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { correctAnswerOf, isPatternQuestion, type ModuleQuestion } from './types';
+import { correctAnswerOf, isPatternQuestion, type ModuleQuestion, type StateOf } from './types';
 import type { ProgressStore } from './progressStore';
 
 export type QuizPhase = 'idle' | 'predicting' | 'revealed' | 'complete';
@@ -38,6 +38,8 @@ interface QuizSessionOptions<TInputs, TPreset extends string, TSnapshot> {
    * it a question inherits the previous one's state, and a panel verified as unambiguous can
    * appear contaminated. */
   resetEngine: () => void;
+  /** Applies a question's one-off event to the engine state. */
+  perturbEngine: (fn: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>) => void;
   store: ProgressStore;
 }
 
@@ -55,6 +57,7 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   captureBaseline,
   clearBaseline,
   resetEngine,
+  perturbEngine,
   store,
 }: QuizSessionOptions<TInputs, TPreset, TSnapshot>): QuizSession<TInputs, TPreset, TSnapshot> {
   const [phase, setPhase] = useState<QuizPhase>('idle');
@@ -81,12 +84,13 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
         applyRef.current({}, next.answer);
       } else {
         applyRef.current(next.setup.inputs ?? {}, next.setup.preset);
+        if (next.setup.perturb) perturbEngine(next.setup.perturb);
       }
       setIndex(at);
       setAnswer(null);
       setPhase('predicting');
     },
-    [questions, clearBaseline, resetEngine],
+    [questions, clearBaseline, resetEngine, perturbEngine],
   );
 
   const start = useCallback(() => {
@@ -109,11 +113,12 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
       if (!isPatternQuestion(current)) {
         // Freeze first, THEN intervene, so the frozen trace is the pre-intervention state.
         captureBaseline();
-        applyRef.current(current.intervention.inputs);
+        if (current.intervention.inputs) applyRef.current(current.intervention.inputs);
+        if (current.intervention.perturb) perturbEngine(current.intervention.perturb);
       }
       setPhase('revealed');
     },
-    [questions, index, store, moduleId, captureBaseline],
+    [questions, index, store, moduleId, captureBaseline, perturbEngine],
   );
 
   const next = useCallback(() => load(index + 1), [load, index]);

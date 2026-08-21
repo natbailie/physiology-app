@@ -5,10 +5,13 @@ import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { OxygenDissociationCurve } from '@/shared/components/OxygenDissociationCurve/OxygenDissociationCurve';
+import { MUSCLE_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { muscleContractionContent } from './content';
 import { muscleLoopConfig } from './engine/loopConfig';
 import { perturbCaffeine, perturbStimulate } from './engine/engine';
@@ -27,6 +30,17 @@ import type { MuscleInputs } from './engine/types';
 export function MuscleContractionPage() {
   const [inputs, setInputs] = useState<MuscleInputs>(DEFAULT_MUSCLE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'muscleContraction',
+    questions: MUSCLE_QUESTIONS,
+    presets: MUSCLE_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
   const { derived, state } = snapshot;
 
   function handleChange<K extends keyof MuscleInputs>(key: K, value: MuscleInputs[K]) {
@@ -67,6 +81,7 @@ export function MuscleContractionPage() {
       }
       diagram={<MuscleDiagram derived={derived} excitationPulse={state.excitationPulse} />}
       readouts={<ReadoutPanel derived={derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -109,7 +124,7 @@ export function MuscleContractionPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={muscleContractionContent} />}
+      explainer={<ExplainerPanel content={muscleContractionContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of excitation-contraction coupling — not a clinical or biomechanical tool. Tension is expressed as a percentage of maximal tetanic tension. Like the action potential module, this one runs far SLOWER than real time (about 1/20): a twitch is over in a tenth of a second, so the calcium transient and the tension it produces would otherwise be impossible to see as separate events. Press "Stimulate" for a single twitch, or raise the stimulation frequency for summation and tetanus.'
       }

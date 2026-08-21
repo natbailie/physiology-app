@@ -4,10 +4,13 @@ import { MembraneDiagram } from './components/MembraneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { MEMBRANE_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { membranePotentialsContent } from './content';
 import { membraneLoopConfig } from './engine/loopConfig';
 import { perturbStimulate } from './engine/engine';
@@ -18,6 +21,17 @@ import type { MembraneInputs } from './engine/types';
 export function MembranePotentialsPage() {
   const [inputs, setInputs] = useState<MembraneInputs>(DEFAULT_MEMBRANE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'membranePotentials',
+    questions: MEMBRANE_QUESTIONS,
+    presets: MEMBRANE_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof MembraneInputs>(key: K, value: MembraneInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -54,6 +68,7 @@ export function MembranePotentialsPage() {
       }
       diagram={<MembraneDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -75,7 +90,7 @@ export function MembranePotentialsPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={membranePotentialsContent} />}
+      explainer={<ExplainerPanel content={membranePotentialsContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of membrane excitability — not a clinical or diagnostic tool. Click "Stimulate" to fire a single action potential, or raise the stimulus current slider past threshold for repetitive firing. Unlike every other module here, this one runs much SLOWER than real time: an action potential lasts about two milliseconds, so the upstroke, repolarization and refractory period would otherwise be far too fast to see.'}
     />
   );

@@ -4,10 +4,13 @@ import { AnsDiagram } from './components/AnsDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { ANS_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { autonomicNervousContent } from './content';
 import { ansLoopConfig } from './engine/loopConfig';
 import { ANS_PRESETS, DEFAULT_ANS_INPUTS, type AnsPresetName, ANS_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
@@ -15,7 +18,18 @@ import type { AnsInputs } from './engine/types';
 
 export function AutonomicNervousPage() {
   const [inputs, setInputs] = useState<AnsInputs>(DEFAULT_ANS_INPUTS);
-  const { snapshot, history, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'autonomicNervous',
+    questions: ANS_QUESTIONS,
+    presets: ANS_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof AnsInputs>(key: K, value: AnsInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -47,6 +61,7 @@ export function AutonomicNervousPage() {
       }
       diagram={<AnsDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -56,7 +71,7 @@ export function AutonomicNervousPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={autonomicNervousContent} />}
+      explainer={<ExplainerPanel content={autonomicNervousContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of autonomic control — not a clinical or diagnostic tool. Compare the "Fight or flight" and "Rest & digest" presets and watch the heart and gut tiles move in opposite directions, then contrast the "Atropine" and "Organophosphate" toxidromes, which mirror each other sign for sign. Simulated time runs faster than real time so each organ\'s response settles within a few seconds.'}
     />
   );

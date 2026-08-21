@@ -31,6 +31,7 @@ export function RespiratoryPage() {
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
+    perturbEngine: perturb,
   });
 
   function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {
@@ -88,7 +89,7 @@ export function RespiratoryPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={respiratoryContent} />}
+      explainer={<ExplainerPanel content={respiratoryContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of respiratory and acid-base physiology — not a clinical or diagnostic tool. Simulated time runs faster than real time so chemoreceptor responses (seconds-minutes) and renal compensation (physiologically days) are both watchable within roughly a minute.'}
     />
   );

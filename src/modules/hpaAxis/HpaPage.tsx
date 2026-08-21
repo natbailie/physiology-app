@@ -4,10 +4,13 @@ import { HpaDiagram } from './components/HpaDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { HPA_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hpaAxisContent } from './content';
 import { hpaLoopConfig } from './engine/loopConfig';
 import { perturbAcuteStressor } from './engine/engine';
@@ -17,6 +20,17 @@ import type { HpaInputs } from './engine/types';
 export function HpaPage() {
   const [inputs, setInputs] = useState<HpaInputs>(DEFAULT_HPA_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'hpaAxis',
+    questions: HPA_QUESTIONS,
+    presets: HPA_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof HpaInputs>(key: K, value: HpaInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export function HpaPage() {
       }
       diagram={<HpaDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -62,7 +77,7 @@ export function HpaPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={hpaAxisContent} />}
+      explainer={<ExplainerPanel content={hpaAxisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of HPA axis physiology — not a clinical or diagnostic tool. Simulated time runs much faster than real time: one diurnal cortisol cycle completes in about 4 minutes, and the adrenal-atrophy/recovery dynamics (physiologically weeks) are compressed to be watchable within a session — try the "Steroid therapy" preset for a while, then set exogenous glucocorticoid back to 0.'}
     />
   );

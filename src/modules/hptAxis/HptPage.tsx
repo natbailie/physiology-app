@@ -4,10 +4,13 @@ import { HptDiagram } from './components/HptDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { HPT_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hptAxisContent } from './content';
 import { hptLoopConfig } from './engine/loopConfig';
 import { perturbAcuteIllness } from './engine/engine';
@@ -17,6 +20,17 @@ import type { HptInputs } from './engine/types';
 export function HptPage() {
   const [inputs, setInputs] = useState<HptInputs>(DEFAULT_HPT_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hptLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'hptAxis',
+    questions: HPT_QUESTIONS,
+    presets: HPT_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof HptInputs>(key: K, value: HptInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export function HptPage() {
       }
       diagram={<HptDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -62,7 +77,7 @@ export function HptPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={hptAxisContent} />}
+      explainer={<ExplainerPanel content={hptAxisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of thyroid axis physiology — not a clinical or diagnostic tool. T3 is shown in normalized units (baseline ≈ 90-100), not literal ng/dL. Simulated time runs much faster than real time so T4\'s week-long turnover is compressed to be watchable within a session.'}
     />
   );

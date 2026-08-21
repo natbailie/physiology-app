@@ -31,6 +31,7 @@ function setup(questions: ModuleQuestion<Inputs, Preset, Snapshot>[] = [PATTERN]
   const captureBaseline = vi.fn();
   const clearBaseline = vi.fn();
   const resetEngine = vi.fn();
+  const perturbEngine = vi.fn();
   const store = createMemoryProgressStore();
 
   const hook = renderHook(() =>
@@ -41,10 +42,11 @@ function setup(questions: ModuleQuestion<Inputs, Preset, Snapshot>[] = [PATTERN]
       captureBaseline,
       clearBaseline,
       resetEngine,
+      perturbEngine,
       store,
     }),
   );
-  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, store };
+  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, store };
 }
 
 describe('pattern-discrimination sessions', () => {

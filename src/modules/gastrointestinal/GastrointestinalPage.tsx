@@ -4,10 +4,13 @@ import { GiDiagram } from './components/GiDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { GI_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { gastrointestinalContent } from './content';
 import { giLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal } from './engine/engine';
@@ -17,6 +20,17 @@ import type { GiInputs } from './engine/types';
 export function GastrointestinalPage() {
   const [inputs, setInputs] = useState<GiInputs>(DEFAULT_GI_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'gastrointestinal',
+    questions: GI_QUESTIONS,
+    presets: GI_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof GiInputs>(key: K, value: GiInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export function GastrointestinalPage() {
       }
       diagram={<GiDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -62,7 +77,7 @@ export function GastrointestinalPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={gastrointestinalContent} />}
+      explainer={<ExplainerPanel content={gastrointestinalContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of GI physiology — not a clinical or diagnostic tool. Adjust the meal composition and drug/tone sliders first, then click "Eat meal" to trigger digestion — or leave the stomach empty and just watch to see the migrating motor complex sweep through its interdigestive cycle. Simulated time runs much faster than real time so hormone responses and gastric emptying (physiologically hours) are watchable within a session.'}
     />
   );

@@ -5,10 +5,13 @@ import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTrajectoryChart';
+import { RESP_MECH_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryMechanicsContent } from './content';
 import { respMechLoopConfig } from './engine/loopConfig';
 import { perturbFvcManeuver } from './engine/engine';
@@ -18,6 +21,17 @@ import type { RespMechInputs } from './engine/types';
 export function RespiratoryMechanicsPage() {
   const [inputs, setInputs] = useState<RespMechInputs>(DEFAULT_RESP_MECH_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'respiratoryMechanics',
+    questions: RESP_MECH_QUESTIONS,
+    presets: RESP_MECH_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof RespMechInputs>(key: K, value: RespMechInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -54,6 +68,7 @@ export function RespiratoryMechanicsPage() {
       }
       diagram={<RespMechDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -71,7 +86,7 @@ export function RespiratoryMechanicsPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={respiratoryMechanicsContent} />}
+      explainer={<ExplainerPanel content={respiratoryMechanicsContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of lung mechanics — not a clinical or diagnostic tool. Click "FVC maneuver" to run a forced expiration and trace the flow-volume loop; compare the scooped obstructive loop of COPD with the narrow but normally-shaped restrictive loop of fibrosis. Then contrast the "Pulmonary embolism" and "Pneumonia" presets and watch hypoxic pulmonary vasoconstriction engage for the shunt but do nothing at all for the dead space.'}
     />
   );

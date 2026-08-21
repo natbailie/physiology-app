@@ -30,6 +30,7 @@ export function CardiorenalPage() {
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
+    perturbEngine: perturb,
   });
 
   function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {
@@ -84,7 +85,7 @@ export function CardiorenalPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={cardiorenalContent} />}
+      explainer={<ExplainerPanel content={cardiorenalContent} startCollapsed={session.phase !== 'idle'} />}
       footnote="A simplified, conceptual model of cardiorenal physiology — not a clinical or diagnostic tool. GFR and urine output are shown in normalized units (baseline = 100), not literal mL/min. Simulated time runs faster than real time so RAAS/ANP responses (which take minutes physiologically) are watchable within roughly a minute."
     />
   );

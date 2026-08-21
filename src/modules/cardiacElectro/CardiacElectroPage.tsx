@@ -5,10 +5,13 @@ import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { XYTrajectoryChart } from '@/shared/components/XYTrajectoryChart/XYTrajectoryChart';
+import { CARDIAC_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { cardiacElectroContent } from './content';
 import { cardiacLoopConfig } from './engine/loopConfig';
 import { CARDIAC_PRESETS, DEFAULT_CARDIAC_INPUTS, type CardiacPresetName, CARDIAC_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
@@ -16,7 +19,18 @@ import type { CardiacInputs } from './engine/types';
 
 export function CardiacElectroPage() {
   const [inputs, setInputs] = useState<CardiacInputs>(DEFAULT_CARDIAC_INPUTS);
-  const { snapshot, history, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
+  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'cardiacElectro',
+    questions: CARDIAC_QUESTIONS,
+    presets: CARDIAC_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof CardiacInputs>(key: K, value: CardiacInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -46,6 +60,7 @@ export function CardiacElectroPage() {
       }
       diagram={<CardiacDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -63,7 +78,7 @@ export function CardiacElectroPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={cardiacElectroContent} />}
+      explainer={<ExplainerPanel content={cardiacElectroContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of cardiac mechanics — not a clinical or diagnostic tool. The ECG trace here is a schematic of timing and sequence only, included to show when in the cycle each event falls; for a trace actually computed from the depolarisation sequence, see the ECG & Cardiac Conduction module. Change one lever at a time and watch which corner of the pressure-volume loop moves: preload widens it, afterload raises and narrows it, contractility lets it empty further left. Simulated time runs slower than real time so the four phases are distinguishable as the loop is traced.'}
     />
   );

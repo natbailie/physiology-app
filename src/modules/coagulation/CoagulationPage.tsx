@@ -29,6 +29,7 @@ export function CoagulationPage() {
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
+    perturbEngine: perturb,
   });
 
   function handleChange<K extends keyof CoagInputs>(key: K, value: CoagInputs[K]) {
@@ -78,7 +79,7 @@ export function CoagulationPage() {
       }
       blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={coagulationContent} />}
+      explainer={<ExplainerPanel content={coagulationContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of haemostasis — not a clinical or diagnostic tool, and the clotting times are illustrative rather than calibrated to any particular laboratory\'s reagents. Pick a preset and read the PATTERN across PT, APTT, platelets and bleeding time rather than any single value — that combination is what localises the defect. Then click "Injure vessel" to fire the cascade and watch whether a clot actually forms: haemophilia has a perfectly normal PT and still fails to seal.'}
     />
   );

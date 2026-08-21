@@ -4,10 +4,13 @@ import { NephronDiagram } from './components/NephronDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { RENAL_TUBULAR_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { renalTubularContent } from './content';
 import { renalTubularLoopConfig } from './engine/loopConfig';
 import { perturbWaterDeprivation } from './engine/engine';
@@ -17,6 +20,17 @@ import type { RenalTubularInputs } from './engine/types';
 export function RenalTubularPage() {
   const [inputs, setInputs] = useState<RenalTubularInputs>(DEFAULT_RENAL_TUBULAR_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'renalTubular',
+    questions: RENAL_TUBULAR_QUESTIONS,
+    presets: RENAL_TUBULAR_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof RenalTubularInputs>(key: K, value: RenalTubularInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export function RenalTubularPage() {
       }
       diagram={<NephronDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -76,7 +91,7 @@ export function RenalTubularPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={renalTubularContent} />}
+      explainer={<ExplainerPanel content={renalTubularContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of nephron function — not a clinical or diagnostic tool. The best way to use it: pick "Central DI", note the dilute urine, then raise "Exogenous ADH (DDAVP)" and watch the urine concentrate sharply — then repeat with "Nephrogenic DI", where the same dose changes almost nothing. That contrast is the water deprivation test. Simulated time runs faster than real time so ADH responses (minutes) and medullary gradient washout (hours) are both watchable within a session.'}
     />
   );

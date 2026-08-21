@@ -16,14 +16,40 @@ export const DIRECTION_CHOICES: readonly DirectionChoice[] = [
 /** Fractional change below which a metric counts as having not really moved. */
 export const DEFAULT_TOLERANCE = 0.05;
 
+/** The engine state carried inside a module's snapshot. Lets a question name a perturbation
+ * without every module having to thread an extra generic. */
+export type StateOf<TSnapshot> = TSnapshot extends { state: infer S } ? S : never;
+
 export interface PredictQuestion<TInputs, TPreset extends string, TSnapshot> {
   id: string;
   /** Clinical framing, shown before the learner commits. */
   stem: string;
-  /** State established before the question is asked. */
-  setup: { preset?: TPreset; inputs?: Partial<TInputs> };
-  /** The intervention whose consequence is being predicted. */
-  intervention: { label: string; inputs: Partial<TInputs> };
+  /**
+   * State established before the question is asked.
+   *
+   * `perturb` runs an event during setup — infecting a host, injuring a vessel, eating a meal.
+   * Without it a question about an ongoing process would compare "nothing happening" against
+   * "something happening", which is not a like-for-like before and after.
+   */
+  setup: {
+    preset?: TPreset;
+    inputs?: Partial<TInputs>;
+    perturb?: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>;
+  };
+  /**
+   * The intervention whose consequence is being predicted.
+   *
+   * `inputs` changes a setting. `perturb` applies a one-off event to the engine state — a meal,
+   * a bolus, an injury, a stimulus. Many of the sharpest teaching moments in this app are
+   * events rather than settings (a fasting model defends its glucose almost perfectly; it is
+   * the meal that separates a working pancreas from a failed one), so a question may use
+   * either or both.
+   */
+  intervention: {
+    label: string;
+    inputs?: Partial<TInputs>;
+    perturb?: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>;
+  };
   /** The question itself, e.g. "What happens to PaCO2?" */
   prompt: string;
   /** Readout to watch while it plays out. */

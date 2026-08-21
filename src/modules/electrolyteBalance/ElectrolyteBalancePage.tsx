@@ -35,6 +35,7 @@ export function ElectrolyteBalancePage() {
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
+    perturbEngine: perturb,
   });
   const { derived } = snapshot;
 
@@ -102,7 +103,7 @@ export function ElectrolyteBalancePage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={electrolyteBalanceContent} />}
+      explainer={<ExplainerPanel content={electrolyteBalanceContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={`A simplified, conceptual model of water and electrolyte balance — not a clinical or dosing tool. One second of real time is about one simulated hour, so a disorder that takes days to develop or correct plays out over roughly a minute. Current assessment: ${derived.disorderClassification}.`}
     />
   );

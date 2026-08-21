@@ -4,10 +4,13 @@ import { GlucoseDiagram } from './components/GlucoseDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { GLUCOSE_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { glucoseRegulationContent } from './content';
 import { glucoseLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal, perturbGiveInsulin } from './engine/engine';
@@ -17,6 +20,17 @@ import type { GlucoseInputs } from './engine/types';
 export function GlucoseRegulationPage() {
   const [inputs, setInputs] = useState<GlucoseInputs>(DEFAULT_GLUCOSE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'glucoseRegulation',
+    questions: GLUCOSE_QUESTIONS,
+    presets: GLUCOSE_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof GlucoseInputs>(key: K, value: GlucoseInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -57,6 +71,7 @@ export function GlucoseRegulationPage() {
       }
       diagram={<GlucoseDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -66,7 +81,7 @@ export function GlucoseRegulationPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={glucoseRegulationContent} />}
+      explainer={<ExplainerPanel content={glucoseRegulationContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of glucose regulation — not a clinical or diagnostic tool. Pick a preset (or set the sliders yourself), then click "Eat meal" to deliver the carbohydrate load and "Give insulin" to deliver the insulin dose. Try the Type 1 diabetes preset, eat a meal, and watch glucose climb unchecked — then give insulin. Simulated time runs faster than real time so a post-meal glucose excursion (physiologically a couple of hours) is watchable within a session.'}
     />
   );

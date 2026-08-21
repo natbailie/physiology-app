@@ -49,11 +49,19 @@ export function runQuestion<TState, TInputs, TDerived, THistoryPoint, TPreset ex
     ...question.setup.inputs,
   };
 
-  const settled = settle(config, config.createInitialState(), setupInputs, question.settleSeconds ?? 600);
+  const initial = question.setup.perturb
+    ? (question.setup.perturb(config.createInitialState() as never) as TState)
+    : config.createInitialState();
+  const settled = settle(config, initial, setupInputs, question.settleSeconds ?? 600);
   const before = question.metric(settled);
 
   const afterInputs: TInputs = { ...setupInputs, ...question.intervention.inputs };
-  const observed = settle(config, settled.state, afterInputs, question.observeSeconds ?? 600);
+  // A perturbation is an instantaneous event, applied once at the moment of intervention —
+  // exactly as the page applies it when the learner commits.
+  const perturbed = question.intervention.perturb
+    ? question.intervention.perturb(settled.state as never)
+    : settled.state;
+  const observed = settle(config, perturbed as TState, afterInputs, question.observeSeconds ?? 600);
   const after = question.metric(observed);
 
   const direction = directionOf(before, after, question.tolerance ?? DEFAULT_TOLERANCE);

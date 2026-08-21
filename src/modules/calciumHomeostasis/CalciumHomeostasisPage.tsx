@@ -4,10 +4,13 @@ import { CalciumDiagram } from './components/CalciumDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { CALCIUM_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { calciumHomeostasisContent } from './content';
 import { calciumLoopConfig } from './engine/loopConfig';
 import { perturbCalciumInfusion } from './engine/engine';
@@ -17,6 +20,17 @@ import type { CalciumInputs } from './engine/types';
 export function CalciumHomeostasisPage() {
   const [inputs, setInputs] = useState<CalciumInputs>(DEFAULT_CALCIUM_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
+
+  const { session, summary } = useModulePractice({
+    moduleId: 'calciumHomeostasis',
+    questions: CALCIUM_QUESTIONS,
+    presets: CALCIUM_PRESETS,
+    setInputs,
+    captureBaseline: baseline.capture,
+    clearBaseline: baseline.clear,
+    resetEngine: reset,
+    perturbEngine: perturb,
+  });
 
   function handleChange<K extends keyof CalciumInputs>(key: K, value: CalciumInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export function CalciumHomeostasisPage() {
       }
       diagram={<CalciumDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
+      practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -62,7 +77,7 @@ export function CalciumHomeostasisPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
-      explainer={<ExplainerPanel content={calciumHomeostasisContent} />}
+      explainer={<ExplainerPanel content={calciumHomeostasisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of calcium and phosphate homeostasis — not a clinical or diagnostic tool. Compare the presets by watching calcium and phosphate move in opposite directions: primary hyperparathyroidism raises calcium while dropping phosphate, hypoparathyroidism does the reverse, and hypomagnesemia produces hypocalcemia with PTH stuck near zero. Simulated time runs much faster than real time so PTH (minutes) and calcitriol (hours to days) responses are both watchable within a session.'}
     />
   );
