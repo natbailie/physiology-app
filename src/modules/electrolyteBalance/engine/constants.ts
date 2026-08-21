@@ -201,6 +201,14 @@ export const CLASSIFICATION = {
   HYPERVOLEMIC_RATIO: 1.08,
   /** Hyperglycaemia correction: serum sodium falls ~1.6 mEq/L per 100 mg/dL of glucose. */
   GLUCOSE_CORRECTION_PER_100: 1.6,
+  /** The glucose level below which no water is displaced between compartments, mg/dL.
+   *
+   * The Edelman relation is an empirical fit to normoglycaemic people, so it already contains
+   * whatever normal glucose does to the compartments. Only glucose ABOVE this reference counts
+   * as an extra effective osmole. The correction above uses the same reference, which is what
+   * keeps the two from double-counting: the shift moves the sodium down, the correction moves
+   * the same displacement back up, and neither is applied twice. */
+  GLUCOSE_OSMOTIC_REFERENCE_MG_DL: 100,
 };
 
 export const LIMITS = {
