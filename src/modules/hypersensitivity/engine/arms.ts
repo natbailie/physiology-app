@@ -1,4 +1,4 @@
-import { TYPE_I, TYPE_II, TYPE_III, TYPE_IV } from './constants';
+import { TRANSFUSION, TYPE_I, TYPE_II, TYPE_III, TYPE_IV } from './constants';
 import { clamp } from '@/shared/lib/math';
 
 /**
@@ -101,4 +101,40 @@ export function macrophageTarget(tCellRecruitment: number): number {
 /** Type I injury: histamine-driven vasodilatation, leak and bronchospasm, minus any blockade. */
 export function histamineInjury(histamine: number, blockade: number): number {
   return clamp(histamine * TYPE_I.INJURY_GAIN * blockade, 0, 1);
+}
+
+/**
+ * Total antibody available against a cell-surface antigen — the type II arm's real strength.
+ *
+ * Three sources, and they behave completely differently in time. Deliberate sensitisation is
+ * standing. Naturally-occurring anti-A and anti-B need no prior exposure at all, which is why
+ * an ABO-incompatible unit can kill on a first transfusion. And a recalled antibody against a
+ * minor antigen has to be re-made from memory, which takes days — the delayed reaction.
+ */
+export function totalAntiCellAntibody(
+  iggAgainstCellSurface: number,
+  aboCompatibility: number,
+  recalledAntibody: number,
+): number {
+  const isohaemagglutinin = clamp(1 - aboCompatibility, 0, 1) * TRANSFUSION.ISOHAEMAGGLUTININ_STRENGTH;
+  const recalled = clamp(recalledAntibody, 0, 1) * TRANSFUSION.RECALL_STRENGTH;
+  return clamp(iggAgainstCellSurface, 0, 1.5) + isohaemagglutinin + recalled;
+}
+
+/** Total mast cell trigger: standing IgE sensitisation plus anti-IgA against donor plasma. */
+export function totalMastCellTrigger(igeSensitisation: number, recipientIgaDeficiency: number): number {
+  return clamp(igeSensitisation, 0, 1.5) + clamp(recipientIgaDeficiency, 0, 1) * TRANSFUSION.ANTI_IGA_STRENGTH;
+}
+
+/**
+ * Pulmonary capillary leak from donor antibody activating recipient neutrophils — TRALI.
+ *
+ * Note what it is NOT: not a volume problem, and not one of the four types either, since the
+ * antibody came from the donor rather than the patient. The lung fills because the capillaries
+ * leak, so the ventricle is never stretched and the BNP never rises. That is the only thing
+ * separating it from circulatory overload, and the treatments are opposites — support the
+ * breathing in one, offload the volume in the other.
+ */
+export function capillaryLeakTarget(donorAntileukocyteAntibody: number, transfusedVolume: number): number {
+  return clamp(clamp(donorAntileukocyteAntibody, 0, 1) * Math.min(transfusedVolume * 2, 1), 0, 1);
 }

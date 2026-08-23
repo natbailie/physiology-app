@@ -14,6 +14,13 @@ const MECHANISM_LABEL: Record<string, string> = {
   none: 'No reaction',
 };
 
+/** Recognising that a reaction is NOT one of the four types is a diagnosis in its own right. */
+const NON_IMMUNE_LABEL: Record<string, string> = {
+  'volume overload': 'Not immune — overload',
+  'capillary leak': 'Not immune — leaky lung',
+  'stored cytokines': 'Not immune — cytokines',
+};
+
 const MECHANISM_COLOUR: Record<string, string> = {
   I: 'var(--ige)',
   II: 'var(--cytotoxic-ab)',
@@ -60,23 +67,47 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
       />
       <ReadoutItem label="Temperature" value={derived.temperatureC.toFixed(1)} unit="&deg;C" colorVar="var(--warn)" />
       <ReadoutItem
+        label="Haemoglobin"
+        value={derived.haemoglobinGDl.toFixed(1)}
+        unit="g/dL"
+        colorVar="var(--hemoglobin)"
+      />
+      <ReadoutItem label="SaO2" value={derived.saO2Percent.toFixed(0)} unit="%" colorVar="var(--o2)" />
+      <ReadoutItem
+        label="BNP"
+        value={derived.bnpPgMl.toFixed(0)}
+        unit="pg/mL"
+        secondary={derived.bnpPgMl > 150 ? 'stretched ventricle — volume' : 'ventricle not loaded'}
+        colorVar="var(--artery)"
+      />
+      <ReadoutItem
         label="Mean arterial pressure"
         value={derived.meanArterialPressureMmHg.toFixed(0)}
         unit="mmHg"
         colorVar="var(--artery)"
       />
-      <ReadoutItem label="Wheal" value={derived.whealMm.toFixed(0)} unit="mm" colorVar="var(--ige)" />
+      {/* Paired deliberately: a weal is leaked plasma and an induration is a cellular
+          infiltrate, so which of the two a patient has IS the mechanism, felt with a finger. */}
       <ReadoutItem
-        label="Induration"
-        value={derived.indurationMm.toFixed(0)}
+        label="Wheal / induration"
+        value={`${derived.whealMm.toFixed(0)} / ${derived.indurationMm.toFixed(0)}`}
         unit="mm"
-        colorVar="var(--delayed-type)"
+        secondary="soft & immediate vs firm & delayed"
+        colorVar="var(--ige)"
       />
       <ReadoutItem
         label="Mechanism"
-        value={MECHANISM_LABEL[mechanism] ?? 'No reaction'}
+        value={
+          mechanism === 'none' && derived.nonImmuneCause
+            ? (NON_IMMUNE_LABEL[derived.nonImmuneCause] ?? 'No reaction')
+            : (MECHANISM_LABEL[mechanism] ?? 'No reaction')
+        }
         secondary={derived.mechanismSummary}
-        colorVar={MECHANISM_COLOUR[mechanism] ?? 'var(--ok)'}
+        colorVar={
+          mechanism === 'none' && derived.nonImmuneCause
+            ? 'var(--warn)'
+            : (MECHANISM_COLOUR[mechanism] ?? 'var(--ok)')
+        }
         wide
       />
     </div>

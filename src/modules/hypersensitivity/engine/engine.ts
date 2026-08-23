@@ -7,6 +7,7 @@ import {
   INJURY,
   TYPE_I,
   TYPE_II,
+  TRANSFUSION,
   TYPE_III,
   TYPE_IV,
 } from './constants';
@@ -19,9 +20,12 @@ import {
   macrophageTarget,
   mastCellReleaseRate,
   blockadeFactor,
+  capillaryLeakTarget,
   tCellTarget,
+  totalAntiCellAntibody,
+  totalMastCellTrigger,
 } from './arms';
-import { dominantMechanism, mechanismSummary } from './classification';
+import { dominantMechanism, mechanismSummary, nonImmuneCause } from './classification';
 import { approach, clamp } from '@/shared/lib/math';
 import type {
   HypersensitivityDerived,
@@ -53,6 +57,10 @@ export function createInitialState(): HypersensitivityState {
     tissueInjury: 0,
     onsetHours: -1,
     peakInjury: 0,
+    plasmaVolumeExcess: 0,
+    capillaryLeak: 0,
+    recalledAntibody: 0,
+    transfusedCytokines: 0,
     peakMechanism: 'none',
   };
 }
@@ -63,6 +71,12 @@ export function computeDerived(
 ): HypersensitivityDerived {
   // How much injury each arm is responsible for right now. These four numbers are what the
   // timeline plots and what the classifier reads.
+  // Volume the circulation cannot accommodate — the volume arm, which is not immune at all.
+  const effectiveOverload = Math.max(
+    0,
+    state.plasmaVolumeExcess - clamp(inputs.cardiacReserve, 0, 1.5) * TRANSFUSION.VOLUME_TOLERANCE_PER_RESERVE,
+  );
+
   const armActivity = {
     I: histamineInjury(state.histamine, blockadeFactor(inputs.mastCellStabilisation)),
     II: state.cellDestruction,
@@ -75,6 +89,8 @@ export function computeDerived(
   // the diagnosis — a resolved anaphylaxis was still an anaphylaxis. Until then, report live.
   const live = dominantMechanism(armActivity);
   const mechanism = state.peakMechanism !== 'none' ? state.peakMechanism : live;
+  const cause = nonImmuneCause(effectiveOverload, state.capillaryLeak, state.transfusedCytokines);
+
 
   // Complement is CONSUMED by the two antibody arms and untouched by the other two, which is
   // exactly why C3 and C4 are measured: a low pair localises the problem to II or III.
@@ -85,6 +101,8 @@ export function computeDerived(
 
   // Haemolysis markers move only with type II, because only there is a cell being destroyed.
   const haemolysis = state.cellDestruction;
+
+
 
   // Anaphylaxis is a distributive shock and nothing else here is. That single fact separates
   // the most urgent reaction from the rest at the bedside.
@@ -108,7 +126,8 @@ export function computeDerived(
 
     armActivity,
     dominantMechanism: mechanism,
-    mechanismSummary: mechanismSummary(mechanism, state.onsetHours),
+    nonImmuneCause: cause,
+    mechanismSummary: mechanismSummary(mechanism, state.onsetHours, cause),
 
     // Tryptase is released from the same granules as histamine, so it rises only in type I —
     // and falls again within hours, which is why the sample has to be taken early.
@@ -118,6 +137,27 @@ export function computeDerived(
     // Antibody sitting ON the cell. Positive in type II by definition, and negative in type III
     // where the complexes are in the circulation rather than on a cell surface.
     directCoombs: clamp(state.boundToCellSurface, 0, 1),
+    // The transfused CELLS raise the haemoglobin, and they persist after the plasma they came
+    // in has been excreted — so the rise tracks the donor cells rather than the volume load.
+    // A haemolytic reaction is the case where the haemoglobin falls after a transfusion
+    // instead of rising, which is often the thing that makes anyone look.
+    haemoglobinGDl:
+      TRANSFUSION.NORMAL_HAEMOGLOBIN_G_DL +
+      state.fixedAntigen * TRANSFUSION.HAEMOGLOBIN_RISE_PER_UNIT -
+      haemolysis * TRANSFUSION.HAEMOGLOBIN_FALL_FROM_HAEMOLYSIS,
+    // Both a wet lung from too much volume and a wet lung from leaking capillaries desaturate,
+    // and this row cannot tell them apart. That is the difficulty the BNP exists to resolve.
+    saO2Percent: clamp(
+      TRANSFUSION.NORMAL_SAO2_PERCENT -
+        effectiveOverload * TRANSFUSION.SAO2_FALL_FROM_OVERLOAD -
+        state.capillaryLeak * TRANSFUSION.SAO2_FALL_FROM_LEAK,
+      40,
+      100,
+    ),
+    // Only a STRETCHED ventricle makes BNP, so the volume arm raises it and the leak does not.
+    bnpPgMl: TRANSFUSION.NORMAL_BNP_PG_ML + effectiveOverload * TRANSFUSION.BNP_PER_VOLUME_EXCESS,
+    plasmaVolumeExcess: state.plasmaVolumeExcess,
+    capillaryLeak: state.capillaryLeak,
     haptoglobinMgDl: Math.max(HAEMOLYSIS.NORMAL_HAPTOGLOBIN_MG_DL - haemolysis * HAEMOLYSIS.HAPTOGLOBIN_CONSUMPTION, 2),
     lactateDehydrogenaseUL: HAEMOLYSIS.NORMAL_LDH_U_L + haemolysis * HAEMOLYSIS.LDH_RISE_U_L,
     bilirubinUmolL: HAEMOLYSIS.NORMAL_BILIRUBIN_UMOL_L + haemolysis * HAEMOLYSIS.BILIRUBIN_RISE_UMOL_L,
@@ -133,6 +173,12 @@ export function computeDerived(
     sensitisedTCells: inputs.sensitisedTCells,
     complementFunction: inputs.complementFunction,
     mastCellStabilisation: inputs.mastCellStabilisation,
+    aboCompatibility: inputs.aboCompatibility,
+    recipientIgaDeficiency: inputs.recipientIgaDeficiency,
+    productLeukocyteLoad: inputs.productLeukocyteLoad,
+    donorAntileukocyteAntibody: inputs.donorAntileukocyteAntibody,
+    anamnesticRecall: inputs.anamnesticRecall,
+    cardiacReserve: inputs.cardiacReserve,
   };
 }
 
@@ -147,7 +193,11 @@ function feverRise(state: HypersensitivityState): number {
   return (
     state.immuneComplexDeposition * CLINICAL.FEVER_FROM_COMPLEXES_C +
     state.cellDestruction * CLINICAL.FEVER_FROM_CELL_DESTRUCTION_C +
-    state.macrophageActivation * CLINICAL.FEVER_FROM_MACROPHAGES_C
+    state.macrophageActivation * CLINICAL.FEVER_FROM_MACROPHAGES_C +
+    // Cytokines carried in with stored donor white cells: fever, and nothing else at all. No
+    // haemolysis, no complement consumption, no hypotension — which is exactly what makes a
+    // febrile non-haemolytic reaction a diagnosis of exclusion rather than a diagnosis.
+    state.transfusedCytokines * TRANSFUSION.FEVER_FROM_CYTOKINES_C
   );
 }
 
@@ -168,7 +218,11 @@ export function tick(
   // --- Type I: minutes. Granules are already loaded; nothing has to be made. ---
   // Release EMPTIES a finite store, so the reaction is a spike: it peaks within minutes, and it
   // stops because the mast cells have run out rather than because the antigen has gone.
-  const releaseRate = mastCellReleaseRate(state.solubleAntigen, derived.igeSensitisation, state.granuleStore);
+  const releaseRate = mastCellReleaseRate(
+    state.solubleAntigen,
+    totalMastCellTrigger(derived.igeSensitisation, derived.recipientIgaDeficiency),
+    state.granuleStore,
+  );
   const released = Math.min(releaseRate * dtHours, state.granuleStore);
   const granuleStore = clamp(
     state.granuleStore - released + (1 - state.granuleStore) * (dtHours / TYPE_I.GRANULE_RECOVERY_TAU_HOURS),
@@ -185,7 +239,10 @@ export function tick(
   // --- Type II: hours. Antibody must find a cell-bound antigen, then kill the cell. ---
   const boundToCellSurface = approachAsymmetric(
     state.boundToCellSurface,
-    cellSurfaceBindingTarget(state.fixedAntigen, derived.iggAgainstCellSurface),
+    cellSurfaceBindingTarget(
+      state.fixedAntigen,
+      totalAntiCellAntibody(derived.iggAgainstCellSurface, derived.aboCompatibility, state.recalledAntibody),
+    ),
     dtHours,
     TYPE_II.BINDING_TAU_HOURS,
     TYPE_II.DESTRUCTION_TAU_HOURS * 4,
@@ -221,6 +278,34 @@ export function tick(
     dtHours,
     TYPE_IV.MACROPHAGE_TAU_HOURS,
     TYPE_IV.RESOLUTION_TAU_HOURS,
+  );
+
+  // --- The transfusion arms ---
+  // Antibody against a minor antigen has to be RE-MADE, and that is why the reaction is
+  // delayed: the patient goes home well and their haemoglobin falls a week later.
+  const recalledAntibody = approach(
+    state.recalledAntibody,
+    clamp(derived.anamnesticRecall, 0, 1) * (state.fixedAntigen > 0.05 ? 1 : 0),
+    dtHours,
+    TRANSFUSION.RECALL_TAU_HOURS,
+  );
+  const transfusedCytokines = approachAsymmetric(
+    state.transfusedCytokines,
+    clamp((derived.productLeukocyteLoad / 100) * Math.min(state.plasmaVolumeExcess * 2, 1), 0, 1),
+    dtHours,
+    TRANSFUSION.CYTOKINE_TAU_HOURS,
+    TRANSFUSION.CYTOKINE_CLEARANCE_TAU_HOURS,
+  );
+  // Volume is cleared faster the more cardiac and renal reserve there is. A normal heart never
+  // notices a unit; a failing one drowns on it, and nothing immune has happened either way.
+  const clearance = TRANSFUSION.VOLUME_CLEARANCE_TAU_HOURS / Math.max(clamp(derived.cardiacReserve, 0.08, 1.5), 0.08);
+  const plasmaVolumeExcess = approach(state.plasmaVolumeExcess, 0, dtHours, clearance);
+  const capillaryLeak = approachAsymmetric(
+    state.capillaryLeak,
+    capillaryLeakTarget(derived.donorAntileukocyteAntibody, state.plasmaVolumeExcess),
+    dtHours,
+    TRANSFUSION.LEAK_TAU_HOURS,
+    TRANSFUSION.LEAK_RESOLUTION_TAU_HOURS,
   );
 
   // Complement is consumed by the antibody arms only.
@@ -270,6 +355,10 @@ export function tick(
     tissueInjury,
     onsetHours: justApparent ? hoursSinceChallenge : state.onsetHours,
     peakInjury: Math.max(state.peakInjury, tissueInjury),
+    plasmaVolumeExcess,
+    capillaryLeak,
+    recalledAntibody,
+    transfusedCytokines,
     peakMechanism: tissueInjury > state.peakInjury ? dominantMechanism(derived.armActivity) : state.peakMechanism,
   };
 }
@@ -319,4 +408,39 @@ export function perturbAdrenaline(state: HypersensitivityState): Hypersensitivit
     ...state,
     histamine: state.histamine * 0.12,
   };
+}
+
+/**
+ * "Transfuse" — give one unit of the product currently configured.
+ *
+ * Everything that follows depends on what is in the bag and who is receiving it, and the same
+ * unit is a non-event, a fever, an anaphylaxis, a haemolysis, a wet lung or a drowning. Note
+ * that the donor red cell antigens go into the FIXED pool, because they are stuck to cells —
+ * which is what makes an incompatible transfusion a type II reaction rather than a type III.
+ */
+export function perturbTransfuse(state: HypersensitivityState): HypersensitivityState {
+  return {
+    ...state,
+    // Donor red cell antigens: fixed to cells, and they persist as long as the cells do.
+    fixedAntigen: clamp(state.fixedAntigen + 0.9, 0, 1),
+    // Donor plasma proteins, including IgA: soluble.
+    solubleAntigen: clamp(state.solubleAntigen + 0.7, 0, 1),
+    plasmaVolumeExcess: clamp(state.plasmaVolumeExcess + TRANSFUSION.UNIT_VOLUME_LOAD, 0, 2),
+    hoursSinceChallenge: 0,
+    onsetHours: -1,
+    peakInjury: 0,
+    peakMechanism: 'none',
+  };
+}
+
+/**
+ * "Diurese" — offload the volume.
+ *
+ * The treatment for circulatory overload and useless for everything else here, which is the
+ * transfusion half's version of the same lesson: it fixes a wet lung caused by too much volume
+ * and does nothing at all for a wet lung caused by leaking capillaries. Telling those two
+ * apart is what the BNP is for.
+ */
+export function perturbDiurese(state: HypersensitivityState): HypersensitivityState {
+  return { ...state, plasmaVolumeExcess: state.plasmaVolumeExcess * 0.25 };
 }

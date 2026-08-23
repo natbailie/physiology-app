@@ -10,6 +10,16 @@ export type HypersensitivityType = 'I' | 'II' | 'III' | 'IV';
 
 export type DominantMechanism = HypersensitivityType | 'none';
 
+/**
+ * Things that injure a transfused patient without being hypersensitivity at all.
+ *
+ * Worth naming rather than lumping under "no reaction", because two of the three commonest
+ * transfusion reactions are here. Recognising that a reaction is NOT one of the four types is
+ * a diagnosis in its own right, and it changes the treatment completely — a wet lung from too
+ * much volume is offloaded, and a wet lung from leaking capillaries is not.
+ */
+export type NonImmuneCause = 'volume overload' | 'capillary leak' | 'stored cytokines' | null;
+
 export interface HypersensitivityInputs {
   /** Size of the antigen exposure, % of a reference dose (0-200) */
   antigenDose: number;
@@ -39,6 +49,36 @@ export interface HypersensitivityInputs {
    * the classification is worth knowing.
    */
   mastCellStabilisation: number;
+
+  // --- Transfusion: the same four arms, driven by what is in the bag ---
+
+  /**
+   * ABO compatibility, fraction (0-1; 1 is fully compatible).
+   *
+   * The reason a transfusion reaction can be immediate on a FIRST transfusion, which no other
+   * scenario in this module allows: anti-A and anti-B are naturally occurring, present without
+   * any prior exposure at all. Sensitisation is not required, so the usual reassurance that a
+   * first exposure is safe does not apply to blood.
+   */
+  aboCompatibility: number;
+  /** Recipient IgA deficiency with anti-IgA, fraction (0-1) — anaphylaxis to donor plasma */
+  recipientIgaDeficiency: number;
+  /** Donor leukocytes and the cytokines they have accumulated in storage, % (0-100) */
+  productLeukocyteLoad: number;
+  /**
+   * Donor anti-leukocyte antibody, fraction (0-1) — TRALI.
+   *
+   * Antibody in the DONOR's plasma against the RECIPIENT's neutrophils, which is why TRALI is a
+   * property of the donor rather than of the patient, and why it is prevented by screening
+   * donors rather than by pre-medicating recipients.
+   */
+  donorAntileukocyteAntibody: number;
+  /** Anamnestic recall of an antibody against a minor red cell antigen, fraction (0-1) — the
+   * delayed haemolytic reaction, where antibody has to be RE-MADE and that takes days */
+  anamnesticRecall: number;
+  /** Cardiac and renal reserve for handling a volume load, fraction (0-1.5) — low reserve is
+   * what turns a routine unit into circulatory overload */
+  cardiacReserve: number;
 }
 
 export interface HypersensitivityState {
@@ -75,6 +115,16 @@ export interface HypersensitivityState {
   onsetHours: number;
   /** Peak injury reached during this challenge */
   peakInjury: number;
+  /** Excess plasma volume from the transfusion, litres — the volume arm, which is not an
+   * immune mechanism at all and is the commonest transfusion reaction there is */
+  plasmaVolumeExcess: number;
+  /** Neutrophil-mediated pulmonary capillary leak, 0..1 — TRALI */
+  capillaryLeak: number;
+  /** Antibody being re-made against a minor red cell antigen, 0..1. Rises over DAYS, which is
+   * the entire clinical signature of a delayed haemolytic reaction */
+  recalledAntibody: number;
+  /** Cytokines carried in with stored donor leukocytes, 0..1 — fever and nothing else */
+  transfusedCytokines: number;
   /** Which arm was dominant at that peak. Held so the verdict names the reaction that
    * HAPPENED rather than whatever is left of it now — an anaphylaxis that has resolved was
    * still an anaphylaxis, and reporting "no reaction" beside a peak of 95% helps nobody. */
@@ -100,6 +150,8 @@ export interface HypersensitivityDerived {
   /** How much injury each arm is currently responsible for, 0..1. Drives the timeline. */
   armActivity: Record<HypersensitivityType, number>;
   dominantMechanism: DominantMechanism;
+  /** Set when the injury is real but none of the four arms caused it. */
+  nonImmuneCause: NonImmuneCause;
   /** One line naming what is happening and how it was worked out. */
   mechanismSummary: string;
 
@@ -117,6 +169,19 @@ export interface HypersensitivityDerived {
   bilirubinUmolL: number;
   temperatureC: number;
   meanArterialPressureMmHg: number;
+  /** Haemoglobin, g/dL. A transfusion should RAISE it; a haemolytic reaction is the case where
+   * it falls instead, which is often the first thing anyone notices */
+  haemoglobinGDl: number;
+  /** Arterial oxygen saturation, % — falls in both TACO and TRALI, and cannot separate them */
+  saO2Percent: number;
+  /**
+   * BNP, pg/mL. The row that DOES separate them: it is released by a stretched ventricle, so
+   * it is high when the lung is wet from too much volume (TACO) and normal when the lung is
+   * wet from leaking capillaries (TRALI). Same chest film, opposite treatments.
+   */
+  bnpPgMl: number;
+  plasmaVolumeExcess: number;
+  capillaryLeak: number;
   /** Wheal diameter, mm — the immediate weal-and-flare of a type I skin test */
   whealMm: number;
   /** Induration diameter, mm — the firm, delayed swelling of a type IV response. Distinct from
@@ -132,6 +197,12 @@ export interface HypersensitivityDerived {
   sensitisedTCells: number;
   complementFunction: number;
   mastCellStabilisation: number;
+  aboCompatibility: number;
+  recipientIgaDeficiency: number;
+  productLeukocyteLoad: number;
+  donorAntileukocyteAntibody: number;
+  anamnesticRecall: number;
+  cardiacReserve: number;
 }
 
 export interface HypersensitivitySnapshot {

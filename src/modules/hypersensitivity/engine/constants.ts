@@ -88,7 +88,10 @@ export const ANTIGEN = {
    * convenience — the split IS the difference between type II and type III.
    */
   SOLUBLE_CLEARANCE_TAU_HOURS: 20,
-  FIXED_CLEARANCE_TAU_HOURS: 65,
+  // Days. Transfused red cells outlive this window entirely, and a hapten bound to skin
+  // protein sits there until the skin turns over — which is why the delayed arms have anything
+  // left to react against by the time they get going.
+  FIXED_CLEARANCE_TAU_HOURS: 110,
   CHALLENGE_DOSE_SCALE: 0.01,
 };
 
@@ -170,4 +173,68 @@ export const HYPERSENSITIVITY_SIMULATION = {
    */
   HOURS_PER_SECOND: 1,
   TIME_SCALE: 2,
+};
+
+/**
+ * Transfusion: the same four arms, plus a volume arm that is not immune at all.
+ *
+ * The organising claim of this half of the module is that every transfusion reaction is one of
+ * the mechanisms above driven by something in the bag — with two exceptions that are worth
+ * knowing precisely BECAUSE they are exceptions. A febrile non-haemolytic reaction is cytokines
+ * carried in with stored donor white cells and belongs to none of the four types; circulatory
+ * overload is plain hydrostatics and involves the immune system nowhere.
+ */
+export const TRANSFUSION = {
+  /**
+   * How hard naturally-occurring anti-A and anti-B hit an incompatible unit.
+   *
+   * Large, and it needs no sensitisation whatsoever — these antibodies are present from
+   * infancy without any prior exposure to blood. That is why an ABO-incompatible transfusion
+   * can kill on someone's FIRST transfusion, and why it is the one reaction in this module
+   * where "they have never had it before" offers no protection at all.
+   */
+  ISOHAEMAGGLUTININ_STRENGTH: 1.45,
+  // Anti-IgA in an IgA-deficient recipient, reacting against donor plasma IgA.
+  ANTI_IGA_STRENGTH: 1.2,
+  // Cytokines accumulated in the bag during storage: fever, and nothing else. No haemolysis,
+  // no complement consumption, no hypotension — which is what makes it a diagnosis of
+  // exclusion rather than a diagnosis.
+  CYTOKINE_TAU_HOURS: 1.5,
+  CYTOKINE_CLEARANCE_TAU_HOURS: 6,
+  FEVER_FROM_CYTOKINES_C: 1.7,
+  /**
+   * Antibody against a MINOR red cell antigen has to be re-made from memory, and making
+   * antibody takes days. That single fact is the whole clinical picture of a delayed
+   * haemolytic reaction: the patient goes home, and their haemoglobin falls a week later.
+   */
+  RECALL_TAU_HOURS: 80,
+  RECALL_STRENGTH: 1.15,
+  // One unit, as a fraction of plasma volume. A normal heart clears it without noticing.
+  UNIT_VOLUME_LOAD: 0.55,
+  VOLUME_CLEARANCE_TAU_HOURS: 7,
+  /**
+   * How much volume a unit of cardiac and renal reserve can accommodate without the ventricle
+   * being stretched.
+   *
+   * Overload is not the volume given, it is the volume in EXCESS of what the circulation can
+   * take — which is exactly why the identical unit is unremarkable in one patient and drowns
+   * the next. Without this term a correctly matched unit in a healthy recipient came back with
+   * a BNP of 386 and a saturation of 88%, which is a description of the transfusion rather
+   * than of anything wrong with it.
+   */
+  VOLUME_TOLERANCE_PER_RESERVE: 0.62,
+  // TRALI: donor antibody activates recipient neutrophils in the pulmonary capillaries. The
+  // lung leaks, but nothing is overloaded — which is why the BNP stays normal.
+  LEAK_TAU_HOURS: 2.5,
+  LEAK_RESOLUTION_TAU_HOURS: 40,
+  NORMAL_BNP_PG_ML: 45,
+  // BNP comes from a STRETCHED ventricle, so only the volume arm raises it.
+  BNP_PER_VOLUME_EXCESS: 620,
+  NORMAL_SAO2_PERCENT: 97,
+  SAO2_FALL_FROM_OVERLOAD: 16,
+  SAO2_FALL_FROM_LEAK: 22,
+  NORMAL_HAEMOGLOBIN_G_DL: 9.5,
+  // A unit should RAISE the haemoglobin by about this much.
+  HAEMOGLOBIN_RISE_PER_UNIT: 1.2,
+  HAEMOGLOBIN_FALL_FROM_HAEMOLYSIS: 3.4,
 };

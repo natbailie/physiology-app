@@ -132,7 +132,7 @@ export const MODULES: ModuleDescriptor[] = [
   {
     id: 'hypersensitivity',
     name: 'Hypersensitivity',
-    tagline: 'Types I-IV: four mechanisms on four different clocks',
+    tagline: 'Types I-IV, and every transfusion reaction among them',
     status: 'available',
     accentColorVar: 'var(--ige)',
   },

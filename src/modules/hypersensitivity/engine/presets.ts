@@ -15,6 +15,12 @@ export const DEFAULT_HYPERSENSITIVITY_INPUTS: HypersensitivityInputs = {
   sensitisedTCells: 0,
   complementFunction: 1,
   mastCellStabilisation: 0,
+  aboCompatibility: 1,
+  recipientIgaDeficiency: 0,
+  productLeukocyteLoad: 0,
+  donorAntileukocyteAntibody: 0,
+  anamnesticRecall: 0,
+  cardiacReserve: 1,
 };
 
 export type HypersensitivityPresetName =
@@ -23,7 +29,14 @@ export type HypersensitivityPresetName =
   | 'typeIIHaemolysis'
   | 'typeIIISerumSickness'
   | 'typeIVContactDermatitis'
-  | 'treatedAnaphylaxis';
+  | 'treatedAnaphylaxis'
+  | 'compatibleTransfusion'
+  | 'aboIncompatible'
+  | 'anaphylacticIgaDeficient'
+  | 'febrileNonHaemolytic'
+  | 'delayedHaemolytic'
+  | 'taco'
+  | 'trali';
 
 /**
  * The four types, each set up so it is the ONLY arm available to the host.
@@ -49,6 +62,35 @@ export const HYPERSENSITIVITY_PRESETS: Record<HypersensitivityPresetName, Partia
   // The same sensitised host, pre-treated. Mast cell stabilisation blunts type I and would do
   // nothing at all to any of the others — which is the practical payoff of the classification.
   treatedAnaphylaxis: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, igeSensitisation: 1.15, mastCellStabilisation: 85 },
+
+  // --- Transfusion reactions: the same four arms, driven by what is in the bag ---
+  // Press "Transfuse" rather than "Challenge" for these.
+
+  // The control. A correctly matched unit in a patient who can handle the volume does exactly
+  // what it is supposed to: the haemoglobin goes up and nothing else happens.
+  compatibleTransfusion: { ...DEFAULT_HYPERSENSITIVITY_INPUTS },
+  // Type II, and the one reaction here that needs no prior exposure at all — anti-A and anti-B
+  // are naturally occurring, so a first transfusion can kill. Minutes to hours, haemoglobinuria,
+  // a positive Coombs, and a haemoglobin that FALLS after a transfusion.
+  aboIncompatible: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, aboCompatibility: 0 },
+  // Type I. An IgA-deficient recipient with anti-IgA meets donor plasma IgA, and reacts to the
+  // plasma rather than to the cells — which is why washed cells prevent it.
+  anaphylacticIgaDeficient: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, recipientIgaDeficiency: 1 },
+  // NOT one of the four types: cytokines that accumulated in the bag during storage. Fever and
+  // nothing else — no haemolysis, no complement consumption, no hypotension. That emptiness is
+  // the diagnosis, and it is why leukodepletion prevents it.
+  febrileNonHaemolytic: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, productLeukocyteLoad: 90 },
+  // Type II again, but the antibody has to be RE-MADE from memory against a minor antigen, and
+  // making antibody takes days. The patient goes home well and their haemoglobin falls a week
+  // later — which is why this one is found on a blood count rather than at the bedside.
+  delayedHaemolytic: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, anamnesticRecall: 1 },
+  // Not immune at all. Plain hydrostatics in a patient without the reserve to clear a unit —
+  // and the commonest transfusion reaction there is. High BNP; treat by offloading volume.
+  taco: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, cardiacReserve: 0.12 },
+  // Donor antibody against the RECIPIENT's neutrophils, so it is a property of the donor. The
+  // lung leaks rather than being overloaded, so the BNP stays normal — the one row that
+  // separates it from TACO, and the treatments are opposites.
+  trali: { ...DEFAULT_HYPERSENSITIVITY_INPUTS, donorAntileukocyteAntibody: 1 },
 };
 
 export const HYPERSENSITIVITY_PRESET_LABELS: Record<HypersensitivityPresetName, string> = {
@@ -58,13 +100,37 @@ export const HYPERSENSITIVITY_PRESET_LABELS: Record<HypersensitivityPresetName, 
   typeIIISerumSickness: 'Type III — serum sickness',
   typeIVContactDermatitis: 'Type IV — contact dermatitis',
   treatedAnaphylaxis: 'Type I, pre-treated',
+  compatibleTransfusion: 'Compatible unit',
+  aboIncompatible: 'ABO incompatible',
+  anaphylacticIgaDeficient: 'Anaphylactic (IgA)',
+  febrileNonHaemolytic: 'Febrile non-haemolytic',
+  delayedHaemolytic: 'Delayed haemolytic',
+  taco: 'TACO (overload)',
+  trali: 'TRALI',
 };
 
-export const PRESET_ORDER: HypersensitivityPresetName[] = [
+/** The classic four, where each arm is isolated so its timing and labs read cleanly. */
+export const MECHANISM_PRESET_ORDER: HypersensitivityPresetName[] = [
   'naiveFirstExposure',
   'typeIAnaphylaxis',
   'typeIIHaemolysis',
   'typeIIISerumSickness',
   'typeIVContactDermatitis',
   'treatedAnaphylaxis',
+];
+
+/** The same mechanisms met clinically, where the antigen arrives in a bag. */
+export const TRANSFUSION_PRESET_ORDER: HypersensitivityPresetName[] = [
+  'compatibleTransfusion',
+  'aboIncompatible',
+  'anaphylacticIgaDeficient',
+  'febrileNonHaemolytic',
+  'delayedHaemolytic',
+  'taco',
+  'trali',
+];
+
+export const PRESET_ORDER: HypersensitivityPresetName[] = [
+  ...MECHANISM_PRESET_ORDER,
+  ...TRANSFUSION_PRESET_ORDER,
 ];

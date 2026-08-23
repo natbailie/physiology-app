@@ -17,6 +17,25 @@
   margin-left: auto;
 }
 
+/* A labelled run of scenarios. Only rendered distinctly when a module supplies groups. */
+.group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.groupLabel {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding-right: 0.1rem;
+  white-space: nowrap;
+}
+
 .preset {
   font: inherit;
   font-size: 0.75rem;
@@ -105,6 +124,10 @@
     overflow-x: auto;
     scrollbar-width: none;
     padding-bottom: 2px;
+  }
+
+  .group {
+    flex-wrap: nowrap;
   }
 
   .presets::-webkit-scrollbar {

@@ -223,6 +223,7 @@ describe('numerical safety', () => {
           for (const sensitisedTCells of [0, 1.5]) {
             for (const complementFunction of [0, 1.5]) {
               const inputs: HypersensitivityInputs = {
+                ...DEFAULT_HYPERSENSITIVITY_INPUTS,
                 antigenDose,
                 igeSensitisation,
                 iggAgainstCellSurface,

@@ -8,8 +8,22 @@ export interface PresetAction {
   variant?: 'impulse' | 'danger';
 }
 
+export interface PresetGroup<T extends string> {
+  label: string;
+  order: readonly T[];
+}
+
 interface PresetBarProps<T extends string> {
   order: readonly T[];
+  /**
+   * Splits the scenarios into labelled runs.
+   *
+   * For a module whose presets fall into two genuinely different families — the four
+   * mechanisms, and the same mechanisms met clinically — an undifferentiated row of eleven
+   * buttons hides the structure that is half the teaching. Falls back to a single flat run
+   * when absent, so existing modules are untouched.
+   */
+  groups?: readonly PresetGroup<T>[];
   labels: Record<T, string>;
   onApply: (name: T) => void;
   actions?: PresetAction[];
@@ -23,25 +37,33 @@ interface PresetBarProps<T extends string> {
  * the fastest path to a teaching point, so it stays reachable at every scroll position. */
 export function PresetBar<T extends string>({
   order,
+  groups,
   labels,
   onApply,
   actions,
   onReset,
   disabled = false,
 }: PresetBarProps<T>) {
+  const runs: readonly PresetGroup<T>[] = groups ?? [{ label: '', order }];
+
   return (
     <div className={styles.bar}>
       <div className={styles.presets}>
-        {order.map((name) => (
-          <button
-            key={name}
-            type="button"
-            className={styles.preset}
-            disabled={disabled}
-            onClick={() => onApply(name)}
-          >
-            {labels[name]}
-          </button>
+        {runs.map((run) => (
+          <div key={run.label} className={styles.group}>
+            {run.label && <span className={styles.groupLabel}>{run.label}</span>}
+            {run.order.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={styles.preset}
+                disabled={disabled}
+                onClick={() => onApply(name)}
+              >
+                {labels[name]}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
 

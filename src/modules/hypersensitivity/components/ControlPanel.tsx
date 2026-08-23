@@ -80,6 +80,65 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         unit="%"
         onChange={(v) => onChange('mastCellStabilisation', v)}
       />
+      <Slider
+        label="ABO compatibility"
+        value={inputs.aboCompatibility}
+        min={0}
+        max={1}
+        step={0.05}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('aboCompatibility', v)}
+      />
+      <Slider
+        label="Recipient IgA deficiency"
+        value={inputs.recipientIgaDeficiency}
+        min={0}
+        max={1}
+        step={0.05}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('recipientIgaDeficiency', v)}
+      />
+      <Slider
+        label="Product leukocyte load"
+        value={inputs.productLeukocyteLoad}
+        min={0}
+        max={100}
+        step={5}
+        unit="%"
+        onChange={(v) => onChange('productLeukocyteLoad', v)}
+      />
+      <Slider
+        label="Donor anti-leukocyte antibody"
+        value={inputs.donorAntileukocyteAntibody}
+        min={0}
+        max={1}
+        step={0.05}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('donorAntileukocyteAntibody', v)}
+      />
+      <Slider
+        label="Anamnestic recall (minor antigen)"
+        value={inputs.anamnesticRecall}
+        min={0}
+        max={1}
+        step={0.05}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('anamnesticRecall', v)}
+      />
+      <Slider
+        label="Cardiac / renal reserve"
+        value={inputs.cardiacReserve}
+        min={0}
+        max={1.5}
+        step={0.05}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('cardiacReserve', v)}
+      />
     </ControlRail>
   );
 }

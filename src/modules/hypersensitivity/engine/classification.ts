@@ -1,4 +1,4 @@
-import type { DominantMechanism, HypersensitivityType } from './types';
+import type { DominantMechanism, HypersensitivityType, NonImmuneCause } from './types';
 
 interface ArmActivity {
   I: number;
@@ -44,6 +44,29 @@ const MECHANISM_NAMES: Record<HypersensitivityType, string> = {
 };
 
 /**
+ * Injury with no immune arm behind it.
+ *
+ * Checked in order of how badly it would matter to miss: overload and capillary leak both fill
+ * the lung and both desaturate the patient, and they are treated in opposite directions, so
+ * the distinction between them is the one worth making first.
+ */
+export function nonImmuneCause(effectiveOverload: number, capillaryLeak: number, cytokines: number): NonImmuneCause {
+  if (effectiveOverload > 0.08) return 'volume overload';
+  if (capillaryLeak > 0.15) return 'capillary leak';
+  if (cytokines > 0.15) return 'stored cytokines';
+  return null;
+}
+
+const NON_IMMUNE_SUMMARY: Record<NonNullable<NonImmuneCause>, string> = {
+  'volume overload':
+    'Not a hypersensitivity type — circulatory overload · BNP high, because the ventricle is stretched',
+  'capillary leak':
+    'Not a hypersensitivity type — donor antibody against recipient neutrophils · BNP NORMAL, the lung leaks rather than fills',
+  'stored cytokines':
+    'Not a hypersensitivity type — cytokines from stored donor leukocytes · fever and nothing else',
+};
+
+/**
  * The reasoning under the label: how fast it came on, and what that alone rules out.
  *
  * Onset is the single most discriminating piece of information about a hypersensitivity
@@ -51,8 +74,15 @@ const MECHANISM_NAMES: Record<HypersensitivityType, string> = {
  * speeds. Nothing that takes two days can be preformed granule contents; nothing that happens
  * in ten minutes can be waiting for cells to traffic to a site.
  */
-export function mechanismSummary(mechanism: DominantMechanism, onsetHours: number): string {
-  if (mechanism === 'none') return 'No reaction — the arm that would mediate one is not present';
+export function mechanismSummary(
+  mechanism: DominantMechanism,
+  onsetHours: number,
+  cause: NonImmuneCause = null,
+): string {
+  if (mechanism === 'none') {
+    if (cause) return NON_IMMUNE_SUMMARY[cause];
+    return 'No reaction — the arm that would mediate one is not present';
+  }
 
   const timing =
     onsetHours < 0
