@@ -90,7 +90,7 @@ export const MODULES: ModuleDescriptor[] = [
   {
     id: 'ecgConduction',
     name: 'ECG & Cardiac Conduction',
-    tagline: 'How depolarisation & repolarisation write each ECG wave',
+    tagline: 'How one dipole, seen twelve ways, writes an ECG',
     status: 'available',
     accentColorVar: 'var(--ecg-trace)',
   },

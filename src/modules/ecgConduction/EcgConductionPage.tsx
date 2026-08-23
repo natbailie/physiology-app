@@ -4,6 +4,7 @@ import { EcgDiagram } from './components/EcgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { EcgStrip } from '@/shared/components/EcgStrip/EcgStrip';
+import { TwelveLeadGrid } from './components/TwelveLeadGrid';
 import { ECG_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
@@ -52,6 +53,7 @@ export function EcgConductionPage() {
           labels={ECG_PRESET_LABELS}
           onApply={handleApplyPreset}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={
@@ -64,14 +66,23 @@ export function EcgConductionPage() {
             colorVar="var(--ecg-trace)"
             currentSegment={snapshot.derived.currentSegment}
           />
+          <TwelveLeadGrid
+            inputs={inputs}
+            rrIntervalMs={snapshot.state.lastRrIntervalMs}
+            selectedLead={inputs.lead}
+            onSelectLead={(lead) => handleChange('lead', lead)}
+          />
         </>
       }
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={ECG_PRESET_LABELS} />}
       transport={<SimControls transport={transport} />}
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={ecgConductionContent} startCollapsed={session.phase !== 'idle'} />}
-      footnote={'A simplified, conceptual model of cardiac activation — not a clinical or diagnostic tool, and it models only the six frontal-plane limb leads, so chest-lead findings such as the RSR\' of right bundle branch block are outside its scope. The trace is computed from the activation sequence rather than drawn, so the heart diagram and the strip are driven by one clock and are always in step; time runs slower than real life so the wavefront is watchable as its wave is inscribed. For the mechanical consequences of the same cycle — preload, afterload and the pressure-volume loop — see the Cardiac Cycle module.'}
+      footnote={
+        'A simplified, conceptual model of cardiac activation — not a clinical or diagnostic tool. The trace is computed from the activation sequence rather than drawn, so every lead is the same dipole seen from a different angle: the limb leads sample the frontal plane, the chest leads the horizontal one, and R-wave progression, the RSR\' of right bundle branch block and the localisation of an injury current all fall out of that geometry rather than being drawn in. The ventricle is modelled as four lumped regions, so morphology is directionally right but coarse — and only the injury CURRENT of an infarct is modelled, not the loss of muscle, so a posterior infarct shows its ST depression in V1-V2 without the tall R that accompanies it in life. The twelve-lead grid draws one representative conducted beat, so read the rhythm off the strip rather than the grid. Time runs slower than real life so the wavefront is watchable as its wave is inscribed. For the mechanical consequences of the same cycle — preload, afterload and the pressure-volume loop — see the Cardiac Cycle module.'
+      }
     />
   );
 }

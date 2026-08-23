@@ -118,6 +118,17 @@
   text-anchor: middle;
 }
 
+/* Caption under a reference circle. Centred, so the two planes can be titled without either
+   caption running off the edge of the viewBox. */
+.insetCaption {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
 .valueLabel {
   font-family: var(--mono);
   font-size: 9px;
@@ -132,4 +143,99 @@
   letter-spacing: 0.08em;
   fill: var(--ecg-trace);
   text-transform: uppercase;
+}
+
+/* --- Twelve-lead grid --- */
+
+.gridPanel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  padding: 0.7rem 0.8rem 0.5rem;
+}
+
+.gridHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.gridNote {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.gridLeads {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--panel-border);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+@media (max-width: 620px) {
+  .gridLeads {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.gridCell {
+  background: var(--panel);
+  border: none;
+  padding: 0.3rem 0.2rem 0.15rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  transition: background-color 0.15s ease;
+}
+
+.gridCell:hover {
+  background: var(--panel-raised);
+}
+
+.gridCell:focus-visible {
+  outline: 2px solid var(--ecg-trace);
+  outline-offset: -2px;
+}
+
+.gridCellSelected {
+  composes: gridCell;
+  background: color-mix(in srgb, var(--ecg-trace) 8%, var(--panel));
+}
+
+.gridCellLabel {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-align: left;
+  padding-left: 0.15rem;
+}
+
+.gridCellSelected .gridCellLabel {
+  color: var(--ecg-trace);
+}
+
+.gridTrace {
+  fill: none;
+  stroke: var(--ecg-trace);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gridBaseline {
+  stroke: var(--text-faint);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 3;
+  opacity: 0.6;
 }

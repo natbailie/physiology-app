@@ -1,7 +1,7 @@
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
-import type { EcgInputs, LeadName, Rhythm } from '../engine/types';
+import type { EcgInputs, InjuryTerritory, LeadName, Rhythm } from '../engine/types';
 
 interface ControlPanelProps {
   inputs: EcgInputs;
@@ -15,6 +15,21 @@ const LEAD_OPTIONS: { value: LeadName; label: string }[] = [
   { value: 'aVR', label: 'aVR' },
   { value: 'aVL', label: 'aVL' },
   { value: 'aVF', label: 'aVF' },
+  { value: 'V1', label: 'V1' },
+  { value: 'V2', label: 'V2' },
+  { value: 'V3', label: 'V3' },
+  { value: 'V4', label: 'V4' },
+  { value: 'V5', label: 'V5' },
+  { value: 'V6', label: 'V6' },
+];
+
+/** Which wall the injury current is centred on — the input that turns "there is an infarct"
+ * into "the infarct is here". */
+const TERRITORY_OPTIONS: { value: InjuryTerritory; label: string }[] = [
+  { value: 'anterior', label: 'Anterior' },
+  { value: 'inferior', label: 'Inferior' },
+  { value: 'lateral', label: 'Lateral' },
+  { value: 'posterior', label: 'Posterior' },
 ];
 
 const RHYTHM_OPTIONS: { value: Rhythm; label: string }[] = [
@@ -117,6 +132,13 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         unit="%"
         formatValue={percent}
         onChange={(v) => onChange('ischemicInjury', v)}
+      />
+      <ToggleGroup
+        label="Injury territory"
+        value={inputs.injuryTerritory}
+        options={TERRITORY_OPTIONS}
+        colorVar="var(--depolarized)"
+        onChange={(value) => onChange('injuryTerritory', value)}
       />
     
     </ControlRail>

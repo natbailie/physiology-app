@@ -1,8 +1,7 @@
-import { INJURY, LEAD_AXES } from './constants';
+import { INJURY, INJURY_TERRITORY_VECTORS } from './constants';
+import { projectOntoLead } from './leadProjection';
 import { clamp } from '@/shared/lib/math';
-import type { LeadName } from './types';
-
-const DEGREES_TO_RADIANS = Math.PI / 180;
+import type { InjuryTerritory, LeadName } from './types';
 
 /**
  * ST deviation from an ischemic injury current, mV.
@@ -13,21 +12,20 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
  * ST segment — the window when healthy myocardium is uniformly depolarised and everything
  * would otherwise be isoelectric.
  *
- * Because the offset is a vector projected onto each lead like any other, RECIPROCAL CHANGES
- * fall out for free: an inferior injury (+90°) elevates ST in the inferior leads (II, III,
- * aVF) and simultaneously depresses it in aVL (−30°), because cos(120°) is negative. That
- * pairing is a real diagnostic signature, and here it is a consequence of the geometry rather
- * than something drawn in.
+ * Because the offset is a vector projected onto each lead like any other, both LOCALISATION
+ * and RECIPROCAL CHANGE fall out for free. An inferior injury elevates ST in the inferior
+ * leads (II, III, aVF) and simultaneously depresses it in aVL, because that lead faces the
+ * other way. An anterior injury elevates V2 to V4 and leaves the limb leads comparatively
+ * quiet. And a POSTERIOR injury — which no electrode faces directly — appears only as its own
+ * mirror image: ST depression with tall R waves in V1 and V2. That last one is the classic
+ * miss, and here it is a consequence of the geometry rather than a special case.
  */
-export function stDeviationMv(ischemicInjury: number, lead: LeadName): number {
+export function stDeviationMv(ischemicInjury: number, territory: InjuryTerritory, lead: LeadName): number {
   const severity = clamp(ischemicInjury, 0, 1);
   if (severity === 0) return 0;
 
-  const territory = INJURY.TERRITORY_ANGLE_DEGREES * DEGREES_TO_RADIANS;
-  const leadAngle = LEAD_AXES[lead] * DEGREES_TO_RADIANS;
-  const projection = Math.cos(territory - leadAngle);
-
-  return severity * INJURY.ST_DEVIATION_MV_PER_UNIT * projection;
+  const direction = INJURY_TERRITORY_VECTORS[territory];
+  return severity * INJURY.ST_DEVIATION_MV_PER_UNIT * projectOntoLead(direction, lead);
 }
 
 /** True while the ventricle is uniformly depolarised — the ST segment window, where the
