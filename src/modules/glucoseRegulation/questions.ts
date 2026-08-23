@@ -43,4 +43,43 @@ export const GLUCOSE_QUESTIONS: readonly GlucoseQuestion[] = [
       'Glucose falls, because glucagon is what drives the hepatic glucose output that holds a fasting person up. The defence against hypoglycaemia is hierarchical: insulin secretion switches off first, glucagon rises second, and the slower cortisol, growth hormone and adrenaline arm engages only at genuinely low levels. Remove the second line and the patient leans on a weaker third one — which is the situation in long-standing diabetes, where the glucagon response is lost and hypoglycaemia unawareness follows.',
     metric: (s) => s.derived.bloodGlucoseMgDl,
   },
-];
+
+  {
+    id: 'meal-in-type-2',
+    stem: 'A patient with type 2 diabetes eats a large meal. Their beta cells still work, but their tissues respond poorly to insulin.',
+    setup: { preset: 'normal', inputs: { insulinResistance: 3.2 } },
+    intervention: { label: 'They eat a 90 g carbohydrate meal.', perturb: (state) => perturbEatMeal(state, 90) },
+    prompt: 'What happens to blood glucose?',
+    watch: 'blood glucose',
+    correctDirection: 'rises',
+    observeSeconds: 200,
+    explanation:
+      'It climbs higher and stays up longer than it would in a normal host, even though insulin is being secreted — often more of it. That is the defining feature of type 2 diabetes: the signal is present and the tissue does not answer it. Watch the insulin level while this happens, because it explains why the early disease is treated with drugs that improve sensitivity rather than with insulin itself, and why the fasting glucose can look almost normal while the post-meal excursion is grossly abnormal.',
+    metric: (s) => s.derived.bloodGlucoseMgDl,
+  },
+  {
+    id: 'meal-raises-insulin',
+    stem: 'A person with entirely normal beta cell function and normal insulin sensitivity eats a substantial meal.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'They eat a 75 g carbohydrate meal.', perturb: (state) => perturbEatMeal(state, 75) },
+    prompt: 'What happens to the insulin level?',
+    watch: 'the insulin level',
+    correctDirection: 'rises',
+    observeSeconds: 200,
+    explanation:
+      'Insulin rises, and the speed of it is the point: the beta cell responds to the glucose itself rather than to anything anticipatory, so the signal follows the substrate within minutes. Watch what it then does to hepatic glucose output, which is switched OFF at the same time — insulin does not merely push glucose into tissue, it simultaneously stops the liver adding more. Losing one arm of that is why a fasting glucose and a post-meal glucose can fail independently.',
+    metric: (s) => s.derived.insulinLevel,
+  },
+  {
+    id: 'insulin-drives-counter-regulation',
+    stem: 'A patient injects their usual insulin dose and then misses the meal it was intended for.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'A large insulin dose is given with no meal.', perturb: (state) => perturbGiveInsulin(state, 14) },
+    prompt: 'What happens to counter-regulatory drive?',
+    watch: 'counter-regulatory drive',
+    correctDirection: 'rises',
+    observeSeconds: 300,
+    explanation:
+      'It rises hard, because falling glucose is one of the most strongly defended signals in the body — glucagon first, then adrenaline, cortisol and growth hormone behind it. The brain cannot store or make glucose, so a defence with this much redundancy is proportionate. Two clinical consequences follow: the adrenergic symptoms a patient learns to recognise ARE the counter-regulation rather than the hypoglycaemia, and in someone whose response has been blunted by repeated episodes those warnings disappear while the danger does not.',
+    metric: (s) => s.derived.counterRegulatoryDrive,
+  },];
