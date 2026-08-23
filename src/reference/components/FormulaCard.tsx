@@ -62,6 +62,13 @@ export function FormulaCard({ formula }: FormulaCardProps) {
       </div>
 
       <p className={styles.explanation}>{formula.explanation}</p>
+
+      {/* A calculator says what a number is; the simulator shows what moves it. */}
+      {formula.moduleId && (
+        <a className={styles.simulateLink} href={`#${formula.moduleId}`}>
+          Watch this happen &rarr;
+        </a>
+      )}
     </div>
   );
 }

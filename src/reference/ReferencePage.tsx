@@ -1,8 +1,16 @@
 import { FormulaCard } from './components/FormulaCard';
-import { FORMULAS } from './formulas';
+import { FORMULAS, type FormulaDomain } from './formulas';
 import styles from './ReferencePage.module.css';
 
-const DOMAINS = ['Cardiovascular', 'Renal', 'Respiratory'] as const;
+/** Order reads roughly the way a pre-clinical course does, not alphabetically. */
+const DOMAINS: readonly FormulaDomain[] = [
+  'Cardiovascular',
+  'Respiratory',
+  'Acid-base',
+  'Renal',
+  'Haematology',
+  'Neuro & muscle',
+];
 
 export function ReferencePage() {
   return (
@@ -12,7 +20,10 @@ export function ReferencePage() {
           &larr; Modules
         </a>
         <h1 className={styles.title}>Formula Reference</h1>
-        <span className={styles.subtitle}>high-yield equations &amp; calculators for exam prep</span>
+        <span className={styles.subtitle}>
+          {FORMULAS.length} high-yield equations &amp; calculators — most of them computed by a simulator
+          in this app, and linked to it
+        </span>
       </header>
 
       {DOMAINS.map((domain) => {

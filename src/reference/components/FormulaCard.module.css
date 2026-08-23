@@ -95,3 +95,20 @@
   line-height: 1.5;
   color: var(--text-dim);
 }
+
+/* Links a formula to the module that computes it. */
+.simulateLink {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 1px;
+}
+
+.simulateLink:hover {
+  color: var(--text);
+  border-bottom-color: var(--text-faint);
+}
