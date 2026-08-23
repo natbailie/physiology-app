@@ -58,6 +58,7 @@ export function HypersensitivityPage() {
 
   return (
     <ModulePage
+      moduleId="hypersensitivity"
       title="Hypersensitivity"
       subtitle="four mechanisms, four timescales, and every transfusion reaction among them"
       accentVar="var(--ige)"

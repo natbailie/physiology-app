@@ -54,6 +54,7 @@ export function CapillaryExchangePage() {
 
   return (
     <ModulePage
+      moduleId="capillaryExchange"
       title="Capillary Exchange & Oedema"
       subtitle="Starling forces, the interstitium & lymphatic reserve"
       accentVar="var(--capillary)"

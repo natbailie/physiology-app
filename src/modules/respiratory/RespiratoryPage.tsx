@@ -56,6 +56,7 @@ export function RespiratoryPage() {
 
   return (
     <ModulePage
+      moduleId="respiratory"
       title="Respiratory & Acid-Base"
       subtitle="ventilation, gas exchange & acid-base feedback simulator"
       accentVar="var(--o2)"

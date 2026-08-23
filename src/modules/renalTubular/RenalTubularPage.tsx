@@ -53,6 +53,7 @@ export function RenalTubularPage() {
 
   return (
     <ModulePage
+      moduleId="renalTubular"
       title="Renal Tubular Physiology"
       subtitle="nephron segments, countercurrent multiplication & ADH"
       accentVar="var(--tubule)"

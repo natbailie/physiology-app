@@ -49,6 +49,7 @@ export function ImmuneResponsePage() {
 
   return (
     <ModulePage
+      moduleId="immuneResponse"
       title="Immune Response"
       subtitle="innate to adaptive, and how memory changes everything"
       accentVar="var(--memory)"

@@ -48,6 +48,7 @@ export function AutonomicNervousPage() {
 
   return (
     <ModulePage
+      moduleId="autonomicNervous"
       title="Autonomic Nervous System"
       subtitle="sympathetic/parasympathetic balance across organ effectors"
       accentVar="var(--sympathetic)"

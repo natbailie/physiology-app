@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { RelatedModules } from '@/shared/components/RelatedModules/RelatedModules';
 import styles from './ModulePage.module.css';
 
 interface ModulePageProps {
+  /** Registry id, used to look up this module's related links. */
+  moduleId: string;
   title: string;
   subtitle: string;
   /** Module accent, e.g. "var(--artery)". Drives slider fills, focus rings and preset accents. */
@@ -30,6 +33,7 @@ interface ModulePageProps {
  * main column, and a control rail that stays on screen so a slider drag and the
  * diagram it drives are always visible together. */
 export function ModulePage({
+  moduleId,
   title,
   subtitle,
   accentVar,
@@ -88,6 +92,7 @@ export function ModulePage({
             </div>
           )}
           {explainer}
+          <RelatedModules moduleId={moduleId} />
           <p className={styles.footnote}>{footnote}</p>
         </div>
 

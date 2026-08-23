@@ -53,6 +53,7 @@ export function CoagulationPage() {
 
   return (
     <ModulePage
+      moduleId="coagulation"
       title="Coagulation & Hemostasis"
       subtitle="the clotting cascade, PT/APTT & anticoagulants"
       accentVar="var(--fibrin)"

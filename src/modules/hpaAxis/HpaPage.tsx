@@ -53,6 +53,7 @@ export function HpaPage() {
 
   return (
     <ModulePage
+      moduleId="hpaAxis"
       title="HPA Axis"
       subtitle="cortisol, stress response & adrenal insufficiency simulator"
       accentVar="var(--cortisol)"

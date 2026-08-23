@@ -57,6 +57,7 @@ export function NeuromuscularJunctionPage() {
 
   return (
     <ModulePage
+      moduleId="neuromuscularJunction"
       title="Neuromuscular Junction"
       subtitle="a reserve so large that losing it is invisible until it is gone"
       accentVar="var(--vm)"

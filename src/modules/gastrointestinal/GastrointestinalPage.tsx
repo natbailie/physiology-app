@@ -53,6 +53,7 @@ export function GastrointestinalPage() {
 
   return (
     <ModulePage
+      moduleId="gastrointestinal"
       title="GI Physiology"
       subtitle="gastric acid, gut hormones & motility along the meal"
       accentVar="var(--gastrin)"

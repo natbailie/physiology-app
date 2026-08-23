@@ -53,6 +53,7 @@ export function CalciumHomeostasisPage() {
 
   return (
     <ModulePage
+      moduleId="calciumHomeostasis"
       title="Calcium & Bone/Mineral Homeostasis"
       subtitle="PTH, calcitriol & phosphate regulation"
       accentVar="var(--pth)"

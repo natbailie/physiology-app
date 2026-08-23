@@ -53,6 +53,7 @@ export function ErythropoiesisPage() {
 
   return (
     <ModulePage
+      moduleId="erythropoiesis"
       title="Erythropoiesis & Anemia"
       subtitle="EPO feedback, iron & B12, and classifying an anemia"
       accentVar="var(--hemoglobin)"

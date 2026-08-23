@@ -57,6 +57,7 @@ export function GlucoseRegulationPage() {
 
   return (
     <ModulePage
+      moduleId="glucoseRegulation"
       title="Glucose Regulation"
       subtitle="insulin, glucagon & counter-regulatory hormones"
       accentVar="var(--glucose)"

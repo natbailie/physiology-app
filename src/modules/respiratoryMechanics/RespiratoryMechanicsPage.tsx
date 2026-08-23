@@ -54,6 +54,7 @@ export function RespiratoryMechanicsPage() {
 
   return (
     <ModulePage
+      moduleId="respiratoryMechanics"
       title="Respiratory Mechanics & Spirometry"
       subtitle="lung volumes, compliance & V/Q matching"
       accentVar="var(--compliance)"

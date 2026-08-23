@@ -54,6 +54,7 @@ export function CardiorenalPage() {
 
   return (
     <ModulePage
+      moduleId="cardiorenal"
       title="Cardiorenal Monitor"
       subtitle="heart & kidney feedback simulator"
       accentVar="var(--artery)"

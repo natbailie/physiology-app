@@ -59,6 +59,7 @@ export function ShockStatesPage() {
 
   return (
     <ModulePage
+      moduleId="shockStates"
       title="Shock States"
       subtitle="four ways to fail, and the numbers that separate them"
       accentVar="var(--artery)"

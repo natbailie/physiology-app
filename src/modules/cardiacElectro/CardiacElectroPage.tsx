@@ -47,6 +47,7 @@ export function CardiacElectroPage() {
 
   return (
     <ModulePage
+      moduleId="cardiacElectro"
       title="Cardiac Cycle & PV Loop"
       subtitle="preload, afterload, contractility & the pressure-volume loop"
       accentVar="var(--pv-loop)"

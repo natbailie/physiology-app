@@ -54,6 +54,7 @@ export function MembranePotentialsPage() {
 
   return (
     <ModulePage
+      moduleId="membranePotentials"
       title="Membrane & Action Potentials"
       subtitle="ion conductances, Nernst/GHK & the action potential"
       accentVar="var(--vm)"

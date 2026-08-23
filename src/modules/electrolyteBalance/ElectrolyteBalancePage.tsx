@@ -49,6 +49,7 @@ export function ElectrolyteBalancePage() {
 
   return (
     <ModulePage
+      moduleId="electrolyteBalance"
       title="Potassium & Sodium-Water Balance"
       subtitle="serum versus total body, and tonicity versus volume"
       accentVar="var(--potassium)"

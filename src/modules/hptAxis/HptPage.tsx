@@ -53,6 +53,7 @@ export function HptPage() {
 
   return (
     <ModulePage
+      moduleId="hptAxis"
       title="Thyroid (HPT) Axis"
       subtitle="TSH, T4/T3 & thyroid function test interpretation simulator"
       accentVar="var(--thyroid)"

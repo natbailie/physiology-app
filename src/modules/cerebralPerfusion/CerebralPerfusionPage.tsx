@@ -57,6 +57,7 @@ export function CerebralPerfusionPage() {
 
   return (
     <ModulePage
+      moduleId="cerebralPerfusion"
       title="Cerebral Perfusion, ICP & CSF"
       subtitle="a box that cannot expand, and the pressure that gets you perfused"
       accentVar="var(--vm)"

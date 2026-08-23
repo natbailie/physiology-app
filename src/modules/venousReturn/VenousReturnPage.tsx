@@ -51,6 +51,7 @@ export function VenousReturnPage() {
 
   return (
     <ModulePage
+      moduleId="venousReturn"
       title="Venous Return & Cardiac Function Curves"
       subtitle="filling pressure, the two curves & where they cross"
       accentVar="var(--venous)"

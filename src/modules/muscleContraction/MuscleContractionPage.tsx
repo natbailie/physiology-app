@@ -65,6 +65,7 @@ export function MuscleContractionPage() {
 
   return (
     <ModulePage
+      moduleId="muscleContraction"
       title="Muscle & Excitation-Contraction Coupling"
       subtitle="calcium, cross-bridges, length-tension & force-velocity"
       accentVar="var(--sarcomere)"

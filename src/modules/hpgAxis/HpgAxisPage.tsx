@@ -49,6 +49,7 @@ export function HpgAxisPage() {
 
   return (
     <ModulePage
+      moduleId="hpgAxis"
       title="HPG Axis"
       subtitle="GnRH, LH/FSH & the ovulatory LH surge"
       accentVar="var(--lh)"

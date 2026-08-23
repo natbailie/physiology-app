@@ -44,6 +44,7 @@ export function EcgConductionPage() {
 
   return (
     <ModulePage
+      moduleId="ecgConduction"
       title="ECG & Cardiac Conduction"
       subtitle="how depolarisation and repolarisation write each wave"
       accentVar="var(--ecg-trace)"

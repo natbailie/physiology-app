@@ -58,6 +58,7 @@ export function FetalCirculationPage() {
 
   return (
     <ModulePage
+      moduleId="fetalCirculation"
       title="Fetal & Neonatal Circulation"
       subtitle="two circulations in parallel, and the minute they become one"
       accentVar="var(--o2)"
