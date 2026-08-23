@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type RouteId =
   | 'home'
+  | 'account'
   | 'cardiorenal'
   | 'respiratory'
   | 'hpaAxis'
@@ -31,6 +32,7 @@ export type RouteId =
   | 'reference';
 
 const VALID_ROUTES: RouteId[] = [
+  'account',
   'cardiorenal',
   'respiratory',
   'hpaAxis',

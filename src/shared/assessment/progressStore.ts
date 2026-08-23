@@ -22,13 +22,15 @@ export interface ProgressStore {
 const EMPTY: ModuleSummary = { attempted: 0, correct: 0, lastOutcome: {} };
 const STORAGE_KEY = 'physiologyLab.progress.v1';
 
-type Persisted = Record<string, ModuleSummary>;
+/** moduleId -> summary. Shared by the localStorage store and the server-backed one. */
+export type Persisted = Record<string, ModuleSummary>;
 
-function emptySummary(): ModuleSummary {
+export function emptySummary(): ModuleSummary {
   return { attempted: 0, correct: 0, lastOutcome: {} };
 }
 
-function applyRecord(all: Persisted, moduleId: string, questionId: string, correct: boolean): Persisted {
+/** The one definition of what a record does to a tally — both stores must agree with it. */
+export function applyRecord(all: Persisted, moduleId: string, questionId: string, correct: boolean): Persisted {
   const current = all[moduleId] ?? emptySummary();
   return {
     ...all,

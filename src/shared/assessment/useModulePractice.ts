@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { createLocalStorageProgressStore, type ModuleSummary, type ProgressStore } from './progressStore';
+import type { ModuleSummary, ProgressStore } from './progressStore';
 import type { ModuleQuestion, StateOf } from './types';
 import { useQuizSession, type QuizSession } from './useQuizSession';
+import { useProgressStore } from './useProgressStore';
 
 interface ModulePracticeOptions<TInputs, TPreset extends string, TSnapshot> {
   moduleId: string;
@@ -13,14 +14,8 @@ interface ModulePracticeOptions<TInputs, TPreset extends string, TSnapshot> {
   clearBaseline: () => void;
   resetEngine: () => void;
   perturbEngine: (fn: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>) => void;
-  /** Injectable for tests; defaults to the localStorage-backed store. */
+  /** Injectable for tests; overrides the learner's default (server or localStorage) store. */
   store?: ProgressStore;
-}
-
-let defaultStore: ProgressStore | null = null;
-function sharedStore(): ProgressStore {
-  defaultStore ??= createLocalStorageProgressStore();
-  return defaultStore;
 }
 
 /**
@@ -41,7 +36,8 @@ export function useModulePractice<TInputs, TPreset extends string, TSnapshot>({
   session: QuizSession<TInputs, TPreset, TSnapshot>;
   summary: ModuleSummary;
 } {
-  const activeStore = useMemo(() => store ?? sharedStore(), [store]);
+  const learnerStore = useProgressStore();
+  const activeStore = store ?? learnerStore;
 
   const applyInputs = useCallback(
     (patch: Partial<TInputs>, preset?: TPreset) => {

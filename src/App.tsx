@@ -1,5 +1,6 @@
 import { useHashRoute } from '@/shared/hooks/useHashRoute';
 import { HomePage } from '@/home/HomePage';
+import { AccountPage } from '@/account/AccountPage';
 import { CardiorenalPage } from '@/modules/cardiorenal/CardiorenalPage';
 import { RespiratoryPage } from '@/modules/respiratory/RespiratoryPage';
 import { HpaPage } from '@/modules/hpaAxis/HpaPage';
@@ -35,6 +36,7 @@ function App() {
   return (
     <div className={styles.app}>
       {route === 'home' && <HomePage />}
+      {route === 'account' && <AccountPage />}
       {route === 'cardiorenal' && <CardiorenalPage />}
       {route === 'respiratory' && <RespiratoryPage />}
       {route === 'hpaAxis' && <HpaPage />}
