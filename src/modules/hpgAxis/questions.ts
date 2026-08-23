@@ -48,4 +48,44 @@ export const HPG_QUESTIONS: readonly HpgQuestion[] = [
       'Responsiveness falls, which is the counter-intuitive centrepiece of this axis. GnRH must arrive in discrete pulses; continuous exposure downregulates the receptors and shuts the axis down. That is why long-acting GnRH agonists are used as chemical castration in prostate cancer DESPITE being agonists, and it explains the initial flare before the downregulation takes hold. Note the relationship is non-monotonic — too infrequent also fails, which is the mechanism of hypothalamic amenorrhoea at the other end.',
     metric: (s) => s.derived.pituitaryResponsiveness,
   },
+
+  {
+    id: 'ocp-suppresses-lh',
+    stem: 'A woman starts a combined oral contraceptive. Her ovaries and pituitary are entirely normal.',
+    setup: { preset: 'normalFemaleCycle' },
+    intervention: { label: 'Combined oestrogen and progestogen are taken continuously.', inputs: { exogenousEstrogenProgesterone: 85 } },
+    prompt: 'What happens to LH?',
+    watch: 'LH',
+    correctDirection: 'falls',
+    observeSeconds: 2000,
+    explanation:
+      'LH is suppressed, and suppressing it is precisely how the pill works: no LH surge means no ovulation. The mechanism is the steroid feedback that already exists, used deliberately — continuous oestrogen and progestogen hold the axis in its negative-feedback mode and never allow the switch to positive feedback that generates the surge. Note the contrast with the natural cycle, where rising oestrogen from a mature follicle flips that switch. Same hormones, same receptors; the difference is whether the level is steady or rising.',
+    metric: (s) => s.derived.lhLevel,
+  },
+  {
+    id: 'hypothalamic-amenorrhoea',
+    stem: 'A young athlete training intensively on a low energy intake stops menstruating. Her ovaries and pituitary are structurally normal.',
+    setup: { preset: 'normalFemaleCycle' },
+    intervention: { label: 'Hypothalamic GnRH output is suppressed.', inputs: { hypothalamicSuppression: 85 } },
+    prompt: 'What happens to oestrogen?',
+    watch: 'oestrogen',
+    correctDirection: 'falls',
+    observeSeconds: 2000,
+    explanation:
+      'Oestrogen falls, and the whole axis is quiet — low GnRH, low LH and FSH, low oestrogen. That pattern is what identifies the level of the lesion: an ovary that had failed would show HIGH gonadotrophins, because the pituitary would be shouting at it. Here nothing is shouting, which places the problem at the top. The clinical consequence is not merely the missed periods but the bone density lost while oestrogen is low, which is why this is treated rather than accepted as a consequence of training.',
+    metric: (s) => s.derived.estrogenLevel,
+  },
+  {
+    id: 'gonadal-failure-raises-lh',
+    stem: 'A man has primary testicular failure. His hypothalamus and pituitary are entirely normal.',
+    setup: { preset: 'normalMaleAxis' },
+    intervention: { label: 'Gonadal function collapses.', inputs: { gonadalFunction: 0.1 } },
+    prompt: 'What happens to LH?',
+    watch: 'LH',
+    correctDirection: 'rises',
+    observeSeconds: 2000,
+    explanation:
+      'LH rises, because the pituitary is working perfectly and is responding to the loss of testosterone feedback exactly as it should. High gonadotrophins with a low sex steroid is the signature of PRIMARY gonadal failure, and it is the direct mirror of the secondary picture where both are low. Note that FSH usually rises further and earlier than LH, because inhibin from the seminiferous tubules is a separate feedback signal and tubular function typically fails before Leydig cell function does.',
+    metric: (s) => s.derived.lhLevel,
+  }
 ];

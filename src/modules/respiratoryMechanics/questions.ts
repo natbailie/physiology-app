@@ -42,4 +42,41 @@ export const RESP_MECH_QUESTIONS: readonly RespMechQuestion[] = [
       'Without hypoxic vasoconstriction, blood keeps flowing through the unventilated unit and its V/Q falls further toward zero. HPV exists to divert perfusion away from lung that is not being ventilated, partially correcting a shunt — and note the asymmetry: it does nothing whatever for dead space, where the problem is ventilation reaching unperfused alveoli. Shunt has a defence; dead space does not. That is why shunt responds poorly to supplemental oxygen while dead space responds poorly to nothing at all.',
     metric: (s) => s.derived.vqRatioB,
   },
+
+  {
+    id: 'surfactant-loss-stiffens',
+    stem: 'A premature neonate has not yet made adequate surfactant. Their airways are structurally normal.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Surfactant function collapses.', inputs: { surfactantFunction: 0.15 } },
+    prompt: 'What happens to effective compliance?',
+    watch: 'the effective compliance',
+    correctDirection: 'falls',
+    explanation:
+      'The lung becomes far stiffer, because surfactant is what lowers alveolar surface tension. Two consequences follow from Laplace. The pressure needed to keep an alveolus open goes up, so the work of breathing rises steeply. And because that pressure varies inversely with radius, small alveoli would empty into large ones without surfactant to stabilise them — which is why the disease is one of collapse rather than merely of stiffness, and why the treatment is to replace the missing molecule.',
+    metric: (s) => s.derived.effectiveCompliance,
+  },
+  {
+    id: 'dead-space-wastes-ventilation',
+    stem: 'A patient has a large pulmonary embolism. Ventilation is unchanged and their airways are clear.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Dead space fraction rises sharply.', inputs: { deadSpaceFraction: 60 } },
+    prompt: 'What happens to alveolar ventilation?',
+    watch: 'the alveolar ventilation',
+    correctDirection: 'falls',
+    explanation:
+      'Alveolar ventilation falls even though minute ventilation has not changed at all, because a larger share of every breath is now going to lung that is ventilated but not perfused. This is why an embolism raises CO2 despite the patient breathing hard, and why the arterial CO2 can be normal while the END-TIDAL value is low — the gap between the two is dead space made measurable, and it is the basis for capnography in suspected embolism.',
+    metric: (s) => s.derived.alveolarVentilationMLPerMin,
+  },
+  {
+    id: 'fibrosis-shrinks-volumes',
+    stem: 'A patient develops pulmonary fibrosis. Their airways are not obstructed and their respiratory muscles are strong.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Lung compliance falls sharply.', inputs: { lungCompliance: 0.03 } },
+    prompt: 'What happens to total lung capacity?',
+    watch: 'the total lung capacity',
+    correctDirection: 'falls',
+    explanation:
+      'Every volume shrinks, because total lung capacity is where the inward elastic recoil of the lung balances the outward pull of the chest wall — and a stiffer lung pulls harder, so the balance is struck at a smaller volume. This is the defining feature of a restrictive defect. What does NOT change is the FEV1/FVC ratio, because both numerator and denominator shrink together, which is precisely how spirometry separates restriction from obstruction.',
+    metric: (s) => s.derived.totalLungCapacityML,
+  }
 ];

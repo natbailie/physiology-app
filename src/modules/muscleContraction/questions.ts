@@ -49,4 +49,44 @@ export const MUSCLE_QUESTIONS: readonly MuscleQuestion[] = [
       'Active tension falls away on the descending limb of the length-tension curve, because overlap between thick and thin filaments is what determines how many cross-bridges can form at all. Stretch too far and there is simply less overlap to work with. Note this is a statement about geometry rather than about activation: calcium release and troponin occupancy are unchanged, and the muscle is trying just as hard. The same relationship, applied to the ventricle, is the Frank-Starling mechanism and its decompensation limb.',
     metric: (s) => s.derived.lengthTensionFactor,
   },
+
+  {
+    id: 'recruitment-raises-tension',
+    stem: 'A person lifts a heavier object. The stimulation frequency to each active motor unit is unchanged.',
+    setup: { preset: 'fusedTetanus', inputs: { motorUnitRecruitment: 0.2 } },
+    intervention: { label: 'More motor units are recruited.', inputs: { motorUnitRecruitment: 0.95 } },
+    prompt: 'What happens to total tension?',
+    watch: 'the total tension',
+    correctDirection: 'rises',
+    explanation:
+      'Tension rises through recruitment rather than through anything happening inside the fibres already working — each motor unit is all-or-none, so graded force at the whole-muscle level comes from how many are switched on. Recruitment follows the size principle, smallest and most fatigue-resistant first, which is why fine control is available at low force and why a maximal effort is both powerful and brief. Frequency summation is the second, independent lever, and the two together cover the whole working range.',
+    metric: (s) => s.derived.totalTension,
+  },
+  {
+    id: 'serca-failure-impairs-relaxation',
+    stem: 'A muscle fibre has impaired SERCA function. Calcium release from the sarcoplasmic reticulum is unaffected.',
+    setup: { preset: 'fusedTetanus' },
+    intervention: { label: 'SERCA activity collapses.', inputs: { sercaActivity: 0.15 } },
+    prompt: 'What happens to cytosolic calcium?',
+    watch: 'the cytosolic calcium',
+    correctDirection: 'rises',
+    explanation:
+      'Cytosolic calcium rises, because SERCA is the pump that clears it back into the store and RELAXATION is an active, ATP-consuming process rather than something that happens when contraction stops. That asymmetry is worth holding on to: releasing calcium is passive and down a gradient, removing it costs energy. It is why relaxation fails before contraction does when ATP runs short, why rigor is a state of sustained binding, and why impaired relaxation is the earliest abnormality in several muscle diseases.',
+    metric: (s) => s.derived.cytosolicCalciumUM,
+  },
 ];
+
+/*
+ * Five rather than six, deliberately.
+ *
+ * Every remaining observable in this module is cycle-dependent — shortening velocity, active
+ * tension, power and even the isotonic/isometric mode all read differently depending where in
+ * the contraction they are sampled, so a before-and-after comparison measures the phase rather
+ * than the intervention. Three separate attempts at a sixth question were rejected by the
+ * harness for exactly that reason.
+ *
+ * `isFused` works because it is a property of the STIMULUS TRAIN rather than of the current
+ * beat, which is the shape any further question here would have to take. The force-velocity
+ * relationship deserves to be taught and belongs on the frozen-baseline overlay or a chart,
+ * not in a format that samples a single instant.
+ */
