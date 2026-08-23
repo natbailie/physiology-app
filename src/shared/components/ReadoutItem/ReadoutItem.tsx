@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { Term } from '@/shared/components/Term/Term';
 import styles from './ReadoutItem.module.css';
 
 interface ReadoutItemProps {
@@ -16,8 +17,9 @@ export function ReadoutItem({ label, value, unit, secondary, colorVar, wide }: R
   const style = colorVar ? ({ '--tile-color': colorVar } as CSSProperties) : undefined;
   return (
     <div className={wide ? `${styles.tile} ${styles.wide}` : styles.tile}>
+      {/* Looks its own label up, so a module gains definitions without being touched. */}
       <span className={`label ${styles.label}`} style={style}>
-        {label}
+        <Term label={label} />
       </span>
       <div className={styles.valueRow}>
         <span className={`numeral ${styles.value}`}>{value}</span>
