@@ -45,4 +45,41 @@ export const VENOUS_RETURN_QUESTIONS: readonly VenousReturnQuestion[] = [
       'A fistula bypasses the arterioles entirely, collapsing the resistance to venous return and letting blood race back to the heart. The result is a high cardiac output produced by a completely normal heart. It also shows why resistance to venous return is dominated by the VEINS rather than the arterioles: what matters is resistance weighted by the compliance downstream of it, and almost all the compliance is venous. Doubling systemic vascular resistance moves the venous return curve far less than it moves arterial pressure.',
     metric: (s) => s.derived.cardiacOutputLPerMin,
   },
+
+  {
+    id: 'haemorrhage-drops-filling-pressure',
+    stem: 'A trauma patient loses a substantial volume of blood. Their heart is entirely normal.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'They lose 1.5 L of blood.', inputs: { bloodVolumeMl: 3500 } },
+    prompt: 'What happens to the mean systemic filling pressure?',
+    watch: 'the mean systemic filling pressure',
+    correctDirection: 'falls',
+    explanation:
+      'It falls, and that is the reason the output falls with it. Mean systemic filling pressure is the pressure in the circulation with the heart stopped — the upstream head that drives blood back to the right atrium — and it is set by the stressed volume against the venous compliance. A normal heart cannot pump blood that does not arrive, so in haemorrhage the limit is the filling pressure, not the pump. That is why the treatment is volume rather than inotropes.',
+    metric: (s) => s.derived.meanSystemicFillingPressureMmHg,
+  },
+  {
+    id: 'failing-heart-raises-atrial-pressure',
+    stem: 'A patient develops a severe cardiomyopathy. Their blood volume and vascular tone are unchanged.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Contractility falls to a third of normal.', inputs: { contractility: 0.33 } },
+    prompt: 'What happens to the right atrial pressure?',
+    watch: 'the right atrial pressure',
+    correctDirection: 'rises',
+    explanation:
+      'The right atrial pressure rises, because a weaker heart operates further up the venous return curve. The two curves cross wherever cardiac function meets venous return, and flattening the cardiac curve moves the crossing to a higher pressure and a lower flow. The raised jugular venous pressure at the bedside IS that new crossing point, which is why it is a sign of the pump failing rather than of too much fluid.',
+    metric: (s) => s.derived.rightAtrialPressureMmHg,
+  },
+  {
+    id: 'venodilation-drops-return',
+    stem: 'A patient is given a large dose of a venodilator. Their blood volume is completely unchanged — not a millilitre has been lost.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Venous compliance doubles.', inputs: { venousCompliance: 2 } },
+    prompt: 'What happens to venous return?',
+    watch: 'venous return',
+    correctDirection: 'falls',
+    explanation:
+      'Return falls despite the blood volume being identical, because what drives it is the STRESSED volume — the part actually distending the vessels — and dilating the veins converts stressed volume into unstressed at a stroke. The same blood is now sitting in a larger container at a lower pressure. This is how nitrates relieve angina, and it is also why they drop the blood pressure of a patient who is already volume-deplete.',
+    metric: (s) => s.derived.venousReturnLPerMin,
+  }
 ];
