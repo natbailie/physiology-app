@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { EcgDiagram } from './components/EcgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_ECG_INPUTS, ECG_PRESETS, type EcgPresetName, ECG_PRESET_LABELS,
 import type { EcgInputs } from './engine/types';
 
 export function EcgConductionPage() {
-  const [inputs, setInputs] = useState<EcgInputs>(DEFAULT_ECG_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<EcgInputs>('ecgConduction', DEFAULT_ECG_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, ecgLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -52,6 +52,7 @@ export function EcgConductionPage() {
           order={PRESET_ORDER}
           labels={ECG_PRESET_LABELS}
           onApply={handleApplyPreset}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

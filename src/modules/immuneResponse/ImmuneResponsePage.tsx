@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ImmuneDiagram } from './components/ImmuneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_IMMUNE_INPUTS, IMMUNE_PRESETS, type ImmunePresetName, IMMUNE_PR
 import type { ImmuneInputs } from './engine/types';
 
 export function ImmuneResponsePage() {
-  const [inputs, setInputs] = useState<ImmuneInputs>(DEFAULT_IMMUNE_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ImmuneInputs>('immuneResponse', DEFAULT_IMMUNE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, immuneLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -58,6 +58,7 @@ export function ImmuneResponsePage() {
           labels={IMMUNE_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Vaccinate', onClick: () => perturb((state) => perturbVaccinate(state)), variant: 'impulse' }, { label: 'Infect', onClick: () => perturb((state) => perturbInfect(state)), variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

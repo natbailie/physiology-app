@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -24,7 +24,7 @@ import {
 import type { FetalInputs } from './engine/types';
 
 export function FetalCirculationPage() {
-  const [inputs, setInputs] = useState<FetalInputs>(DEFAULT_FETAL_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<FetalInputs>('fetalCirculation', DEFAULT_FETAL_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, fetalLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -67,6 +67,7 @@ export function FetalCirculationPage() {
           labels={FETAL_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Reopen duct', onClick: () => perturb(perturbReopenDuct), variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

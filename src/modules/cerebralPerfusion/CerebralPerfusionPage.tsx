@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -24,7 +24,7 @@ import {
 import type { CerebralInputs } from './engine/types';
 
 export function CerebralPerfusionPage() {
-  const [inputs, setInputs] = useState<CerebralInputs>(DEFAULT_CEREBRAL_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<CerebralInputs>('cerebralPerfusion', DEFAULT_CEREBRAL_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cerebralLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -69,6 +69,7 @@ export function CerebralPerfusionPage() {
             { label: 'Drain CSF', onClick: () => perturb((s) => perturbDrainCsf(s, 12)), variant: 'impulse' },
             { label: 'Acute bleed', onClick: () => perturb((s) => perturbAcuteBleed(s, 20)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

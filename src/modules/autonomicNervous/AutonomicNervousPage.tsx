@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { AnsDiagram } from './components/AnsDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -17,7 +17,7 @@ import { ANS_PRESETS, DEFAULT_ANS_INPUTS, type AnsPresetName, ANS_PRESET_LABELS,
 import type { AnsInputs } from './engine/types';
 
 export function AutonomicNervousPage() {
-  const [inputs, setInputs] = useState<AnsInputs>(DEFAULT_ANS_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<AnsInputs>('autonomicNervous', DEFAULT_ANS_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -56,6 +56,7 @@ export function AutonomicNervousPage() {
           order={PRESET_ORDER}
           labels={ANS_PRESET_LABELS}
           onApply={handleApplyPreset}
+          onShare={shareLink}
           onReset={reset}
         />
       }

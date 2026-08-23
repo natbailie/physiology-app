@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { HptDiagram } from './components/HptDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_HPT_INPUTS, HPT_PRESETS, type HptPresetName, HPT_PRESET_LABELS,
 import type { HptInputs } from './engine/types';
 
 export function HptPage() {
-  const [inputs, setInputs] = useState<HptInputs>(DEFAULT_HPT_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<HptInputs>('hptAxis', DEFAULT_HPT_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hptLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function HptPage() {
           labels={HPT_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Acute illness', onClick: triggerAcuteIllness, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { RespMechDiagram } from './components/RespMechDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -19,7 +19,7 @@ import { DEFAULT_RESP_MECH_INPUTS, RESP_MECH_PRESETS, type RespMechPresetName, R
 import type { RespMechInputs } from './engine/types';
 
 export function RespiratoryMechanicsPage() {
-  const [inputs, setInputs] = useState<RespMechInputs>(DEFAULT_RESP_MECH_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<RespMechInputs>('respiratoryMechanics', DEFAULT_RESP_MECH_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -63,6 +63,7 @@ export function RespiratoryMechanicsPage() {
           labels={RESP_MECH_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'FVC maneuver', onClick: triggerFvcManeuver, variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

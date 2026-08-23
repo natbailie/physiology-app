@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { HpaDiagram } from './components/HpaDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_HPA_INPUTS, HPA_PRESETS, type HpaPresetName, HPA_PRESET_LABELS,
 import type { HpaInputs } from './engine/types';
 
 export function HpaPage() {
-  const [inputs, setInputs] = useState<HpaInputs>(DEFAULT_HPA_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<HpaInputs>('hpaAxis', DEFAULT_HPA_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function HpaPage() {
           labels={HPA_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Acute stressor', onClick: triggerAcuteStressor, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

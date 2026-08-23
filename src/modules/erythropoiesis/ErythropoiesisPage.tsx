@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ErythropoiesisDiagram } from './components/ErythropoiesisDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_ERYTHRO_INPUTS, ERYTHRO_PRESETS, type ErythroPresetName, ERYTHR
 import type { ErythroInputs } from './engine/types';
 
 export function ErythropoiesisPage() {
-  const [inputs, setInputs] = useState<ErythroInputs>(DEFAULT_ERYTHRO_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ErythroInputs>('erythropoiesis', DEFAULT_ERYTHRO_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, erythroLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function ErythropoiesisPage() {
           labels={ERYTHRO_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Acute bleed', onClick: triggerAcuteBleed, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

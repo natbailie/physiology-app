@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { routeIdFromHash } from './scenarioUrl';
 
 export type RouteId =
   | 'home'
@@ -63,7 +64,9 @@ const VALID_ROUTES: RouteId[] = [
 ];
 
 function resolveHash(): RouteId {
-  const id = window.location.hash.replace('#', '');
+  // A hash may carry a shared scenario (`#respiratory?s=...`); the route is only the part
+  // before the query, so an unrecognised payload can never send a learner to the home page.
+  const id = routeIdFromHash(window.location.hash);
   return VALID_ROUTES.includes(id as RouteId) ? (id as RouteId) : 'home';
 }
 

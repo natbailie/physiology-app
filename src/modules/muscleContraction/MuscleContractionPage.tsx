@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { MuscleDiagram } from './components/MuscleDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -28,7 +29,7 @@ import { FORCE_VELOCITY, LENGTH_TENSION, TENSION } from './engine/constants';
 import type { MuscleInputs } from './engine/types';
 
 export function MuscleContractionPage() {
-  const [inputs, setInputs] = useState<MuscleInputs>(DEFAULT_MUSCLE_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<MuscleInputs>('muscleContraction', DEFAULT_MUSCLE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -76,6 +77,7 @@ export function MuscleContractionPage() {
             { label: 'Stimulate', onClick: () => perturb((s) => perturbStimulate(s)), variant: 'impulse' },
             { label: 'Caffeine', onClick: () => perturb((s) => perturbCaffeine(s)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

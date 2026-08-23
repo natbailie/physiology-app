@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { GlucoseDiagram } from './components/GlucoseDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_GLUCOSE_INPUTS, GLUCOSE_PRESETS, type GlucosePresetName, GLUCOS
 import type { GlucoseInputs } from './engine/types';
 
 export function GlucoseRegulationPage() {
-  const [inputs, setInputs] = useState<GlucoseInputs>(DEFAULT_GLUCOSE_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<GlucoseInputs>('glucoseRegulation', DEFAULT_GLUCOSE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -66,6 +66,7 @@ export function GlucoseRegulationPage() {
           labels={GLUCOSE_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Eat meal', onClick: triggerEatMeal, variant: 'impulse' }, { label: 'Give insulin', onClick: triggerGiveInsulin, variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

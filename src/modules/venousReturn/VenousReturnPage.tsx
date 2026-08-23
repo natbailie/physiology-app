@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { GuytonDiagram } from './components/GuytonDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -26,7 +26,7 @@ import { PLOT } from './engine/constants';
 import type { VenousReturnInputs } from './engine/types';
 
 export function VenousReturnPage() {
-  const [inputs, setInputs] = useState<VenousReturnInputs>(DEFAULT_VENOUS_RETURN_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<VenousReturnInputs>('venousReturn', DEFAULT_VENOUS_RETURN_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -64,6 +64,7 @@ export function VenousReturnPage() {
             { label: 'Valsalva', onClick: () => perturb((s) => perturbValsalva(s)), variant: 'impulse' },
             { label: 'Haemorrhage 1 L', onClick: () => perturb((s) => perturbHemorrhage(s)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

@@ -138,3 +138,15 @@
     margin-left: 0;
   }
 }
+
+/* Copy a link reproducing the current scenario. Subordinate to the scenarios themselves. */
+.share {
+  composes: preset;
+  color: var(--text-faint);
+  border-style: dashed;
+}
+
+.share:hover:not(:disabled) {
+  color: var(--text);
+  border-style: solid;
+}

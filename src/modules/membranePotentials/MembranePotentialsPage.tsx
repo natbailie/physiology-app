@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { MembraneDiagram } from './components/MembraneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -19,7 +19,7 @@ import { CONDUCTANCE } from './engine/constants';
 import type { MembraneInputs } from './engine/types';
 
 export function MembranePotentialsPage() {
-  const [inputs, setInputs] = useState<MembraneInputs>(DEFAULT_MEMBRANE_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<MembraneInputs>('membranePotentials', DEFAULT_MEMBRANE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -63,6 +63,7 @@ export function MembranePotentialsPage() {
           labels={MEMBRANE_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Stimulate', onClick: triggerStimulate, variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

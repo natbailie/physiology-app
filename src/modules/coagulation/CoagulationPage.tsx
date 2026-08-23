@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { CoagulationDiagram } from './components/CoagulationDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { COAG_PRESETS, DEFAULT_COAG_INPUTS, type CoagPresetName, COAG_PRESET_LAB
 import type { CoagInputs } from './engine/types';
 
 export function CoagulationPage() {
-  const [inputs, setInputs] = useState<CoagInputs>(DEFAULT_COAG_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<CoagInputs>('coagulation', DEFAULT_COAG_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, coagLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function CoagulationPage() {
           labels={COAG_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Injure vessel', onClick: triggerInjury, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

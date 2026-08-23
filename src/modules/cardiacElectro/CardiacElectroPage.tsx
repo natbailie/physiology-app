@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { CardiacDiagram } from './components/CardiacDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { CARDIAC_PRESETS, DEFAULT_CARDIAC_INPUTS, type CardiacPresetName, CARDIA
 import type { CardiacInputs } from './engine/types';
 
 export function CardiacElectroPage() {
-  const [inputs, setInputs] = useState<CardiacInputs>(DEFAULT_CARDIAC_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<CardiacInputs>('cardiacElectro', DEFAULT_CARDIAC_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -55,6 +55,7 @@ export function CardiacElectroPage() {
           order={PRESET_ORDER}
           labels={CARDIAC_PRESET_LABELS}
           onApply={handleApplyPreset}
+          onShare={shareLink}
           onReset={reset}
         />
       }

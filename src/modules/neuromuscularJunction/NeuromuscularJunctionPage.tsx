@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -24,7 +24,7 @@ import {
 import type { NmjInputs } from './engine/types';
 
 export function NeuromuscularJunctionPage() {
-  const [inputs, setInputs] = useState<NmjInputs>(DEFAULT_NMJ_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<NmjInputs>('neuromuscularJunction', DEFAULT_NMJ_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, nmjLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -69,6 +69,7 @@ export function NeuromuscularJunctionPage() {
             { label: 'Tetanic burst', onClick: () => perturb(perturbTetanicBurst), variant: 'impulse' },
             { label: 'Rest', onClick: () => perturb(perturbRest) },
           ]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

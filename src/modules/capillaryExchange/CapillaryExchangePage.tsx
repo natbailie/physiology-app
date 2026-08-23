@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { CapillaryDiagram } from './components/CapillaryDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -25,7 +25,7 @@ import {
 import type { CapillaryInputs, TissueBed } from './engine/types';
 
 export function CapillaryExchangePage() {
-  const [inputs, setInputs] = useState<CapillaryInputs>(DEFAULT_CAPILLARY_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<CapillaryInputs>('capillaryExchange', DEFAULT_CAPILLARY_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, capillaryLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -66,6 +66,7 @@ export function CapillaryExchangePage() {
             { label: 'Albumin infusion', onClick: () => perturb((s) => perturbAlbuminInfusion(s)), variant: 'impulse' },
             { label: 'Stand up', onClick: () => perturb((s) => perturbStandUp(s)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

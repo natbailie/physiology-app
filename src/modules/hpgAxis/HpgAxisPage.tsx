@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { HpgDiagram } from './components/HpgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -17,7 +17,7 @@ import { DEFAULT_HPG_INPUTS, HPG_PRESETS, type HpgPresetName, HPG_PRESET_LABELS,
 import type { HpgInputs } from './engine/types';
 
 export function HpgAxisPage() {
-  const [inputs, setInputs] = useState<HpgInputs>(DEFAULT_HPG_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<HpgInputs>('hpgAxis', DEFAULT_HPG_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpgLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -57,6 +57,7 @@ export function HpgAxisPage() {
           order={PRESET_ORDER}
           labels={HPG_PRESET_LABELS}
           onApply={handleApplyPreset}
+          onShare={shareLink}
           onReset={reset}
         />
       }

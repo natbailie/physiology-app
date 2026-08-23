@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,7 +19,7 @@ import { SIMULATION } from './engine/constants';
 import type { SimInputs } from './engine/types';
 
 export function CardiorenalPage() {
-  const [inputs, setInputs] = useState<SimInputs>(DEFAULT_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<SimInputs>('cardiorenal', DEFAULT_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -63,6 +63,7 @@ export function CardiorenalPage() {
           labels={PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Hemorrhage', onClick: triggerHemorrhage, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

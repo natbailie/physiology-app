@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { RespiratoryDiagram } from './components/RespiratoryDiagram';
 import { DavenportDiagram } from './components/DavenportDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -21,7 +21,7 @@ import { DEFAULT_RESP_INPUTS, RESP_PRESETS, type RespPresetName, RESP_PRESET_LAB
 import type { RespInputs } from './engine/types';
 
 export function RespiratoryPage() {
-  const [inputs, setInputs] = useState<RespInputs>(DEFAULT_RESP_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<RespInputs>('respiratory', DEFAULT_RESP_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -65,6 +65,7 @@ export function RespiratoryPage() {
           labels={RESP_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Bronchospasm', onClick: triggerBronchospasm, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

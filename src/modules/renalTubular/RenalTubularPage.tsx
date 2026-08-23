@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { NephronDiagram } from './components/NephronDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS, type RenalTubularP
 import type { RenalTubularInputs } from './engine/types';
 
 export function RenalTubularPage() {
-  const [inputs, setInputs] = useState<RenalTubularInputs>(DEFAULT_RENAL_TUBULAR_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<RenalTubularInputs>('renalTubular', DEFAULT_RENAL_TUBULAR_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function RenalTubularPage() {
           labels={RENAL_TUBULAR_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Water deprivation', onClick: triggerWaterDeprivation, variant: 'danger' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

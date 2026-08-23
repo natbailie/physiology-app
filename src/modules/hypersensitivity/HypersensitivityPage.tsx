@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ReactionTimeline } from './components/ReactionTimeline';
 import { MechanismDiagram } from './components/MechanismDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -27,7 +27,7 @@ import {
 import type { HypersensitivityInputs } from './engine/types';
 
 export function HypersensitivityPage() {
-  const [inputs, setInputs] = useState<HypersensitivityInputs>(DEFAULT_HYPERSENSITIVITY_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<HypersensitivityInputs>('hypersensitivity', DEFAULT_HYPERSENSITIVITY_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hypersensitivityLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -80,6 +80,7 @@ export function HypersensitivityPage() {
             },
             { label: 'Transfuse', onClick: () => perturb((state) => perturbTransfuse(state)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />

@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { CompartmentDiagram } from './components/CompartmentDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -24,7 +24,7 @@ import {
 import type { ElectrolyteInputs } from './engine/types';
 
 export function ElectrolyteBalancePage() {
-  const [inputs, setInputs] = useState<ElectrolyteInputs>(DEFAULT_ELECTROLYTE_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ElectrolyteInputs>('electrolyteBalance', DEFAULT_ELECTROLYTE_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, electrolyteLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function ElectrolyteBalancePage() {
             { label: 'Saline bolus', onClick: () => perturb((s) => perturbSalineBolus(s)), variant: 'impulse' },
             { label: 'K+ bolus', onClick: () => perturb((s) => perturbPotassiumBolus(s)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

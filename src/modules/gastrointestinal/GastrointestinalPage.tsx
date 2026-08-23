@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { GiDiagram } from './components/GiDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { DEFAULT_GI_INPUTS, GI_PRESETS, type GiPresetName, GI_PRESET_LABELS, PRE
 import type { GiInputs } from './engine/types';
 
 export function GastrointestinalPage() {
-  const [inputs, setInputs] = useState<GiInputs>(DEFAULT_GI_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<GiInputs>('gastrointestinal', DEFAULT_GI_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function GastrointestinalPage() {
           labels={GI_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Eat meal', onClick: triggerEatMeal, variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

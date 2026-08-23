@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styles from './PresetBar.module.css';
 
 export interface PresetAction {
@@ -27,6 +28,8 @@ interface PresetBarProps<T extends string> {
   labels: Record<T, string>;
   onApply: (name: T) => void;
   actions?: PresetAction[];
+  /** Returns a URL reproducing the current scenario. Renders a copy-link affordance when given. */
+  onShare?: () => string;
   onReset: () => void;
   /** Locks the bar while a pattern question is open. Loading a different scenario mid-question
    * would silently replace the one being asked about. */
@@ -41,9 +44,31 @@ export function PresetBar<T extends string>({
   labels,
   onApply,
   actions,
+  onShare,
   onReset,
   disabled = false,
 }: PresetBarProps<T>) {
+  const [copied, setCopied] = useState(false);
+
+  /**
+   * Copy, then say so for a moment.
+   *
+   * Without the acknowledgement a learner cannot tell the button did anything — the clipboard
+   * is invisible — and will click it repeatedly. Falls back to a prompt where the clipboard API
+   * is unavailable (an insecure origin, or a browser that refuses without a gesture it trusts),
+   * because a link the user can select beats a button that silently fails.
+   */
+  const handleShare = async () => {
+    if (!onShare) return;
+    const url = onShare();
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      window.prompt('Copy this link to share the scenario', url);
+    }
+  };
   const runs: readonly PresetGroup<T>[] = groups ?? [{ label: '', order }];
 
   return (
@@ -68,6 +93,16 @@ export function PresetBar<T extends string>({
       </div>
 
       <div className={styles.actions}>
+        {onShare && (
+          <button
+            type="button"
+            className={styles.share}
+            disabled={disabled}
+            onClick={() => void handleShare()}
+          >
+            {copied ? 'Link copied' : 'Share'}
+          </button>
+        )}
         {actions?.map((action) => (
           <button
             key={action.label}

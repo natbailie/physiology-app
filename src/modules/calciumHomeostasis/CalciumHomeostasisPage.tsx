@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { CalciumDiagram } from './components/CalciumDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,7 +18,7 @@ import { CALCIUM_PRESETS, DEFAULT_CALCIUM_INPUTS, type CalciumPresetName, CALCIU
 import type { CalciumInputs } from './engine/types';
 
 export function CalciumHomeostasisPage() {
-  const [inputs, setInputs] = useState<CalciumInputs>(DEFAULT_CALCIUM_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<CalciumInputs>('calciumHomeostasis', DEFAULT_CALCIUM_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -62,6 +62,7 @@ export function CalciumHomeostasisPage() {
           labels={CALCIUM_PRESET_LABELS}
           onApply={handleApplyPreset}
           actions={[{ label: 'Calcium infusion', onClick: triggerCalciumInfusion, variant: 'impulse' }]}
+          onShare={shareLink}
           onReset={reset}
         />
       }

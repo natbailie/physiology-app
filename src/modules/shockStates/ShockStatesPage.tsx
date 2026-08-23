@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -24,7 +24,7 @@ import {
 import type { ShockInputs } from './engine/types';
 
 export function ShockStatesPage() {
-  const [inputs, setInputs] = useState<ShockInputs>(DEFAULT_SHOCK_INPUTS);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ShockInputs>('shockStates', DEFAULT_SHOCK_INPUTS);
   const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, shockLoopConfig);
 
   const { session, summary } = useModulePractice({
@@ -71,6 +71,7 @@ export function ShockStatesPage() {
             { label: 'Fluid bolus', onClick: () => perturb((s) => perturbFluidBolus(s, 1000)), variant: 'impulse' },
             { label: 'Haemorrhage', onClick: () => perturb((s) => perturbHaemorrhage(s, 1000)), variant: 'danger' },
           ]}
+          onShare={shareLink}
           onReset={reset}
           disabled={session.blinded}
         />
