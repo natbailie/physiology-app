@@ -25,17 +25,20 @@ import type { NmjInputs } from './engine/types';
 
 export function NeuromuscularJunctionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<NmjInputs>('neuromuscularJunction', DEFAULT_NMJ_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, nmjLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, nmjLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'neuromuscularJunction',
     questions: NMJ_QUESTIONS,
     presets: NMJ_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_NMJ_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof NmjInputs>(key: K, value: NmjInputs[K]) {

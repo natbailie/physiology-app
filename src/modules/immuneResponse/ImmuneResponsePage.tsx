@@ -19,17 +19,20 @@ import type { ImmuneInputs } from './engine/types';
 
 export function ImmuneResponsePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ImmuneInputs>('immuneResponse', DEFAULT_IMMUNE_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, immuneLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, immuneLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'immuneResponse',
     questions: IMMUNE_QUESTIONS,
     presets: IMMUNE_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_IMMUNE_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof ImmuneInputs>(key: K, value: ImmuneInputs[K]) {
@@ -61,11 +64,12 @@ export function ImmuneResponsePage() {
           actions={[{ label: 'Vaccinate', onClick: () => perturb((state) => perturbVaccinate(state)), variant: 'impulse' }, { label: 'Infect', onClick: () => perturb((state) => perturbInfect(state)), variant: 'danger' }]}
           onShare={shareLink}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={<ImmuneDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={IMMUNE_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -74,6 +78,7 @@ export function ImmuneResponsePage() {
   <Sparkline label="Memory" unit="%" data={memoryHistory} baselineData={memoryHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--memory)" />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={immuneResponseContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of the immune response — not a clinical or diagnostic tool. The best way to use it: click "Infect" on a healthy host and watch the primary response run its course, then — once it has cleared — click "Infect" again. Nothing about the inputs has changed, only the memory the first infection left behind, and the second course is barely an illness. "Vaccinate" reaches the same protected state without any infection at all. One simulated second is roughly one day.'}

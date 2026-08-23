@@ -19,17 +19,20 @@ import type { RenalTubularInputs } from './engine/types';
 
 export function RenalTubularPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RenalTubularInputs>('renalTubular', DEFAULT_RENAL_TUBULAR_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'renalTubular',
     questions: RENAL_TUBULAR_QUESTIONS,
     presets: RENAL_TUBULAR_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_RENAL_TUBULAR_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof RenalTubularInputs>(key: K, value: RenalTubularInputs[K]) {

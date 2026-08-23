@@ -19,17 +19,20 @@ import type { GlucoseInputs } from './engine/types';
 
 export function GlucoseRegulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GlucoseInputs>('glucoseRegulation', DEFAULT_GLUCOSE_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'glucoseRegulation',
     questions: GLUCOSE_QUESTIONS,
     presets: GLUCOSE_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_GLUCOSE_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof GlucoseInputs>(key: K, value: GlucoseInputs[K]) {

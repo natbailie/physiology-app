@@ -19,17 +19,20 @@ import type { ErythroInputs } from './engine/types';
 
 export function ErythropoiesisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ErythroInputs>('erythropoiesis', DEFAULT_ERYTHRO_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, erythroLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, erythroLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'erythropoiesis',
     questions: ERYTHROPOIESIS_QUESTIONS,
     presets: ERYTHRO_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_ERYTHRO_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof ErythroInputs>(key: K, value: ErythroInputs[K]) {

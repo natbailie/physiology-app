@@ -19,17 +19,20 @@ import type { CardiacInputs } from './engine/types';
 
 export function CardiacElectroPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CardiacInputs>('cardiacElectro', DEFAULT_CARDIAC_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'cardiacElectro',
     questions: CARDIAC_QUESTIONS,
     presets: CARDIAC_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_CARDIAC_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof CardiacInputs>(key: K, value: CardiacInputs[K]) {

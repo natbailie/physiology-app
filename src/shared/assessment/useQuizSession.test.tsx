@@ -44,6 +44,7 @@ function setup(now: () => number = () => Date.now()) {
   const clearBaseline = vi.fn();
   const resetEngine = vi.fn();
   const perturbEngine = vi.fn();
+  const fastForwardEngine = vi.fn();
   const store = createMemoryProgressStore(emptyProgress(), now);
 
   const hook = renderHook(() =>
@@ -55,11 +56,12 @@ function setup(now: () => number = () => Date.now()) {
       clearBaseline,
       resetEngine,
       perturbEngine,
+      fastForwardEngine,
       store,
     }),
   );
 
-  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, store };
+  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, fastForwardEngine, store };
 }
 
 describe('useQuizSession', () => {
@@ -75,7 +77,10 @@ describe('useQuizSession', () => {
 
     expect(result.current.phase).toBe('predicting');
     expect(result.current.question?.id).toBe('q1');
-    expect(applyInputs).toHaveBeenCalledWith({ dial: 1 }, 'normal');
+    // The third argument matters: a question's setup is rebuilt from the module's defaults
+    // rather than merged onto whatever the previous question left, which is what the
+    // verification harness does and therefore what the learner must be shown.
+    expect(applyInputs).toHaveBeenCalledWith({ dial: 1 }, 'normal', true);
   });
 
   it('resets the engine BEFORE applying the setup, so questions cannot contaminate each other', () => {
@@ -154,6 +159,7 @@ describe('useQuizSession', () => {
         captureBaseline,
         clearBaseline: vi.fn(),
         resetEngine: vi.fn(),
+        fastForwardEngine: vi.fn(),
         perturbEngine: perturbEngine as never,
         store: createMemoryProgressStore(),
       }),

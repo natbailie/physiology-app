@@ -19,17 +19,20 @@ import type { HpaInputs } from './engine/types';
 
 export function HpaPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HpaInputs>('hpaAxis', DEFAULT_HPA_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'hpaAxis',
     questions: HPA_QUESTIONS,
     presets: HPA_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_HPA_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof HpaInputs>(key: K, value: HpaInputs[K]) {
@@ -65,11 +68,12 @@ export function HpaPage() {
           actions={[{ label: 'Acute stressor', onClick: triggerAcuteStressor, variant: 'danger' }]}
           onShare={shareLink}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={<HpaDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={HPA_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -78,6 +82,7 @@ export function HpaPage() {
   <Sparkline label="Adrenal reserve" unit="%" data={reserveHistory} baselineData={reserveHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--text)" />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={hpaAxisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of HPA axis physiology — not a clinical or diagnostic tool. Simulated time runs much faster than real time: one diurnal cortisol cycle completes in about 4 minutes, and the adrenal-atrophy/recovery dynamics (physiologically weeks) are compressed to be watchable within a session — try the "Steroid therapy" preset for a while, then set exogenous glucocorticoid back to 0.'}

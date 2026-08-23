@@ -22,17 +22,20 @@ import type { RespInputs } from './engine/types';
 
 export function RespiratoryPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RespInputs>('respiratory', DEFAULT_RESP_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'respiratory',
     questions: RESPIRATORY_QUESTIONS,
     presets: RESP_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_RESP_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {

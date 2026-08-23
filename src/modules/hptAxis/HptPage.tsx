@@ -19,17 +19,20 @@ import type { HptInputs } from './engine/types';
 
 export function HptPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HptInputs>('hptAxis', DEFAULT_HPT_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hptLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hptLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'hptAxis',
     questions: HPT_QUESTIONS,
     presets: HPT_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_HPT_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof HptInputs>(key: K, value: HptInputs[K]) {
@@ -65,11 +68,12 @@ export function HptPage() {
           actions={[{ label: 'Acute illness', onClick: triggerAcuteIllness, variant: 'danger' }]}
           onShare={shareLink}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={<HptDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={HPT_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -78,6 +82,7 @@ export function HptPage() {
   <Sparkline label="T3" unit="ng/dL*" data={t3History} baselineData={t3HistoryBaseline} domainMin={0} domainMax={250} colorVar="var(--thyroid)" />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={hptAxisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of thyroid axis physiology — not a clinical or diagnostic tool. T3 is shown in normalized units (baseline ≈ 90-100), not literal ng/dL. Simulated time runs much faster than real time so T4\'s week-long turnover is compressed to be watchable within a session.'}

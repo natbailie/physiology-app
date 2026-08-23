@@ -40,8 +40,15 @@ export interface QuizSession<TInputs, TPreset extends string, TSnapshot> {
 interface QuizSessionOptions<TInputs, TPreset extends string, TSnapshot> {
   moduleId: string;
   questions: readonly ModuleQuestion<TInputs, TPreset, TSnapshot>[];
-  /** Applies a question's setup or intervention to the page's live inputs. */
-  applyInputs: (patch: Partial<TInputs>, preset?: TPreset) => void;
+  /**
+   * Applies a question's setup or intervention to the page's live inputs.
+   *
+   * `fromDefaults` rebuilds from the module's baseline rather than merging onto what is on
+   * screen. Question SETUPS use it, because the verification harness settles from defaults and
+   * anything else means the learner is shown a scenario nobody checked; INTERVENTIONS do not,
+   * because they are applied on top of the setup they follow.
+   */
+  applyInputs: (patch: Partial<TInputs>, preset?: TPreset, fromDefaults?: boolean) => void;
   /** Freezes the trace at the moment of commitment, so the prediction is watched as a
    * divergence from where the model was rather than as an unanchored wiggle. */
   captureBaseline: () => void;
@@ -53,6 +60,8 @@ interface QuizSessionOptions<TInputs, TPreset extends string, TSnapshot> {
   resetEngine: () => void;
   /** Applies a question's one-off event to the engine state. */
   perturbEngine: (fn: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>) => void;
+  /** Integrates simulated time immediately, so a settled scenario can be shown at once. */
+  fastForwardEngine: (seconds: number) => void;
   store: ProgressStore;
 }
 
@@ -71,6 +80,7 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   clearBaseline,
   resetEngine,
   perturbEngine,
+  fastForwardEngine,
   store,
 }: QuizSessionOptions<TInputs, TPreset, TSnapshot>): QuizSession<TInputs, TPreset, TSnapshot> {
   const [phase, setPhase] = useState<QuizPhase>('idle');
@@ -111,19 +121,23 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
       clearBaseline();
       resetEngine();
       if (isPatternQuestion(next)) {
-        applyRef.current({}, next.answer);
+        applyRef.current({}, next.answer, true);
         // Same setup event the verification harness runs, so what the learner sees is what the
         // fairness check checked.
         if (next.setup?.perturb) perturbEngine(next.setup.perturb);
+        // ...and the same settling. The fairness check reads a settled engine; without this the
+        // learner is shown an unsettled transient and asked to name a disorder that has not
+        // developed yet, which at some modules' time scales would take minutes of waiting.
+        if (next.settleSeconds) fastForwardEngine(next.settleSeconds);
       } else {
-        applyRef.current(next.setup.inputs ?? {}, next.setup.preset);
+        applyRef.current(next.setup.inputs ?? {}, next.setup.preset, true);
         if (next.setup.perturb) perturbEngine(next.setup.perturb);
       }
       setIndex(at);
       setAnswer(null);
       setPhase('predicting');
     },
-    [byId, clearBaseline, resetEngine, perturbEngine],
+    [byId, clearBaseline, resetEngine, perturbEngine, fastForwardEngine],
   );
 
   const begin = useCallback(

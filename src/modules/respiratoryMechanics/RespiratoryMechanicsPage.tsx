@@ -20,17 +20,20 @@ import type { RespMechInputs } from './engine/types';
 
 export function RespiratoryMechanicsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RespMechInputs>('respiratoryMechanics', DEFAULT_RESP_MECH_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'respiratoryMechanics',
     questions: RESP_MECH_QUESTIONS,
     presets: RESP_MECH_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_RESP_MECH_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof RespMechInputs>(key: K, value: RespMechInputs[K]) {

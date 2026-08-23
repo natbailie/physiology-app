@@ -25,17 +25,20 @@ import type { CerebralInputs } from './engine/types';
 
 export function CerebralPerfusionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CerebralInputs>('cerebralPerfusion', DEFAULT_CEREBRAL_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cerebralLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cerebralLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'cerebralPerfusion',
     questions: CEREBRAL_QUESTIONS,
     presets: CEREBRAL_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_CEREBRAL_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof CerebralInputs>(key: K, value: CerebralInputs[K]) {

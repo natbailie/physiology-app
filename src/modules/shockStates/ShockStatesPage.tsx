@@ -25,17 +25,20 @@ import type { ShockInputs } from './engine/types';
 
 export function ShockStatesPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ShockInputs>('shockStates', DEFAULT_SHOCK_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, shockLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, shockLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'shockStates',
     questions: SHOCK_QUESTIONS,
     presets: SHOCK_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_SHOCK_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof ShockInputs>(key: K, value: ShockInputs[K]) {

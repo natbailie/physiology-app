@@ -39,7 +39,7 @@ export interface SimBaseline<THistoryPoint> {
   clear: () => void;
 }
 
-export interface UseEngineLoopResult<TState, TDerived, THistoryPoint> {
+export interface UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   snapshot: { state: TState; derived: TDerived };
   history: THistoryPoint[];
   reset: () => void;
@@ -47,6 +47,9 @@ export interface UseEngineLoopResult<TState, TDerived, THistoryPoint> {
    * immediately. Each module defines its own named wrapper around this, e.g.
    * `triggerHemorrhage` or `triggerBronchospasm`. */
   perturb: (fn: (state: TState) => TState) => void;
+  /** Integrates simulated time immediately, so a scenario can be shown already settled.
+   * Pass `inputsOverride` when the inputs were changed in the same tick. */
+  fastForward: (seconds: number, inputsOverride?: TInputs) => void;
   /** Play/pause/step/speed over simulated time. */
   transport: SimTransport;
   /** Freeze the current trace so a changed scenario can be compared against it. */
@@ -73,7 +76,7 @@ function prefersReducedMotion(): boolean {
 export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
   inputs: TInputs,
   config: EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint>,
-): UseEngineLoopResult<TState, TDerived, THistoryPoint> {
+): UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   const inputsRef = useRef(inputs);
   const configRef = useRef(config);
   const stateRef = useRef(config.createInitialState());
@@ -158,6 +161,36 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
     });
   }, []);
 
+  /**
+   * Integrate `seconds` of SIMULATED time immediately, without animating it.
+   *
+   * Pattern-discrimination questions need this. Their fairness is verified against a settled
+   * engine, but the page only reset it and started the clock — so a learner was shown an
+   * unsettled transient and asked to name a disorder that had not developed yet. At the thyroid
+   * axis's time scale, waiting for the panel the harness checked would have taken eleven
+   * minutes.
+   *
+   * Chunked to the engine's own stability bound, exactly as the verification harness settles, so
+   * the state a learner reads is the state that was checked.
+   */
+  const fastForward = useCallback((seconds: number, inputsOverride?: TInputs) => {
+    const cfg = configRef.current;
+    // `inputsRef` syncs via an effect, so a caller that has just applied a preset and wants it
+    // settled in the SAME tick must pass the new inputs explicitly — otherwise this integrates
+    // four thousand seconds of the previous scenario. That hazard is documented in CLAUDE.md
+    // and it is exactly what happens when a pattern question loads.
+    const activeInputs = inputsOverride ?? inputsRef.current;
+    let remaining = seconds;
+    let state = stateRef.current;
+    while (remaining > 0) {
+      const dt = Math.min(remaining, cfg.maxDtSeconds);
+      remaining -= dt;
+      state = cfg.step(state, activeInputs, dt).state;
+    }
+    stateRef.current = state;
+    setSnapshot({ state, derived: cfg.computeDerived(state, activeInputs) });
+  }, []);
+
   const reset = useCallback(() => {
     const cfg = configRef.current;
     stateRef.current = cfg.createInitialState();
@@ -205,5 +238,5 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
     clear: useCallback(() => setBaselineHistory(null), []),
   };
 
-  return { snapshot, history, reset, perturb, transport, baseline };
+  return { snapshot, history, reset, perturb, fastForward, transport, baseline };
 }

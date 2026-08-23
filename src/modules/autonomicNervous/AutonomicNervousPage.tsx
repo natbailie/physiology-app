@@ -18,17 +18,20 @@ import type { AnsInputs } from './engine/types';
 
 export function AutonomicNervousPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<AnsInputs>('autonomicNervous', DEFAULT_ANS_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'autonomicNervous',
     questions: ANS_QUESTIONS,
     presets: ANS_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_ANS_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof AnsInputs>(key: K, value: AnsInputs[K]) {

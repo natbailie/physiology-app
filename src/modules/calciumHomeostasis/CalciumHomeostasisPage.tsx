@@ -19,17 +19,20 @@ import type { CalciumInputs } from './engine/types';
 
 export function CalciumHomeostasisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CalciumInputs>('calciumHomeostasis', DEFAULT_CALCIUM_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'calciumHomeostasis',
     questions: CALCIUM_QUESTIONS,
     presets: CALCIUM_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_CALCIUM_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof CalciumInputs>(key: K, value: CalciumInputs[K]) {

@@ -20,17 +20,20 @@ import type { MembraneInputs } from './engine/types';
 
 export function MembranePotentialsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MembraneInputs>('membranePotentials', DEFAULT_MEMBRANE_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'membranePotentials',
     questions: MEMBRANE_QUESTIONS,
     presets: MEMBRANE_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_MEMBRANE_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof MembraneInputs>(key: K, value: MembraneInputs[K]) {

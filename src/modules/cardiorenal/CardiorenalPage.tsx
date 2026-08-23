@@ -20,17 +20,20 @@ import type { SimInputs } from './engine/types';
 
 export function CardiorenalPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<SimInputs>('cardiorenal', DEFAULT_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'cardiorenal',
     questions: CARDIORENAL_QUESTIONS,
     presets: PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {

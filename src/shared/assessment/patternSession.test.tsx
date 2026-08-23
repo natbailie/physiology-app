@@ -32,6 +32,7 @@ function setup(questions: ModuleQuestion<Inputs, Preset, Snapshot>[] = [PATTERN]
   const clearBaseline = vi.fn();
   const resetEngine = vi.fn();
   const perturbEngine = vi.fn();
+  const fastForwardEngine = vi.fn();
   const store = createMemoryProgressStore();
 
   const hook = renderHook(() =>
@@ -43,10 +44,11 @@ function setup(questions: ModuleQuestion<Inputs, Preset, Snapshot>[] = [PATTERN]
       clearBaseline,
       resetEngine,
       perturbEngine,
+      fastForwardEngine,
       store,
     }),
   );
-  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, store };
+  return { ...hook, applyInputs, captureBaseline, clearBaseline, resetEngine, perturbEngine, fastForwardEngine, store };
 }
 
 describe('pattern-discrimination sessions', () => {
@@ -54,7 +56,7 @@ describe('pattern-discrimination sessions', () => {
     const { result, applyInputs } = setup();
     act(() => result.current.start());
 
-    expect(applyInputs).toHaveBeenCalledWith({}, 'alpha');
+    expect(applyInputs).toHaveBeenCalledWith({}, 'alpha', true);
   });
 
   it('resets the engine before loading the scenario, so the panel is uncontaminated', () => {

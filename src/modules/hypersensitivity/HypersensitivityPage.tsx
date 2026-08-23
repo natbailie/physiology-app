@@ -28,17 +28,20 @@ import type { HypersensitivityInputs } from './engine/types';
 
 export function HypersensitivityPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HypersensitivityInputs>('hypersensitivity', DEFAULT_HYPERSENSITIVITY_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hypersensitivityLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hypersensitivityLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'hypersensitivity',
     questions: HYPERSENSITIVITY_QUESTIONS,
     presets: HYPERSENSITIVITY_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_HYPERSENSITIVITY_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof HypersensitivityInputs>(key: K, value: HypersensitivityInputs[K]) {

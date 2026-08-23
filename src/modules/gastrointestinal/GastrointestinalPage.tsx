@@ -19,17 +19,20 @@ import type { GiInputs } from './engine/types';
 
 export function GastrointestinalPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GiInputs>('gastrointestinal', DEFAULT_GI_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'gastrointestinal',
     questions: GI_QUESTIONS,
     presets: GI_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_GI_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof GiInputs>(key: K, value: GiInputs[K]) {

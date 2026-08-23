@@ -26,17 +26,20 @@ import type { CapillaryInputs, TissueBed } from './engine/types';
 
 export function CapillaryExchangePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CapillaryInputs>('capillaryExchange', DEFAULT_CAPILLARY_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, capillaryLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, capillaryLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'capillaryExchange',
     questions: CAPILLARY_QUESTIONS,
     presets: CAPILLARY_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_CAPILLARY_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
 

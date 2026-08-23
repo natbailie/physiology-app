@@ -30,17 +30,20 @@ import type { MuscleInputs } from './engine/types';
 
 export function MuscleContractionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MuscleInputs>('muscleContraction', DEFAULT_MUSCLE_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'muscleContraction',
     questions: MUSCLE_QUESTIONS,
     presets: MUSCLE_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_MUSCLE_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
   const { derived, state } = snapshot;
 

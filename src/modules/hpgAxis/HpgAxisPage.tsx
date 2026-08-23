@@ -18,17 +18,20 @@ import type { HpgInputs } from './engine/types';
 
 export function HpgAxisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HpgInputs>('hpgAxis', DEFAULT_HPG_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, hpgLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hpgLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'hpgAxis',
     questions: HPG_QUESTIONS,
     presets: HPG_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_HPG_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof HpgInputs>(key: K, value: HpgInputs[K]) {

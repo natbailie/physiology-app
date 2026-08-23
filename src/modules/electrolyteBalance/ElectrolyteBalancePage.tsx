@@ -25,17 +25,20 @@ import type { ElectrolyteInputs } from './engine/types';
 
 export function ElectrolyteBalancePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ElectrolyteInputs>('electrolyteBalance', DEFAULT_ELECTROLYTE_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, electrolyteLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, electrolyteLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'electrolyteBalance',
     questions: ELECTROLYTE_QUESTIONS,
     presets: ELECTROLYTE_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_ELECTROLYTE_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
 
@@ -65,11 +68,12 @@ export function ElectrolyteBalancePage() {
           ]}
           onShare={shareLink}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
       diagram={<CompartmentDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={ELECTROLYTE_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -104,6 +108,7 @@ export function ElectrolyteBalancePage() {
           />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={electrolyteBalanceContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={`A simplified, conceptual model of water and electrolyte balance — not a clinical or dosing tool. One second of real time is about one simulated hour, so a disorder that takes days to develop or correct plays out over roughly a minute. Current assessment: ${derived.disorderClassification}.`}

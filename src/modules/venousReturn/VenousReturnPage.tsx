@@ -27,17 +27,20 @@ import type { VenousReturnInputs } from './engine/types';
 
 export function VenousReturnPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<VenousReturnInputs>('venousReturn', DEFAULT_VENOUS_RETURN_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'venousReturn',
     questions: VENOUS_RETURN_QUESTIONS,
     presets: VENOUS_RETURN_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_VENOUS_RETURN_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
 

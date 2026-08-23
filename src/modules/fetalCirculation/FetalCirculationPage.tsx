@@ -25,17 +25,20 @@ import type { FetalInputs } from './engine/types';
 
 export function FetalCirculationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<FetalInputs>('fetalCirculation', DEFAULT_FETAL_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, fetalLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, fetalLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'fetalCirculation',
     questions: FETAL_QUESTIONS,
     presets: FETAL_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_FETAL_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof FetalInputs>(key: K, value: FetalInputs[K]) {

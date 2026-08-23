@@ -19,17 +19,20 @@ import type { CoagInputs } from './engine/types';
 
 export function CoagulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CoagInputs>('coagulation', DEFAULT_COAG_INPUTS);
-  const { snapshot, history, perturb, reset, transport, baseline } = useEngineLoop(inputs, coagLoopConfig);
+  const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, coagLoopConfig);
 
   const { session, summary } = useModulePractice({
     moduleId: 'coagulation',
     questions: COAGULATION_QUESTIONS,
     presets: COAG_PRESETS,
+    inputs,
+    defaultInputs: DEFAULT_COAG_INPUTS,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
+    fastForwardEngine: fastForward,
   });
 
   function handleChange<K extends keyof CoagInputs>(key: K, value: CoagInputs[K]) {
