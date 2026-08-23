@@ -10,6 +10,9 @@ import { runQuestion, type QuestionRunResult } from './verifyQuestion';
  * keyed direction is a fact about the model rather than an author's recollection. If tuning
  * a constant flips an outcome, the question that taught it fails loudly.
  */
+/** Room for engines that need simulated days to settle. See `patternSuite` for the reasoning. */
+const SETTLE_TIMEOUT_MS = 180_000;
+
 export function describeQuestionSet<TState, TInputs, TDerived, THistoryPoint, TPreset extends string>(
   config: EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint>,
   defaultInputs: TInputs,
@@ -24,7 +27,8 @@ export function describeQuestionSet<TState, TInputs, TDerived, THistoryPoint, TP
     for (const question of questions) {
       results.set(question.id, runQuestion(config, defaultInputs, presets, question));
     }
-  });
+    // Same reason as the pattern suite: some engines need simulated days, in small steps.
+  }, SETTLE_TIMEOUT_MS);
 
   const resultFor = (id: string): QuestionRunResult => {
     const result = results.get(id);

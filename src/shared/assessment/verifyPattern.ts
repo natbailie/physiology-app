@@ -41,6 +41,16 @@ export function readPanel<TState, TInputs, TDerived, THistoryPoint, TPreset exte
   return panel.map((field) => ({ label: field.label, value: field.value(snapshot) }));
 }
 
+/**
+ * Settled panels, keyed by preset and settle time.
+ *
+ * Questions within a module share options — four hyponatraemia questions drawn from the same
+ * four scenarios settle the same four engines twelve times without this. On a module whose
+ * disorders take simulated DAYS to develop that is the difference between a suite that runs and
+ * one that times out.
+ */
+export type PanelCache = Map<string, PanelReading[]>;
+
 export interface PatternRunResult<TPreset extends string> {
   panels: Map<TPreset, PanelReading[]>;
   /** Distractors whose panel is indistinguishable from the answer's — an unfair question. */
@@ -59,6 +69,7 @@ export function runPatternQuestion<TState, TInputs, TDerived, THistoryPoint, TPr
   defaultInputs: TInputs,
   presets: Record<TPreset, Partial<TInputs>>,
   question: PatternQuestion<TPreset, { state: TState; derived: TDerived }>,
+  cache?: PanelCache,
 ): PatternRunResult<TPreset> {
   const seconds = question.settleSeconds ?? 600;
   const panels = new Map<TPreset, PanelReading[]>();
@@ -68,7 +79,13 @@ export function runPatternQuestion<TState, TInputs, TDerived, THistoryPoint, TPr
   const perturb = question.setup?.perturb as ((state: TState) => TState) | undefined;
 
   for (const option of question.options) {
-    panels.set(option, readPanel(config, defaultInputs, presets, question.panel, option, seconds, perturb));
+    // Keyed on everything that changes the result: which scenario, how long, and whether a
+    // setup event ran. Two questions sharing all three share the settle.
+    const key = `${option}|${seconds}|${perturb ? 'perturbed' : 'plain'}`;
+    const cached = cache?.get(key);
+    const readings = cached ?? readPanel(config, defaultInputs, presets, question.panel, option, seconds, perturb);
+    if (!cached) cache?.set(key, readings);
+    panels.set(option, readings);
   }
 
   const answerPanel = panels.get(question.answer) ?? [];

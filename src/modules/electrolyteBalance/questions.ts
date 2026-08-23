@@ -1,9 +1,30 @@
-import type { PredictQuestion } from '@/shared/assessment/types';
+import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
 import type { ElectrolyteDerived, ElectrolyteInputs, ElectrolyteState } from './engine/types';
 import type { ElectrolytePresetName } from './engine/presets';
 
 type Snapshot = { state: ElectrolyteState; derived: ElectrolyteDerived };
-export type ElectrolyteQuestion = PredictQuestion<ElectrolyteInputs, ElectrolytePresetName, Snapshot>;
+export type ElectrolyteQuestion = ModuleQuestion<ElectrolyteInputs, ElectrolytePresetName, Snapshot>;
+
+/**
+ * The hyponatraemia workup, in the order it is actually done.
+ *
+ * The serum sodium is on the panel and is deliberately near-useless: all three causes below
+ * produce almost the same number, which is exactly the clinical problem. Volume status and
+ * urine osmolality are what separate them, and that is the whole algorithm.
+ */
+const SODIUM_PANEL: readonly PanelField<Snapshot>[] = [
+  { label: 'Serum Na+', unit: 'mEq/L', value: (s) => s.derived.serumSodiumMeqL, decimals: 1, tolerance: 0.004 },
+  { label: 'Serum K+', unit: 'mEq/L', value: (s) => s.derived.serumPotassiumMeqL, decimals: 2 },
+  { label: 'ECF volume', unit: 'L', value: (s) => s.derived.ecfVolumeL, decimals: 1 },
+  { label: 'Urine osmolality', unit: 'mOsm/kg', value: (s) => s.derived.urineOsmolality, decimals: 0 },
+];
+
+/**
+ * Sodium moves over DAYS, and this engine works in real seconds — so a settle short enough to
+ * feel quick leaves every preset sitting at 140 and the panel meaningless. Roughly eleven hours
+ * of simulated time is the point at which the three causes have genuinely separated.
+ */
+const SETTLE = 40_000;
 
 export const ELECTROLYTE_QUESTIONS: readonly ElectrolyteQuestion[] = [
   {
@@ -82,5 +103,38 @@ export const ELECTROLYTE_QUESTIONS: readonly ElectrolyteQuestion[] = [
     explanation:
       'ADH that ignores osmolality keeps the collecting duct permeable to water no matter how dilute the plasma becomes, so ingested water is retained and the sodium it dilutes falls. Note the two findings that define the syndrome and both appear here: the urine stays inappropriately concentrated while the plasma is hypotonic, and free water clearance goes negative. The patient stays euvolaemic throughout, which is what separates this from hypovolaemic hyponatraemia — same low sodium, opposite treatment.',
     metric: (s) => s.derived.serumSodiumMeqL,
+  },
+
+  // --- Working up a hyponatraemia: the sodium is the finding, not the diagnosis ---
+
+  {
+    id: 'pattern-siadh',
+    stem: 'A patient with a recently diagnosed small cell lung cancer is confused. Their sodium is low. They look neither dehydrated nor oedematous, and they are on no diuretic.',
+    answer: 'siadh',
+    options: ['siadh', 'hypovolemicHyponatremia', 'polydipsia', 'normal'],
+    panel: SODIUM_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'A concentrated urine in a patient who is hyponatraemic and NOT volume-deplete. That combination is the definition of inappropriate ADH: the only physiological reason to hold on to water is to defend volume or tonicity, and neither applies here — the tonicity is already low and the volume is normal. So the ADH is coming from somewhere the feedback loop cannot switch off, which in the stem is the tumour. Note the serum sodium alone would not have told you any of this; all three options here have essentially the same value.',
+  },
+  {
+    id: 'pattern-hypovolemic-hyponatraemia',
+    stem: 'An elderly patient has had several days of vomiting and diarrhoea. They are hypotensive, tachycardic and dry, and their sodium is low.',
+    answer: 'hypovolemicHyponatremia',
+    options: ['hypovolemicHyponatremia', 'siadh', 'polydipsia', 'normal'],
+    panel: SODIUM_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'The contracted ECF volume is what separates this from SIADH, and the raised potassium is the corroborating clue — a volume-deplete patient has an activated renin-angiotensin-aldosterone axis, and that is what has retained the sodium and shifted the potassium. The ADH here is entirely appropriate: faced with a choice between defending volume and defending tonicity, the body defends volume every time and accepts the low sodium as the price. That is also why the treatment is saline, where in SIADH saline makes matters worse.',
+  },
+  {
+    id: 'pattern-polydipsia',
+    stem: 'A patient with schizophrenia is found confused and fitting. They are known to drink very large volumes of water. Their sodium is low.',
+    answer: 'polydipsia',
+    options: ['polydipsia', 'siadh', 'hypovolemicHyponatremia', 'normal'],
+    panel: SODIUM_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'A maximally DILUTE urine, which is the opposite of every other cause here. The kidney is working perfectly — ADH is appropriately switched off and it is excreting water as fast as it can — and the patient is simply drinking faster than that. This is the one hyponatraemia where the kidney is not part of the problem, and it is why the treatment is to stop the intake rather than to do anything to the patient. The urine osmolality is the single row that makes the call, and it is why it is sent on every hyponatraemia.',
   },
 ];
