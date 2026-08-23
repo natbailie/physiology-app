@@ -8,8 +8,10 @@ app is; this file is about how to work in it.
 - **Engines stay pure.** `src/modules/*/engine/` is plain TypeScript with no React import.
   `step(state, inputs, dt)` must have no side effects — the verification harness, the Step
   control and baseline comparison all depend on it.
-- **No new runtime dependencies.** Charts and diagrams are hand-written SVG on purpose. Reach for
-  a library and the engines stop being the fast, testable part of the app.
+- **No new runtime dependencies for anything the learner sees.** Charts and diagrams are
+  hand-written SVG on purpose. Reach for a library and the engines stop being the fast, testable
+  part of the app. The one exception is the Supabase client, which backs optional accounts and is
+  never loaded when the app runs unconfigured — an infrastructure dependency, not a UI one.
 - **Constants are calibrated, not invented.** Baseline inputs must land on textbook values. If a
   constant changes, the engine test asserting the baseline should fail — that is the point.
 
