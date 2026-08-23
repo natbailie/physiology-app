@@ -1,0 +1,112 @@
+/* The sign-in / create-account form. Shared by the landing gate and the account page, so the
+ * styling lives here rather than in either page's module. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 22rem;
+}
+
+.modeRow {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-self: flex-start;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.modeButton {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.modeActive {
+  background: var(--panel-raised);
+  color: var(--text);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.input {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.input:focus {
+  outline: 1px solid var(--text-dim);
+}
+
+.error {
+  font-size: 0.8rem;
+  color: var(--danger);
+  line-height: 1.4;
+}
+
+.primaryButton {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: var(--text);
+  color: var(--bg, #10141a);
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.muted {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+
+/* Full-width variant: on the landing card the form is the whole content, so the mode toggle
+ * and submit button stretch rather than hugging the left edge of a 22rem column. */
+.wide {
+  max-width: none;
+}
+
+.wide .modeRow,
+.wide .primaryButton {
+  align-self: stretch;
+}
+
+.wide .modeRow {
+  display: flex;
+}
+
+.wide .modeButton {
+  flex: 1;
+}
+
+.wide .primaryButton {
+  text-align: center;
+}

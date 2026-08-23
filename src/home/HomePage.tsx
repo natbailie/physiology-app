@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { useAuth } from '@/auth/AuthContext';
+import { useEntitlement } from '@/billing/useEntitlement';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { knownCount, mastery as masteryOf } from '@/shared/assessment/scheduling';
 import { StudyStrip } from './StudyStrip';
@@ -15,6 +16,7 @@ interface ModuleProgress {
 
 export function HomePage() {
   const { user, initialising } = useAuth();
+  const { isUnlocked } = useEntitlement();
   const store = useProgressStore();
 
   /**
@@ -99,7 +101,12 @@ export function HomePage() {
 
       <div className={styles.grid}>
         {MODULES.map((module) => (
-          <ModuleCard key={module.id} {...module} {...(progress[module.id] ?? { dueCount: 0 })} />
+          <ModuleCard
+            key={module.id}
+            {...module}
+            {...(progress[module.id] ?? { dueCount: 0 })}
+            locked={module.status === 'available' && !isUnlocked(module.id)}
+          />
         ))}
       </div>
 

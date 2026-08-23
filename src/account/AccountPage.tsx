@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
 import { useAuth } from '@/auth/AuthContext';
+import { AuthForm } from '@/auth/AuthForm';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { MODULES } from '@/home/moduleRegistry';
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -19,7 +19,7 @@ export function AccountPage() {
 }
 
 function AccountBody() {
-  const { user, initialising, signUp, signIn, signOut } = useAuth();
+  const { user, initialising, signOut } = useAuth();
 
   if (initialising) {
     return <p className={styles.muted}>Checking whether you are still signed in…</p>;
@@ -27,7 +27,11 @@ function AccountBody() {
   if (user) {
     return <SignedInView email={user.email} onSignOut={() => void signOut()} />;
   }
-  return <AuthForm onSignUp={signUp} onSignIn={signIn} />;
+  return (
+    <section className={styles.body}>
+      <AuthForm />
+    </section>
+  );
 }
 
 function LocalOnlyNotice() {
@@ -82,102 +86,6 @@ function SignedInView({ email, onSignOut }: { email: string; onSignOut: () => vo
       <button type="button" className={styles.secondaryButton} onClick={onSignOut}>
         Sign out
       </button>
-    </section>
-  );
-}
-
-type AuthMode = 'signIn' | 'create';
-
-function AuthForm({
-  onSignUp,
-  onSignIn,
-}: {
-  onSignUp: (email: string, password: string) => Promise<{ ok: boolean; message?: string; needsConfirmation?: boolean }>;
-  onSignIn: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>;
-}) {
-  const [mode, setMode] = useState<AuthMode>('signIn');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const result =
-        mode === 'create' ? await onSignUp(email.trim(), password) : await onSignIn(email.trim(), password);
-      if (!result.ok && result.message) setError(result.message);
-      if ('needsConfirmation' in result && result.needsConfirmation) setAwaitingConfirmation(true);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (awaitingConfirmation) {
-    return (
-      <p className={styles.muted}>
-        Nearly there — confirm your email address using the link we just sent, then sign in.
-      </p>
-    );
-  }
-
-  return (
-    <section className={styles.body}>
-      <div className={styles.modeRow}>
-        <button
-          type="button"
-          className={`${styles.modeButton} ${mode === 'signIn' ? styles.modeActive : ''}`}
-          onClick={() => setMode('signIn')}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          className={`${styles.modeButton} ${mode === 'create' ? styles.modeActive : ''}`}
-          onClick={() => setMode('create')}
-        >
-          Create account
-        </button>
-      </div>
-
-      <form className={styles.form} onSubmit={(e) => void submit(e)}>
-        <label className={styles.label}>
-          Email
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            className={styles.input}
-          />
-        </label>
-        <label className={styles.label}>
-          Password
-          <input
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete={mode === 'create' ? 'new-password' : 'current-password'}
-            className={styles.input}
-          />
-        </label>
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <button type="submit" disabled={busy} className={styles.primaryButton}>
-          {busy ? 'One moment…' : mode === 'create' ? 'Create account' : 'Sign in'}
-        </button>
-      </form>
-
-      {mode === 'create' && (
-        <p className={styles.hint}>Six characters minimum. We send a confirmation link before the account goes live.</p>
-      )}
     </section>
   );
 }

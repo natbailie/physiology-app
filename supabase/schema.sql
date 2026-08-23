@@ -10,7 +10,12 @@
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   display_name text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Billing. Written only by the Stripe webhook (service role), never by the client — see the
+  -- column grants at the bottom of this file.
+  subscription_status text not null default 'free',
+  stripe_customer_id text,
+  current_period_end timestamptz
 );
 
 create table public.question_attempts (
@@ -56,6 +61,13 @@ create policy "update own profile"
   on public.profiles for update
   using (auth.uid () = id);
 
+-- The policy above governs *which row* a user may update, not which columns. Without the grants
+-- below, anyone holding the anon key could set their own subscription_status to 'active' and let
+-- themselves into the paid catalogue. Revoke the table-wide grant and hand back only the column
+-- a learner legitimately owns.
+revoke update on public.profiles from authenticated;
+grant update (display_name) on public.profiles to authenticated;
+
 create policy "read own attempts"
   on public.question_attempts for select
   using (auth.uid () = user_id);
@@ -67,3 +79,15 @@ create policy "insert own attempts"
 create policy "delete own attempts"
   on public.question_attempts for delete
   using (auth.uid () = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- Migration for a project that already has these tables. Safe to re-run.
+-- ---------------------------------------------------------------------------
+-- alter table public.profiles
+--   add column if not exists subscription_status text not null default 'free',
+--   add column if not exists stripe_customer_id text,
+--   add column if not exists current_period_end timestamptz;
+--
+-- revoke update on public.profiles from authenticated;
+-- grant update (display_name) on public.profiles to authenticated;

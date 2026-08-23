@@ -4,6 +4,7 @@ import { routeIdFromHash } from './scenarioUrl';
 export type RouteId =
   | 'home'
   | 'account'
+  | 'pricing'
   | 'cardiorenal'
   | 'respiratory'
   | 'hpaAxis'
@@ -39,6 +40,7 @@ export type RouteId =
 
 const VALID_ROUTES: RouteId[] = [
   'account',
+  'pricing',
   'cardiorenal',
   'respiratory',
   'hpaAxis',

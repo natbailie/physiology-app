@@ -1,4 +1,8 @@
-import { useHashRoute } from '@/shared/hooks/useHashRoute';
+import { useHashRoute, type RouteId } from '@/shared/hooks/useHashRoute';
+import { AuthGate } from '@/auth/AuthGate';
+import { useEntitlement } from '@/billing/useEntitlement';
+import { Paywall } from '@/billing/Paywall';
+import { PricingPage } from '@/billing/PricingPage';
 import { HomePage } from '@/home/HomePage';
 import { AccountPage } from '@/account/AccountPage';
 import { CardiorenalPage } from '@/modules/cardiorenal/CardiorenalPage';
@@ -35,13 +39,39 @@ import { MotorControlPage } from '@/modules/motorControl/MotorControlPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
+/** Routes that are never a paid module: they must open whatever the subscription says. */
+const UNGATED_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>(['home', 'account', 'pricing']);
+
 function App() {
   const route = useHashRoute();
+
+  return (
+    <AuthGate route={route}>
+      <RoutedApp route={route} />
+    </AuthGate>
+  );
+}
+
+function RoutedApp({ route }: { route: RouteId }) {
+  const { status, isUnlocked } = useEntitlement();
+
+  if (!UNGATED_ROUTES.has(route)) {
+    // Hold the render rather than flashing a paywall at someone who has in fact paid.
+    if (status === 'loading') return <div className={styles.app} />;
+    if (!isUnlocked(route)) {
+      return (
+        <div className={styles.app}>
+          <Paywall moduleId={route} />
+        </div>
+      );
+    }
+  }
 
   return (
     <div className={styles.app}>
       {route === 'home' && <HomePage />}
       {route === 'account' && <AccountPage />}
+      {route === 'pricing' && <PricingPage />}
       {route === 'cardiorenal' && <CardiorenalPage />}
       {route === 'respiratory' && <RespiratoryPage />}
       {route === 'hpaAxis' && <HpaPage />}
