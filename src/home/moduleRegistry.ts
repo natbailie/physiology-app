@@ -130,6 +130,13 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--memory)',
   },
   {
+    id: 'hypersensitivity',
+    name: 'Hypersensitivity',
+    tagline: 'Types I-IV: four mechanisms on four different clocks',
+    status: 'available',
+    accentColorVar: 'var(--ige)',
+  },
+  {
     id: 'muscleContraction',
     name: 'Muscle & EC Coupling',
     tagline: 'Calcium, cross-bridges, length-tension & force-velocity',

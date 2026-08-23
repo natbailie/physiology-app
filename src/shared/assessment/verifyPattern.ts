@@ -11,8 +11,9 @@ function settle<TState, TInputs, TDerived, THistoryPoint>(
   config: EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint>,
   inputs: TInputs,
   seconds: number,
+  perturb?: (state: TState) => TState,
 ): { state: TState; derived: TDerived } {
-  let current = config.createInitialState();
+  let current = perturb ? perturb(config.createInitialState()) : config.createInitialState();
   let snapshot = { state: current, derived: config.computeDerived(current, inputs) };
   let remaining = seconds;
 
@@ -34,8 +35,9 @@ export function readPanel<TState, TInputs, TDerived, THistoryPoint, TPreset exte
   panel: readonly PanelField<{ state: TState; derived: TDerived }>[],
   preset: TPreset,
   seconds: number,
+  perturb?: (state: TState) => TState,
 ): PanelReading[] {
-  const snapshot = settle(config, { ...defaultInputs, ...presets[preset] }, seconds);
+  const snapshot = settle(config, { ...defaultInputs, ...presets[preset] }, seconds, perturb);
   return panel.map((field) => ({ label: field.label, value: field.value(snapshot) }));
 }
 
@@ -61,8 +63,12 @@ export function runPatternQuestion<TState, TInputs, TDerived, THistoryPoint, TPr
   const seconds = question.settleSeconds ?? 600;
   const panels = new Map<TPreset, PanelReading[]>();
 
+  // The setup event runs identically for every option, so the panels stay a like-for-like
+  // comparison — the same thing done to four different patients.
+  const perturb = question.setup?.perturb as ((state: TState) => TState) | undefined;
+
   for (const option of question.options) {
-    panels.set(option, readPanel(config, defaultInputs, presets, question.panel, option, seconds));
+    panels.set(option, readPanel(config, defaultInputs, presets, question.panel, option, seconds, perturb));
   }
 
   const answerPanel = panels.get(question.answer) ?? [];

@@ -19,6 +19,7 @@ export type RouteId =
   | 'coagulation'
   | 'erythropoiesis'
   | 'immuneResponse'
+  | 'hypersensitivity'
   | 'muscleContraction'
   | 'electrolyteBalance'
   | 'capillaryExchange'
@@ -47,6 +48,7 @@ const VALID_ROUTES: RouteId[] = [
   'coagulation',
   'erythropoiesis',
   'immuneResponse',
+  'hypersensitivity',
   'muscleContraction',
   'electrolyteBalance',
   'capillaryExchange',

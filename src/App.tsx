@@ -17,6 +17,7 @@ import { EcgConductionPage } from '@/modules/ecgConduction/EcgConductionPage';
 import { CoagulationPage } from '@/modules/coagulation/CoagulationPage';
 import { ErythropoiesisPage } from '@/modules/erythropoiesis/ErythropoiesisPage';
 import { ImmuneResponsePage } from '@/modules/immuneResponse/ImmuneResponsePage';
+import { HypersensitivityPage } from '@/modules/hypersensitivity/HypersensitivityPage';
 import { MuscleContractionPage } from '@/modules/muscleContraction/MuscleContractionPage';
 import { ElectrolyteBalancePage } from '@/modules/electrolyteBalance/ElectrolyteBalancePage';
 import { CapillaryExchangePage } from '@/modules/capillaryExchange/CapillaryExchangePage';
@@ -51,6 +52,7 @@ function App() {
       {route === 'coagulation' && <CoagulationPage />}
       {route === 'erythropoiesis' && <ErythropoiesisPage />}
       {route === 'immuneResponse' && <ImmuneResponsePage />}
+      {route === 'hypersensitivity' && <HypersensitivityPage />}
       {route === 'muscleContraction' && <MuscleContractionPage />}
       {route === 'electrolyteBalance' && <ElectrolyteBalancePage />}
       {route === 'capillaryExchange' && <CapillaryExchangePage />}
