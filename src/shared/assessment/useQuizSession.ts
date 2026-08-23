@@ -4,8 +4,16 @@ import type { ProgressStore } from './progressStore';
 
 export type QuizPhase = 'idle' | 'predicting' | 'revealed' | 'complete';
 
+/**
+ * Practice walks the whole module in authoring order; review walks only what has fallen due,
+ * most overdue first. The distinction matters to the learner, so the panel says which one they
+ * are in rather than presenting two identical-looking sessions.
+ */
+export type QuizMode = 'practice' | 'review';
+
 export interface QuizSession<TInputs, TPreset extends string, TSnapshot> {
   phase: QuizPhase;
+  mode: QuizMode;
   question: ModuleQuestion<TInputs, TPreset, TSnapshot> | null;
   /** 1-based, for "Question 2 of 3". */
   index: number;
@@ -18,7 +26,12 @@ export interface QuizSession<TInputs, TPreset extends string, TSnapshot> {
   correct: boolean | null;
   /** Correct answers this session. */
   score: number;
+  /** How many questions are due for review right now. Zero hides the review affordance
+   * entirely rather than offering a button that opens an empty session. */
+  dueCount: number;
   start: () => void;
+  /** Runs only the due questions. A no-op when nothing is due. */
+  startReview: () => void;
   commit: (answer: string) => void;
   next: () => void;
   exit: () => void;
@@ -64,16 +77,33 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
+  const [mode, setMode] = useState<QuizMode>('practice');
+  /**
+   * The question ids this run will walk, in order.
+   *
+   * A session is a QUEUE rather than a walk of the whole array, because review runs a subset in
+   * due-date order. Holding the ids rather than the questions keeps it stable if the module's
+   * question list is rebuilt between renders.
+   */
+  const [queue, setQueue] = useState<readonly string[]>([]);
 
   // Read through a ref so a changing callback identity never restarts a session.
   const applyRef = useRef(applyInputs);
   applyRef.current = applyInputs;
 
-  const question = phase === 'idle' || phase === 'complete' ? null : (questions[index] ?? null);
+  const questionIds = useMemo(() => questions.map((q) => q.id), [questions]);
+  const dueCount = store.due(moduleId, questionIds).length;
+
+  const byId = useCallback(
+    (id: string | undefined) => (id === undefined ? undefined : questions.find((q) => q.id === id)),
+    [questions],
+  );
+
+  const question = phase === 'idle' || phase === 'complete' ? null : (byId(queue[index]) ?? null);
 
   const load = useCallback(
-    (at: number) => {
-      const next = questions[at];
+    (at: number, from: readonly string[]) => {
+      const next = byId(from[at]);
       if (!next) {
         setPhase('complete');
         return;
@@ -93,17 +123,37 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
       setAnswer(null);
       setPhase('predicting');
     },
-    [questions, clearBaseline, resetEngine, perturbEngine],
+    [byId, clearBaseline, resetEngine, perturbEngine],
   );
 
-  const start = useCallback(() => {
-    setScore(0);
-    load(0);
-  }, [load]);
+  const begin = useCallback(
+    (nextQueue: readonly string[], nextMode: QuizMode) => {
+      if (nextQueue.length === 0) return;
+      setScore(0);
+      setMode(nextMode);
+      setQueue(nextQueue);
+      load(0, nextQueue);
+    },
+    [load],
+  );
+
+  const start = useCallback(() => begin(questionIds, 'practice'), [begin, questionIds]);
+
+  /**
+   * Review runs what is due, most overdue first.
+   *
+   * The queue is fixed when the session opens rather than recomputed per question. Without
+   * that, answering a question wrong — which makes it due immediately — would put it straight
+   * back into the same queue and the session could never end.
+   */
+  const startReview = useCallback(
+    () => begin(store.due(moduleId, questionIds), 'review'),
+    [begin, store, moduleId, questionIds],
+  );
 
   const commit = useCallback(
     (choice: string) => {
-      const current = questions[index];
+      const current = byId(queue[index]);
       if (!current) return;
 
       const isCorrect = choice === correctAnswerOf(current);
@@ -121,10 +171,10 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
       }
       setPhase('revealed');
     },
-    [questions, index, store, moduleId, captureBaseline, perturbEngine],
+    [byId, queue, index, store, moduleId, captureBaseline, perturbEngine],
   );
 
-  const next = useCallback(() => load(index + 1), [load, index]);
+  const next = useCallback(() => load(index + 1, queue), [load, index, queue]);
 
   const exit = useCallback(() => {
     clearBaseline();
@@ -142,11 +192,14 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
     question,
     blinded: phase === 'predicting' && question !== null && isPatternQuestion(question),
     index: index + 1,
-    total: questions.length,
+    total: queue.length,
     answer,
     correct,
     score,
+    mode,
+    dueCount,
     start,
+    startReview,
     commit,
     next,
     exit,

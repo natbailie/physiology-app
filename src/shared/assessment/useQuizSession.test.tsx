@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { useQuizSession } from './useQuizSession';
-import { createMemoryProgressStore } from './progressStore';
+import { createMemoryProgressStore, emptyProgress } from './progressStore';
 import type { PredictQuestion } from './types';
 
 afterEach(cleanup);
@@ -38,13 +38,13 @@ const QUESTIONS: PredictQuestion<Inputs, Preset, Snapshot>[] = [
   },
 ];
 
-function setup() {
+function setup(now: () => number = () => Date.now()) {
   const applyInputs = vi.fn();
   const captureBaseline = vi.fn();
   const clearBaseline = vi.fn();
   const resetEngine = vi.fn();
   const perturbEngine = vi.fn();
-  const store = createMemoryProgressStore();
+  const store = createMemoryProgressStore(emptyProgress(), now);
 
   const hook = renderHook(() =>
     useQuizSession({
@@ -235,5 +235,86 @@ describe('useQuizSession', () => {
     act(() => result.current.exit());
     expect(result.current.phase).toBe('idle');
     expect(clearBaseline).toHaveBeenCalledOnce();
+  });
+});
+
+describe('the review queue', () => {
+  const AT = new Date(2026, 7, 17, 12).getTime();
+
+  it('offers nothing to review before anything has been answered', () => {
+    const { result } = setup(() => AT);
+    expect(result.current.dueCount).toBe(0);
+  });
+
+  it('does not open an empty session when nothing is due', () => {
+    // The button is hidden in this state, but the guard belongs in the hook: a review session
+    // with no questions would land straight on the "complete" screen having asked nothing.
+    const { result } = setup(() => AT);
+    act(() => result.current.startReview());
+    expect(result.current.phase).toBe('idle');
+  });
+
+  it('makes a missed question due and leaves a correct one alone', () => {
+    const { result } = setup(() => AT);
+    act(() => result.current.start());
+    act(() => result.current.commit('falls')); // q1 keys "rises" — wrong
+    act(() => result.current.next());
+    act(() => result.current.commit('falls')); // q2 keys "falls" — right
+    act(() => result.current.next());
+
+    expect(result.current.phase).toBe('complete');
+    expect(result.current.dueCount).toBe(1);
+  });
+
+  it('runs only the due questions, and says it is reviewing', () => {
+    const { result } = setup(() => AT);
+    act(() => result.current.start());
+    act(() => result.current.commit('falls')); // wrong
+    act(() => result.current.next());
+    act(() => result.current.commit('falls')); // right
+    act(() => result.current.next());
+
+    act(() => result.current.startReview());
+    expect(result.current.mode).toBe('review');
+    expect(result.current.total).toBe(1);
+    expect(result.current.question?.id).toBe('q1');
+  });
+
+  it('ends a review session even when every answer is wrong again', () => {
+    // The hazard this guards: a wrong answer becomes due immediately, so recomputing the queue
+    // per question would feed it straight back and the session could never finish. The queue is
+    // fixed when the session opens.
+    const { result } = setup(() => AT);
+    act(() => result.current.start());
+    act(() => result.current.commit('falls'));
+    act(() => result.current.next());
+    act(() => result.current.commit('rises'));
+    act(() => result.current.next());
+
+    act(() => result.current.startReview());
+    const reviewLength = result.current.total;
+    expect(reviewLength).toBe(2);
+
+    for (let i = 0; i < reviewLength; i += 1) {
+      act(() => result.current.commit('unchanged'));
+      act(() => result.current.next());
+    }
+    expect(result.current.phase).toBe('complete');
+  });
+
+  it('stops offering a question once its interval has passed without it falling due', () => {
+    let now = AT;
+    const { result } = setup(() => now);
+    act(() => result.current.start());
+    act(() => result.current.commit('rises')); // q1 correct — one day away
+    act(() => result.current.next());
+    act(() => result.current.commit('falls')); // q2 correct
+    act(() => result.current.next());
+
+    expect(result.current.dueCount).toBe(0);
+
+    now = AT + 2 * 86_400_000;
+    act(() => result.current.exit());
+    expect(result.current.dueCount).toBe(2);
   });
 });

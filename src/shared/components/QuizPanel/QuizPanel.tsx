@@ -32,7 +32,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   summary,
   presetLabels,
 }: QuizPanelProps<TInputs, TPreset, TSnapshot>) {
-  const { phase, question, index, total, answer, correct, score } = session;
+  const { phase, question, index, total, answer, correct, score, mode, dueCount } = session;
 
   if (phase === 'idle') {
     return (
@@ -41,7 +41,9 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
           <div>
             <h2 className={styles.idleTitle}>Practice</h2>
             <p className={styles.idleBlurb}>
-              Commit to an answer, then find out whether the model agrees.
+              {dueCount > 0
+                ? `${dueCount} question${dueCount === 1 ? '' : 's'} ${dueCount === 1 ? 'is' : 'are'} due for review — the ones you have missed or not seen in a while.`
+                : 'Commit to an answer, then find out whether the model agrees.'}
             </p>
           </div>
           <div className={styles.idleActions}>
@@ -50,8 +52,19 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
                 {summary.correct}/{summary.attempted} all time
               </span>
             )}
-            <button type="button" className={styles.primary} onClick={session.start}>
-              Start practice
+            {/* Only offered when something is actually due — a review button that opens an
+                empty session teaches the learner to ignore it. */}
+            {dueCount > 0 && (
+              <button type="button" className={styles.primary} onClick={session.startReview}>
+                Review {dueCount}
+              </button>
+            )}
+            <button
+              type="button"
+              className={dueCount > 0 ? styles.secondary : styles.primary}
+              onClick={session.start}
+            >
+              {dueCount > 0 ? 'All questions' : 'Start practice'}
             </button>
           </div>
         </div>
@@ -69,17 +82,23 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
             </h2>
             <p className={styles.idleBlurb}>
               {score === total
-                ? 'Every answer matched the model.'
-                : 'The ones you missed are the ones worth coming back to.'}
+                ? 'Every answer matched the model. Each one moves further down the queue.'
+                : `${total - score} came back to the front of the queue — you will see ${total - score === 1 ? 'it' : 'them'} again shortly.`}
             </p>
           </div>
           <div className={styles.idleActions}>
             <button type="button" className={styles.secondary} onClick={session.exit}>
               Done
             </button>
-            <button type="button" className={styles.primary} onClick={session.start}>
-              Again
-            </button>
+            {dueCount > 0 ? (
+              <button type="button" className={styles.primary} onClick={session.startReview}>
+                Review {dueCount}
+              </button>
+            ) : (
+              <button type="button" className={styles.primary} onClick={session.start}>
+                Again
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -95,10 +114,10 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
     <section className={styles.panel} aria-label="Practice question">
       <header className={styles.header}>
         <span className="label">
-          Question {index} of {total}
+          {mode === 'review' ? 'Review' : 'Question'} {index} of {total}
         </span>
         <button type="button" className={styles.exit} onClick={session.exit}>
-          Exit practice
+          Exit {mode === 'review' ? 'review' : 'practice'}
         </button>
       </header>
 
