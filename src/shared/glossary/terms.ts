@@ -242,6 +242,135 @@ const ENTRIES: Record<string, GlossaryEntry> = {
     definition:
       'Mean arterial pressure minus intracranial pressure. Below about 50 mmHg autoregulation is exhausted and cerebral blood flow falls with pressure.',
   },
+
+  // --- Special senses ---
+  acuity: {
+    expansion: 'Snellen visual acuity',
+    definition:
+      'The smallest resolvable detail, written as a fraction of the distance at which a healthy eye solves it. Foveal cones set the ceiling (6/6 or better); rod-only vision collapses toward 6/60 no matter how dark-adapted.',
+  },
+  'right pupil': {
+    definition:
+      'Pupil diameter of the right eye, mm. Constricts to light through an afferent limb shared bilaterally and its own efferent parasympathetic supply — failure of either limb changes this number differently.',
+  },
+  'left pupil': {
+    definition:
+      'Pupil diameter of the left eye, mm. Equal to the right at rest and under illumination in either eye unless the efferent limbs differ.',
+  },
+  anisocoria: {
+    definition:
+      'Difference in diameter between the two pupils. Significant (>1.5 mm) anisocoria with preserved consensual response points at an efferent lesion — third-nerve palsy, anticholinergic, tonic pupil — not an afferent one.',
+  },
+  'perceived brightness': {
+    definition:
+      'Modelled brightness of the scene as the retina reports it. Falls when receptors are damaged or bleached even if the light itself is unchanged — sensitivity belongs to the detector as much as the stimulus.',
+  },
+  'glutamate release': {
+    definition:
+      'Transmitter output of the photoreceptors. LIGHT REDUCES it (hyperpolarisation), and it is the fall that ON-bipolar cells read as light — the sign inversion at the heart of retinal processing.',
+  },
+  'rod drive': {
+    definition:
+      'Fraction of the retinal signal carried by rods. Zero above daylight because rods SATURATE, not because they are absent; near-total below moonlight, where cones cannot follow.',
+  },
+  'cone drive': {
+    definition:
+      'Fraction of the signal carried by cones. Owns photopic vision, colour and all useful acuity; fades out below moonlight whatever their integrity.',
+  },
+  'swinging torch': {
+    definition:
+      'Constriction achieved by whichever eye is currently illuminated, as a percentage. A weak score from ONE eye with a normal score from the other is a relative afferent pupillary defect.',
+  },
+  pta: {
+    expansion: 'Pure-tone average',
+    definition:
+      'Mean air-conduction threshold at 0.5, 1 and 2 kHz. The single number that grades hearing loss severity, though the audiogram shape usually says more about cause than the average does.',
+  },
+  'air-bone gap': {
+    definition:
+      'How much worse air conduction is than bone conduction. Present only when sound is blocked BEFORE the cochlea — effusion, otosclerosis, ossicular disruption.',
+  },
+  'speech discrimination': {
+    definition:
+      'Percentage of words identified correctly at comfortable loudness. Preserved in conductive loss once volume is restored; degraded when inner hair cells distort what reaches the nerve.',
+  },
+  recruitment: {
+    definition:
+      'Abnormally fast growth of loudness past threshold, from loss of cochlear compression. The recruited ear is deaf to whispers yet intolerant of shouts — a cochlear, never a conductive, signature.',
+  },
+  weber: {
+    definition:
+      'Tuning fork on the vertex. Heard LOUDER in the blocked ear = conductive; heard better in the BETTER ear = sensorineural; central = normal or equal loss.',
+  },
+  rinne: {
+    definition:
+      'Air versus bone conduction beside the ear. Normal is air > bone (positive); bone ≥ air (negative) means conductive loss on that side.',
+  },
+  'spontaneous nystagmus': {
+    definition:
+      'Nystagmus with no provocation, driven by firing imbalance between the two vestibular nerves. Beats AWAY from a destructive lesion, TOWARD an irritative one, and vanishes with compensation.',
+  },
+  vertigo: {
+    definition:
+      'The hallucination of motion produced by a vestibular firing mismatch read as head acceleration. Its intensity tracks the imbalance, so central compensation quiets it without repairing anything.',
+  },
+  'vor gain': {
+    expansion: 'Vestibulo-ocular reflex gain',
+    definition:
+      'Eye velocity divided by head velocity during a turn; ~1 keeps gaze locked on the world. Mechanical and irrecoverable after nerve loss even once vertigo has compensated away.',
+  },
+  'head impulse': {
+    definition:
+      'Brief high-acceleration turn while the patient fixates. A corrective saccade at the end betrays VOR gain <0.75 — positive in unilateral loss even when fully compensated.',
+  },
+  'positional nystagmus': {
+    definition:
+      'Nystagmus provoked by the Dix-Hallpike position. Latency then fatigability = BPPV (canalith debris, mechanical). Immediate and non-fatiguing = central.',
+  },
+  'romberg unsteadiness': {
+    definition:
+      'Fall tendency with eyes closed. Vestibular (especially otolith) failure makes vision indispensable, so unsteadiness worsens dramatically in the dark.',
+  },
+  'pain score': {
+    definition:
+      'Perceived pain on a 0-10 scale — an OUTPUT of dorsal-horn transmission cells after gating, not a measure of tissue damage. Rubbing, descending modulation and opioids lower it without touching the injury.',
+  },
+  gate: {
+    definition:
+      'Fraction of nociceptive traffic allowed through the dorsal horn. Opened by C-fibre input, closed by Aβ touch fibres, rubbing, descending modulation and opioid action.',
+  },
+  'touch below': {
+    definition:
+      'Light touch preserved BELOW the cord lesion, per side. Travels in the dorsal columns IPSILATERALLY to the cortex, so loss here marks the same side as the lesion.',
+  },
+  'pain/temp below': {
+    definition:
+      'Pinprick and temperature preserved below the lesion, per side. Spinothalamic fibres crossed already at entry, so loss here marks the OPPOSITE side — the Brown-Séquard dissociation.',
+  },
+  'segmental pain/temp': {
+    definition:
+      'Pain/temperature preserved AT the syrinx level, where crossing fibres are picked off in front of the dilated canal. Cape-like arm involvement with legs spared until late.',
+  },
+  'initiation latency': {
+    definition:
+      'Time from command to movement onset. Dopamine-dependent: triples in advanced parkinsonism while cerebellar, pyramidal and tremor syndromes leave it untouched.',
+  },
+  'resting tremor': {
+    definition:
+      '4-6 Hz tremor with the limb supported and no voluntary task — the parkinsonian oscillator, suppressed by movement and by dopamine restoration.',
+  },
+  'intention tremor': {
+    definition:
+      'Tremor appearing ONLY during voluntary action, worsening as the target nears, with dysmetria. Cerebellar, with initiation and tone normal.',
+  },
+  'postural tremor': {
+    definition:
+      'Tremor holding a position against gravity — essential tremor territory. Eased by alcohol and beta-blockade, unlike every other tremor class.',
+  },
+  'involuntary movement': {
+    definition:
+      'Chorea plus ballism amplitude: movement RELEASED by loss of indirect-pathway braking rather than produced by weakness or tremor. Random, continuous, invading a normally-initiating system.',
+  },
 };
 
 /** Normalises a readout label to a glossary key. */

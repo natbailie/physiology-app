@@ -1,0 +1,84 @@
+.curve {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 2;
+}
+
+.zoneScotopic {
+  fill: var(--vm);
+  opacity: 0.1;
+}
+
+.zoneMesopic {
+  fill: var(--warn);
+  opacity: 0.08;
+}
+
+.zonePhotopic {
+  fill: var(--o2);
+  opacity: 0.08;
+}
+
+.operatingPoint {
+  fill: var(--retina);
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--retina) 70%, transparent));
+  transition: cx 0.3s ease, cy 0.3s ease;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.eyeOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.iris {
+  fill: color-mix(in srgb, var(--o2) 30%, transparent);
+  stroke: var(--text-dim);
+  stroke-width: 1;
+  transition: r 0.25s ease;
+}
+
+.pupil {
+  fill: color-mix(in srgb, var(--danger) 60%, black);
+  transition: r 0.25s ease;
+}
+
+.torchBeam {
+  stroke: var(--warn);
+  stroke-width: 2.5;
+  opacity: 0.85;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

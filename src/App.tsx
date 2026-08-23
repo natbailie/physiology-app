@@ -27,6 +27,11 @@ import { ShockStatesPage } from '@/modules/shockStates/ShockStatesPage';
 import { FetalCirculationPage } from '@/modules/fetalCirculation/FetalCirculationPage';
 import { NeuromuscularJunctionPage } from '@/modules/neuromuscularJunction/NeuromuscularJunctionPage';
 import { CerebralPerfusionPage } from '@/modules/cerebralPerfusion/CerebralPerfusionPage';
+import { VisionPage } from '@/modules/vision/VisionPage';
+import { HearingPage } from '@/modules/hearing/HearingPage';
+import { VestibularPage } from '@/modules/vestibular/VestibularPage';
+import { SomaticSensationPage } from '@/modules/somaticSensation/SomaticSensationPage';
+import { MotorControlPage } from '@/modules/motorControl/MotorControlPage';
 import { ReferencePage } from '@/reference/ReferencePage';
 import styles from './App.module.css';
 
@@ -63,6 +68,11 @@ function App() {
       {route === 'fetalCirculation' && <FetalCirculationPage />}
       {route === 'neuromuscularJunction' && <NeuromuscularJunctionPage />}
       {route === 'cerebralPerfusion' && <CerebralPerfusionPage />}
+      {route === 'vision' && <VisionPage />}
+      {route === 'hearing' && <HearingPage />}
+      {route === 'vestibular' && <VestibularPage />}
+      {route === 'somaticSensation' && <SomaticSensationPage />}
+      {route === 'motorControl' && <MotorControlPage />}
       {route === 'reference' && <ReferencePage />}
     </div>
   );

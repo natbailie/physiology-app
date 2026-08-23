@@ -11,7 +11,7 @@
  * asserts the glob still finds every module in the registry, so if this stops matching it fails
  * loudly rather than reporting zero.
  *
- * Costs no bundle weight: `App.tsx` already imports all 26 module pages, and each of those
+ * Costs no bundle weight: `App.tsx` already imports all 31 module pages, and each of those
  * already imports its own questions.
  */
 const questionModules = import.meta.glob<Record<string, unknown>>('../modules/*/questions.ts', {

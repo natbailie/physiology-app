@@ -30,6 +30,11 @@ export type RouteId =
   | 'fetalCirculation'
   | 'neuromuscularJunction'
   | 'cerebralPerfusion'
+  | 'vision'
+  | 'hearing'
+  | 'vestibular'
+  | 'somaticSensation'
+  | 'motorControl'
   | 'reference';
 
 const VALID_ROUTES: RouteId[] = [
@@ -60,6 +65,11 @@ const VALID_ROUTES: RouteId[] = [
   'fetalCirculation',
   'neuromuscularJunction',
   'cerebralPerfusion',
+  'vision',
+  'hearing',
+  'vestibular',
+  'somaticSensation',
+  'motorControl',
   'reference',
 ];
 

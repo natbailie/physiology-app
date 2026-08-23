@@ -1,0 +1,76 @@
+.columnDC {
+  fill: color-mix(in srgb, var(--o2) 45%, transparent);
+}
+
+.columnDClost {
+  fill: color-mix(in srgb, var(--text-dim) 18%, transparent);
+  stroke: var(--danger);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.columnST {
+  fill: color-mix(in srgb, var(--nociception) 45%, transparent);
+}
+
+.columnSTlost {
+  fill: color-mix(in srgb, var(--text-dim) 18%, transparent);
+  stroke: var(--danger);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.syrinxCavity {
+  fill: color-mix(in srgb, var(--danger) 35%, transparent);
+  transition: r 0.3s ease;
+}
+
+.cordOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.gateBar {
+  transition: width 0.3s ease;
+}
+
+.gateFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

@@ -304,6 +304,60 @@ export const MODULES: ModuleDescriptor[] = [
     ],
   },
   {
+    id: 'vision',
+    name: 'Vision & Phototransduction',
+    tagline: 'Rods vs cones, dark adaptation & the pupil reflexes',
+    status: 'available',
+    accentColorVar: 'var(--retina)',
+    related: [
+      { id: 'membranePotentials', why: 'the ion channels under phototransduction' },
+      { id: 'cerebralPerfusion', why: 'the pressure perfusing this retina' },
+    ],
+  },
+  {
+    id: 'hearing',
+    name: 'Hearing & Cochlear Mechanics',
+    tagline: 'The audiogram, recruitment & telling conductive from cochlear',
+    status: 'available',
+    accentColorVar: 'var(--cochlea)',
+    related: [
+      { id: 'vestibular', why: 'the neighbouring labyrinth and its vertigo' },
+    ],
+  },
+  {
+    id: 'vestibular',
+    name: 'Vestibular System & Vertigo',
+    tagline: 'Canal firing, compensation, BPPV & the head impulse',
+    status: 'available',
+    accentColorVar: 'var(--vestibular)',
+    related: [
+      { id: 'hearing', why: 'the cochlea sharing the same inner ear' },
+      { id: 'cerebralPerfusion', why: 'the brainstem circuits being driven here' },
+    ],
+  },
+  {
+    id: 'somaticSensation',
+    name: 'Somatosensation & Pain Pathways',
+    tagline: 'The dorsal-horn gate, sensitisation & the tract dissociations',
+    status: 'available',
+    accentColorVar: 'var(--nociception)',
+    related: [
+      { id: 'membranePotentials', why: 'the conduction block local anaesthetics exploit' },
+      { id: 'autonomicNervous', why: 'the sympathetic afferents feeding the same horn' },
+    ],
+  },
+  {
+    id: 'motorControl',
+    name: 'Motor Control: Basal Ganglia & Cerebellum',
+    tagline: 'Slowness, error & release across the movement disorders',
+    status: 'available',
+    accentColorVar: 'var(--basal-ganglia)',
+    related: [
+      { id: 'muscleContraction', why: 'the contractile machinery these circuits command' },
+      { id: 'neuromuscularJunction', why: 'the final synapse every command must cross' },
+    ],
+  },
+  {
     id: 'reference',
     name: 'Formula Reference',
     tagline: 'High-yield equations & calculators for cardio, renal & respiratory',

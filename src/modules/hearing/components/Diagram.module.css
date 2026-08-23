@@ -1,0 +1,89 @@
+.curve {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 2;
+}
+
+.airLine {
+  fill: none;
+  stroke: var(--cochlea);
+  stroke-width: 2;
+}
+
+.airMarker {
+  fill: var(--cochlea);
+}
+
+.boneLine {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.boneMarker {
+  fill: var(--bg);
+  stroke: var(--o2);
+  stroke-width: 1.5;
+}
+
+.notchZone {
+  fill: var(--danger);
+  opacity: 0.07;
+}
+
+.speechBand {
+  fill: var(--ok);
+  opacity: 0.08;
+}
+
+.membrane {
+  fill: color-mix(in srgb, var(--cochlea) 12%, transparent);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.waveEnvelope {
+  fill: color-mix(in srgb, var(--cochlea) 45%, transparent);
+  transition: all 0.3s ease;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.gridline {
+  stroke: var(--panel-border);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

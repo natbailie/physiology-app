@@ -1,0 +1,68 @@
+.trace {
+  fill: none;
+  stroke: var(--vestibular);
+  stroke-width: 2;
+}
+
+.eyeDrift {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 2.5;
+  transition: all 0.15s ease;
+}
+
+.fastPhaseArrow {
+  fill: var(--danger);
+  stroke: var(--danger);
+}
+
+.cupulaBar {
+  fill: var(--vestibular);
+  opacity: 0.75;
+  transition: x 0.2s ease, width 0.2s ease;
+}
+
+.canalOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.debris {
+  fill: var(--danger);
+  transition: cy 0.4s ease;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

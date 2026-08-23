@@ -1,0 +1,75 @@
+.trace {
+  fill: none;
+  stroke: var(--basal-ganglia);
+  stroke-width: 2;
+}
+
+.pathwayDirect {
+  stroke: var(--ok);
+  stroke-width: 3.5;
+}
+
+.pathwayIndirect {
+  stroke: var(--danger);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 3;
+}
+
+.nodeLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  fill: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.reachTarget {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.reachActual {
+  fill: color-mix(in srgb, var(--basal-ganglia) 40%, transparent);
+  transition: all 0.3s ease;
+}
+
+.tremorWave {
+  fill: none;
+  stroke: var(--nociception);
+  stroke-width: 2;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

@@ -27,6 +27,11 @@ import { cerebralPerfusionContent } from './cerebralPerfusion/content';
 import { neuromuscularJunctionContent } from './neuromuscularJunction/content';
 import { shockStatesContent } from './shockStates/content';
 import { venousReturnContent } from './venousReturn/content';
+import { visionContent } from './vision/content';
+import { hearingContent } from './hearing/content';
+import { vestibularContent } from './vestibular/content';
+import { somaticSensationContent } from './somaticSensation/content';
+import { motorControlContent } from './motorControl/content';
 
 const ALL: [string, ExplainerContent][] = [
   ['autonomicNervous', autonomicNervousContent],
@@ -55,6 +60,11 @@ const ALL: [string, ExplainerContent][] = [
   ['neuromuscularJunction', neuromuscularJunctionContent],
   ['cerebralPerfusion', cerebralPerfusionContent],
   ['venousReturn', venousReturnContent],
+  ['vision', visionContent],
+  ['hearing', hearingContent],
+  ['vestibular', vestibularContent],
+  ['somaticSensation', somaticSensationContent],
+  ['motorControl', motorControlContent],
 ];
 
 const words = (text: string) => text.trim().split(/\s+/).length;
@@ -66,8 +76,8 @@ const words = (text: string) => text.trim().split(/\s+/).length;
  */
 describe('module explainer content', () => {
   it('covers every simulator module', () => {
-    // 26 simulators; the formula reference has no explainer.
-    expect(ALL).toHaveLength(26);
+    // 31 simulators; the formula reference has no explainer.
+    expect(ALL).toHaveLength(31);
     expect(new Set(ALL.map(([id]) => id)).size).toBe(ALL.length);
   });
 
