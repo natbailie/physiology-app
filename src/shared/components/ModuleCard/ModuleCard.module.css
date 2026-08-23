@@ -54,3 +54,41 @@ a.card:focus-visible {
   border-radius: 999px;
   padding: 0.15rem 0.55rem;
 }
+
+/* --- Progress affordances. Absent entirely until a module has been attempted. --- */
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.due {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--artery);
+  background: color-mix(in srgb, var(--artery) 10%, transparent);
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  white-space: nowrap;
+}
+
+/* A hairline rather than a progress bar: it should read at a glance across a grid of 26
+   without any single card shouting. */
+.meter {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--panel-border);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--card-accent, var(--text-dim));
+}

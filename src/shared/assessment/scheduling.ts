@@ -103,6 +103,19 @@ export function mastery(schedule: Record<string, ReviewState>, questionIds: read
   return total / (questionIds.length * MAX_BOX);
 }
 
+/**
+ * The box at which a question counts as known.
+ *
+ * Box 3 means it has survived a week-long gap, which is a defensible line between "answered
+ * correctly once" and "actually retained". Anything below it is in progress.
+ */
+export const KNOWN_BOX = 3;
+
+/** How many of `questionIds` have been retained rather than merely answered. */
+export function knownCount(schedule: Record<string, ReviewState>, questionIds: readonly string[]): number {
+  return questionIds.filter((id) => (schedule[id]?.box ?? 0) >= KNOWN_BOX).length;
+}
+
 /** Local calendar date for a timestamp, as `YYYY-MM-DD`. */
 export function studyDayOf(at: number): string {
   const date = new Date(at);
