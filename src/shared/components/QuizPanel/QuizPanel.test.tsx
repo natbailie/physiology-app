@@ -56,7 +56,7 @@ function makeSession(overrides: Partial<QuizSession<Inputs, Preset, Snapshot>> =
   } as QuizSession<Inputs, Preset, Snapshot>;
 }
 
-const NO_HISTORY: ModuleSummary = { attempted: 0, correct: 0, lastOutcome: {} };
+const NO_HISTORY: ModuleSummary = { attempted: 0, correct: 0, lastOutcome: {}, schedule: {} };
 
 describe('QuizPanel', () => {
   it('offers to start when idle', () => {
@@ -75,7 +75,7 @@ describe('QuizPanel', () => {
     render(
       <QuizPanel
         session={makeSession({ phase: 'idle', question: null })}
-        summary={{ attempted: 4, correct: 3, lastOutcome: {} }}
+        summary={{ attempted: 4, correct: 3, lastOutcome: {}, schedule: {} }}
       />,
     );
     expect(screen.getByText('3/4 all time')).toBeTruthy();
