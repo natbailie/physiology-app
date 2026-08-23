@@ -1,5 +1,23 @@
 /** The six frontal-plane limb leads, each defined by an axis angle in the hexaxial reference. */
-export type LeadName = 'I' | 'II' | 'III' | 'aVR' | 'aVL' | 'aVF';
+export type LimbLeadName = 'I' | 'II' | 'III' | 'aVR' | 'aVL' | 'aVF';
+
+/**
+ * The six chest leads. They lie in the HORIZONTAL plane, wrapping from just right of the
+ * sternum (V1) round to the left axilla (V6), so between them they see the one axis the limb
+ * leads are blind to — how far forward or back the heart's vector points.
+ */
+export type PrecordialLeadName = 'V1' | 'V2' | 'V3' | 'V4' | 'V5' | 'V6';
+
+export type LeadName = LimbLeadName | PrecordialLeadName;
+
+/**
+ * The wall an injury current is centred on.
+ *
+ * Made an input rather than a constant because localisation is the point: the SAME injury
+ * current projected onto twelve differently-angled leads is what turns "there is an infarct"
+ * into "the infarct is here", and reciprocal change falls out of the same projection.
+ */
+export type InjuryTerritory = 'anterior' | 'inferior' | 'lateral' | 'posterior';
 
 export type Rhythm = 'sinus' | 'atrialFibrillation';
 
@@ -42,6 +60,8 @@ export interface EcgInputs {
   serumPotassium: number;
   /** Transmural ischemic injury, 0-1 — produces ST deviation via an injury current */
   ischemicInjury: number;
+  /** Which wall that injury is centred on */
+  injuryTerritory: InjuryTerritory;
   /** Which limb lead the trace is recorded from */
   lead: LeadName;
   rhythm: Rhythm;
@@ -87,6 +107,12 @@ export interface EcgDerived {
   /** Net instantaneous dipole, for the hexaxial inset */
   dipoleMagnitude: number;
   dipoleAngleDegrees: number;
+  /** Direction in the horizontal plane, degrees from straight-left toward anterior — what the
+   * chest leads measure and the limb leads cannot */
+  horizontalAngleDegrees: number;
+  /** Where the QRS flips from mostly-negative to mostly-positive across the precordium.
+   * Normally V3 or V4; null when no lead is net positive at all (poor R-wave progression) */
+  rWaveTransitionLead: PrecordialLeadName | null;
   /** Mass-weighted mean QRS axis, degrees, and its clinical classification */
   meanQrsAxisDegrees: number;
   axisClassification: 'normal' | 'left deviation' | 'right deviation' | 'extreme';
@@ -108,6 +134,7 @@ export interface EcgDerived {
   ventricularAPD: number;
   serumPotassium: number;
   ischemicInjury: number;
+  injuryTerritory: InjuryTerritory;
   lead: LeadName;
   rhythm: Rhythm;
 }

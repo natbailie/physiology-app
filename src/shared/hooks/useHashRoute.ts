@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type RouteId =
   | 'home'
+  | 'account'
   | 'cardiorenal'
   | 'respiratory'
   | 'hpaAxis'
@@ -19,6 +20,7 @@ export type RouteId =
   | 'coagulation'
   | 'erythropoiesis'
   | 'immuneResponse'
+  | 'hypersensitivity'
   | 'muscleContraction'
   | 'electrolyteBalance'
   | 'capillaryExchange'
@@ -30,6 +32,7 @@ export type RouteId =
   | 'reference';
 
 const VALID_ROUTES: RouteId[] = [
+  'account',
   'cardiorenal',
   'respiratory',
   'hpaAxis',
@@ -47,6 +50,7 @@ const VALID_ROUTES: RouteId[] = [
   'coagulation',
   'erythropoiesis',
   'immuneResponse',
+  'hypersensitivity',
   'muscleContraction',
   'electrolyteBalance',
   'capillaryExchange',

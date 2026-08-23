@@ -15,6 +15,7 @@ import { glucoseRegulationContent } from './glucoseRegulation/content';
 import { hpaAxisContent } from './hpaAxis/content';
 import { hpgAxisContent } from './hpgAxis/content';
 import { hptAxisContent } from './hptAxis/content';
+import { hypersensitivityContent } from './hypersensitivity/content';
 import { immuneResponseContent } from './immuneResponse/content';
 import { membranePotentialsContent } from './membranePotentials/content';
 import { muscleContractionContent } from './muscleContraction/content';
@@ -42,6 +43,7 @@ const ALL: [string, ExplainerContent][] = [
   ['hpaAxis', hpaAxisContent],
   ['hpgAxis', hpgAxisContent],
   ['hptAxis', hptAxisContent],
+  ['hypersensitivity', hypersensitivityContent],
   ['immuneResponse', immuneResponseContent],
   ['membranePotentials', membranePotentialsContent],
   ['muscleContraction', muscleContractionContent],
@@ -64,8 +66,8 @@ const words = (text: string) => text.trim().split(/\s+/).length;
  */
 describe('module explainer content', () => {
   it('covers every simulator module', () => {
-    // 25 simulators; the formula reference has no explainer.
-    expect(ALL).toHaveLength(25);
+    // 26 simulators; the formula reference has no explainer.
+    expect(ALL).toHaveLength(26);
     expect(new Set(ALL.map(([id]) => id)).size).toBe(ALL.length);
   });
 

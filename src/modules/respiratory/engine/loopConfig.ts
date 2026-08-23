@@ -12,6 +12,7 @@ export const respiratoryLoopConfig: EngineLoopConfig<RespState, RespInputs, Resp
     pH: snapshot.derived.pH,
     paCO2: snapshot.derived.paCO2,
     saO2: snapshot.derived.saO2,
+    plasmaHCO3: snapshot.derived.plasmaHCO3,
   }),
   maxDtSeconds: RESP_SIMULATION.MAX_DT_SECONDS,
   renderIntervalMs: RESP_SIMULATION.RENDER_INTERVAL_MS,

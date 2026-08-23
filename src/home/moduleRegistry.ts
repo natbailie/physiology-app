@@ -20,7 +20,7 @@ export const MODULES: ModuleDescriptor[] = [
   {
     id: 'respiratory',
     name: 'Respiratory & Acid-Base',
-    tagline: 'Ventilation, gas exchange & acid-base balance',
+    tagline: 'Ventilation, gas exchange & reading a blood gas',
     status: 'available',
     accentColorVar: 'var(--o2)',
   },
@@ -90,7 +90,7 @@ export const MODULES: ModuleDescriptor[] = [
   {
     id: 'ecgConduction',
     name: 'ECG & Cardiac Conduction',
-    tagline: 'How depolarisation & repolarisation write each ECG wave',
+    tagline: 'How one dipole, seen twelve ways, writes an ECG',
     status: 'available',
     accentColorVar: 'var(--ecg-trace)',
   },
@@ -128,6 +128,13 @@ export const MODULES: ModuleDescriptor[] = [
     tagline: 'Innate to adaptive, and how memory changes everything',
     status: 'available',
     accentColorVar: 'var(--memory)',
+  },
+  {
+    id: 'hypersensitivity',
+    name: 'Hypersensitivity',
+    tagline: 'Types I-IV, and every transfusion reaction among them',
+    status: 'available',
+    accentColorVar: 'var(--ige)',
   },
   {
     id: 'muscleContraction',

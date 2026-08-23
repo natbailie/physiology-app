@@ -9,6 +9,7 @@ export const DEFAULT_ECG_INPUTS: EcgInputs = {
   ventricularAPD: 300,
   serumPotassium: 4,
   ischemicInjury: 0,
+  injuryTerritory: 'inferior',
   lead: 'II',
   rhythm: 'sinus',
 };
@@ -22,6 +23,8 @@ export type EcgPresetName =
   | 'atrialFibrillation'
   | 'hyperkalemia'
   | 'inferiorStemi'
+  | 'anteriorStemi'
+  | 'posteriorMi'
   | 'longQt';
 
 export const ECG_PRESETS: Record<EcgPresetName, Partial<EcgInputs>> = {
@@ -42,7 +45,14 @@ export const ECG_PRESETS: Record<EcgPresetName, Partial<EcgInputs>> = {
   hyperkalemia: { ...DEFAULT_ECG_INPUTS, serumPotassium: 7.2 },
   // Injury current elevates ST in the inferior leads (II, III, aVF) — switch to aVL to see the
   // reciprocal depression appear automatically.
-  inferiorStemi: { ...DEFAULT_ECG_INPUTS, ischemicInjury: 0.8, lead: 'II' },
+  inferiorStemi: { ...DEFAULT_ECG_INPUTS, ischemicInjury: 0.8, injuryTerritory: 'inferior', lead: 'II' },
+  // The territory the limb leads are worst at: elevation across V2-V4 with the frontal leads
+  // comparatively quiet, which is why a twelve-lead is not six leads plus decoration.
+  anteriorStemi: { ...DEFAULT_ECG_INPUTS, ischemicInjury: 0.8, injuryTerritory: 'anterior', lead: 'V3' },
+  // No electrode faces the back of the heart, so this one never elevates anything. It shows up
+  // only as its own mirror image — ST DEPRESSION with a tall R in V1 and V2 — which is the
+  // classic miss, and the reason the pattern is worth recognising rather than deriving.
+  posteriorMi: { ...DEFAULT_ECG_INPUTS, ischemicInjury: 0.8, injuryTerritory: 'posterior', lead: 'V2' },
   // A prolonged action potential stretches the QT, and QTc stays prolonged after rate correction.
   longQt: { ...DEFAULT_ECG_INPUTS, ventricularAPD: 470 },
 };
@@ -56,6 +66,8 @@ export const ECG_PRESET_LABELS: Record<EcgPresetName, string> = {
   atrialFibrillation: 'Atrial fibrillation',
   hyperkalemia: 'Hyperkalemia',
   inferiorStemi: 'Inferior STEMI',
+  anteriorStemi: 'Anterior STEMI',
+  posteriorMi: 'Posterior MI',
   longQt: 'Long QT',
 };
 
@@ -68,5 +80,7 @@ export const PRESET_ORDER: EcgPresetName[] = [
   'atrialFibrillation',
   'hyperkalemia',
   'inferiorStemi',
+  'anteriorStemi',
+  'posteriorMi',
   'longQt',
 ];

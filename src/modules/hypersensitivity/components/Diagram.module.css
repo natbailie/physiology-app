@@ -1,0 +1,167 @@
+/* --- Reaction timeline: the four arms on a logarithmic time axis --- */
+
+.plotAxis {
+  stroke: var(--text-faint);
+  stroke-width: 1.2;
+}
+
+.plotGrid {
+  stroke: var(--grid-line);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+/* One band per arm, drawn where that arm is physically capable of acting. The bands do not
+   overlap, and that is the entire point of the picture. */
+.bandLabel {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+  opacity: 0.9;
+  stroke: var(--panel);
+  stroke-width: 2.5;
+  paint-order: stroke;
+}
+
+.armCurve {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.armTypeI {
+  composes: armCurve;
+  stroke: var(--ige);
+}
+
+.armTypeII {
+  composes: armCurve;
+  stroke: var(--cytotoxic-ab);
+}
+
+.armTypeIII {
+  composes: armCurve;
+  stroke: var(--immune-complex);
+}
+
+.armTypeIV {
+  composes: armCurve;
+  stroke: var(--delayed-type);
+}
+
+/* Where the patient is right now on that timeline. */
+.nowMarker {
+  stroke: var(--text-dim);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.nowLabel {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  fill: var(--text-dim);
+  text-anchor: middle;
+}
+
+.legendLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.03em;
+  fill: var(--text-dim);
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  fill: var(--text);
+}
+
+.pathLabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  fill: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.valueLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+/* --- Mechanism diagram --- */
+
+.cellBody {
+  stroke-width: 2;
+  fill: none;
+}
+
+.mastCell {
+  composes: cellBody;
+  stroke: var(--ige);
+  fill: color-mix(in srgb, var(--ige) calc(var(--arm-i, 0) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--arm-i, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--ige) var(--glow-mix), transparent));
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.targetCell {
+  composes: cellBody;
+  stroke: var(--cytotoxic-ab);
+  fill: color-mix(in srgb, var(--cytotoxic-ab) calc(var(--arm-ii, 0) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--arm-ii, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--cytotoxic-ab) var(--glow-mix), transparent));
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.vesselWall {
+  composes: cellBody;
+  stroke: var(--immune-complex);
+  fill: color-mix(in srgb, var(--immune-complex) calc(var(--arm-iii, 0) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--arm-iii, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--immune-complex) var(--glow-mix), transparent));
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.tissueSite {
+  composes: cellBody;
+  stroke: var(--delayed-type);
+  fill: color-mix(in srgb, var(--delayed-type) calc(var(--arm-iv, 0) * var(--wash)), transparent);
+  filter: drop-shadow(0 0 calc(var(--arm-iv, 0) * 7px * var(--glow-blur)) color-mix(in srgb, var(--delayed-type) var(--glow-mix), transparent));
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.granule {
+  fill: var(--ige);
+}
+
+.antibody {
+  stroke-width: 1.6;
+  fill: none;
+}
+
+.armTitle {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+
+.armCaption {
+  font-family: var(--mono);
+  font-size: 7px;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}

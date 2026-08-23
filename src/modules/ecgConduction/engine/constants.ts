@@ -1,4 +1,4 @@
-import type { LeadName } from './types';
+import type { InjuryTerritory, LimbLeadName, PrecordialLeadName } from './types';
 
 /**
  * Hexaxial reference system: each limb lead's positive electrode direction, in degrees, with
@@ -8,13 +8,57 @@ import type { LeadName } from './types';
  * deflection; one travelling away writes a downward deflection. Everything the lead selector
  * demonstrates — including why aVR is normally inverted — is just this projection.
  */
-export const LEAD_AXES: Record<LeadName, number> = {
+export const LEAD_AXES: Record<LimbLeadName, number> = {
   I: 0,
   II: 60,
   III: 120,
   aVR: -150,
   aVL: -30,
   aVF: 90,
+};
+
+/**
+ * The chest leads, as directions in the HORIZONTAL plane: degrees measured from straight-left
+ * (V6, 0°) rotating toward anterior, so V1 at 115° points forward and slightly to the right.
+ *
+ * Wrapping six electrodes round the front of the chest samples the one axis the limb leads
+ * cannot reach. Everything the precordium is read for — R-wave progression, an anterior
+ * infarct, the RSR' of a right bundle branch block — is this set of angles applied to the same
+ * dipole the limb leads already see.
+ */
+export const PRECORDIAL_AXES: Record<PrecordialLeadName, number> = {
+  V1: 115,
+  V2: 94,
+  V3: 69,
+  V4: 48,
+  V5: 23,
+  V6: 0,
+};
+
+/**
+ * Chest electrodes sit against the chest wall, inches from the heart, while the limb
+ * electrodes are on the arms and legs. Proximity is not cosmetic here: it is the reason a
+ * chest lead registers a taller deflection than a limb lead recording the identical event,
+ * and the reason V1 and V2 report the right ventricle and septum at all rather than being
+ * drowned by the left ventricle's far greater mass.
+ */
+export const PRECORDIAL_PROXIMITY_GAIN = 1.6;
+
+/**
+ * Direction each infarct territory's injury current points, as a unit-ish vector in
+ * (left, inferior, anterior).
+ *
+ * The inferior entry is the frontal +90° the model used before the chest leads existed, so an
+ * inferior STEMI reads exactly as it did. The other three are what the extra axis buys: a
+ * posterior injury points backward, which no limb lead can see directly — it appears instead
+ * as ST DEPRESSION with a tall R in V1 and V2, the mirror image that is easy to miss and easy
+ * to mistake for anterior ischaemia.
+ */
+export const INJURY_TERRITORY_VECTORS: Record<InjuryTerritory, { x: number; y: number; z: number }> = {
+  inferior: { x: 0, y: 1, z: 0 },
+  anterior: { x: 0.1, y: -0.1, z: 1 },
+  lateral: { x: 0.95, y: -0.25, z: 0.1 },
+  posterior: { x: 0.15, y: 0.15, z: -1 },
 };
 
 export const TIMING = {
@@ -72,8 +116,6 @@ export const INJURY = {
   // injured and healthy tissue during electrical diastole. It appears on the trace as a shift
   // of the ST segment — elevation in leads facing the injury, reciprocal depression opposite.
   ST_DEVIATION_MV_PER_UNIT: 0.55,
-  // Frontal-plane direction of the modeled infarct territory (inferior wall).
-  TERRITORY_ANGLE_DEGREES: 90,
 };
 
 export const ATRIAL_FIBRILLATION = {

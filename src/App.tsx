@@ -1,5 +1,6 @@
 import { useHashRoute } from '@/shared/hooks/useHashRoute';
 import { HomePage } from '@/home/HomePage';
+import { AccountPage } from '@/account/AccountPage';
 import { CardiorenalPage } from '@/modules/cardiorenal/CardiorenalPage';
 import { RespiratoryPage } from '@/modules/respiratory/RespiratoryPage';
 import { HpaPage } from '@/modules/hpaAxis/HpaPage';
@@ -17,6 +18,7 @@ import { EcgConductionPage } from '@/modules/ecgConduction/EcgConductionPage';
 import { CoagulationPage } from '@/modules/coagulation/CoagulationPage';
 import { ErythropoiesisPage } from '@/modules/erythropoiesis/ErythropoiesisPage';
 import { ImmuneResponsePage } from '@/modules/immuneResponse/ImmuneResponsePage';
+import { HypersensitivityPage } from '@/modules/hypersensitivity/HypersensitivityPage';
 import { MuscleContractionPage } from '@/modules/muscleContraction/MuscleContractionPage';
 import { ElectrolyteBalancePage } from '@/modules/electrolyteBalance/ElectrolyteBalancePage';
 import { CapillaryExchangePage } from '@/modules/capillaryExchange/CapillaryExchangePage';
@@ -34,6 +36,7 @@ function App() {
   return (
     <div className={styles.app}>
       {route === 'home' && <HomePage />}
+      {route === 'account' && <AccountPage />}
       {route === 'cardiorenal' && <CardiorenalPage />}
       {route === 'respiratory' && <RespiratoryPage />}
       {route === 'hpaAxis' && <HpaPage />}
@@ -51,6 +54,7 @@ function App() {
       {route === 'coagulation' && <CoagulationPage />}
       {route === 'erythropoiesis' && <ErythropoiesisPage />}
       {route === 'immuneResponse' && <ImmuneResponsePage />}
+      {route === 'hypersensitivity' && <HypersensitivityPage />}
       {route === 'muscleContraction' && <MuscleContractionPage />}
       {route === 'electrolyteBalance' && <ElectrolyteBalancePage />}
       {route === 'capillaryExchange' && <CapillaryExchangePage />}

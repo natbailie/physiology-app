@@ -102,6 +102,11 @@
   --interstitium: #6f8a2e; /* capillary exchange: interstitial compartment / oedema */
   --lymph: #2f8a7a; /* capillary exchange: lymphatic return */
   --venous: #3b4fa0; /* venous return: venous reservoir & filling pressure */
+  --ige: #c2258c; /* hypersensitivity: type I, IgE & mast cell mediators */
+  --cytotoxic-ab: #b4500c; /* hypersensitivity: type II, antibody against a cell surface */
+  --immune-complex: #6a3fc9; /* hypersensitivity: type III, immune complex deposition */
+  --delayed-type: #0f7c66; /* hypersensitivity: type IV, T cells & macrophages */
+  --complement: #0b7ea8; /* hypersensitivity: complement consumption (C3/C4) */
   --ok: #007a6f;
   --warn: #9c6608;
   --danger: #c62828;

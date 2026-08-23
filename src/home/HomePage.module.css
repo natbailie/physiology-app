@@ -12,9 +12,26 @@
   gap: 0.4rem;
 }
 
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .title {
   font-size: 1.4rem;
   letter-spacing: 0.02em;
+}
+
+.accountLink {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.accountLink:hover {
+  text-decoration: underline;
 }
 
 .subtitle {

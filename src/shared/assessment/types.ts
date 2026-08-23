@@ -95,6 +95,18 @@ export interface PanelField<TSnapshot> {
 export interface PatternQuestion<TPreset extends string, TSnapshot> {
   id: string;
   stem: string;
+  /**
+   * An event to run before the panel is read, for the same reason `PredictQuestion` has one:
+   * in an event-driven module nothing happens until something is DONE to the patient.
+   *
+   * Without it every option settles at its own untouched baseline and the panels come out
+   * identical, which the fairness check correctly rejects as unanswerable. A hypersensitivity
+   * reaction has to be challenged, an infection has to be given — the scenario is not the
+   * whole setup.
+   */
+  setup?: {
+    perturb?: (state: StateOf<TSnapshot>) => StateOf<TSnapshot>;
+  };
   /** The scenario actually loaded. Also the correct answer. */
   answer: TPreset;
   /** Every option offered, including the answer. */

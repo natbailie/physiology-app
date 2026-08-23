@@ -82,6 +82,9 @@ export function useQuizSession<TInputs, TPreset extends string, TSnapshot>({
       resetEngine();
       if (isPatternQuestion(next)) {
         applyRef.current({}, next.answer);
+        // Same setup event the verification harness runs, so what the learner sees is what the
+        // fairness check checked.
+        if (next.setup?.perturb) perturbEngine(next.setup.perturb);
       } else {
         applyRef.current(next.setup.inputs ?? {}, next.setup.preset);
         if (next.setup.perturb) perturbEngine(next.setup.perturb);

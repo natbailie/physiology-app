@@ -1,7 +1,7 @@
 import { ATRIAL_FIBRILLATION, TIMING } from './constants';
 import { buildSchedule, pWaveWindow, qrsWindow, tWaveEndMs, type ActivationSchedule } from './activation';
-import { netDipole, regionStateAt, vectorAngleDegrees, vectorMagnitude } from './dipole';
-import { classifyAxis, meanQrsAxisDegrees, projectOntoLead } from './leadProjection';
+import { horizontalAngleDegrees, netDipole, regionStateAt, vectorAngleDegrees, vectorMagnitude } from './dipole';
+import { classifyAxis, meanQrsAxisDegrees, projectOntoLead, rWaveTransition } from './leadProjection';
 import { isStSegment, stDeviationMv } from './injuryCurrent';
 import { measureIntervals } from './intervals';
 import { REGIONS, VENTRICULAR_MYOCARDIUM } from './regions';
@@ -115,7 +115,7 @@ export function computeDerived(state: EcgState, inputs: EcgInputs): EcgDerived {
     if (scheduled) repolStart = Math.min(repolStart, scheduled.repolStartMs);
   }
   if (isStSegment(state.ventricularCycleTimeMs, qrs.offsetMs, repolStart)) {
-    voltage += stDeviationMv(inputs.ischemicInjury, inputs.lead);
+    voltage += stDeviationMv(inputs.ischemicInjury, inputs.injuryTerritory, inputs.lead);
   }
 
   if (inAf) voltage += fibrillatoryVoltageMv(state.simTimeSeconds);
@@ -141,6 +141,8 @@ export function computeDerived(state: EcgState, inputs: EcgInputs): EcgDerived {
     currentSegment: currentSegment(schedule, state.atrialCycleTimeMs, state.ventricularCycleTimeMs, hasOrganizedAtria),
     dipoleMagnitude: vectorMagnitude(dipole),
     dipoleAngleDegrees: vectorAngleDegrees(dipole),
+    horizontalAngleDegrees: horizontalAngleDegrees(dipole),
+    rWaveTransitionLead: rWaveTransition(schedule),
     meanQrsAxisDegrees: axis,
     axisClassification: classifyAxis(axis),
     prIntervalMs: hasOrganizedAtria && !dissociated ? intervals.prIntervalMs : 0,
@@ -158,6 +160,7 @@ export function computeDerived(state: EcgState, inputs: EcgInputs): EcgDerived {
     ventricularAPD: inputs.ventricularAPD,
     serumPotassium: inputs.serumPotassium,
     ischemicInjury: inputs.ischemicInjury,
+    injuryTerritory: inputs.injuryTerritory,
     lead: inputs.lead,
     rhythm: inputs.rhythm,
   };

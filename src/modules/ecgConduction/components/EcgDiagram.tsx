@@ -1,6 +1,7 @@
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import { HeartConduction } from './HeartConduction';
 import { HexaxialInset } from './HexaxialInset';
+import { HorizontalPlaneInset } from './HorizontalPlaneInset';
 import styles from './Diagram.module.css';
 import type { EcgDerived } from '../engine/types';
 
@@ -12,21 +13,36 @@ export function EcgDiagram({ derived }: EcgDiagramProps) {
   return (
     <DiagramFrame
       viewBox="0 0 480 300"
-      ariaLabel="Animated diagram of cardiac activation: the depolarisation wavefront sweeping the atria, conduction system and ventricles, alongside a hexaxial reference showing the instantaneous electrical vector and the selected lead axis"
+      ariaLabel="Animated diagram of cardiac activation: the depolarisation wavefront sweeping the atria, conduction system and ventricles, alongside a hexaxial reference and a horizontal-plane reference showing the instantaneous electrical vector and the selected lead axis"
     >
-      <HeartConduction x={150} y={130} regions={derived.regions} />
+      <HeartConduction x={128} y={126} regions={derived.regions} />
 
+      {/* Two planes, one vector. The limb leads measure its shadow on the frontal plane and the
+          chest leads its shadow on the horizontal one, which is why a finding can be invisible
+          in one picture and unmissable in the other. */}
       <HexaxialInset
-        x={382}
-        y={104}
-        radius={54}
+        x={306}
+        y={84}
+        radius={42}
         selectedLead={derived.lead}
         dipoleAngleDegrees={derived.dipoleAngleDegrees}
         dipoleMagnitude={derived.dipoleMagnitude}
         meanQrsAxisDegrees={derived.meanQrsAxisDegrees}
       />
-      <text className={styles.pathLabel} x={334} y={38}>
-        Lead {derived.lead} axis
+      <text className={styles.insetCaption} x={306} y={152}>
+        Frontal · limb
+      </text>
+
+      <HorizontalPlaneInset
+        x={422}
+        y={84}
+        radius={42}
+        selectedLead={derived.lead}
+        horizontalAngleDegrees={derived.horizontalAngleDegrees}
+        dipoleMagnitude={derived.dipoleMagnitude}
+      />
+      <text className={styles.insetCaption} x={422} y={152}>
+        Horizontal · chest
       </text>
 
       <text className={styles.segmentBadge} x={22} y={252}>
@@ -38,7 +54,8 @@ export function EcgDiagram({ derived }: EcgDiagramProps) {
       </text>
       <text className={styles.valueLabel} x={22} y={288}>
         {derived.isDissociated ? 'Atria and ventricles dissociated' : `PR ${derived.prIntervalMs.toFixed(0)} ms`} · QRS{' '}
-        {derived.qrsDurationMs.toFixed(0)} ms · QTc {derived.qtcMs.toFixed(0)} ms
+        {derived.qrsDurationMs.toFixed(0)} ms · QTc {derived.qtcMs.toFixed(0)} ms · R/S transition{' '}
+        {derived.rWaveTransitionLead ?? 'none'}
       </text>
 
       <text className={styles.pathLabel} x={296} y={214}>

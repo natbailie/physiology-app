@@ -1,6 +1,7 @@
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
-import type { RespInputs } from '../engine/types';
+import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
+import type { AcidType, RespInputs } from '../engine/types';
 
 interface ControlPanelProps {
   inputs: RespInputs;
@@ -8,6 +9,12 @@ interface ControlPanelProps {
 }
 
 const percent = (v: number) => Math.round(v * 100).toString();
+
+/** Two acidoses with identical pH and bicarbonate that only the anion gap separates. */
+const ACID_TYPE_OPTIONS: { value: AcidType; label: string }[] = [
+  { value: 'anionGap', label: 'Organic (gap)' },
+  { value: 'hyperchloraemic', label: 'Hyperchloraemic' },
+];
 
 export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
   return (
@@ -47,6 +54,13 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         max={100}
         step={5}
         onChange={(v) => onChange('metabolicAcidLoad', v)}
+      />
+      <ToggleGroup
+        label="Acid type"
+        value={inputs.acidType}
+        options={ACID_TYPE_OPTIONS}
+        colorVar="var(--ph)"
+        onChange={(value) => onChange('acidType', value)}
       />
       <Slider
         label="Renal compensation capacity"
