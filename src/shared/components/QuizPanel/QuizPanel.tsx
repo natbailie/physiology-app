@@ -181,6 +181,19 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
                   )}".`}
             </span>
           </p>
+          {/*
+            The counterfactual is already on screen and unlabelled. `commit` freezes the trace
+            BEFORE applying the intervention, so the dashed series is where the model was
+            heading if nothing had been done — which is exactly what a learner who predicted
+            "barely changes" needs to compare against. Naming it costs a line; leaving them to
+            infer what a second series means wastes the one thing a video course cannot show.
+          */}
+          {!correct && !pattern && (
+            <p className={styles.counterfactual}>
+              The dashed trace is where {question.watch} was before the intervention — compare it
+              with the live one to see the size of the change you predicted away.
+            </p>
+          )}
           <p className={styles.explanation}>{question.explanation}</p>
           <div className={styles.revealActions}>
             <span className={styles.record}>

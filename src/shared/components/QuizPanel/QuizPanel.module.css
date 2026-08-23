@@ -157,6 +157,16 @@
   color: var(--text);
 }
 
+/* Points at the frozen baseline. Only shown on a miss, where the comparison is the lesson. */
+.counterfactual {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0 0 0.5rem;
+  padding-left: 0.6rem;
+  border-left: 2px dashed var(--panel-border);
+}
+
 .explanation {
   font-size: 0.82rem;
   line-height: 1.6;

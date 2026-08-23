@@ -230,3 +230,40 @@ describe('QuizPanel — pattern discrimination', () => {
     expect(screen.getByText(PATTERN.explanation)).toBeTruthy();
   });
 });
+
+describe('explain-the-miss', () => {
+  const wrongAnswer = {
+    phase: 'revealed' as const,
+    question: QUESTION,
+    answer: 'falls',
+    correct: false,
+  };
+
+  it('names the frozen baseline when the learner got it wrong', () => {
+    // The counterfactual is already drawn; the learner just has no way to know what the second
+    // series means.
+    render(<QuizPanel session={makeSession(wrongAnswer)} summary={NO_HISTORY} />);
+    expect(screen.getByText(/dashed trace/)).toBeTruthy();
+  });
+
+  it('stays quiet when they got it right', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ ...wrongAnswer, answer: 'rises', correct: true })}
+        summary={NO_HISTORY}
+      />,
+    );
+    expect(screen.queryByText(/dashed trace/)).toBeNull();
+  });
+
+  it('stays quiet for a pattern question, which has no intervention to compare against', () => {
+    render(
+      <QuizPanel
+        session={makeSession({ phase: 'revealed', question: PATTERN, answer: 'normal', correct: false })}
+        summary={NO_HISTORY}
+        presetLabels={PRESET_LABELS}
+      />,
+    );
+    expect(screen.queryByText(/dashed trace/)).toBeNull();
+  });
+});
