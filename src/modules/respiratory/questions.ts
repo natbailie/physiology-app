@@ -1,9 +1,27 @@
-import type { PredictQuestion } from '@/shared/assessment/types';
+import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
 import type { RespDerived, RespInputs, RespState } from './engine/types';
 import type { RespPresetName } from './engine/presets';
 
 type Snapshot = { state: RespState; derived: RespDerived };
-export type RespQuestion = PredictQuestion<RespInputs, RespPresetName, Snapshot>;
+export type RespQuestion = ModuleQuestion<RespInputs, RespPresetName, Snapshot>;
+
+/**
+ * The arterial blood gas, as it is actually reported.
+ *
+ * Four rows, and no one of them names the disorder alone: pH says how bad it is, PaCO2 and
+ * bicarbonate say which half is responsible, and the anion gap separates two acidoses that are
+ * otherwise identical. Reading the combination is the skill; these questions show nothing else.
+ */
+const ABG_PANEL: readonly PanelField<Snapshot>[] = [
+  { label: 'pH', value: (s) => s.derived.pH, decimals: 2, tolerance: 0.004 },
+  { label: 'PaCO2', unit: 'mmHg', value: (s) => s.derived.paCO2, decimals: 0 },
+  { label: 'HCO3-', unit: 'mEq/L', value: (s) => s.derived.plasmaHCO3, decimals: 0 },
+  { label: 'Anion gap', unit: 'mEq/L', value: (s) => s.derived.anionGapMEqL, decimals: 0 },
+];
+
+// Long enough for the slow renal arm to have finished: a settled run in this module is by
+// definition a chronic picture, which is exactly what these questions are asking about.
+const SETTLE = 3200;
 
 /** Each question keys a DIRECTION, and `questions.test.ts` runs the engine to confirm the
  * model really moves that way. Change a constant that flips one of these and the test fails. */
@@ -57,5 +75,58 @@ export const RESPIRATORY_QUESTIONS: readonly RespQuestion[] = [
     explanation:
       'Ventilation far in excess of CO2 production drives PaCO2 down, and by Henderson-Hasselbalch a lower PaCO2 against an unchanged bicarbonate raises pH — an acute respiratory alkalosis. The important word is acute: renal compensation takes days, so there is nothing yet to blunt it. That is also why the alkalosis is what produces the perioral tingling and carpopedal spasm, by lowering ionised calcium.',
     metric: (s) => s.derived.pH,
+  },
+
+  // --- Reading a blood gas: the pattern-discrimination half of the module ---
+
+  {
+    id: 'abg-gap-vs-non-gap',
+    stem: 'A patient has been vomiting and passing profuse watery stool for three days. They are not diabetic and their lactate is normal. Their gas is below.',
+    answer: 'diarrhoeaNonGap',
+    options: ['diarrhoeaNonGap', 'dkaMetabolicAcidosis', 'salicylatePoisoning', 'pyloricStenosis'],
+    panel: ABG_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'A metabolic acidosis with a NORMAL anion gap. Bicarbonate has been lost straight out of the gut and chloride has taken its place, so nothing unmeasured has accumulated and the gap never moves. Compare it with the ketoacidosis option: the pH and the bicarbonate would look much the same, and the gap is the only row that separates them. That is precisely why the gap is calculated rather than eyeballed — two acidoses with identical pH, identical bicarbonate, and completely different causes and treatments.',
+  },
+  {
+    id: 'abg-salicylate-two-disorders',
+    stem: 'A teenager is brought in confused, hyperventilating and complaining that their ears are ringing. Nobody knows what they have taken.',
+    answer: 'salicylatePoisoning',
+    options: ['salicylatePoisoning', 'dkaMetabolicAcidosis', 'panicHyperventilation', 'diarrhoeaNonGap'],
+    panel: ABG_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'There are two primary disorders here, not one compensating the other. The wide anion gap and low bicarbonate are a metabolic acidosis; the PaCO2 is lower than even full respiratory compensation for that bicarbonate would justify, so the hyperventilation cannot be a response to the acidosis — it is a second disorder. Salicylate does both: it stimulates the respiratory centre directly and it uncouples oxidative phosphorylation. Note the pH, which is close to normal because the two are pulling opposite ways. Reading only the pH here would miss a poisoning.',
+  },
+  {
+    id: 'abg-compensated-retainer',
+    stem: 'A breathless smoker is admitted. Someone looks at the bicarbonate of 32 and asks whether they should be given bicarbonate-lowering treatment.',
+    answer: 'copdChronicAcidosis',
+    options: ['copdChronicAcidosis', 'pyloricStenosis', 'vomitingOnCopd', 'panicHyperventilation'],
+    panel: ABG_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'The raised bicarbonate is not a disorder, it is the answer to one. A PaCO2 this high entitles the patient to a bicarbonate anywhere up to the mid thirties once the kidney has had days to respond, so 32 is exactly where it should be and nothing needs correcting. Note that the pH is still on the acid side: compensation restores the ratio far enough to survive and then runs out of capacity. A chronic retainer whose pH had reached 7.40 would have been cured, not compensated.',
+  },
+  {
+    id: 'abg-alkalosis-hiding-in-a-retainer',
+    stem: 'A patient with long-standing COPD has been vomiting for two days. Their pH is very close to normal and the team is reassured.',
+    answer: 'vomitingOnCopd',
+    options: ['vomitingOnCopd', 'copdChronicAcidosis', 'pyloricStenosis', 'cardiacArrest'],
+    panel: ABG_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'Both derangements push the bicarbonate the same way, so they hide each other and the pH looks almost respectable while both components are grossly abnormal. The giveaway is that the bicarbonate is higher than even complete chronic renal compensation for this PaCO2 could produce, and compensation never overshoots — so something else is adding bicarbonate. That something is the vomiting. Compare the plain COPD option: same PaCO2, and a bicarbonate that stops where compensation alone would stop it.',
+  },
+  {
+    id: 'abg-arrest-both-arms',
+    stem: 'A patient is found unresponsive and pulseless. A gas is taken during resuscitation.',
+    answer: 'cardiacArrest',
+    options: ['cardiacArrest', 'copdChronicAcidosis', 'dkaMetabolicAcidosis', 'salicylatePoisoning'],
+    panel: ABG_PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'Both arms have failed at once and neither is compensating anything. Ventilation has stopped so CO2 accumulates, and perfusion has stopped so the tissues pour out lactate — a respiratory acidosis and a wide-gap metabolic acidosis together, which is why the pH is so much worse than either alone would explain. The distinction from the COPD option matters: there the high PaCO2 comes with a HIGH bicarbonate because the kidney had days to answer it. Here there is no compensation in either direction, and the treatment is circulation and ventilation, not bicarbonate.',
   },
 ];

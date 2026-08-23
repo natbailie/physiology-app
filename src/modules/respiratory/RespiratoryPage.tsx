@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { RespiratoryDiagram } from './components/RespiratoryDiagram';
+import { DavenportDiagram } from './components/DavenportDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -65,11 +66,17 @@ export function RespiratoryPage() {
           onApply={handleApplyPreset}
           actions={[{ label: 'Bronchospasm', onClick: triggerBronchospasm, variant: 'danger' }]}
           onReset={reset}
+          disabled={session.blinded}
         />
       }
-      diagram={<RespiratoryDiagram derived={snapshot.derived} />}
+      diagram={
+        <>
+          <RespiratoryDiagram derived={snapshot.derived} />
+          <DavenportDiagram derived={snapshot.derived} history={history} baselineHistory={baseline.history} />
+        </>
+      }
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      practice={<QuizPanel session={session} summary={summary} presetLabels={RESP_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -88,9 +95,12 @@ export function RespiratoryPage() {
   />
         </>
       }
+      blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={respiratoryContent} startCollapsed={session.phase !== 'idle'} />}
-      footnote={'A simplified, conceptual model of respiratory and acid-base physiology — not a clinical or diagnostic tool. Simulated time runs faster than real time so chemoreceptor responses (seconds-minutes) and renal compensation (physiologically days) are both watchable within roughly a minute.'}
+      footnote={
+        'A simplified, conceptual model of respiratory and acid-base physiology — not a clinical or diagnostic tool. Simulated time runs faster than real time so chemoreceptor responses (seconds-minutes) and renal compensation (physiologically days) are both watchable within roughly a minute — which means a settled run is by definition a CHRONIC picture, and the acute one is what you see on the way there. Watch the trail on the Davenport diagram: it is the path from the acute position to the compensated one. The anion gap is modelled as a consequence of what kind of acid is being produced, so it moves only when an organic acid is the cause; lactate, ketones and salicylate are not distinguished from one another.'
+      }
     />
   );
 }

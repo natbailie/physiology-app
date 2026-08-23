@@ -20,7 +20,7 @@ export const MODULES: ModuleDescriptor[] = [
   {
     id: 'respiratory',
     name: 'Respiratory & Acid-Base',
-    tagline: 'Ventilation, gas exchange & acid-base balance',
+    tagline: 'Ventilation, gas exchange & reading a blood gas',
     status: 'available',
     accentColorVar: 'var(--o2)',
   },

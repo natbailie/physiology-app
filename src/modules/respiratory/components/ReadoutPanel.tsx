@@ -21,6 +21,14 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         colorVar="var(--co2)"
       />
       <ReadoutItem label="A-a gradient" value={derived.aaGradient.toFixed(0)} unit="mmHg" colorVar="var(--text)" />
+      <ReadoutItem label="Anion gap" value={derived.anionGapMEqL.toFixed(0)} unit="mEq/L" colorVar="var(--ph)" />
+      <ReadoutItem
+        label="Interpretation"
+        value={derived.interpretation.short}
+        secondary={derived.interpretation.detail}
+        colorVar={derived.interpretation.isMixed ? 'var(--danger)' : 'var(--bicarb)'}
+        wide
+      />
     </div>
   );
 }

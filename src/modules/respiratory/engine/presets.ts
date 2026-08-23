@@ -5,10 +5,21 @@ export const DEFAULT_RESP_INPUTS: RespInputs = {
   fiO2: 0.21,
   co2Production: 100,
   metabolicAcidLoad: 0,
+  acidType: 'anionGap',
   renalCompensationCapacity: 1,
 };
 
-export type RespPresetName = 'normal' | 'copdChronicAcidosis' | 'panicHyperventilation' | 'dkaMetabolicAcidosis' | 'highAltitude';
+export type RespPresetName =
+  | 'normal'
+  | 'copdChronicAcidosis'
+  | 'panicHyperventilation'
+  | 'dkaMetabolicAcidosis'
+  | 'highAltitude'
+  | 'diarrhoeaNonGap'
+  | 'pyloricStenosis'
+  | 'salicylatePoisoning'
+  | 'cardiacArrest'
+  | 'vomitingOnCopd';
 
 export const RESP_PRESETS: Record<RespPresetName, Partial<RespInputs>> = {
   normal: { ...DEFAULT_RESP_INPUTS },
@@ -18,12 +29,33 @@ export const RESP_PRESETS: Record<RespPresetName, Partial<RespInputs>> = {
   // setting this replaced could not show what oxygen does to such a patient.
   copdChronicAcidosis: { minuteVentilation: 30 },
   // Acute hyperventilation, e.g. a panic attack — renal compensation hasn't had time to engage.
-  panicHyperventilation: { minuteVentilation: 220 },
+  panicHyperventilation: { minuteVentilation: 260 },
   // Ketoacid production drives a primary metabolic acidosis; Kussmaul hyperventilation
   // emerges from the chemoreceptor reflex alone — minuteVentilation stays at baseline.
   dkaMetabolicAcidosis: { metabolicAcidLoad: 70 },
   // Reduced inspired O2 (modeling reduced atmospheric pressure at altitude).
   highAltitude: { fiO2: 0.12 },
+
+  // --- The same pH by different routes, and the disorders that need two names ---
+
+  // Bicarbonate lost from the gut with chloride taking its place. The pH and the bicarbonate
+  // are indistinguishable from a mild ketoacidosis; only the anion gap separates them, which
+  // is the entire reason it is calculated.
+  diarrhoeaNonGap: { metabolicAcidLoad: 45, acidType: 'hyperchloraemic' },
+  // Vomiting gastric acid is losing hydrogen ion, so the bicarbonate left behind is in excess.
+  // Respiratory compensation is hypoventilation, which is limited by the need to breathe at
+  // all — the reason the compensation band for a metabolic alkalosis is so much wider.
+  pyloricStenosis: { metabolicAcidLoad: -35 },
+  // Two PRIMARY disorders at once, not one compensating the other: salicylate stimulates the
+  // respiratory centre directly AND uncouples oxidative phosphorylation. The respiratory
+  // alkalosis is not a response to the acidosis, and no compensation rule will fit the numbers.
+  salicylatePoisoning: { minuteVentilation: 190, metabolicAcidLoad: 40 },
+  // Ventilation stops and perfusion fails together, so CO2 accumulates while anaerobic
+  // metabolism pours out lactate. Both arms acidotic, nothing compensating anything.
+  cardiacArrest: { minuteVentilation: 22, metabolicAcidLoad: 95 },
+  // A chronic retainer who starts vomiting. Both derangements push the bicarbonate up, so the
+  // pH can look reassuringly normal while both components are grossly abnormal.
+  vomitingOnCopd: { minuteVentilation: 30, metabolicAcidLoad: -30 },
 };
 
 export const RESP_PRESET_LABELS: Record<RespPresetName, string> = {
@@ -32,6 +64,11 @@ export const RESP_PRESET_LABELS: Record<RespPresetName, string> = {
   panicHyperventilation: 'Panic attack',
   dkaMetabolicAcidosis: 'DKA',
   highAltitude: 'High altitude',
+  diarrhoeaNonGap: 'Diarrhoea (non-gap)',
+  pyloricStenosis: 'Vomiting',
+  salicylatePoisoning: 'Salicylate',
+  cardiacArrest: 'Cardiac arrest',
+  vomitingOnCopd: 'Vomiting on COPD',
 };
 
 export const PRESET_ORDER: RespPresetName[] = [
@@ -40,4 +77,9 @@ export const PRESET_ORDER: RespPresetName[] = [
   'panicHyperventilation',
   'dkaMetabolicAcidosis',
   'highAltitude',
+  'diarrhoeaNonGap',
+  'pyloricStenosis',
+  'salicylatePoisoning',
+  'cardiacArrest',
+  'vomitingOnCopd',
 ];

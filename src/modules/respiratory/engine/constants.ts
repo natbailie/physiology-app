@@ -32,8 +32,11 @@ export const VENTILATION = {
 export const CHEMORECEPTOR = {
   // PaCO2 deviation (mmHg) that saturates the CO2 component of drive.
   CO2_SENSITIVITY_MMHG: 15,
-  // pH deviation that saturates the pH component of drive.
-  PH_SENSITIVITY: 0.15,
+  // pH deviation that saturates the pH component of drive. Finer than the CO2 term on
+  // purpose: as hyperventilation blows off CO2 the CO2 term turns negative and fights back,
+  // so the acidaemia has to outweigh it for Kussmaul breathing to reach the depth Winter's
+  // formula describes. Loosen this and a diabetic ketoacidosis under-compensates.
+  PH_SENSITIVITY: 0.1,
   // The CO2/pH (central) component alone cannot reach the top of the drive range. The
   // reserved headroom belongs to the hypoxic component, so that withdrawing hypoxic drive
   // — which is exactly what supplemental O2 does to a chronic CO2 retainer — costs real
@@ -42,22 +45,48 @@ export const CHEMORECEPTOR = {
   CENTRAL_MAX_DRIVE: 0.7,
   // PaO2 below this recruits peripheral (hypoxic) chemoreceptor drive.
   HYPOXIC_THRESHOLD_MMHG: 60,
-  HYPOXIC_SENSITIVITY_MMHG: 30,
+  // Steep, because the hypoxic ventilatory response is steep: below the threshold the carotid
+  // bodies recruit hard and fast. A shallower slope left altitude producing no measurable
+  // alkalosis at all, because the falling CO2 term cancelled the hypoxic gain almost exactly.
+  HYPOXIC_SENSITIVITY_MMHG: 20,
   // Fastest actuator: seconds-to-a-minute chemoreceptor/brainstem response.
   TAU_SECONDS: 20,
 };
 
 export const ACUTE_BUFFER = {
   CO2_RANGE_MMHG: 60,
-  // Calibrated toward the clinical "~1 mEq/L HCO3 per 10mmHg PaCO2" acute rule.
-  HCO3_GAIN_PER_SECOND: 0.0006,
+  /**
+   * Bicarbonate offset, mEq/L, at full drive — a BOUNDED actuator rather than a rate.
+   *
+   * This is the acute rule made exact. The drive is linear in PaCO2 over a 60 mmHg span, so a
+   * ceiling of 6 mEq/L is precisely "1 mEq/L per 10 mmHg" and a ceiling of 12 is "2 per 10".
+   * Integrating a rate instead — which is what this used to do — meant the acute bicarbonate
+   * was never a value at all, only however far the integration had got, so "acute" and
+   * "chronic" differed by nothing but how long you had waited and no compensation rule could
+   * be checked against the model.
+   *
+   * The two directions differ because the buffering does: a rise in CO2 is buffered mostly by
+   * haemoglobin and protein, while a fall pulls lactate and other organic acids out of the
+   * cells, which shifts bicarbonate roughly twice as far.
+   */
+  MAX_OFFSET_RISE_MEQ_L: 6,
+  MAX_OFFSET_FALL_MEQ_L: 12,
   TAU_SECONDS: 40,
 };
 
 export const RENAL_COMPENSATION = {
   PH_RANGE: 0.25,
-  // Calibrated toward the "~3.5-4 mEq/L per 10mmHg PaCO2" chronic compensation rule.
-  HCO3_GAIN_PER_SECOND: 0.0009,
+  /**
+   * Maximum bicarbonate the kidney can add or remove, mEq/L.
+   *
+   * Bounding this is what makes compensation INCOMPLETE, which is the single most important
+   * thing about it: a compensating kidney restores the ratio far enough to keep the patient
+   * alive and then runs out of capacity, so a chronic retainer lands at a nearly-normal pH
+   * rather than a normal one. As a free integrator the renal arm simply drove pH to 7.4 and
+   * stopped, which made every chronic disorder look fully corrected and left nothing for the
+   * compensation rules to detect.
+   */
+  MAX_OFFSET_MEQ_L: 11,
   // Slowest actuator: renal compensation takes days physiologically.
   TAU_SECONDS: 480,
 };
@@ -65,6 +94,58 @@ export const RENAL_COMPENSATION = {
 export const METABOLIC_LOAD = {
   // Direct titration of plasma HCO3- by exogenous acid/base load.
   HCO3_GAIN_PER_SECOND: 0.0012,
+  // ...and the clearance that stops it running away. Acid is not only produced, it is
+  // metabolised and excreted, so a FIXED production rate settles at a fixed deficit rather
+  // than consuming every last bicarbonate ion. Without this term the model has production
+  // and no disposal, and any sustained load — mild or catastrophic — ends at the same
+  // floored bicarbonate, which makes every metabolic disorder read identically on a panel.
+  // Steady-state HCO3 deficit is load x HCO3_GAIN_PER_SECOND x CLEARANCE_TAU_SECONDS, so
+  // this constant is what sets how severe a given acid load actually is.
+  CLEARANCE_TAU_SECONDS: 200,
+};
+
+export const ANION_GAP = {
+  // Na - (Cl + HCO3). The normal value is unmeasured anion, mostly albumin.
+  NORMAL_MEQ_L: 12,
+  // An ORGANIC acid (ketoacid, lactate, salicylate) consumes bicarbonate and leaves its
+  // conjugate base behind, so the gap widens one-for-one with the bicarbonate lost. A
+  // hyperchloraemic acidosis — diarrhoea, renal tubular acidosis, saline — loses bicarbonate
+  // with chloride taking its place, so the gap does not move at all. That single difference
+  // is what the gap is calculated to detect.
+  ANION_PER_HCO3_LOST: 1,
+};
+
+export const INTERPRETATION = {
+  // The pH band inside which no primary disorder is called.
+  NORMAL_PH_MIN: 7.35,
+  NORMAL_PH_MAX: 7.45,
+  NORMAL_PACO2_MMHG: 40,
+  NORMAL_HCO3_MEQ_L: 24,
+  // Winter's formula: expected PaCO2 = 1.5 x HCO3 + 8, +/- 2.
+  WINTERS_SLOPE: 1.5,
+  WINTERS_INTERCEPT: 8,
+  WINTERS_TOLERANCE: 2,
+  // Metabolic alkalosis: expected PaCO2 = 0.7 x HCO3 + 20, +/- 5. Hypoventilation is a far
+  // less reliable compensation than hyperventilation, which is why the band is wider.
+  ALKALOSIS_SLOPE: 0.7,
+  ALKALOSIS_INTERCEPT: 20,
+  ALKALOSIS_TOLERANCE: 5,
+  // Renal compensation for a respiratory disorder, per 10 mmHg of PaCO2 deviation. The pair
+  // of numbers is the point: a single blood gas CANNOT distinguish acute from chronic, so
+  // the expectation is a BAND running from the acute value to the fully compensated chronic
+  // one, and only a bicarbonate outside that band proves a second disorder.
+  ACIDOSIS_ACUTE_HCO3_PER_10: 1,
+  ACIDOSIS_CHRONIC_HCO3_PER_10: 3.5,
+  ALKALOSIS_ACUTE_HCO3_PER_10: 2,
+  ALKALOSIS_CHRONIC_HCO3_PER_10: 4,
+  // Slack on the band edges, mEq/L.
+  RESPIRATORY_TOLERANCE: 1.5,
+  // Delta ratio bounds for a pure high-anion-gap acidosis. Below is a coexisting normal-gap
+  // acidosis; above is a coexisting metabolic alkalosis.
+  DELTA_RATIO_MIN: 0.8,
+  DELTA_RATIO_MAX: 2,
+  // Below this the bicarbonate has barely moved and the delta ratio is meaningless noise.
+  DELTA_RATIO_MIN_HCO3_CHANGE: 3,
 };
 
 export const BICARBONATE = {

@@ -7,6 +7,10 @@
   min-width: 0;
 }
 
+.wide {
+  grid-column: 1 / -1;
+}
+
 .label {
   color: var(--tile-color, var(--text-dim));
 }

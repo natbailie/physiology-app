@@ -34,7 +34,9 @@ describe('engine — baseline steady state', () => {
         for (const co2Production of [50, 300]) {
           for (const metabolicAcidLoad of [-100, 100]) {
             for (const renalCompensationCapacity of [0, 1.5]) {
-              extremes.push({ minuteVentilation, fiO2, co2Production, metabolicAcidLoad, renalCompensationCapacity });
+              for (const acidType of ['anionGap', 'hyperchloraemic'] as const) {
+                extremes.push({ minuteVentilation, fiO2, co2Production, metabolicAcidLoad, acidType, renalCompensationCapacity });
+              }
             }
           }
         }
@@ -43,9 +45,19 @@ describe('engine — baseline steady state', () => {
 
     for (const inputs of extremes) {
       const { state, derived } = runFor(inputs, 600, 1);
+      // Every NUMERIC derived value must be finite. The panel also carries the two expected-
+      // compensation bands (null when the disorder is not of that kind) and the interpretation
+      // itself, so the sweep checks the bands element-wise rather than treating them as scalars.
       for (const [key, value] of Object.entries(derived)) {
+        if (typeof value !== 'number') continue;
         expect(Number.isFinite(value), `${key} should be finite for ${JSON.stringify(inputs)}`).toBe(true);
       }
+      for (const band of [derived.expectedPaCO2Range, derived.expectedHCO3Range]) {
+        if (band === null) continue;
+        expect(band.every(Number.isFinite), `band finite for ${JSON.stringify(inputs)}`).toBe(true);
+        expect(band[0]).toBeLessThan(band[1]);
+      }
+      expect(typeof derived.interpretation.label).toBe('string');
       // Henderson-Hasselbalch pH at the extremes of the HCO3-/PaCO2 clamps (HCO3 5-45,
       // PaCO2 10-150) ranges roughly 6.1-8.3 — wider than any real survivable pH, but this
       // sweep intentionally covers input combinations far outside physiologic norms.
@@ -169,5 +181,63 @@ describe('engine — high altitude (hypoxic respiratory alkalosis)', () => {
     expect(derived.saO2).toBeLessThan(88);
     expect(derived.paCO2).toBeLessThan(38);
     expect(derived.pH).toBeGreaterThan(7.4);
+  });
+});
+
+describe('engine — acid production meets acid clearance', () => {
+  const withLoad = (metabolicAcidLoad: number) =>
+    runFor({ ...DEFAULT_RESP_INPUTS, metabolicAcidLoad }, 4000, 0.5);
+
+  it('settles a mild acid load at a mildly low bicarbonate rather than consuming all of it', () => {
+    // Acid is metabolised and excreted as well as produced, so a fixed production rate reaches
+    // a fixed deficit. Without a clearance term the model had production and no disposal, and
+    // every sustained load — trivial or lethal — ended at the same floored bicarbonate.
+    const { derived } = withLoad(15);
+    expect(derived.plasmaHCO3).toBeGreaterThan(17);
+    expect(derived.plasmaHCO3).toBeLessThan(23);
+    expect(derived.pH).toBeGreaterThan(7.28);
+  });
+
+  it('grades severity: a larger load settles at a lower bicarbonate and a lower pH', () => {
+    const mild = withLoad(15);
+    const severe = withLoad(70);
+    expect(severe.derived.plasmaHCO3).toBeLessThan(mild.derived.plasmaHCO3 - 4);
+    expect(severe.derived.pH).toBeLessThan(mild.derived.pH - 0.03);
+  });
+
+  it('holds a steady state instead of drifting on toward the clamp', () => {
+    const early = runFor({ ...DEFAULT_RESP_INPUTS, metabolicAcidLoad: 40 }, 2000, 0.5);
+    const late = runFor({ ...DEFAULT_RESP_INPUTS, metabolicAcidLoad: 40 }, 6000, 0.5);
+    expect(Math.abs(late.derived.plasmaHCO3 - early.derived.plasmaHCO3)).toBeLessThan(1);
+  });
+
+  it('widens the anion gap for an organic acid and leaves it alone for a hyperchloraemic one', () => {
+    const organic = runFor({ ...DEFAULT_RESP_INPUTS, metabolicAcidLoad: 45, acidType: 'anionGap' }, 4000, 0.5);
+    const chloride = runFor({ ...DEFAULT_RESP_INPUTS, metabolicAcidLoad: 45, acidType: 'hyperchloraemic' }, 4000, 0.5);
+    // Same acid load, so the pH and the bicarbonate are identical...
+    expect(organic.derived.pH).toBeCloseTo(chloride.derived.pH, 6);
+    expect(organic.derived.plasmaHCO3).toBeCloseTo(chloride.derived.plasmaHCO3, 6);
+    // ...and only the gap tells them apart.
+    expect(organic.derived.anionGapMEqL).toBeGreaterThan(chloride.derived.anionGapMEqL + 8);
+  });
+});
+
+describe('engine — chemical buffering and the kidney are separate defences', () => {
+  it('answers an acute CO2 rise with buffering long before the kidney has moved', () => {
+    const early = runFor({ ...DEFAULT_RESP_INPUTS, minuteVentilation: 40 }, 120, 0.25);
+    expect(early.state.bufferOffsetMEqL).toBeGreaterThan(early.state.renalOffsetMEqL);
+  });
+
+  it('and with renal compensation once it has had time — the arm that does the heavy lifting', () => {
+    const late = runFor({ ...DEFAULT_RESP_INPUTS, minuteVentilation: 40 }, 4000, 0.5);
+    expect(late.state.renalOffsetMEqL).toBeGreaterThan(late.state.bufferOffsetMEqL);
+  });
+
+  it('never fully normalises the pH, because the kidney runs out of capacity', () => {
+    // Compensation restores the RATIO far enough to survive and then stops. A chronic retainer
+    // whose pH reached 7.40 would mean the disorder had been cured, not compensated.
+    const { derived } = runFor({ ...DEFAULT_RESP_INPUTS, minuteVentilation: 30 }, 8000, 0.5);
+    expect(derived.pH).toBeLessThan(7.36);
+    expect(derived.paCO2).toBeGreaterThan(60);
   });
 });
