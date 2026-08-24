@@ -16,6 +16,11 @@ interface AuthContextValue {
   signUp(email: string, password: string): Promise<AuthResult>;
   signIn(email: string, password: string): Promise<AuthResult>;
   signOut(): Promise<void>;
+  /**
+   * Permanent self-service deletion (UK GDPR): the server-side rpc removes the auth user and
+   * everything cascading from it — profile, attempts, entitlements. There is no undo.
+   */
+  deleteAccount(): Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -40,8 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    // Respects `cancelled` for the same reason `getSession` does: Supabase fires this callback
+    // once on subscribe, and it can also land after unmount. It clears `initialising` too — if
+    // it arrives before `getSession` resolves, the answer is already known and there is nothing
+    // left to wait for.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
       setUser(toUser(session));
+      setInitialising(false);
     });
 
     return () => {
@@ -70,6 +81,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signOut() {
         await supabase?.auth.signOut();
       },
+      async deleteAccount() {
+        if (!supabase) return { ok: false, message: 'Accounts are not configured.' };
+        const { error } = await supabase.rpc('delete_own_account');
+        if (error) return { ok: false, message: tidyError(error.message) };
+        // The server-side user is gone; drop the now-dead local session so the app
+        // returns to its signed-out state rather than limping along on a stale JWT.
+        await supabase.auth.signOut();
+        return { ok: true, needsConfirmation: false };
+      },
     }),
     [user, initialising],
   );
@@ -85,6 +105,8 @@ function tidyError(message: string): string {
   if (lower.includes('password should be')) return 'Passwords need at least six characters.';
   if (lower.includes('email not confirmed')) return 'Confirm your email first — check your inbox.';
   if (lower.includes('rate limit')) return 'Too many attempts just now — wait a moment and retry.';
+  if (lower.includes('permission denied') || lower.includes('not found'))
+    return 'Deletion is not available on this deployment yet.';
   return message;
 }
 

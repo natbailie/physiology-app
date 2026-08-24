@@ -185,7 +185,12 @@ export function createSupabaseProgressStore(
       if (db) {
         let query = db.from(TABLE).delete().eq('user_id', userId);
         if (moduleId !== undefined) query = query.eq('module_id', moduleId);
-        void query;
+        // A PostgREST builder is a lazy thenable: it does not issue the request until it is
+        // awaited or `.then`-ed. Discarding it with a bare `void` sent nothing at all, so the
+        // rows survived on the server and reappeared the next time the store rehydrated.
+        void query.then(({ error }) => {
+          if (error) console.warn('progress reset did not reach the server', error.message);
+        });
       }
     },
 

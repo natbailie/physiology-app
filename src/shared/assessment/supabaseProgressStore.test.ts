@@ -16,6 +16,7 @@ interface FakeRow {
 function fakeClient() {
   const inserted: FakeRow[] = [];
   const deleteFilters: [string, string | undefined][] = [];
+  let deletesIssued = 0;
   let insertsFail = false;
   let resolveFetch: ((rows: FakeRow[]) => void) | null = null;
 
@@ -54,6 +55,16 @@ function fakeClient() {
               deleteFilters.push([column, value]);
               return chain;
             },
+            /**
+             * A PostgREST builder is a lazy thenable — it only issues the request when it is
+             * awaited. Modelling that is the whole point of this fake: the store used to build
+             * the delete and drop it with a bare `void`, so the filters below were recorded and
+             * the request was never sent. Counting `then` is what tells the two apart.
+             */
+            then<T>(onFulfilled: (value: { error: null }) => T): Promise<T> {
+              deletesIssued += 1;
+              return Promise.resolve({ error: null }).then(onFulfilled);
+            },
           };
           return chain;
         },
@@ -70,7 +81,7 @@ function fakeClient() {
 
   const moduleFilters = () => deleteFilters.filter(([col]) => col === 'module_id').map(([, v]) => v);
 
-  return { client: client as unknown as SupabaseClient, inserted, moduleFilters, __setInsertsFail: client.__setInsertsFail, __releaseFetch: client.__releaseFetch };
+  return { client: client as unknown as SupabaseClient, inserted, moduleFilters, deletesIssued: () => deletesIssued, __setInsertsFail: client.__setInsertsFail, __releaseFetch: client.__releaseFetch };
 }
 
 async function settle(): Promise<void> {
@@ -173,7 +184,7 @@ describe('supabase-backed progress store', () => {
   });
 
   it('resetting one module clears it locally without touching others, and scopes the server delete', async () => {
-    const { client, moduleFilters } = fakeClient();
+    const { client, moduleFilters, deletesIssued } = fakeClient();
     const store = createSupabaseProgressStore('user-1', client);
 
     store.record('respiratory', 'q1', true);
@@ -184,12 +195,13 @@ describe('supabase-backed progress store', () => {
     expect(store.summary('respiratory').attempted).toBe(0);
     expect(store.summary('cardiorenal').attempted).toBe(1);
     expect(moduleFilters()).toEqual(['respiratory']);
+    expect(deletesIssued(), 'the delete was built but never sent').toBe(1);
 
     await settle();
   });
 
   it('resetting everything discards every module locally and sends no module filter', async () => {
-    const { client, moduleFilters } = fakeClient();
+    const { client, moduleFilters, deletesIssued } = fakeClient();
     const store = createSupabaseProgressStore('user-1', client);
 
     store.record('respiratory', 'q1', true);
@@ -199,6 +211,7 @@ describe('supabase-backed progress store', () => {
     expect(store.summary('respiratory').attempted).toBe(0);
     expect(store.summary('cardiorenal').attempted).toBe(0);
     expect(moduleFilters()).toEqual([]);
+    expect(deletesIssued(), 'the delete was built but never sent').toBe(1);
 
     await settle();
   });
