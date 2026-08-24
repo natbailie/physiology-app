@@ -4,6 +4,7 @@ import { routeIdFromHash } from './scenarioUrl';
 export type RouteId =
   | 'home'
   | 'account'
+  | 'privacy'
   | 'pricing'
   | 'cardiorenal'
   | 'respiratory'
@@ -36,10 +37,20 @@ export type RouteId =
   | 'vestibular'
   | 'somaticSensation'
   | 'motorControl'
+  | 'liverPhysiology'
+  | 'pregnancy'
+  | 'anteriorPituitary'
+  | 'adrenalCortex'
+  | 'adrenalMedulla'
+  | 'bloodGroups'
+  | 'thermoregulation'
+  | 'exercisePhysiology'
   | 'reference';
 
-const VALID_ROUTES: RouteId[] = [
+/** Exported so `moduleRegistry.test.ts` can assert every available module has a route. */
+export const VALID_ROUTES: RouteId[] = [
   'account',
+  'privacy',
   'pricing',
   'cardiorenal',
   'respiratory',
@@ -72,6 +83,14 @@ const VALID_ROUTES: RouteId[] = [
   'vestibular',
   'somaticSensation',
   'motorControl',
+  'liverPhysiology',
+  'pregnancy',
+  'anteriorPituitary',
+  'adrenalCortex',
+  'adrenalMedulla',
+  'bloodGroups',
+  'thermoregulation',
+  'exercisePhysiology',
   'reference',
 ];
 

@@ -1,0 +1,53 @@
+import { lazy, type ComponentType } from 'react';
+import type { RouteId } from '@/shared/hooks/useHashRoute';
+
+/**
+ * Every page except the landing grid is its own chunk, loaded on first visit — thirty-odd
+ * simulators would otherwise ship as one bundle and the first load would pay for all of them.
+ * The destructured `.then` keeps each named export compile-time checked.
+ */
+export const PAGES: Partial<Record<RouteId, ComponentType>> = {
+  account: lazy(() => import('@/account/AccountPage').then(({ AccountPage }) => ({ default: AccountPage }))),
+  privacy: lazy(() => import('@/account/PrivacyPage').then(({ PrivacyPage }) => ({ default: PrivacyPage }))),
+  pricing: lazy(() => import('@/billing/PricingPage').then(({ PricingPage }) => ({ default: PricingPage }))),
+  reference: lazy(() => import('@/reference/ReferencePage').then(({ ReferencePage }) => ({ default: ReferencePage }))),
+  cardiorenal: lazy(() => import('@/modules/cardiorenal/CardiorenalPage').then(({ CardiorenalPage }) => ({ default: CardiorenalPage }))),
+  respiratory: lazy(() => import('@/modules/respiratory/RespiratoryPage').then(({ RespiratoryPage }) => ({ default: RespiratoryPage }))),
+  hpaAxis: lazy(() => import('@/modules/hpaAxis/HpaPage').then(({ HpaPage }) => ({ default: HpaPage }))),
+  hptAxis: lazy(() => import('@/modules/hptAxis/HptPage').then(({ HptPage }) => ({ default: HptPage }))),
+  gastrointestinal: lazy(() => import('@/modules/gastrointestinal/GastrointestinalPage').then(({ GastrointestinalPage }) => ({ default: GastrointestinalPage }))),
+  glucoseRegulation: lazy(() => import('@/modules/glucoseRegulation/GlucoseRegulationPage').then(({ GlucoseRegulationPage }) => ({ default: GlucoseRegulationPage }))),
+  calciumHomeostasis: lazy(() => import('@/modules/calciumHomeostasis/CalciumHomeostasisPage').then(({ CalciumHomeostasisPage }) => ({ default: CalciumHomeostasisPage }))),
+  membranePotentials: lazy(() => import('@/modules/membranePotentials/MembranePotentialsPage').then(({ MembranePotentialsPage }) => ({ default: MembranePotentialsPage }))),
+  autonomicNervous: lazy(() => import('@/modules/autonomicNervous/AutonomicNervousPage').then(({ AutonomicNervousPage }) => ({ default: AutonomicNervousPage }))),
+  renalTubular: lazy(() => import('@/modules/renalTubular/RenalTubularPage').then(({ RenalTubularPage }) => ({ default: RenalTubularPage }))),
+  cardiacElectro: lazy(() => import('@/modules/cardiacElectro/CardiacElectroPage').then(({ CardiacElectroPage }) => ({ default: CardiacElectroPage }))),
+  respiratoryMechanics: lazy(() => import('@/modules/respiratoryMechanics/RespiratoryMechanicsPage').then(({ RespiratoryMechanicsPage }) => ({ default: RespiratoryMechanicsPage }))),
+  hpgAxis: lazy(() => import('@/modules/hpgAxis/HpgAxisPage').then(({ HpgAxisPage }) => ({ default: HpgAxisPage }))),
+  ecgConduction: lazy(() => import('@/modules/ecgConduction/EcgConductionPage').then(({ EcgConductionPage }) => ({ default: EcgConductionPage }))),
+  coagulation: lazy(() => import('@/modules/coagulation/CoagulationPage').then(({ CoagulationPage }) => ({ default: CoagulationPage }))),
+  erythropoiesis: lazy(() => import('@/modules/erythropoiesis/ErythropoiesisPage').then(({ ErythropoiesisPage }) => ({ default: ErythropoiesisPage }))),
+  immuneResponse: lazy(() => import('@/modules/immuneResponse/ImmuneResponsePage').then(({ ImmuneResponsePage }) => ({ default: ImmuneResponsePage }))),
+  hypersensitivity: lazy(() => import('@/modules/hypersensitivity/HypersensitivityPage').then(({ HypersensitivityPage }) => ({ default: HypersensitivityPage }))),
+  muscleContraction: lazy(() => import('@/modules/muscleContraction/MuscleContractionPage').then(({ MuscleContractionPage }) => ({ default: MuscleContractionPage }))),
+  electrolyteBalance: lazy(() => import('@/modules/electrolyteBalance/ElectrolyteBalancePage').then(({ ElectrolyteBalancePage }) => ({ default: ElectrolyteBalancePage }))),
+  capillaryExchange: lazy(() => import('@/modules/capillaryExchange/CapillaryExchangePage').then(({ CapillaryExchangePage }) => ({ default: CapillaryExchangePage }))),
+  venousReturn: lazy(() => import('@/modules/venousReturn/VenousReturnPage').then(({ VenousReturnPage }) => ({ default: VenousReturnPage }))),
+  shockStates: lazy(() => import('@/modules/shockStates/ShockStatesPage').then(({ ShockStatesPage }) => ({ default: ShockStatesPage }))),
+  fetalCirculation: lazy(() => import('@/modules/fetalCirculation/FetalCirculationPage').then(({ FetalCirculationPage }) => ({ default: FetalCirculationPage }))),
+  neuromuscularJunction: lazy(() => import('@/modules/neuromuscularJunction/NeuromuscularJunctionPage').then(({ NeuromuscularJunctionPage }) => ({ default: NeuromuscularJunctionPage }))),
+  cerebralPerfusion: lazy(() => import('@/modules/cerebralPerfusion/CerebralPerfusionPage').then(({ CerebralPerfusionPage }) => ({ default: CerebralPerfusionPage }))),
+  vision: lazy(() => import('@/modules/vision/VisionPage').then(({ VisionPage }) => ({ default: VisionPage }))),
+  hearing: lazy(() => import('@/modules/hearing/HearingPage').then(({ HearingPage }) => ({ default: HearingPage }))),
+  vestibular: lazy(() => import('@/modules/vestibular/VestibularPage').then(({ VestibularPage }) => ({ default: VestibularPage }))),
+  somaticSensation: lazy(() => import('@/modules/somaticSensation/SomaticSensationPage').then(({ SomaticSensationPage }) => ({ default: SomaticSensationPage }))),
+  motorControl: lazy(() => import('@/modules/motorControl/MotorControlPage').then(({ MotorControlPage }) => ({ default: MotorControlPage }))),
+  liverPhysiology: lazy(() => import('@/modules/liverPhysiology/LiverPhysiologyPage').then(({ LiverPhysiologyPage }) => ({ default: LiverPhysiologyPage }))),
+  pregnancy: lazy(() => import('@/modules/pregnancy/PregnancyPage').then(({ PregnancyPage }) => ({ default: PregnancyPage }))),
+  anteriorPituitary: lazy(() => import('@/modules/anteriorPituitary/AnteriorPituitaryPage').then(({ AnteriorPituitaryPage }) => ({ default: AnteriorPituitaryPage }))),
+  adrenalCortex: lazy(() => import('@/modules/adrenalCortex/AdrenalCortexPage').then(({ AdrenalCortexPage }) => ({ default: AdrenalCortexPage }))),
+  adrenalMedulla: lazy(() => import('@/modules/adrenalMedulla/AdrenalMedullaPage').then(({ AdrenalMedullaPage }) => ({ default: AdrenalMedullaPage }))),
+  bloodGroups: lazy(() => import('@/modules/bloodGroups/BloodGroupsPage').then(({ BloodGroupsPage }) => ({ default: BloodGroupsPage }))),
+  thermoregulation: lazy(() => import('@/modules/thermoregulation/ThermoregulationPage').then(({ ThermoregulationPage }) => ({ default: ThermoregulationPage }))),
+  exercisePhysiology: lazy(() => import('@/modules/exercisePhysiology/ExercisePhysiologyPage').then(({ ExercisePhysiologyPage }) => ({ default: ExercisePhysiologyPage }))),
+};
