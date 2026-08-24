@@ -1,0 +1,68 @@
+.matrixCell {
+  fill: color-mix(in srgb, var(--ok) 18%, transparent);
+  stroke: var(--panel-border);
+  stroke-width: 0.5;
+}
+
+.matrixBad {
+  fill: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.matrixCurrent {
+  stroke: var(--transfusion);
+  stroke-width: 3;
+  fill: none;
+}
+
+.matrixLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  fill: var(--text-dim);
+}
+
+.reactionCurve {
+  fill: none;
+  stroke: var(--transfusion);
+  stroke-width: 2.5;
+}
+
+.rhCurve {
+  fill: none;
+  stroke: var(--warn);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

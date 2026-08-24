@@ -1,0 +1,55 @@
+.secretionTrace {
+  fill: none;
+  stroke: var(--adrenal-medulla);
+  stroke-width: 2;
+}
+
+.receptorBar {
+  transition: width 0.3s ease;
+}
+
+.receptorFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.bodyOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.vessel {
+  stroke: var(--artery);
+  stroke-width: 2;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

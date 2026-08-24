@@ -1,0 +1,69 @@
+.bodyOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.coreDisc {
+  fill: color-mix(in srgb, var(--danger) calc(var(--heat) * 1%), transparent);
+  transition: fill 0.3s ease;
+}
+
+.setpointBand {
+  transition: y 0.3s ease, height 0.3s ease;
+}
+
+.lossArrow {
+  stroke: var(--o2);
+  stroke-width: 3;
+  transition: opacity 0.3s ease;
+}
+
+.gainArrow {
+  stroke: var(--danger);
+  stroke-width: 3;
+}
+
+.prodArrow {
+  stroke: var(--nociception);
+  stroke-width: 3;
+}
+
+.effectorBar {
+  transition: width 0.3s ease;
+}
+
+.effectorFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

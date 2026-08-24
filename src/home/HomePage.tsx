@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { useAuth } from '@/auth/AuthContext';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { knownCount, mastery as masteryOf } from '@/shared/assessment/scheduling';
 import { StudyStrip } from './StudyStrip';
-import { questionIdsFor } from './moduleQuestionIds';
+import {
+  questionIdsFor,
+  questionIndexVersion,
+  subscribeQuestionIndex,
+} from './moduleQuestionIds';
 import { MODULES } from './moduleRegistry';
 import styles from './HomePage.module.css';
 
@@ -18,6 +22,10 @@ export function HomePage() {
   const { user, initialising } = useAuth();
   const { isUnlocked } = useEntitlement();
   const store = useProgressStore();
+
+  // The question index builds in the background (lazy glob — see moduleQuestionIds); this
+  // re-renders once when it lands, and the memo below recomputes with real denominators.
+  const indexVersion = useSyncExternalStore(subscribeQuestionIndex, questionIndexVersion);
 
   /**
    * One pass over every module.
@@ -70,7 +78,8 @@ export function HomePage() {
         reviewModuleName: mostDue?.name ?? null,
       },
     };
-  }, [store]);
+    // indexVersion is a dependency so the totals recompute once the question bank arrives.
+  }, [store, indexVersion]);
 
   return (
     <div className={styles.page}>

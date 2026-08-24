@@ -1,0 +1,56 @@
+.enzymeNode {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 1.5;
+}
+
+.enzymeBlocked {
+  fill: color-mix(in srgb, var(--danger) 30%, transparent);
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+
+.pathwayLine {
+  fill: none;
+  stroke: var(--cortisol);
+  stroke-width: 2;
+}
+
+.fluxBar {
+  transition: width 0.3s ease;
+}
+
+.fluxFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

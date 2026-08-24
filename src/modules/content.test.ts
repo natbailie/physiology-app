@@ -32,6 +32,14 @@ import { hearingContent } from './hearing/content';
 import { vestibularContent } from './vestibular/content';
 import { somaticSensationContent } from './somaticSensation/content';
 import { motorControlContent } from './motorControl/content';
+import { liverPhysiologyContent } from './liverPhysiology/content';
+import { pregnancyContent } from './pregnancy/content';
+import { anteriorPituitaryContent } from './anteriorPituitary/content';
+import { adrenalCortexContent } from './adrenalCortex/content';
+import { adrenalMedullaContent } from './adrenalMedulla/content';
+import { bloodGroupsContent } from './bloodGroups/content';
+import { thermoregulationContent } from './thermoregulation/content';
+import { exercisePhysiologyContent } from './exercisePhysiology/content';
 
 const ALL: [string, ExplainerContent][] = [
   ['autonomicNervous', autonomicNervousContent],
@@ -65,6 +73,14 @@ const ALL: [string, ExplainerContent][] = [
   ['vestibular', vestibularContent],
   ['somaticSensation', somaticSensationContent],
   ['motorControl', motorControlContent],
+  ['liverPhysiology', liverPhysiologyContent],
+  ['pregnancy', pregnancyContent],
+  ['anteriorPituitary', anteriorPituitaryContent],
+  ['adrenalCortex', adrenalCortexContent],
+  ['adrenalMedulla', adrenalMedullaContent],
+  ['bloodGroups', bloodGroupsContent],
+  ['thermoregulation', thermoregulationContent],
+  ['exercisePhysiology', exercisePhysiologyContent],
 ];
 
 const words = (text: string) => text.trim().split(/\s+/).length;
@@ -76,8 +92,8 @@ const words = (text: string) => text.trim().split(/\s+/).length;
  */
 describe('module explainer content', () => {
   it('covers every simulator module', () => {
-    // 31 simulators; the formula reference has no explainer.
-    expect(ALL).toHaveLength(31);
+    // 33 simulators; the formula reference has no explainer.
+    expect(ALL).toHaveLength(39);
     expect(new Set(ALL.map(([id]) => id)).size).toBe(ALL.length);
   });
 

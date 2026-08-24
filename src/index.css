@@ -112,6 +112,13 @@
   --vestibular: #0f7c66; /* vestibular: canal firing / nystagmus trace */
   --nociception: #8c2f39; /* somatosensation & pain: nociceptive traffic / gate output */
   --basal-ganglia: #47679e; /* motor control: gating circuit / executed movement */
+  --liver: #99551b; /* liver: bile / conjugated bilirubin flow */
+  --placenta: #2f7fa3; /* pregnancy: fetal-placental unit / maternal adaptation */
+  --pituitary: #7c4f8f; /* anterior pituitary: hypothalamic-pituitary signalling */
+  --adrenal-medulla: #a02f2f; /* adrenal medulla: catecholamine secretion */
+  --transfusion: #2f6db5; /* blood groups & transfusion: donor-recipient matching */
+  --thermal: #cf5b00; /* thermoregulation: heat load vs defended set point */
+  --exercise: #2e7d46; /* exercise physiology: integrated metabolic response */
   --ok: #007a6f;
   --warn: #9c6608;
   --danger: #c62828;

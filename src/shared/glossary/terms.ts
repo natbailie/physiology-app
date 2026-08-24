@@ -371,6 +371,202 @@ const ENTRIES: Record<string, GlossaryEntry> = {
     definition:
       'Chorea plus ballism amplitude: movement RELEASED by loss of indirect-pathway braking rather than produced by weakness or tremor. Random, continuous, invading a normally-initiating system.',
   },
+
+  // --- Liver ---
+  'total bilirubin': {
+    definition:
+      'Sum of both pigment pools in plasma. Visible jaundice past roughly 40 µmol/L; the total alone never tells you WHERE it is failing — the split does.',
+  },
+  unconjugated: {
+    definition:
+      'Indirect bilirubin: albumin-bound, lipid-soluble, unable to enter urine but able to enter the brain. Rises with haemolysis or failed conjugation (Gilbert, Crigler-Najjar, the newborn).',
+  },
+  conjugated: {
+    definition:
+      'Direct bilirubin: water-soluble after UGT conjugation. Spills into urine once plasma passes the renal threshold — its presence means hepatocellular regurgitation or obstructed outflow.',
+  },
+  'conjugated fraction': {
+    definition:
+      'Conjugated as a percentage of total bilirubin. Under 20% points upstream of the liver; over 55% points at drainage or ducts; between lies the mixed picture.',
+  },
+  'urine bilirubin': {
+    definition:
+      'Dipstick for conjugated pigment. ABSENT in deep UNCONJUGATED jaundice (it cannot cross into urine) — a negative strip in a yellow patient is itself localising information.',
+  },
+  'urine urobilinogen': {
+    definition:
+      'Flora convert gut bilirubin to urobilinogen; some reabsorbs and reaches urine. HIGH when haemolysis floods an open pathway; ABSENT when obstruction stops bile reaching the gut at all.',
+  },
+  'stool colour': {
+    definition:
+      'Stercobilin from gut bilirubin. Pale (acholic) stool means bile is not arriving — surgical jaundice until proven otherwise.',
+  },
+  ammonia: {
+    definition:
+      'Gut-derived nitrogen the liver should convert to urea. Rising levels track failing hepatic mass and correlate with encephalopathy grade better than jaundice does.',
+  },
+  'kernicterus risk': {
+    definition:
+      'Unbound unconjugated bilirubin relative to albumin binding capacity — the fraction that can cross the neonatal blood-brain barrier. Albumin IS the defence, which is why hypoalbuminaemia multiplies risk.',
+  },
+
+  // --- Pregnancy ---
+  'maternal haemoglobin': {
+    definition:
+      'In pregnancy, falls by dilution: plasma expands ~45% while red cell mass gains ~25%. Trough near 30 weeks around 11 g/dL is physiological, not deficiency.',
+  },
+  'maternal cardiac output': {
+    definition:
+      'Rises toward +40% by mid-pregnancy via stroke volume first, then rate. Remains elevated briefly postpartum before normalising.',
+  },
+  'maternal map': {
+    definition:
+      'Mean arterial pressure dips in mid-pregnancy under low SVR. A RISE after mid-gestation signals a placental problem, not a cardiovascular triumph.',
+  },
+  'maternal creatinine': {
+    definition:
+      'Falls through pregnancy as GFR rises ~50%. A value of 0.9 mg/dL that reads "normal" on adult ranges may represent real renal impairment in a term woman.',
+  },
+  progesterone: {
+    definition:
+      'Drives the hyperventilation of pregnancy, smooth-muscle relaxation everywhere, and BLOCKS milk secretion until it withdraws after delivery.',
+  },
+  prolactin: {
+    definition:
+      'Primed through pregnancy, unopposed after the placenta leaves, then sustained ONLY by suckling. Supply follows demand because production follows this signal.',
+  },
+  oxytocin: {
+    definition:
+      'Contracts the uterus in labour (via the Ferguson stretch reflex) and ejects stored milk within seconds of a feed. Ejection and production are different hormones on different clocks.',
+  },
+
+  // --- Anterior pituitary ---
+  gh: {
+    expansion: 'Growth hormone',
+    definition:
+      'Pulsatile pituitary hormone acting largely through hepatic IGF-1. Regulated by the hypothalamus — which is why a glucose load suppresses it in health, and fails to in acromegaly.',
+  },
+  'igf-1': {
+    expansion: 'Insulin-like growth factor 1',
+    definition:
+      'The liver-made integrator of GH over days; the screening value of choice because random GH pulses mislead. Above roughly 320 ng/mL with unsuppressible GH, acromegaly is confirmed.',
+  },
+  'pituitary prolactin': {
+    definition:
+      'The one anterior hormone under tonic INHIBITION (dopamine). Rises moderately with stalk compression, drugs or TRH drive; into the hundreds only with a secretoma.',
+  },
+  'glucose suppression test': {
+    definition:
+      '75 g oral glucose should drive GH below 1 ng/mL. Failure to suppress is diagnostic of autonomous GH secretion — acromegaly before any imaging.',
+  },
+  'dopamine brake': {
+    definition:
+      'Effective inhibition reaching the lactotroph: hypothalamic tone × receptor function × stalk patency. Drugs attack the receptor; any sellar mass attacks the stalk.',
+  },
+  'sellar mass': {
+    definition:
+      'Volume proxy for whatever occupies the fossa. Past roughly 1.5 cm of upward extension it threatens the chiasma (bitemporal fields) and compresses the portal stalk.',
+  },
+  'gonadal axis': {
+    definition:
+      'Prolactin above ~30 suppresses GnRH: LH and FSH fall next. Amenorrhoea and low libido are therefore often the presenting complaint of a silent prolactinoma.',
+  },
+  'somatic effect': {
+    definition:
+      'Height velocity while epiphyses stay open (gigantism); acral tissue overgrowth once they fuse (acromegaly). Same excess, different skeleton.',
+  },
+
+  // --- Adrenal cortex ---
+  cortisol: {
+    definition:
+      'The glucocorticoid output of the fasciculata. Needs every enzyme on the line, so ANY block lowers it — and the resulting ACTH surge drives precursor pile-up behind the block.',
+  },
+  mineralocorticoid: {
+    definition:
+      'Combined salt-retaining activity: aldosterone plus weak DOC effect. Low means salt-wasting crisis; high without aldosterone means DOC is doing it, with hypertension.',
+  },
+  androgens: {
+    definition:
+      'Adrenal sex-steroid output. Rise when flux diverts around a 21 or 11β block; vanish with 17α or 3β-HSD failure — the axis that separates virilising from undervirilising CAH.',
+  },
+  '17-ohp marker': {
+    expansion: '17-hydroxyprogesterone',
+    definition:
+      'The substrate trapped immediately before 21-hydroxylase. High ONLY in 21-OH deficiency — which is why newborn screening measures it.',
+  },
+  'doc excess': {
+    expansion: '11-deoxycorticosterone',
+    definition:
+      'Weak mineralocorticoid that accumulates when 11β or 17α is blocked. Enough of it causes hypertension WITHOUT salt-wasting.',
+  },
+  'acth drive': {
+    definition:
+      'Pituitary demand amplified by cortisol deficit. It flogs the blocked gland, which is why precursors accumulate — and why replacement therapy treats the biochemistry twice over.',
+  },
+  'crisis risk': {
+    definition:
+      'Addisonian crisis likelihood from effective cortisol coverage. Illness multiplies requirement; replacement plus stress-dosing closes the gap.',
+  },
+
+  // --- Adrenal medulla ---
+  'catecholamine map': {
+    definition:
+      'Driven here by alpha-mediated vasoconstriction. Beta-blockade without alpha cover REMOVES beta2 dilatation and sends MAP higher than no treatment at all.',
+  },
+  'heart rate': {
+    definition:
+      'Beta1 chronotropy minus baroreflex braking. Adrenaline-predominant tumours push it hard; noradrenaline raises pressure that reflexly slows the node.',
+  },
+  'orthostatic drop': {
+    definition:
+      'Fall in pressure on standing from contracted plasma volume — weeks of vasoconstriction leak volume away. Hypertension WITH postural hypotension smells like phaeochromocytoma.',
+  },
+  'arrhythmia risk': {
+    definition:
+      'Beta-driven irritability, worsened when beta-blockade is given without alpha cover, and lowered by proper sequential blockade.',
+  },
+  'classical triad': {
+    definition:
+      'Headache, sweating, palpitations — each tracks a different catecholamine action. All three together makes phaeochromocytoma near-certain until metanephrines say otherwise.',
+  },
+  paroxysm: {
+    definition:
+      'A burst of secretion clearing within minutes. Events rather than states — which is why patients describe attacks and why metanephrines beat random sampling.',
+  },
+
+  // --- Blood groups ---
+  crossmatch: {
+    definition:
+      'The laboratory meeting of recipient serum against donor cells. Major mismatch means preformed antibodies will destroy the unit — the check that stands between routine therapy and disaster.',
+  },
+  'reaction arm': {
+    definition:
+      'Immediate intravascular IgM (ABO) versus delayed extravascular IgG (Rh): different antibodies, different speeds, different clinical syndromes.',
+  },
+  haemolysis: {
+    definition:
+      'Destruction of the transfused cells. Severity scales with incompatible VOLUME infused — stopping at ten millilitres aborts the entire syndrome.',
+  },
+  'free haemoglobin': {
+    definition:
+      'Haemoglobin released directly into plasma by intravascular lysis — the ABO signature, absent or minimal in extravascular (Rh) clearance.',
+  },
+  'complement consumed': {
+    definition:
+      'IgM fixing complement on transfused cells uses the cascade up. Its consumption marks an intravascular event and drives the shock physiology.',
+  },
+  'dic risk': {
+    definition:
+      'Disseminated intravascular coagulation triggered by massive haemolysis — the reason severe ABO reactions bleed and clot simultaneously.',
+  },
+  'renal injury': {
+    definition:
+      'Acute tubular damage from free haemoglobin plus shock. The consequence fluids are given for, and the reason early recognition matters more than anything downstream.',
+  },
+  haemoglobinuria: {
+    definition:
+      'Free haemoglobin spilling into urine past haptoglobin capacity — the dark urine of an acute reaction, and never present in uncomplicated extravascular clearance.',
+  },
 };
 
 /** Normalises a readout label to a glossary key. */

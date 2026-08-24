@@ -1,0 +1,62 @@
+.workCurve {
+  fill: none;
+  stroke: var(--exercise);
+  stroke-width: 2.5;
+}
+
+.maxLine {
+  stroke: var(--danger);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 3;
+}
+
+.thresholdLine {
+  stroke: var(--warn);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.operatingPoint {
+  fill: var(--exercise);
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--exercise) 70%, transparent));
+  transition: cx 0.3s ease, cy 0.3s ease;
+}
+
+.flowBar {
+  transition: width 0.3s ease;
+}
+
+.flowFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

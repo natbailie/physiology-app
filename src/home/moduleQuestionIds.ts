@@ -11,38 +11,80 @@
  * asserts the glob still finds every module in the registry, so if this stops matching it fails
  * loudly rather than reporting zero.
  *
- * Costs no bundle weight: `App.tsx` already imports all 31 module pages, and each of those
- * already imports its own questions.
+ * The glob is deliberately NOT eager. An eager glob welds every module's questions into the
+ * chunk that imports this file — fine while App.tsx statically imported all pages, fatal to
+ * first-load size now that each page is its own lazy route. The index builds once in the
+ * background; consumers subscribe and re-render when it lands.
  */
-const questionModules = import.meta.glob<Record<string, unknown>>('../modules/*/questions.ts', {
-  eager: true,
-});
+const questionModules = import.meta.glob<Record<string, unknown>>('../modules/*/questions.ts');
 
 function hasStringId(value: unknown): value is { id: string } {
   return typeof value === 'object' && value !== null && typeof (value as { id?: unknown }).id === 'string';
 }
 
-function buildIndex(): Record<string, string[]> {
-  const index: Record<string, string[]> = {};
+let index: Record<string, string[]> | null = null;
+let version = 0;
+let loadStarted = false;
+const listeners = new Set<() => void>();
 
-  for (const [path, exports] of Object.entries(questionModules)) {
-    const moduleId = path.match(/modules\/([^/]+)\/questions\.ts$/)?.[1];
-    if (!moduleId) continue;
+function buildIndexFor(path: string, exports: Record<string, unknown>): [string, string[]] | null {
+  const moduleId = path.match(/modules\/([^/]+)\/questions\.ts$/)?.[1];
+  if (!moduleId) return null;
 
-    // Each module names its array differently (RESPIRATORY_QUESTIONS, ECG_QUESTIONS, ...), so
-    // it is found by shape: the exported array whose entries carry a string id.
-    const questions = Object.values(exports).find(
-      (value): value is readonly { id: string }[] =>
-        Array.isArray(value) && value.length > 0 && value.every(hasStringId),
-    );
-    index[moduleId] = questions ? questions.map((q) => q.id) : [];
-  }
-
-  return index;
+  // Each module names its array differently (RESPIRATORY_QUESTIONS, ECG_QUESTIONS, ...), so
+  // it is found by shape: the exported array whose entries carry a string id.
+  const questions = Object.values(exports).find(
+    (value): value is readonly { id: string }[] =>
+      Array.isArray(value) && value.length > 0 && value.every(hasStringId),
+  );
+  return [moduleId, questions ? questions.map((q) => q.id) : []];
 }
 
-export const MODULE_QUESTION_IDS: Record<string, string[]> = buildIndex();
+function startLoad(): void {
+  if (loadStarted) return;
+  loadStarted = true;
+
+  void Promise.all(
+    Object.entries(questionModules).map(async ([path, loader]) =>
+      buildIndexFor(path, (await loader()) as Record<string, unknown>),
+    ),
+  ).then((entries) => {
+    index = {};
+    for (const entry of entries) {
+      if (entry) index[entry[0]] = entry[1];
+    }
+    version += 1;
+    for (const listener of listeners) listener();
+  });
+}
+
+/** Kicks off the background build (idempotent) and subscribes to its completion. */
+export function subscribeQuestionIndex(listener: () => void): () => void {
+  startLoad();
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+/** Snapshot for useSyncExternalStore — changes exactly once, when the index lands. */
+export function questionIndexVersion(): number {
+  return version;
+}
 
 export function questionIdsFor(moduleId: string): string[] {
-  return MODULE_QUESTION_IDS[moduleId] ?? [];
+  return index?.[moduleId] ?? [];
+}
+
+/** Test/SSR escape hatch: resolves with the full index once the glob has been walked. */
+export async function loadQuestionIndex(): Promise<Record<string, string[]>> {
+  startLoad();
+  await new Promise<void>((resolve) => {
+    if (index !== null) return resolve();
+    const unsubscribe = subscribeQuestionIndex(() => {
+      if (index !== null) {
+        unsubscribe();
+        resolve();
+      }
+    });
+  });
+  return index as Record<string, string[]>;
 }

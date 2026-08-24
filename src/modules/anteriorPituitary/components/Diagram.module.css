@@ -1,0 +1,66 @@
+.axisLine {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.glandNode {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2;
+}
+
+.flowArrow {
+  stroke: var(--pituitary);
+  stroke-width: 2.5;
+  transition: opacity 0.3s ease;
+}
+
+.brakeBar {
+  transition: width 0.3s ease;
+}
+
+.brakeFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.massCircle {
+  fill: color-mix(in srgb, var(--danger) 40%, transparent);
+  transition: r 0.3s ease;
+}
+
+.fieldWedge {
+  fill: var(--danger);
+  opacity: 0.25;
+  transition: opacity 0.3s ease;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}

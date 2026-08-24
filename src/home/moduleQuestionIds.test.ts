@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { MODULE_QUESTION_IDS, questionIdsFor } from './moduleQuestionIds';
+import {
+  loadQuestionIndex,
+  questionIdsFor,
+} from './moduleQuestionIds';
 import { MODULES } from './moduleRegistry';
 
 const SIMULATORS = MODULES.filter((module) => module.kind !== 'reference');
@@ -10,24 +13,28 @@ const SIMULATORS = MODULES.filter((module) => module.kind !== 'reference');
  * asserted rather than waited for.
  */
 describe('module question index', () => {
-  it('finds a question set for every simulator in the registry', () => {
-    const missing = SIMULATORS.filter((module) => questionIdsFor(module.id).length === 0).map((m) => m.id);
+  it('finds a question set for every simulator in the registry', async () => {
+    const index = await loadQuestionIndex();
+    const missing = SIMULATORS.filter((m) => (index[m.id] ?? []).length === 0).map((m) => m.id);
     expect(missing.join(', '), `modules with no questions discovered: ${missing.join(', ')}`).toBe('');
   });
 
-  it('discovers no module the registry does not list', () => {
+  it('discovers no module the registry does not list', async () => {
+    const index = await loadQuestionIndex();
     const registered = new Set(MODULES.map((module) => module.id));
-    const stray = Object.keys(MODULE_QUESTION_IDS).filter((id) => !registered.has(id));
+    const stray = Object.keys(index).filter((id) => !registered.has(id));
     expect(stray.join(', ')).toBe('');
   });
 
-  it('gives every question within a module a unique id', () => {
-    for (const [moduleId, ids] of Object.entries(MODULE_QUESTION_IDS)) {
+  it('gives every question within a module a unique id', async () => {
+    const index = await loadQuestionIndex();
+    for (const [moduleId, ids] of Object.entries(index)) {
       expect(new Set(ids).size, `${moduleId} has duplicate question ids`).toBe(ids.length);
     }
   });
 
-  it('returns an empty list for a module that does not exist, rather than throwing', () => {
+  it('returns an empty list for a module that does not exist, rather than throwing', async () => {
+    await loadQuestionIndex();
     expect(questionIdsFor('notAModule')).toEqual([]);
   });
 });

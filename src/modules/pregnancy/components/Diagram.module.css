@@ -1,0 +1,68 @@
+.curveLine {
+  fill: none;
+  stroke: var(--placenta);
+  stroke-width: 2.5;
+}
+
+.hbCurve {
+  fill: none;
+  stroke: var(--hemoglobin);
+  stroke-width: 2;
+}
+
+.operatingPoint {
+  fill: var(--placenta);
+  filter: drop-shadow(0 0 calc(5px * var(--glow-blur)) color-mix(in srgb, var(--placenta) 70%, transparent));
+  transition: cx 0.3s ease, cy 0.3s ease;
+}
+
+.fetusCircle {
+  fill: color-mix(in srgb, var(--placenta) 35%, transparent);
+  transition: r 0.3s ease;
+}
+
+.wombOutline {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+}
+
+.contractionWave {
+  fill: none;
+  stroke: var(--nociception);
+  stroke-width: 2;
+}
+
+.axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.caption {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--danger);
+  letter-spacing: 0.06em;
+}
