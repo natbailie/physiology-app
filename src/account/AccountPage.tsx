@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '@/auth/AuthContext';
 import { AuthForm } from '@/auth/AuthForm';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
@@ -14,22 +15,77 @@ export function AccountPage() {
         <h1 className={styles.title}>Your account</h1>
       </header>
       {isSupabaseConfigured ? <AccountBody /> : <LocalOnlyNotice />}
+      <a href="#privacy" className={styles.footerLink}>
+        What data do we hold?
+      </a>
     </div>
   );
 }
 
 function AccountBody() {
-  const { user, initialising, signOut } = useAuth();
+  const { user, initialising, signOut, deleteAccount } = useAuth();
 
   if (initialising) {
     return <p className={styles.muted}>Checking whether you are still signed in…</p>;
   }
   if (user) {
-    return <SignedInView email={user.email} onSignOut={() => void signOut()} />;
+    return (
+      <>
+        <SignedInView email={user.email} onSignOut={() => void signOut()} />
+        <DangerZone onDelete={() => deleteAccount()} />
+      </>
+    );
   }
   return (
     <section className={styles.body}>
       <AuthForm />
+    </section>
+  );
+}
+
+/**
+ * Two-step confirmation: the first click arms the button, the second commits. Deletion is
+ * immediate and server-side — there is no grace period to restore from, so the friction
+ * has to live here rather than in a "contact support" queue.
+ */
+function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; message?: string }> }) {
+  const [armed, setArmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const act = async () => {
+    if (!armed || busy) {
+      setArmed(true);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const result = await onDelete();
+    if (result.ok) {
+      // The session is dead server-side; land somewhere sane rather than on a signed-out account page.
+      window.location.hash = '#home';
+      return;
+    }
+    setArmed(false);
+    setBusy(false);
+    setError(result.message ?? 'Something went wrong — nothing was deleted.');
+  };
+
+  return (
+    <section className={styles.dangerZone}>
+      <h2 className={styles.sectionTitle}>Danger zone</h2>
+      <p className={styles.muted}>
+        Deleting your account removes your email address, every recorded answer and your access
+        rights from our servers straight away. There is no way back.
+      </p>
+      {error && <p className={styles.error}>{error}</p>}
+      <button
+        type="button"
+        className={`${styles.dangerButton} ${armed ? styles.dangerArmed : ''}`}
+        onClick={() => void act()}
+      >
+        {busy ? 'Deleting…' : armed ? 'Click again to delete permanently' : 'Delete my account…'}
+      </button>
     </section>
   );
 }

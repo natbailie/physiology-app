@@ -5,8 +5,9 @@ import type { RouteId } from '@/shared/hooks/useHashRoute';
 import { useAuth } from './AuthContext';
 import styles from './AuthGate.module.css';
 
-/** Routes a signed-out visitor may still see. Pricing is the one thing worth reading before joining. */
-const PUBLIC_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>(['pricing']);
+/** Routes a signed-out visitor may still see. Pricing is the one thing worth reading before
+ * joining; the privacy notice must be readable without an account or it protects no one. */
+const PUBLIC_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>(['pricing', 'privacy']);
 
 /**
  * Nothing but the landing screen renders until there is a session.

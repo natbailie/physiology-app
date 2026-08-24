@@ -116,3 +116,55 @@
   color: var(--text-faint);
   line-height: 1.6;
 }
+
+/* Access code. Deliberately understated — it is a side door, not the offer. */
+.codeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+.codeLabel {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.codeNote {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.codeInput {
+  flex: 1;
+  min-width: 8rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.codeInput:focus {
+  outline: 1px solid var(--text-dim);
+}
+
+.codeButton {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.codeButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

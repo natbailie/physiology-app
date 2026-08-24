@@ -5,3 +5,9 @@
    * to sit flush against the top of the viewport. */
   padding: 0 1.25rem;
 }
+
+/* Chunk loading placeholder — deliberately invisible content, matching the entitlement
+ * loading state rather than advertising a spinner that would flash for a few ms. */
+.loading {
+  min-height: 60vh;
+}

@@ -1,12 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useAuthOptional } from '@/auth/AuthContext';
 import { ACTIVE_SUBSCRIPTION_STATUSES, FREE_MODULE_IDS } from './config';
+import {
+  getAccessCodeServerSnapshot,
+  getAccessCodeSnapshot,
+  subscribeAccessCode,
+} from './accessCode';
 
 export type EntitlementStatus = 'loading' | 'free' | 'active';
 
 export interface Entitlement {
   status: EntitlementStatus;
+  /** True when full access comes from a redeemed access code rather than a subscription. */
+  viaAccessCode: boolean;
   /** Whether this learner may open a given module right now. */
   isUnlocked(moduleId: string): boolean;
 }
@@ -57,10 +64,20 @@ function statusFor(userId: string): Promise<EntitlementStatus> {
  *
  * With no Supabase configured there is no subscription to check and no way to buy one, so the
  * build is treated as fully unlocked — the app has always been required to run without accounts.
+ *
+ * A redeemed access code overrides whatever the server says, which is the whole point of it.
  */
 export function useEntitlement(): Entitlement {
   const { user } = useAuthOptional() ?? { user: null };
   const userId = user?.id ?? null;
+
+  // Same idiom as useProgressStore: an external flag every consumer re-renders on, so redeeming
+  // on the pricing page unlocks the home grid and the route gate without a reload.
+  const viaAccessCode = useSyncExternalStore(
+    subscribeAccessCode,
+    getAccessCodeSnapshot,
+    getAccessCodeServerSnapshot,
+  );
 
   const [status, setStatus] = useState<EntitlementStatus>(() => {
     if (!isSupabaseConfigured) return 'active';
@@ -96,11 +113,14 @@ export function useEntitlement(): Entitlement {
     };
   }, [userId]);
 
+  const effective: EntitlementStatus = viaAccessCode ? 'active' : status;
+
   return useMemo(
     () => ({
-      status,
-      isUnlocked: (moduleId: string) => status === 'active' || FREE_MODULE_IDS.has(moduleId),
+      status: effective,
+      viaAccessCode,
+      isUnlocked: (moduleId: string) => effective === 'active' || FREE_MODULE_IDS.has(moduleId),
     }),
-    [status],
+    [effective, viaAccessCode],
   );
 }

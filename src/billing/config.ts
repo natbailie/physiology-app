@@ -32,3 +32,18 @@ export const PLAN = {
     'Progress that follows you across devices',
   ],
 } as const;
+
+/**
+ * A code that unlocks full access without paying.
+ *
+ * TODO: remove before payments go live. This string is compiled into the JS bundle — anyone who
+ * opens devtools and searches can find it and let themselves into the paid catalogue. That costs
+ * nothing while `startCheckout` is a stub and nothing is actually being sold; it is a back door the
+ * moment that changes. The real replacement is server-side redemption: an `access_codes` table plus
+ * a `security definer` rpc that sets `profiles.subscription_status` for the calling user, which is
+ * also what institutional or promo codes would need.
+ *
+ * Rotating this constant revokes every unlock already granted — `accessCode.ts` stores the redeemed
+ * code and re-checks it against this value on every read.
+ */
+export const TEST_ACCESS_CODE = 'mbbs2627';

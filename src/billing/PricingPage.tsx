@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useAuth } from '@/auth/AuthContext';
 import { MODULES } from '@/home/moduleRegistry';
 import { FREE_MODULE_IDS, PLAN } from './config';
 import { useEntitlement } from './useEntitlement';
 import { startCheckout } from './startCheckout';
+import { clearAccessCode, redeemAccessCode } from './accessCode';
 import styles from './PricingPage.module.css';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference' && m.status === 'available');
@@ -11,9 +12,10 @@ const FREE_SIMULATOR_COUNT = SIMULATORS.filter((m) => FREE_MODULE_IDS.has(m.id))
 
 export function PricingPage() {
   const { user } = useAuth();
-  const { status } = useEntitlement();
+  const { status, viaAccessCode } = useEntitlement();
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [code, setCode] = useState('');
 
   const subscribe = async () => {
     setBusy(true);
@@ -24,6 +26,16 @@ export function PricingPage() {
       else setNotice(result.message);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const submitCode = (event: FormEvent) => {
+    event.preventDefault();
+    setNotice(null);
+    if (redeemAccessCode(code)) {
+      setCode('');
+    } else {
+      setNotice('That code was not recognised.');
     }
   };
 
@@ -69,6 +81,32 @@ export function PricingPage() {
         )}
 
         {notice && <p className={styles.notice}>{notice}</p>}
+
+        {viaAccessCode ? (
+          <div className={styles.codeRow}>
+            <p className={styles.codeNote}>Unlocked with an access code on this browser.</p>
+            <button type="button" className={styles.codeButton} onClick={clearAccessCode}>
+              Remove
+            </button>
+          </div>
+        ) : (
+          <form className={styles.codeRow} onSubmit={submitCode}>
+            <label className={styles.codeLabel} htmlFor="access-code">
+              Have an access code?
+            </label>
+            <input
+              id="access-code"
+              className={styles.codeInput}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <button type="submit" className={styles.codeButton} disabled={code.trim() === ''}>
+              Apply
+            </button>
+          </form>
+        )}
       </section>
 
       <p className={styles.freeNote}>
