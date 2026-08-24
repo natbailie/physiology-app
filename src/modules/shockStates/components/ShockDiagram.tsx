@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import type { ShockDerived } from '../engine/types';
 import styles from './Diagram.module.css';
@@ -35,7 +36,7 @@ export function ShockDiagram({ derived }: ShockDiagramProps) {
   const vasodilatation = clamp((1 - derived.systemicVascularResistance) / 0.7, 0, 1);
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Circulatory loop showing where each shock state acts">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Circulatory loop showing where each shock state acts">
       <g style={style}>
         <path className={styles.vessel} d={LOOP} />
 
@@ -104,9 +105,16 @@ export function ShockDiagram({ derived }: ShockDiagramProps) {
         <text className={styles.verdict} x={40} y={378}>
           {derived.classification}
         </text>
-        <text className={styles.label} x={40} y={396}>
-          {derived.patternSummary}
-        </text>
+        <DiagramText
+        className={styles.label}
+        x={40}
+        y={396}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
+        {derived.patternSummary}
+      </DiagramText>
       </g>
     </DiagramFrame>
   );

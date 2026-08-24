@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import { ENDPLATE } from '../engine/constants';
 import { receptorAvailability } from '../engine/transmission';
@@ -30,7 +31,7 @@ export function NmjDiagram({ derived }: NmjDiagramProps) {
   const barWidth = TRAIN_PLOT.width / 4 - 8;
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Neuromuscular junction with end-plate potential and train-of-four">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Neuromuscular junction with end-plate potential and train-of-four">
       <g style={style}>
         {/* Nerve terminal with its vesicle pool */}
         <path className={styles.terminal} d="M 40 90 h 210 v 90 h -210 z" />
@@ -112,9 +113,16 @@ export function NmjDiagram({ derived }: NmjDiagramProps) {
         <text className={styles.verdict} x={40} y={352}>
           {derived.classification}
         </text>
-        <text className={styles.label} x={40} y={372}>
-          {derived.patternSummary}
-        </text>
+        <DiagramText
+        className={styles.label}
+        x={40}
+        y={372}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
+        {derived.patternSummary}
+      </DiagramText>
       </g>
     </DiagramFrame>
   );

@@ -1,4 +1,5 @@
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import type { VestibularDerived } from '../engine/types';
 import styles from './Diagram.module.css';
@@ -24,7 +25,7 @@ export function VestibularDiagram({ derived }: VestibularDiagramProps) {
   const totalNystagmus = Math.abs(spv) + positional;
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Canal pair, cupula deflection and nystagmus trace">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Canal pair, cupula deflection and nystagmus trace">
       {/* Right canal (left of frame = patient's right). */}
       <path
         className={styles.canalOutline}
@@ -77,9 +78,9 @@ export function VestibularDiagram({ derived }: VestibularDiagramProps) {
               transform={`translate(${(i * 37) % 30},0)`}
             />
           ))}
-          <text className={styles.caption} x={430} y={310}>
+          <DiagramText className={styles.caption} x={60} y={310} maxWidth={484}>
             fast phases {spv > 0 || positional > 0 ? 'rightward' : 'leftward'} · SPV {Math.abs(spv).toFixed(1)} °/s
-          </text>
+          </DiagramText>
         </g>
       ) : (
         <line className={styles.eyeDrift} x1={60} x2={500} y1={290} y2={290} />
@@ -98,9 +99,16 @@ export function VestibularDiagram({ derived }: VestibularDiagramProps) {
       <text className={styles.verdict} x={40} y={374}>
         {derived.classification}
       </text>
-      <text className={styles.label} x={40} y={392}>
+      <DiagramText
+        className={styles.label}
+        x={40}
+        y={392}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import { CRANIUM } from '../engine/constants';
 import { intracranialPressure } from '../engine/cerebralMechanics';
@@ -41,7 +42,7 @@ export function CerebralDiagram({ derived }: CerebralDiagramProps) {
   const brainWidth = Math.max(20, BOX.width - massWidth - bloodWidth - csfWidth);
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Intracranial contents and the pressure-volume curve">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Intracranial contents and the pressure-volume curve">
       <path className={styles.skull} d={`M ${BOX.x - 8} ${BOX.y - 10} h ${BOX.width + 16} v ${BOX.height + 20} h -${BOX.width + 16} z`} />
       <text className={styles.label} x={BOX.x - 8} y={BOX.y - 18}>
         A BOX THAT CANNOT EXPAND
@@ -109,9 +110,16 @@ export function CerebralDiagram({ derived }: CerebralDiagramProps) {
       <text className={styles.verdict} x={40} y={368}>
         {derived.classification}
       </text>
-      <text className={styles.label} x={40} y={388}>
+      <DiagramText
+        className={styles.label}
+        x={40}
+        y={388}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

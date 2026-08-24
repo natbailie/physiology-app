@@ -65,7 +65,7 @@ export function FetalDiagram({ derived }: FetalDiagramProps) {
 
         {/* Placenta — fades out as the cord is clamped. */}
         <circle className={styles.placenta} cx={80} cy={330} r={26} />
-        <text className={styles.label} x={48} y={378}>
+        <text className={styles.label} x={48} y={298}>
           PLACENTA
         </text>
 

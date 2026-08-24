@@ -75,7 +75,7 @@ export function CalciumDiagram({ derived }: CalciumDiagramProps) {
         colorVar="var(--calcium)"
         label="Serum Ca feedback"
         markerId="calcium-feedback-arrow"
-        labelPos={{ x: 138, y: 290 }}
+        labelPos={{ x: 116, y: 290 }}
         inhibitory
       />
 

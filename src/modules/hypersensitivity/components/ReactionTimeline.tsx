@@ -78,7 +78,8 @@ export function ReactionTimeline({ derived, history }: ReactionTimelineProps) {
       viewBox="0 0 480 300"
       ariaLabel={`Reaction timeline on a logarithmic time axis showing the activity of all four hypersensitivity arms since the challenge. ${derived.mechanismSummary}`}
     >
-      <text className={styles.pathLabel} x={22} y={22}>
+      {/* A tier above the sliding "now" label, which occupies PLOT.top - 18 across the full width. */}
+      <text className={styles.pathLabel} x={22} y={11}>
         Reaction timeline · log time since challenge
       </text>
 

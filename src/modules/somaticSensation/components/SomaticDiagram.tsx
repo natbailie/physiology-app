@@ -1,4 +1,5 @@
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import type { SomaticDerived } from '../engine/types';
 import styles from './Diagram.module.css';
 
@@ -20,7 +21,7 @@ export function SomaticDiagram({ derived }: SomaticDiagramProps) {
   const GATE = { x: 320, y: 80, width: 200, height: 26 };
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Spinal cord tracts, dorsal horn gate and modality map">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Spinal cord tracts, dorsal horn gate and modality map">
       <text className={styles.label} x={CORD.x} y={CORD.y - 14}>
         CORD BELOW THE LESION
       </text>
@@ -92,37 +93,44 @@ export function SomaticDiagram({ derived }: SomaticDiagramProps) {
         opacity={0.75}
         rx={6}
       />
-      <text className={styles.caption} x={GATE.x} y={GATE.y + GATE.height + 20}>
+      <DiagramText className={styles.caption} x={GATE.x} y={GATE.y + GATE.height + 20} maxWidth={560 - GATE.x - 16}>
         C-fibre {derived.cFibreTraffic.toFixed(0)} · Aδ {derived.adDeltaTraffic.toFixed(0)} · Aβ{' '}
         {derived.abTraffic.toFixed(0)}
-      </text>
-      <text className={styles.caption} x={GATE.x} y={GATE.y + GATE.height + 38}>
+      </DiagramText>
+      <DiagramText className={styles.caption} x={GATE.x} y={GATE.y + GATE.height + 38} maxWidth={560 - GATE.x - 16}>
         first pain {derived.firstPainLatencyMs.toFixed(0)} ms · second pain{' '}
         {derived.secondPainLatencyMs.toFixed(0)} ms · touch {derived.touchLatencyMs.toFixed(0)} ms
-      </text>
+      </DiagramText>
       {derived.allodyniaActive && (
-        <text className={styles.alarm} x={GATE.x} y={GATE.y + GATE.height + 58}>
+        <DiagramText className={styles.alarm} x={GATE.x} y={GATE.y + GATE.height + 58} maxWidth={560 - GATE.x - 16} fontSize={12}>
           ALLODYNIA — Aβ traffic now driving pain pathways
-        </text>
+        </DiagramText>
       )}
 
       <text className={styles.verdict} x={90} y={300}>
         pain {derived.perceivedPainScore.toFixed(1)}/10
       </text>
-      <text className={styles.caption} x={90} y={318}>
+      <DiagramText className={styles.caption} x={90} y={318} maxWidth={454}>
         transmission output {derived.transmissionCellOutput.toFixed(0)} · descending brake{' '}
         {derived.descendingModulation.toFixed(0)} · rubbing {derived.rubbingGateDrive.toFixed(0)}
-      </text>
-      <text className={styles.caption} x={90} y={338}>
+      </DiagramText>
+      <DiagramText className={styles.caption} x={90} y={350} maxWidth={454}>
         segmental (syrinx level) pain/temp preserved {derived.segmentalPainTempPct.toFixed(0)}%
-      </text>
+      </DiagramText>
 
-      <text className={styles.verdict} x={90} y={368}>
+      <DiagramText className={styles.verdict} x={90} y={376} maxWidth={454} fontSize={15} tracking={0.04}>
         {derived.classification}
-      </text>
-      <text className={styles.label} x={90} y={388}>
+      </DiagramText>
+      <DiagramText
+        className={styles.label}
+        x={90}
+        y={398}
+        maxWidth={454}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

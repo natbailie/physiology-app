@@ -27,6 +27,9 @@
   font-weight: 600;
   color: var(--text);
   line-height: 1.1;
+  /* Classifications are single unbreakable words — "hyperprolactinaemia" needs ~200px, and a
+     tile on a 375px viewport gives it 139. Without this it escapes the tile rather than wrapping. */
+  overflow-wrap: anywhere;
 }
 
 .unit {

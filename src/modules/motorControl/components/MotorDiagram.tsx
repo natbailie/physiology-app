@@ -1,4 +1,5 @@
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import type { MotorDerived } from '../engine/types';
 import styles from './Diagram.module.css';
@@ -31,7 +32,7 @@ export function MotorDiagram({ derived }: MotorDiagramProps) {
   }
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Basal ganglia circuit, executed reach and tremor strip">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Basal ganglia circuit, executed reach and tremor strip">
       {/* Circuit: cortex - striatum - GPi/SNr - thalamus - cortex, STN between. */}
       <text className={styles.label} x={40} y={44}>
         GATING CIRCUIT
@@ -99,37 +100,44 @@ export function MotorDiagram({ derived }: MotorDiagramProps) {
       <line className={styles.axis} x1={REACH.x} x2={REACH.x + REACH.width} y1={160} y2={160} />
       <line className={styles.reachTarget} x1={commandX} x2={commandX} y1={148} y2={172} />
       <rect className={styles.reachActual} x={REACH.x} y={152} width={achievedX - REACH.x} height={16} rx={3} />
-      <text className={styles.caption} x={REACH.x} y={192}>
+      <DiagramText className={styles.caption} x={REACH.x} y={192} maxWidth={560 - REACH.x - 16}>
         achieved {derived.achievedAmplitudePct.toFixed(0)}% of command · error{' '}
         {derived.amplitudeErrorPct.toFixed(0)}%{derived.dysmetriaPct > 15 ? ` · dysmetria ${derived.dysmetriaPct.toFixed(0)}%` : ''}
-      </text>
+      </DiagramText>
 
-      <text className={styles.caption} x={40} y={232}>
+      <DiagramText className={styles.caption} x={40} y={226} maxWidth={504}>
         latency {derived.initiationLatencyMs.toFixed(0)} ms · rigidity {derived.rigidityScore.toFixed(1)} · spasticity{' '}
         {derived.spasticityScore.toFixed(1)}
-      </text>
+      </DiagramText>
 
-      <text className={styles.label} x={STRIP.x} y={STRIP.y - 10}>
+      <DiagramText className={styles.label} x={STRIP.x} y={STRIP.y - 10} maxWidth={560 - STRIP.x - 16}>
         TREMOR STRIP · rest {derived.restingTremorAmp.toFixed(1)} / intention{' '}
         {derived.intentionTremorAmp.toFixed(1)} / postural {derived.posturalTremorAmp.toFixed(1)}
-      </text>
+      </DiagramText>
       <line className={styles.axis} x1={STRIP.x} x2={STRIP.x + STRIP.width} y1={STRIP.y + STRIP.height / 2} y2={STRIP.y + STRIP.height / 2} />
       <path className={styles.tremorWave} d={points.join(' ')} />
       {derived.involuntaryMovementIndex > 2 && (
-        <text className={styles.alarm} x={STRIP.x} y={STRIP.y + STRIP.height + 18}>
+        <DiagramText className={styles.alarm} x={STRIP.x} y={STRIP.y + STRIP.height + 18} maxWidth={560 - STRIP.x - 16} fontSize={12}>
           Involuntary movement invading the trace — chorea/ballism {derived.involuntaryMovementIndex.toFixed(1)}
-        </text>
+        </DiagramText>
       )}
 
       <text className={styles.caption} x={40} y={352}>
         gait: {derived.gaitClass}
       </text>
-      <text className={styles.verdict} x={40} y={372}>
+      <DiagramText className={styles.verdict} x={40} y={378} maxWidth={504} fontSize={15} tracking={0.04}>
         {derived.classification}
-      </text>
-      <text className={styles.label} x={40} y={391}>
+      </DiagramText>
+      <DiagramText
+        className={styles.label}
+        x={40}
+        y={400}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

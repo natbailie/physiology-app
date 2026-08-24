@@ -64,7 +64,9 @@ export function NephronDiagram({ derived }: NephronDiagramProps) {
             <text className={styles.osmolalityValue} y={labelAbove ? -13 : 20}>
               {segment.osmolality.toFixed(0)}
             </text>
-            <text className={styles.segmentLabel} y={labelAbove ? -24 : 31}>
+            {/* Bowman's capsule and the proximal tubule are 62 units apart, and their centred
+                labels are wider than that — the first is lifted a line clear of its neighbour. */}
+            <text className={styles.segmentLabel} y={labelAbove ? (index === 0 ? -34 : -24) : 31}>
               {segment.label}
             </text>
           </g>

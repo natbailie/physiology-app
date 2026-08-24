@@ -157,7 +157,8 @@ export function DavenportDiagram({ derived, history, baselineHistory }: Davenpor
       <text className={styles.axisLabel} x={PLOT.left - 34} y={PLOT.top + 6}>
         mEq/L
       </text>
-      <text className={styles.axisLabel} x={(PLOT.left + PLOT.right) / 2} y={PLOT.bottom + 26}>
+      {/* Beside the tick row, not below it: the row underneath is the interpretation block. */}
+      <text className={styles.axisLabel} x={PLOT.right + 14} y={PLOT.bottom + 13}>
         pH
       </text>
 

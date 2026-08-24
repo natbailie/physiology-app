@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
 import { absoluteSignal, nakaRushton, rodWeight } from '../engine/visionMechanics';
 import { RECEPTOR } from '../engine/constants';
@@ -42,7 +43,7 @@ export function VisionDiagram({ derived }: VisionDiagramProps) {
   const pupilRadiusL = derived.pupilLeftMm * 5.5;
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Pupil reflexes and the retinal intensity-response curve">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Pupil reflexes and the retinal intensity-response curve">
       {/* The two eyes, pupils drawn to scale. */}
       <circle className={styles.eyeOutline} cx={eyeR.cx} cy={eyeR.cy} r={52} />
       <circle className={styles.eyeOutline} cx={eyeL.cx} cy={eyeL.cy} r={52} />
@@ -124,9 +125,16 @@ export function VisionDiagram({ derived }: VisionDiagramProps) {
       <text className={styles.verdict} x={40} y={368}>
         {derived.classification}
       </text>
-      <text className={styles.label} x={40} y={388}>
+      <DiagramText
+        className={styles.label}
+        x={40}
+        y={388}
+        maxWidth={504}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

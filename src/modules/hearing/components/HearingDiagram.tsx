@@ -1,4 +1,5 @@
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { AUDIOGRAM_FREQS_HZ } from '../engine/constants';
 import { clamp } from '@/shared/lib/math';
 import type { HearingDerived } from '../engine/types';
@@ -39,7 +40,7 @@ export function HearingDiagram({ derived }: HearingDiagramProps) {
   envPoints.push(`L${MEM.x + MEM.width},${MEM.y + MEM.height} Z`);
 
   return (
-    <DiagramFrame viewBox="0 0 560 400" ariaLabel="Audiogram with air and bone conduction, and the cochlear travelling wave">
+    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Audiogram with air and bone conduction, and the cochlear travelling wave">
       <text className={styles.label} x={PLOT.x} y={PLOT.y - 14}>
         AUDIOGRAM · dB HL vs FREQUENCY
       </text>
@@ -100,26 +101,33 @@ export function HearingDiagram({ derived }: HearingDiagramProps) {
         apex ← · → base
       </text>
 
-      <text className={styles.caption} x={60} y={300}>
+      <DiagramText className={styles.caption} x={60} y={300} maxWidth={484}>
         stimulus {derived.stimulusFrequencyHz} Hz @ {derived.stimulusLevelDbHl.toFixed(0)} dB HL · sensation level{' '}
         {derived.sensationLevelDb.toFixed(0)} dB
-      </text>
-      <text className={styles.caption} x={60} y={318}>
+      </DiagramText>
+      <DiagramText className={styles.caption} x={60} y={330} maxWidth={484}>
         loudness {derived.loudnessPct.toFixed(0)}%{derived.recruitmentIndex > 1.3 ? ` · RECRUITMENT ×${derived.recruitmentIndex.toFixed(1)}` : ''} ·{' '}
         {derived.rinneResult} · Weber {derived.weberResult.toLowerCase()}
-      </text>
+      </DiagramText>
       {derived.stapediusActive && (
-        <text className={styles.alarm} x={60} y={338}>
+        <DiagramText className={styles.alarm} x={60} y={362} maxWidth={484} fontSize={12}>
           Stapedius reflex contracted — the ear's own limiter
-        </text>
+        </DiagramText>
       )}
 
-      <text className={styles.verdict} x={60} y={368}>
+      <DiagramText className={styles.verdict} x={60} y={386} maxWidth={484} fontSize={15} tracking={0.04}>
         {derived.classification}
-      </text>
-      <text className={styles.label} x={60} y={388}>
+      </DiagramText>
+      <DiagramText
+        className={styles.label}
+        x={60}
+        y={408}
+        maxWidth={484}
+        fontSize={11}
+        tracking={0.06}
+      >
         {derived.patternSummary}
-      </text>
+      </DiagramText>
     </DiagramFrame>
   );
 }

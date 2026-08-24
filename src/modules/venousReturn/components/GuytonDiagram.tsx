@@ -48,7 +48,13 @@ export function GuytonDiagram({ derived }: GuytonDiagramProps) {
 
   const operating = project({ pra: derived.operatingPointPra, flow: derived.operatingPointFlow });
   const live = project({ pra: derived.rightAtrialPressureMmHg, flow: derived.cardiacOutputLPerMin });
-  const pmsfX = project({ pra: derived.meanSystemicFillingPressureMmHg, flow: 0 }).x;
+  // Clamped to the plot: a Valsalva drives Pmsf to 28 mmHg, which projected past the axis and
+  // put the tick and its label on top of the readout column.
+  const pmsfX = clamp(
+    project({ pra: derived.meanSystemicFillingPressureMmHg, flow: 0 }).x,
+    PLOT_AREA.left,
+    PLOT_AREA.right,
+  );
 
   const stressedFraction = derived.stressedVolumeMl / Math.max(derived.totalBloodVolumeMl, 1);
   const stressedHeight = RESERVOIR.height * clamp(stressedFraction * 3, 0.02, 0.85);
