@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Refuse to push anything that does not build and pass locally.
+#
+# The point is that "it works on my Mac" and "CI is green" are the same claim: this runs the
+# exact four steps .github/workflows/ci.yml runs, in the same order. A push that survives this
+# hook has already been checked, so a red CI run means an environment difference worth knowing
+# about rather than a mistake that could have been caught here.
+#
+# `vite build` is not optional and never gets dropped for speed: a bad `composes:` reference in
+# a CSS module passes both tsc and vitest and still breaks the page.
+#
+# Enabled by `git config core.hooksPath .githooks`, which `npm install` does via the `prepare`
+# script. To push past it in an emergency: git push --no-verify
+
+if [ "$SKIP_VERIFY" = "1" ]; then
+  echo "pre-push: SKIP_VERIFY=1 set, skipping verification"
+  exit 0
+fi
+
+echo "pre-push: running npm run verify (tsc, lint, tests, build)..."
+
+if ! npm run --silent verify; then
+  echo
+  echo "pre-push: verification FAILED — nothing was pushed."
+  echo "          Fix the above, or push anyway with: git push --no-verify"
+  exit 1
+fi
+
+echo "pre-push: all green, pushing."
+exit 0

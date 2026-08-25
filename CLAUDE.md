@@ -55,6 +55,22 @@ Questions may carry a `perturb` in the setup or the intervention. Many of the sh
 moments are events rather than settings — a fasting glucose model defends itself almost perfectly,
 and it is the meal that separates a working pancreas from a failed one.
 
+## Before pushing
+
+`npm run verify` runs the same four steps CI does, in the same order: `tsc -b`, `oxlint`,
+`vitest run`, `vite build`. A green local run is the same claim as a green CI run, so a red CI
+after a green verify means an environment difference worth investigating, not a slip.
+
+`.githooks/pre-push` runs it automatically and refuses the push if anything fails; `npm install`
+points `core.hooksPath` at that directory via the `prepare` script, so a fresh clone gets it
+after one install. `git push --no-verify` (or `SKIP_VERIFY=1`) bypasses it.
+
+**The working tree is inside iCloud's Desktop & Documents sync.** That produces `<name> 2.ext`
+conflict copies after a burst of file writes — 42 of them in one session, every one byte-identical
+to its original. They are untracked and inert (the questions index globs `*/questions.ts`, which
+those names do not match), but they clutter `git status` at exactly the moment you are checking
+the tree is clean. `cmp -s` them against the original, then delete.
+
 ## Verifying UI work
 
 - `npm test` and `npx tsc -b` do **not** catch CSS-module errors. Run `npx vite build` — a bad

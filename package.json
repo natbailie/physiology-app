@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "verify": "tsc -b && npm run lint && vitest run && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
