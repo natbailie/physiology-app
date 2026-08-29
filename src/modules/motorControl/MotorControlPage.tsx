@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,20 @@ import {
   MOTOR_PRESET_LABELS,
   MOTOR_PRESET_ORDER,
   DEFAULT_MOTOR_INPUTS,
-  type MotorPresetName,
 } from './engine/presets';
 import type { MotorInputs } from './engine/types';
+import { TremorStrip } from './components/TremorStrip';
 
 export function MotorControlPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MotorInputs>('motorControl', DEFAULT_MOTOR_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, motorLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_MOTOR_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'motorControl',
@@ -41,20 +52,21 @@ export function MotorControlPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof MotorInputs>(key: K, value: MotorInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: MotorPresetName) {
-    setInputs((prev) => ({ ...prev, ...MOTOR_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_MOTOR_INPUTS,
+    presets: MOTOR_PRESETS,
+    resetEngine: reset,
+  });
 
-  const latencyHistory = history.map((h) => h.latency);
-  const latencyBaseline = baseline.history?.map((h) => h.latency) ?? null;
-  const restHistory = history.map((h) => h.restTremor);
-  const restBaseline = baseline.history?.map((h) => h.restTremor) ?? null;
-  const involuntaryHistory = history.map((h) => h.involuntary);
-  const involuntaryBaseline = baseline.history?.map((h) => h.involuntary) ?? null;
+  const latencyHistory = useSeries(history, (h) => h.latency);
+  const latencyBaseline = useSeries(baseline.history, (h) => h.latency);
+  const restHistory = useSeries(history, (h) => h.restTremor);
+  const restBaseline = useSeries(baseline.history, (h) => h.restTremor);
+  const involuntaryHistory = useSeries(history, (h) => h.involuntary);
+  const involuntaryBaseline = useSeries(baseline.history, (h) => h.involuntary);
 
   return (
     <ModulePage
@@ -66,13 +78,13 @@ export function MotorControlPage() {
         <PresetBar
           order={MOTOR_PRESET_ORDER}
           labels={MOTOR_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Levodopa dose', onClick: () => perturb(perturbLevodopaDose), variant: 'impulse' },
             { label: 'Deep brain stimulation', onClick: () => perturb(perturbToggleDbs), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -82,6 +94,7 @@ export function MotorControlPage() {
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
+          <TremorStrip derived={snapshot.derived} />
           <Sparkline
             label="Initiation latency"
             unit="ms"

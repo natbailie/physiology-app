@@ -62,6 +62,48 @@ export const IRON_STORES = {
   REPLETION_PER_SECOND: 0.00018,
 };
 
+/** Hepcidin — the hepatic hormone that degrades ferroportin, the only iron exporter in the
+ * body. Everything about the iron studies panel falls out of this one number: stores raise
+ * it, IL-6 raises it hard (the anaemia of chronic disease), erythropoietic drive and HFE-type
+ * sensing failure suppress it (the overload syndromes). */
+export const HEPCIDIN = {
+  /** Baseline production at replete stores and no inflammation. */
+  NORMAL_FRACTION: 1,
+  TAU_SECONDS: 3600,
+  /** Store drive: from ~0.25 when empty to ~1.75 when overloaded. */
+  STORE_DRIVE_MIN: 0.25,
+  STORE_DRIVE_MAX: 1.75,
+  /** IL-6 can multiply hepcidin several-fold at maximal inflammation. */
+  INFLAMMATION_MAX_MULTIPLIER: 4,
+  /** Erythroferrone-like suppression by a marrow driving beyond its supply — strong enough
+   * that thalassaemia-style drive keeps hepcidin near-undetectable despite overload. */
+  DRIVE_SUPPRESSION_EXPONENT: 1.3,
+  /** A sensing defect (HFE) caps how high stores can push hepcidin. */
+  SENSING_MIN_MULTIPLIER: 0.08,
+  /** Ferroportin gate: 1 at normal hepcidin; rises slightly when hepcidin is low, collapses
+   * when it is high. This gate sits between BOTH iron sources — gut uptake and macrophage
+   * release — and the marrow downstream of it, which is why ACD starves a replete patient. */
+  GATE_LOW_HEPCIDIN_GAIN: 0.42,
+  GATE_MAX: 1.45,
+  GATE_MIN: 0.05,
+} as const;
+
+/** The serum iron studies panel, all derived rather than authored: every row moves because
+ * hepcidin moved, which is why the four classic patterns separate without being labelled. */
+export const IRON_PANEL = {
+  SERUM_IRON_BASE_UG_DL: 95,
+  TIBC_BASE_UG_DL: 340,
+  SATURATION_DEFICIENT_PCT: 16,
+  SATURATION_NORMAL_LOW_PCT: 22,
+  SATURATION_OVERLOAD_PCT: 45,
+  /** Transferrin up-regulation as stores empty (IDA), capped near this multiple. */
+  TIBC_DEFICIENCY_MAX_MULTIPLE: 1.35,
+  /** Transferrin falls as a negative acute-phase reactant at full inflammation. */
+  TIBC_INFLAMMATION_MIN_MULTIPLE: 0.72,
+  /** Ferritin is ALSO an acute-phase reactant — the trap that makes a normal ferritin lie. */
+  FERRITIN_INFLAMMATION_MAX_MULTIPLE: 3.2,
+} as const;
+
 export const RED_CELL_KINETICS = {
   // Normal senescent loss — a red cell lives about 120 days.
   BASAL_LOSS: 0.32,
@@ -95,4 +137,8 @@ export const ERYTHRO_SIMULATION = {
   HISTORY_CAPACITY: 600,
   // Erythropoiesis runs over weeks, so time is heavily compressed.
   TIME_SCALE: 8,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 900,
 };

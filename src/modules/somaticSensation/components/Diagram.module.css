@@ -1,76 +1,161 @@
-.columnDC {
-  fill: color-mix(in srgb, var(--o2) 45%, transparent);
+/* --- The cord in cross-section --- */
+
+.cordOutline {
+  fill: var(--panel-raised);
+  stroke: var(--panel-border);
+  stroke-width: 1.5;
 }
 
-.columnDClost {
-  fill: color-mix(in srgb, var(--text-dim) 18%, transparent);
-  stroke: var(--danger);
+/* Grey matter. The butterfly is what gives the dorsal horn, the ventral horn and the central
+   canal somewhere to be — without it a "syrinx expanding from the central canal" has no canal
+   to expand from. */
+.greyMatter {
+  fill: color-mix(in srgb, var(--nociception) var(--wash-faint), var(--panel-raised));
+  stroke: color-mix(in srgb, var(--nociception) 35%, transparent);
   stroke-width: 1;
-  stroke-dasharray: 3 2;
+}
+
+/* Where the gate acts. Opens and shuts in place rather than as a bar chart parked elsewhere. */
+.dorsalHorn {
+  fill: color-mix(in srgb, var(--nociception) calc(var(--gate, 0) * var(--wash-strong)), transparent);
+  stroke: color-mix(in srgb, var(--nociception) 45%, transparent);
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+.centralCanal {
+  fill: var(--panel);
+  stroke: var(--text-faint);
+  stroke-width: 1;
+}
+
+/* A syrinx takes the fibres crossing in the anterior commissure at those segments, and spares
+   everything that crosses elsewhere. That is the whole of the cape distribution. */
+.syrinxCavity {
+  fill: var(--panel);
+  stroke: var(--danger);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  transition:
+    rx 0.5s ease,
+    ry 0.5s ease;
+}
+
+/* --- Tracts. Shading IS integrity: a lost tract fades toward the surrounding white matter. --- */
+
+.tract {
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+.columnDC {
+  composes: tract;
+  fill: color-mix(in srgb, var(--axon) calc(var(--integrity, 1) * var(--wash-strong)), transparent);
+  stroke: color-mix(in srgb, var(--axon) calc(var(--integrity, 1) * 60%), transparent);
 }
 
 .columnST {
-  fill: color-mix(in srgb, var(--nociception) 45%, transparent);
+  composes: tract;
+  fill: color-mix(in srgb, var(--nociception) calc(var(--integrity, 1) * var(--wash-strong)), transparent);
+  stroke: color-mix(in srgb, var(--nociception) calc(var(--integrity, 1) * 60%), transparent);
 }
 
-.columnSTlost {
-  fill: color-mix(in srgb, var(--text-dim) 18%, transparent);
-  stroke: var(--danger);
+/* --- The decussation inset --- */
+
+.levelLine {
+  stroke: var(--panel-border);
   stroke-width: 1;
-  stroke-dasharray: 3 2;
 }
 
-.syrinxCavity {
-  fill: color-mix(in srgb, var(--danger) 35%, transparent);
-  transition: r 0.3s ease;
+.midline {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.7;
 }
 
-.cordOutline {
+.fibre {
   fill: none;
-  stroke: var(--text-dim);
   stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.gateBar {
-  transition: width 0.3s ease;
+.painFibre {
+  composes: fibre;
+  stroke: var(--nociception);
 }
 
-.gateFrame {
+.touchFibre {
+  composes: fibre;
+  stroke: var(--axon);
+}
+
+.painLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  fill: var(--nociception);
+}
+
+.touchLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  fill: var(--axon);
+}
+
+/* --- Body maps --- */
+
+.bodyOutline {
   fill: none;
-  stroke: var(--panel-border);
-  stroke-width: 1;
+  stroke: var(--text-faint);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
 }
 
-.axis {
-  stroke: var(--panel-border);
-  stroke-width: 1;
+/* Wash over the half of the body that has lost the modality. Opacity is the loss, so an intact
+   side is simply clear. */
+.lossWash {
+  fill: var(--danger);
+  transition: opacity 0.4s ease;
+}
+
+.sideTick {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+}
+
+.headline {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+/* --- Shared text --- */
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.anatomyStrong {
+  composes: anatomyStrong from '../../../shared/styles/diagramText.module.css';
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .alarm {
-  font-family: var(--mono);
-  font-size: 12px;
-  fill: var(--danger);
-  letter-spacing: 0.06em;
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
 }

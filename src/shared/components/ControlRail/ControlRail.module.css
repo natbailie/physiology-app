@@ -1,8 +1,5 @@
 .rail {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-1);
+  composes: panel from '../../styles/panel.module.css';
   padding: 0.9rem 1rem 1.1rem;
   display: flex;
   flex-direction: column;

@@ -25,6 +25,7 @@ export const pituitaryLoopConfig: EngineLoopConfig<
     igf1: snapshot.derived.igf1NgMl / 10,
   }),
   maxDtSeconds: PITUITARY_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: PITUITARY_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: PITUITARY_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: PITUITARY_SIMULATION.HISTORY_CAPACITY,
   timeScale: PITUITARY_SIMULATION.TIME_SCALE,

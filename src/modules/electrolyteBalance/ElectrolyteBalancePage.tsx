@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { CompartmentDiagram } from './components/CompartmentDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -19,13 +23,19 @@ import {
   ELECTROLYTE_PRESETS,
   ELECTROLYTE_PRESET_LABELS,
   ELECTROLYTE_PRESET_ORDER,
-  type ElectrolytePresetName,
 } from './engine/presets';
 import type { ElectrolyteInputs } from './engine/types';
 
 export function ElectrolyteBalancePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ElectrolyteInputs>('electrolyteBalance', DEFAULT_ELECTROLYTE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, electrolyteLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_ELECTROLYTE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'electrolyteBalance',
@@ -41,14 +51,19 @@ export function ElectrolyteBalancePage() {
     fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
+  const sodiumHistory = useSeries(history, (h) => h.sodium);
+  const potassiumHistory = useSeries(history, (h) => h.potassium);
+  const totalBodyPotassiumHistory = useSeries(history, (h) => h.totalBodyPotassiumPct);
+  const ecfVolumeHistory = useSeries(history, (h) => h.ecfVolume);
 
-  function handleChange<K extends keyof ElectrolyteInputs>(key: K, value: ElectrolyteInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ElectrolytePresetName) {
-    setInputs((prev) => ({ ...prev, ...ELECTROLYTE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_ELECTROLYTE_INPUTS,
+    presets: ELECTROLYTE_PRESETS,
+    resetEngine: reset,
+  });
 
   return (
     <ModulePage
@@ -60,14 +75,14 @@ export function ElectrolyteBalancePage() {
         <PresetBar
           order={ELECTROLYTE_PRESET_ORDER}
           labels={ELECTROLYTE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Give insulin', onClick: () => perturb((s) => perturbGiveInsulin(s)), variant: 'impulse' },
             { label: 'Saline bolus', onClick: () => perturb((s) => perturbSalineBolus(s)), variant: 'impulse' },
             { label: 'K+ bolus', onClick: () => perturb((s) => perturbPotassiumBolus(s)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -80,7 +95,7 @@ export function ElectrolyteBalancePage() {
           <Sparkline
             label="Serum Na+"
             unit="mEq/L"
-            data={history.map((h) => h.sodium)}
+            data={sodiumHistory}
             domainMin={105}
             domainMax={165}
             colorVar="var(--sodium)"
@@ -91,8 +106,8 @@ export function ElectrolyteBalancePage() {
             label="Serum K+"
             secondaryLabel="total body K+"
             unit="mEq/L"
-            data={history.map((h) => h.potassium)}
-            secondaryData={history.map((h) => h.totalBodyPotassiumPct)}
+            data={potassiumHistory}
+            secondaryData={totalBodyPotassiumHistory}
             secondaryColorVar="var(--text-dim)"
             domainMin={1.5}
             domainMax={8}
@@ -101,7 +116,7 @@ export function ElectrolyteBalancePage() {
           <Sparkline
             label="ECF volume"
             unit="L"
-            data={history.map((h) => h.ecfVolume)}
+            data={ecfVolumeHistory}
             domainMin={8}
             domainMax={20}
             colorVar="var(--artery)"

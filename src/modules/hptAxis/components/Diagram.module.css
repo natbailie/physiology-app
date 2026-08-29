@@ -48,11 +48,55 @@
 /* --- Labels --- */
 
 .organLabel {
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- Thyroid --- */
+
+.thyroidLobe {
+  fill: color-mix(in srgb, var(--thyroid) var(--wash-faint), var(--panel));
+  stroke: var(--thyroid);
+  stroke-width: 1.8;
+}
+
+.thyroidIsthmus {
+  fill: color-mix(in srgb, var(--thyroid) var(--wash-faint), var(--panel));
+  stroke: var(--thyroid);
+  stroke-width: 1.2;
+}
+
+/* Colloid in the follicles: the thyroid stores months of its own product, which is why its
+   diseases and its treatment both move slowly. */
+.follicle {
+  fill: color-mix(in srgb, var(--thyroid) calc(0.25 + var(--thyroid-intensity, 0) * 0.75) 100%, transparent);
+  stroke: none;
+  transition: fill 0.4s ease;
+}
+
+/* --- Peripheral deiodination --- */
+
+.conversion {
+  fill: none;
+  stroke: var(--thyroid);
+  stroke-width: calc(1.5px + var(--conversion, 1) * 2px);
+  stroke-linecap: round;
+  opacity: calc(0.3 + var(--conversion, 1) * 0.6);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
+}
+
+.conversionLabel {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  fill: var(--text);
-  text-transform: uppercase;
-  text-anchor: middle;
+  fill: var(--thyroid);
+  stroke: none;
+}
+
+.conversionTick {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  fill: var(--text-faint);
+  stroke: none;
 }

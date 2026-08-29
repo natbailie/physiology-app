@@ -14,6 +14,7 @@ export const cardiacLoopConfig: EngineLoopConfig<CardiacState, CardiacInputs, Ca
     ecgVoltage: snapshot.derived.ecgVoltage,
   }),
   maxDtSeconds: CARDIAC_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: CARDIAC_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: CARDIAC_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: CARDIAC_SIMULATION.HISTORY_CAPACITY,
   timeScale: CARDIAC_SIMULATION.TIME_SCALE,

@@ -1,0 +1,169 @@
+{
+  "$generatedBy": "tools/pulse-oracle/run.sh — do not edit by hand",
+  "pulseImage": "kitware/pulse:4.3.1",
+  "scenario": "/source/data/human/adult/scenarios/patient/ZeroARDS.json",
+  "description": "The zero-severity control for the ARDS condition — the same patient, healthy.",
+  "durationSeconds": 120,
+  "sampleIntervalSeconds": 10,
+  "landmarks": {
+    "settled": 120
+  },
+  "samples": [
+    {
+      "t": 0,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 534.96,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.1
+    },
+    {
+      "t": 10,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.09,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.2
+    },
+    {
+      "t": 20,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.22,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.2
+    },
+    {
+      "t": 30,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.36,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.2
+    },
+    {
+      "t": 40,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.5,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.2
+    },
+    {
+      "t": 50,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.63,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 60,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.74,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 70,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.83,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 80,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.91,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 90,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.96,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 100,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 535.99,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 110,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 536,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.3
+    },
+    {
+      "t": 120,
+      "shuntFraction": 0.02,
+      "lungComplianceLPerCmH2O": 0.2,
+      "respiratoryComplianceLPerCmH2O": 0.09,
+      "inspiratoryResistanceCmH2OSPerL": 1.5,
+      "deadSpaceTidalVolumeRatio": 0.29,
+      "oxygenSaturation": 0.97,
+      "tidalVolumeMl": 536.02,
+      "respirationRatePerMin": 12.05,
+      "paO2MmHg": 89.4
+    }
+  ]
+}

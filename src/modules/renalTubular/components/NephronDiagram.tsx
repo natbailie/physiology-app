@@ -34,11 +34,13 @@ export function NephronDiagram({ derived }: NephronDiagramProps) {
       viewBox="0 0 480 300"
       ariaLabel="Diagram of an unrolled nephron showing tubular fluid osmolality at each segment from Bowman's capsule through the proximal tubule, loop of Henle, distal tubule and collecting duct, against the medullary osmotic gradient"
     >
-      {/* Medullary gradient: bands deepen toward the papilla. */}
+      {/* Medullary gradient. The three bands carry increasing --depth, so the medulla actually
+          deepens toward the papilla — they were painted at identical strength, which the graph
+          paper behind them hid. */}
       <g style={medullaStyle}>
-        <rect className={styles.medullaBand} x={0} y={130} width={480} height={56} />
-        <rect className={styles.medullaBand} x={0} y={186} width={480} height={56} />
-        <rect className={styles.medullaBand} x={0} y={242} width={480} height={58} />
+        <rect className={styles.medullaBand} style={{ '--depth': 0.5 } as CSSProperties} x={0} y={130} width={480} height={56} />
+        <rect className={styles.medullaBand} style={{ '--depth': 0.85 } as CSSProperties} x={0} y={186} width={480} height={56} />
+        <rect className={styles.medullaBand} style={{ '--depth': 1.3 } as CSSProperties} x={0} y={242} width={480} height={58} />
       </g>
       <line className={styles.cortexDivider} x1={0} y1={130} x2={480} y2={130} />
       <text className={styles.medullaLabel} x={8} y={124}>

@@ -1,0 +1,164 @@
+/* --- The ventricular wall, in the two layers the engine already distinguishes --- */
+
+/* Outer half of the wall. Perfused first, and the last to be lost. */
+.epiLayer {
+  fill: color-mix(in srgb, var(--artery) var(--wash-faint), var(--panel));
+  stroke: var(--panel-border);
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+.epiInjured {
+  composes: epiLayer;
+  fill: color-mix(in srgb, var(--danger) var(--wash), var(--panel));
+}
+
+/* Inner half. Furthest from the epicardial vessel, squeezed hardest by wall tension, and
+ * perfused only in diastole — which is why it is the layer that fails first. */
+.endoLayer {
+  fill: color-mix(in srgb, var(--artery) var(--wash), var(--panel));
+  stroke: var(--panel-border);
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+.endoIschaemic {
+  composes: endoLayer;
+  fill: color-mix(in srgb, var(--danger) var(--wash-strong), var(--panel));
+}
+
+.cavity {
+  fill: var(--panel-raised);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.chamberLabel {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  fill: var(--text-dim);
+  text-anchor: middle;
+}
+
+/* The pressure the subendocardium sits in — one half of the perfusion subtraction. */
+.cavityPressure {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+/* --- The vessels --- */
+
+.arteryWall {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 12;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.arteryLumen {
+  fill: none;
+  stroke: var(--artery);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-width 0.3s ease;
+}
+
+/* Branches diving through the muscle to the endocardium. Downstream of the lesion they carry
+ * only what gets past it, which is what makes one territory ischaemic and not the rest. */
+.penetrator {
+  fill: none;
+  stroke: var(--artery);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.penetratorDownstream {
+  composes: penetrator;
+  stroke-width: calc(0.8px + var(--lumen, 1) * 2.6px);
+  opacity: calc(0.3 + var(--lumen, 1) * 0.55);
+  transition:
+    stroke-width 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.collateralPath {
+  fill: none;
+  stroke: var(--o2);
+  stroke-width: 3;
+  stroke-dasharray: 5 4;
+  transition: opacity 0.3s ease;
+}
+
+.leader {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+/* --- The cardiac cycle, split into the part that perfuses and the part that does not --- */
+
+.systoleBlock {
+  fill: var(--panel-raised);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+  transition: width 0.3s ease;
+}
+
+.diastoleBlock {
+  fill: color-mix(in srgb, var(--artery) var(--wash), var(--panel));
+  stroke: var(--artery);
+  stroke-width: 1;
+  transition:
+    width 0.3s ease,
+    x 0.3s ease;
+}
+
+.headline {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+/* --- Shared text --- */
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.anatomyFaint {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+  fill: var(--text-faint);
+}
+
+.axis {
+  composes: axis from '../../../shared/styles/diagramText.module.css';
+}
+
+.label {
+  composes: label from '../../../shared/styles/diagramText.module.css';
+}
+
+.caption {
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+}
+
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+}
+
+.alarm {
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
+.tickLabel {
+  composes: tickLabel from '../../../shared/styles/diagramText.module.css';
+}

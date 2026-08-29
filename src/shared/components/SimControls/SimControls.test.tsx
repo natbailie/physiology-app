@@ -17,6 +17,7 @@ function makeTransport(overrides: Partial<SimTransport> = {}): SimTransport {
     toggle: vi.fn(),
     stepOnce: vi.fn(),
     setSpeed: vi.fn(),
+    reset: vi.fn(),
     ...overrides,
   };
 }

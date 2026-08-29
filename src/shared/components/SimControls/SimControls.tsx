@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { SimBaseline, SimTransport } from '@/shared/hooks/useEngineLoop';
 import { SPEED_OPTIONS } from '@/shared/hooks/useEngineLoop';
 import styles from './SimControls.module.css';
@@ -17,7 +18,7 @@ function formatSpeed(multiplier: number): string {
  * Pausing is what makes the readouts readable at all — several modules move faster than
  * a number can be read — and the frozen baseline is what turns two presets into a
  * comparison instead of a memory test. */
-export function SimControls({ transport, baseline }: SimControlsProps) {
+function SimControlsBase({ transport, baseline }: SimControlsProps) {
   const { playing, speed, toggle, stepOnce, setSpeed } = transport;
   const hasBaseline = baseline?.history != null;
 
@@ -76,3 +77,5 @@ export function SimControls({ transport, baseline }: SimControlsProps) {
     </div>
   );
 }
+
+export const SimControls = memo(SimControlsBase);

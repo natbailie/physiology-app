@@ -1,0 +1,25 @@
+/* Chart chrome. `Sparkline`, `EcgStrip`, `XYTrajectoryChart` and
+ * `OxygenDissociationCurve` had byte-identical `.wrap` and `.header` blocks. */
+
+.wrap {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-1);
+}
+
+/* The live value, read against the trace below it. */
+.current {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-sm);
+  color: var(--chart-color, var(--text));
+}

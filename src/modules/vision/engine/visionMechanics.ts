@@ -1,4 +1,4 @@
-import { ACUITY, PUPIL, PUPIL_DRIVE, RECEPTOR } from './constants';
+import { ACUITY, AQUEOUS, PUPIL, PUPIL_DRIVE, RECEPTOR } from './constants';
 import { clamp } from '@/shared/lib/math';
 import type { VisionState_Classification } from './types';
 
@@ -119,12 +119,18 @@ export function classifyVision(pattern: {
   macularFailure: boolean;
   rapdPositive: boolean;
   efferentDefect: boolean;
+  intraocularPressureMmHg: number;
+  blurActive: boolean;
 }): VisionState_Classification {
+  // The eye that hurts outranks everything: a crisis pressure is a diagnosis in itself.
+  if (pattern.intraocularPressureMmHg >= AQUEOUS.CRISIS_IOP_MMHG) return 'acute angle closure';
+  if (pattern.intraocularPressureMmHg >= AQUEOUS.GLAUCOMA_IOP_MMHG) return 'chronic glaucoma (open angle)';
   // Efferent and afferent defects outrank the lighting regime: they are present in every light.
   if (pattern.efferentDefect) return 'efferent defect: fixed dilated pupil';
   if (pattern.rapdPositive) return 'left RAPD (afferent defect)';
   if (pattern.nightBlindness) return 'night blindness (rod failure)';
   if (pattern.macularFailure && pattern.regime === 'photopic') return 'macular cone failure';
+  if (pattern.blurActive) return 'presbyopic blur';
   return pattern.regime;
 }
 
@@ -136,7 +142,18 @@ export function patternSummary(pattern: {
   anisocoriaMm: number;
   regime: string;
   acuityDenominator: number;
+  intraocularPressureMmHg: number;
+  angleClosureFraction: number;
+  blurActive: boolean;
+  nearPointCm: number;
+  fieldDefectLabel: string;
 }): string {
+  if (pattern.intraocularPressureMmHg >= AQUEOUS.CRISIS_IOP_MMHG)
+    return `pressure ${Math.round(pattern.intraocularPressureMmHg)} mmHg with ${(pattern.angleClosureFraction * 100).toFixed(0)}% of the angle closed — a red, painful eye`;
+  if (pattern.intraocularPressureMmHg >= AQUEOUS.GLAUCOMA_IOP_MMHG)
+    return `pressure ${Math.round(pattern.intraocularPressureMmHg)} mmHg with an open angle — silent, painless, and stealing peripheral vision`;
+  if (pattern.fieldDefectLabel !== 'no field defect')
+    return `${pattern.fieldDefectLabel} — the lesion's site, not the eye, drew this pattern`;
   if (pattern.efferentDefect)
     return `right pupil ${pattern.anisocoriaMm.toFixed(1)} mm larger with consensual reflex intact — the lesion is outgoing`;
   if (pattern.rapdPositive)
@@ -145,5 +162,7 @@ export function patternSummary(pattern: {
     return `rods fail in ${pattern.regime} light while daylight vision is spared`;
   if (pattern.macularFailure)
     return `daylight acuity ${acuityLabel(pattern.acuityDenominator)} with pupils and night vision normal — the fovea is the problem`;
+  if (pattern.blurActive)
+    return `print at reading distance blurs; the near point has receded to ${Math.round(pattern.nearPointCm)} cm — the lens, not the retina`;
   return `${pattern.regime} operating point, acuity ${acuityLabel(pattern.acuityDenominator)}`;
 }

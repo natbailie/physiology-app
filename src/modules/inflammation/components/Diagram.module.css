@@ -1,0 +1,80 @@
+/* Tissue cross-section showing the inflammatory site. */
+.tissue {
+  fill: color-mix(in srgb, var(--text-dim) 12%, transparent);
+  stroke: var(--text-dim);
+  stroke-width: 1;
+}
+
+.insultBacteria {
+  fill: color-mix(in srgb, var(--danger) 70%, transparent);
+  transition: r 0.3s ease;
+}
+
+.insultCrystal {
+  fill: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+.insultForeign {
+  fill: color-mix(in srgb, var(--text-dim) 55%, transparent);
+}
+
+.pusPool {
+  fill: color-mix(in srgb, var(--text-faint) 45%, transparent);
+  transition: all 0.3s ease;
+}
+
+.neutrophilDot {
+  fill: color-mix(in srgb, var(--o2) 60%, transparent);
+  transition: all 0.3s ease;
+}
+
+.macrophageDot {
+  fill: color-mix(in srgb, var(--artery) 55%, transparent);
+  transition: all 0.3s ease;
+}
+
+/* Bar chart of immune cell populations. */
+.barFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.neutBar {
+  fill: color-mix(in srgb, var(--o2) 55%, transparent);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.monoBar {
+  fill: color-mix(in srgb, var(--artery) 55%, transparent);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.pusBar {
+  fill: color-mix(in srgb, var(--text-faint) 50%, transparent);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.axis {
+  composes: axis from '../../../shared/styles/diagramText.module.css';
+}
+
+.label {
+  composes: label from '../../../shared/styles/diagramText.module.css';
+}
+
+.caption {
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+}
+
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+}
+
+.alarm {
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
+.tickLabel {
+  composes: tickLabel from '../../../shared/styles/diagramText.module.css';
+}

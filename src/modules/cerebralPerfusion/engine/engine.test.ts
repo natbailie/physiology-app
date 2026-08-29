@@ -143,6 +143,34 @@ describe('CSF', () => {
   });
 });
 
+describe('BBB disruption and vasogenic oedema', () => {
+  it('produces no oedema with an intact barrier', () => {
+    const d = settle(CEREBRAL_PRESETS.normal, 30000);
+    expect(d.vasogenicOedemaMl).toBeCloseTo(0, 1);
+  });
+
+  it('accumulates vasogenic oedema over hours with a disrupted BBB', () => {
+    const d = settle(CEREBRAL_PRESETS.bbbDisruption, 30000);
+    expect(d.vasogenicOedemaMl).toBeGreaterThan(5);
+    expect(d.vasogenicOedemaMl).toBeLessThan(30);
+  });
+
+  it('raises ICP by adding mass effect to the skull', () => {
+    const intact = settle({ ...DEFAULT_CEREBRAL_INPUTS, bbbPermeabilityPct: 100 }, 30000);
+    const disrupted = settle(CEREBRAL_PRESETS.bbbDisruption, 30000);
+    // The disrupted BBB adds oedema volume on top of the mass lesion, pushing ICP higher.
+    expect(disrupted.vasogenicOedemaMl).toBeGreaterThan(intact.vasogenicOedemaMl);
+    expect(disrupted.intracranialPressureMmHg).toBeGreaterThan(intact.intracranialPressureMmHg);
+  });
+
+  it('combines with a mass lesion to exhaust reserve faster', () => {
+    const massOnly = settle({ ...DEFAULT_CEREBRAL_INPUTS, massVolumeMl: 30 }, 30000);
+    const massPlusLeak = settle({ ...DEFAULT_CEREBRAL_INPUTS, massVolumeMl: 30, bbbPermeabilityPct: 180 }, 30000);
+    expect(massPlusLeak.vasogenicOedemaMl).toBeGreaterThan(5);
+    expect(massPlusLeak.compensatoryReserveMl).toBeLessThan(massOnly.compensatoryReserveMl);
+  });
+});
+
 describe('numerical robustness', () => {
   it('never produces NaN or Infinity across extreme inputs', () => {
     const extremes: Partial<CerebralInputs>[] = [
@@ -150,6 +178,7 @@ describe('numerical robustness', () => {
       { meanArterialPressureMmHg: 170, autoregulationIntegrity: 0, paCO2MmHg: 15 },
       { csfProductionRate: 2.5, csfAbsorptionCapacity: 0, venousOutflowPressureMmHg: 25 },
       { paO2MmHg: 25, massVolumeMl: 0, csfAbsorptionCapacity: 1.5 },
+      { bbbPermeabilityPct: 200, massVolumeMl: 100, meanArterialPressureMmHg: 60 },
     ];
 
     for (const patch of extremes) {

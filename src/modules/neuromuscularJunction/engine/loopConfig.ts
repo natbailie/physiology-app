@@ -15,6 +15,7 @@ export const nmjLoopConfig: EngineLoopConfig<NmjState, NmjInputs, NmjDerived, Nm
     tofRatio: snapshot.derived.trainOfFourRatio * 100,
   }),
   maxDtSeconds: NMJ_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: NMJ_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: NMJ_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: NMJ_SIMULATION.HISTORY_CAPACITY,
   timeScale: NMJ_SIMULATION.TIME_SCALE,

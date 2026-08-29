@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import indexCss from '../index.css?raw';
 import { PAGES } from '@/pages';
 import { VALID_ROUTES } from '@/shared/hooks/useHashRoute';
-import { MODULES } from './moduleRegistry';
+import { MODULES, THEMES } from './moduleRegistry';
 
 /**
  * A module id has to appear in four places (see CLAUDE.md) and nothing checked that it did.
@@ -40,7 +40,10 @@ describe('module registry wiring', () => {
     // 'home' is the fallback and never appears in VALID_ROUTES; the rest are utility pages.
     const utility = new Set(['account', 'privacy', 'pricing']);
     const known = new Set(MODULES.map((module) => module.id));
-    const stray = VALID_ROUTES.filter((id) => !utility.has(id) && !known.has(id));
+    const themeRoutes = new Set(THEMES.map((theme) => `theme/${theme.id}`));
+    const stray = VALID_ROUTES.filter(
+      (id) => !utility.has(id) && !known.has(id) && !themeRoutes.has(id),
+    );
     expect(stray.join(', ')).toBe('');
   });
 
@@ -66,6 +69,64 @@ describe('module registry wiring', () => {
       const name = module.accentColorVar?.match(/var\((--[\w-]+)\)/)?.[1];
       if (!name) continue;
       expect(defined.has(name), `${module.id} uses ${name}, which index.css does not define`).toBe(
+        true,
+      );
+    }
+  });
+});
+
+describe('theme wiring', () => {
+  const themeIds = new Set(THEMES.map((theme) => theme.id));
+
+  it('gives every non-reference module a theme that exists', () => {
+    for (const module of MODULES) {
+      if (module.kind === 'reference') continue;
+      expect(themeIds.has(module.theme!), `${module.id} has no valid theme (${module.theme})`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('keeps reference utility pages outside the simulator themes', () => {
+    // The formula sheet is a single pinned page and must not masquerade as a theme. The
+    // medications hub is the exception: it is a browseable collection that earns its own theme
+    // tile, so it is the one reference entry allowed a theme.
+    for (const module of MODULES) {
+      if (module.kind !== 'reference') continue;
+      if (module.id === 'medications') {
+        expect(module.theme, 'the medications hub belongs to its own theme').toBe('medications');
+      } else {
+        expect(module.theme, 'reference lives outside the themes').toBeUndefined();
+      }
+    }
+  });
+
+  it('gives every theme a unique id', () => {
+    expect(themeIds.size).toBe(THEMES.length);
+  });
+
+  it('gives every theme at least one module', () => {
+    const assigned = new Set(MODULES.map((module) => module.theme));
+    const empty = THEMES.filter((theme) => !assigned.has(theme.id)).map((t) => t.id);
+    expect(empty.join(', '), `themes with no modules: ${empty.join(', ')}`).toBe('');
+  });
+
+  it('gives every theme a route the hash router accepts', () => {
+    const routable = new Set<string>(VALID_ROUTES);
+    const unreachable = THEMES.filter((theme) => !routable.has(`theme/${theme.id}`)).map((t) => t.id);
+    expect(
+      unreachable.join(', '),
+      `these themes render a card but #hash falls back to home: ${unreachable.join(', ')}`,
+    ).toBe('');
+  });
+
+  it('uses only accent colours that index.css actually defines', () => {
+    const defined = new Set([...indexCss.matchAll(/(--[\w-]+)\s*:/g)].map((match) => match[1]));
+
+    for (const theme of THEMES) {
+      const name = theme.accentColorVar?.match(/var\((--[\w-]+)\)/)?.[1];
+      if (!name) continue;
+      expect(defined.has(name), `${theme.id} uses ${name}, which index.css does not define`).toBe(
         true,
       );
     }

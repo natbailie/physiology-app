@@ -1,0 +1,24 @@
+.group {
+  display: inline-flex;
+}
+
+.option {
+  composes: segment from '../shared/styles/button.module.css';
+  border-radius: 0;
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--fs-micro);
+}
+
+.option:not(:first-child) {
+  margin-left: -1px;
+}
+
+.option:first-child {
+  border-top-left-radius: var(--r-sm);
+  border-bottom-left-radius: var(--r-sm);
+}
+
+.option:last-child {
+  border-top-right-radius: var(--r-sm);
+  border-bottom-right-radius: var(--r-sm);
+}

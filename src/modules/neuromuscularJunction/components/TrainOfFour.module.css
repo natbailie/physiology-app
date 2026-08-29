@@ -1,0 +1,31 @@
+.wrap {
+  composes: wrap from '../../../shared/styles/chart.module.css';
+}
+
+.header {
+  composes: header from '../../../shared/styles/chart.module.css';
+}
+
+.current {
+  composes: current from '../../../shared/styles/chart.module.css';
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 56px;
+}
+
+.baseline {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.twitch {
+  fill: color-mix(in srgb, var(--sarcomere) var(--wash-strong), transparent);
+  stroke: var(--sarcomere);
+  stroke-width: 1;
+  transition:
+    height 0.3s ease,
+    y 0.3s ease;
+}

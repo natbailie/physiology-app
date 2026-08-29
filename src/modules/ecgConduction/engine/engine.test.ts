@@ -369,3 +369,186 @@ describe('ecg — mean axis', () => {
     expect(axis).toBeLessThan(90);
   });
 });
+
+/** Ventricular beat-to-beat intervals collected over a run, ms. Beats during the first
+ * `settleSeconds` are discarded — every rhythm starts from a state at electrical rest, and
+ * the first interval or two is startup bookkeeping rather than physiology. */
+function rrIntervals(inputs: EcgInputs, seconds: number, settleSeconds = 2): number[] {
+  let state = createInitialState();
+  const intervals: number[] = [];
+  let lastCount = 0;
+  for (let i = 0; i < seconds / DT; i++) {
+    state = step(state, inputs, DT).state;
+    if (state.ventricularBeatCount !== lastCount) {
+      lastCount = state.ventricularBeatCount;
+      if (state.simTimeSeconds > settleSeconds) intervals.push(state.lastRrIntervalMs);
+    }
+  }
+  return intervals;
+}
+
+describe('ecg — atrial flutter', () => {
+  it('runs the atria at the circuit rate and filters it into a regular ~150', () => {
+    const inputs = preset('atrialFlutter');
+    const { derived } = run(inputs, 8);
+
+    // The circuit ignores the sinus node: it drives the atria at its own fixed 300/min...
+    expect(derived.heartRateBpm).toBe(300);
+    // ...and the AV node's filtering leaves a REGULAR ventricular response near 150.
+    expect(derived.rhythmRegular).toBe(true);
+    expect(derived.ventricularRateBpm).toBeGreaterThan(135);
+    expect(derived.ventricularRateBpm).toBeLessThan(165);
+    // The chambers are not dissociated — every ventricular beat IS a conducted flutter wave.
+    expect(derived.isDissociated).toBe(false);
+  });
+
+  it('conducts exactly every second circuit wave rather than at random', () => {
+    const inputs = preset('atrialFlutter');
+    let state = createInitialState();
+    let atrialAtMark = 0;
+    let ventricularAtMark = 0;
+    for (let i = 0; i < 12 / DT; i++) {
+      state = step(state, inputs, DT).state;
+      if (state.simTimeSeconds > 4 && atrialAtMark === 0) {
+        atrialAtMark = state.atrialBeatCount;
+        ventricularAtMark = state.ventricularBeatCount;
+      }
+    }
+    // After settling: two atrial activations per ventricular one.
+    const ratio = (state.atrialBeatCount - atrialAtMark) / (state.ventricularBeatCount - ventricularAtMark);
+    expect(ratio).toBeGreaterThan(1.9);
+    expect(ratio).toBeLessThan(2.1);
+    // And unlike fibrillation the RR intervals do not vary.
+    const intervals = rrIntervals(inputs, 10);
+    expect(Math.max(...intervals) - Math.min(...intervals)).toBeLessThan(5);
+  });
+});
+
+describe('ecg — Wolff-Parkinson-White', () => {
+  it('shortens PR below 120 ms because the accessory pathway skips the AV nodal delay', () => {
+    const normal = run(DEFAULT_ECG_INPUTS, 2.5).derived;
+    const wpw = run(preset('wpw'), 2.5).derived;
+
+    expect(normal.prIntervalMs).toBeGreaterThanOrEqual(120);
+    expect(wpw.prIntervalMs).toBeGreaterThan(80);
+    expect(wpw.prIntervalMs).toBeLessThan(120);
+    // The chambers are still working together — this is pre-excitation, not dissociation.
+    expect(wpw.isDissociated).toBe(false);
+    expect(wpw.rhythmRegular).toBe(true);
+  });
+
+  it('widens and slurs the start of the QRS without turning it into a bundle-branch block', () => {
+    const normal = run(DEFAULT_ECG_INPUTS, 2.5).derived;
+    const wpw = run(preset('wpw'), 2.5).derived;
+    const lbbb = run(preset('lbbb'), 2.5).derived;
+
+    expect(wpw.qrsDurationMs).toBeGreaterThan(normal.qrsDurationMs + 15);
+    // Part of the ventricle is activated through the fast system, so the complex never
+    // widens as far as complete bypass of the conduction system would make it.
+    expect(wpw.qrsDurationMs).toBeLessThan(lbbb.qrsDurationMs);
+  });
+});
+
+describe('ecg — sick sinus syndrome', () => {
+  it('drops the mean rate below the sinus rate by pausing intermittently', () => {
+    const inputs = preset('sickSinus');
+    const { derived } = run(inputs, 30);
+
+    // The junctional pacemaker holds the ventricles through the pauses but at its own slower
+    // rate, so the averaged rate sits clearly below what the SA node's firing would give.
+    expect(derived.meanVentricularRateBpm).toBeLessThan(inputs.heartRate - 8);
+    expect(derived.rhythmRegular).toBe(false);
+  });
+
+  it('fills each pause with junctional escape beats at their own slow rate', () => {
+    const inputs = preset('sickSinus');
+    const intervals = rrIntervals(inputs, 30);
+
+    // The pauses are FILLED, so no single gap ever grows long — that is the point of an
+    // escape pacemaker. What appears instead is a distinct cluster at the junctional rate.
+    const escapes = intervals.filter((rr) => Math.abs(rr - 60000 / 42) < 60);
+    expect(escapes.length).toBeGreaterThanOrEqual(2);
+    // The longest interval stays under two escape cycles: the junction never lets a pause run on.
+    expect(Math.max(...intervals)).toBeLessThan(2 * (60000 / 42) + 400);
+    // ...and sinus beats continue between pauses (the SA node recovers).
+    const sinus = intervals.filter((rr) => rr < 1100);
+    expect(sinus.length).toBeGreaterThan(escapes.length);
+  });
+
+  it('keeps escape complexes narrow — the junction conducts down the normal bundles', () => {
+    const { derived } = run(preset('sickSinus'), 8);
+    expect(derived.qrsDurationMs).toBeLessThan(120);
+  });
+});
+
+describe('ecg — ventricular tachycardia', () => {
+  it('is a regular wide-complex tachycardia driven independently of the atria', () => {
+    const inputs = preset('ventricularTachycardia');
+    const { state, derived } = run(inputs, 10);
+
+    expect(derived.ventricularRateBpm).toBeGreaterThan(160);
+    expect(derived.ventricularRateBpm).toBeLessThan(200);
+    // Monomorphic VT is fast but disciplined — the focus fires on time, every time.
+    const intervals = rrIntervals(inputs, 8);
+    expect(Math.max(...intervals) - Math.min(...intervals)).toBeLessThan(5);
+
+    // Cell-to-cell activation from one focus cannot produce a narrow complex.
+    expect(derived.qrsDurationMs).toBeGreaterThan(140);
+
+    // AV dissociation: the sinus node keeps firing its much slower atrial rhythm behind.
+    expect(derived.isDissociated).toBe(true);
+    expect(state.atrialBeatCount).toBeGreaterThan(0);
+  });
+});
+
+describe('ecg — torsades de pointes', () => {
+  it('rotates successive complexes around the baseline instead of repeating one shape', () => {
+    const { samples } = run(preset('torsades'), 7.2); // three full twist periods
+
+    // Amplitude envelope per twist period: with a rotating axis the same lead sees
+    // strongly positive, then near-flat, then strongly negative deflections.
+    const windowSeconds = 2.4; // the twist period, seconds
+    const perWindow: { max: number; min: number }[] = [];
+    for (let start = 0; start < 7; start += windowSeconds) {
+      const inWindow = samples.filter((s) => s.tMs >= start * 1000 && s.tMs < (start + windowSeconds) * 1000);
+      if (inWindow.length === 0) continue;
+      perWindow.push({ max: Math.max(...inWindow.map((s) => s.mv)), min: Math.min(...inWindow.map((s) => s.mv)) });
+    }
+
+    const strongestPositive = Math.max(...perWindow.map((w) => w.max));
+    const strongestNegative = Math.min(...perWindow.map((w) => w.min));
+    // The twist has to carry the complex through BOTH polarities in the same lead.
+    expect(strongestPositive).toBeGreaterThan(0.4);
+    expect(strongestNegative).toBeLessThan(-0.4);
+    // And the envelope genuinely travels between them: the total swing approaches twice
+    // the larger polarity, not a small ripple on an upright complex.
+    expect(strongestPositive - strongestNegative).toBeGreaterThan(
+      0.9 * Math.max(strongestPositive, -strongestNegative),
+    );
+  });
+
+  it('sits on a long-QT substrate — that is part of the diagnosis', () => {
+    const { derived } = run(preset('torsades'), 6);
+    expect(derived.qtcMs).toBeGreaterThan(460);
+  });
+});
+
+describe('ecg — ventricular fibrillation', () => {
+  it('never organises anything: low-amplitude chaos, no waves, no measurable QRS', () => {
+    const { samples, derived } = run(preset('ventricularFibrillation'), 6);
+
+    // A normal R wave clears 1 mV; VF never aligns enough to reach even half of that.
+    const peakToPeak = Math.max(...samples.map((s) => s.mv)) - Math.min(...samples.map((s) => s.mv));
+    expect(peakToPeak).toBeLessThan(0.55);
+    expect(peakToPeak).toBeGreaterThan(0.08);
+
+    for (const sample of samples) expect(sample.segment).toBe('baseline');
+    expect(derived.rhythmRegular).toBe(false);
+  });
+
+  it('beats erratically fast rather than at any fixed rate', () => {
+    const intervals = rrIntervals(preset('ventricularFibrillation'), 10);
+    expect(intervals.length).toBeGreaterThan(15);
+    expect(Math.max(...intervals) - Math.min(...intervals)).toBeGreaterThan(60);
+  });
+});

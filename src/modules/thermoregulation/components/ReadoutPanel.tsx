@@ -57,6 +57,7 @@ export function ThermoReadoutPanel({ derived }: ReadoutPanelProps) {
         secondary={derived.patternSummary}
         colorVar="var(--text)"
         wide
+        revealsPattern
       />
     </div>
   );

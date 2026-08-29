@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { RingBuffer } from '@/shared/lib/ringBuffer';
 
 export interface EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint> {
@@ -10,7 +10,27 @@ export interface EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint> {
   renderIntervalMs: number;
   historyCapacity: number;
   timeScale: number;
+  /**
+   * Simulated seconds of settling applied before the first frame, so a module opens on normal
+   * physiology instead of relaxing into it while the learner watches.
+   *
+   * Every engine starts its reflex and hormone actuators at zero — a fresh `createInitialState()`
+   * is a plausible starting point, not a steady state — and at the slow time scales that drift
+   * took minutes of real time. Chunked exactly as `verifyQuestion.ts` settles, so what a learner
+   * reads on load is the state the verification harness checks.
+   */
+  settleSeconds?: number;
 }
+
+/**
+ * Real seconds of wall clock a single frame may contribute. A backgrounded tab, a long GC pause
+ * or a slow first paint would otherwise arrive as one enormous catch-up step.
+ *
+ * This is deliberately NOT `maxDtSeconds`: that is a bound on the SIMULATED dt handed to the
+ * engine, and clamping real time against it made every module whose bound is smaller than a
+ * frame (membranePotentials at 0.4ms) run far slower than its `timeScale` says it does.
+ */
+const MAX_FRAME_SECONDS = 0.05;
 
 /** Speed multipliers applied on top of each module's own `timeScale`. 1 is the
  * module's calibrated pace; the slow settings exist so fast events (an action
@@ -30,6 +50,9 @@ export interface SimTransport {
   /** Advance a fixed slice of time while paused. No-op while playing. */
   stepOnce: () => void;
   setSpeed: (multiplier: number) => void;
+  /** Back to 1x and to the playing state the module mounted with. Part of what the Reset
+   * button undoes — a module left at 4x otherwise stays at 4x through a reset. */
+  reset: () => void;
 }
 
 export interface SimBaseline<THistoryPoint> {
@@ -42,7 +65,9 @@ export interface SimBaseline<THistoryPoint> {
 export interface UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   snapshot: { state: TState; derived: TDerived };
   history: THistoryPoint[];
-  reset: () => void;
+  /** Back to the engine's initial state, with history discarded. Pass `inputsOverride` when the
+   * inputs were changed in the same tick — same hazard `fastForward` documents. */
+  reset: (inputsOverride?: TInputs) => void;
   /** Applies an arbitrary state transform (e.g. an acute perturbation) and re-renders
    * immediately. Each module defines its own named wrapper around this, e.g.
    * `triggerHemorrhage` or `triggerBronchospasm`. */
@@ -54,6 +79,52 @@ export interface UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   transport: SimTransport;
   /** Freeze the current trace so a changed scenario can be compared against it. */
   baseline: SimBaseline<THistoryPoint>;
+}
+
+/**
+ * Settling is pure but not free — the slowest modules integrate tens of thousands of steps — and
+ * it is re-run on every mount and every Reset. Keyed by config object, then by the inputs it was
+ * settled against, so a remount or a reset back to defaults costs nothing.
+ */
+const settledStateCache = new WeakMap<object, Map<string, unknown>>();
+
+function settledState<TState, TInputs, TDerived, THistoryPoint>(
+  cfg: EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint>,
+  inputs: TInputs,
+): TState {
+  const fresh = cfg.createInitialState();
+  const seconds = cfg.settleSeconds ?? 0;
+  if (seconds <= 0) return fresh;
+
+  const key = JSON.stringify(inputs);
+  let perConfig = settledStateCache.get(cfg);
+  if (!perConfig) {
+    perConfig = new Map<string, unknown>();
+    settledStateCache.set(cfg, perConfig);
+  }
+  const cached = perConfig.get(key);
+  if (cached !== undefined) return cached as TState;
+
+  let state = fresh;
+  let remaining = seconds;
+  while (remaining > 0) {
+    const dt = Math.min(remaining, cfg.maxDtSeconds);
+    remaining -= dt;
+    state = cfg.step(state, inputs, dt).state;
+  }
+  perConfig.set(key, state);
+  return state;
+}
+
+/** Inputs are flat records of numbers, strings and booleans, so this settles whether anything
+ * actually changed. Guards the input effect below against a caller that rebuilds its inputs
+ * object without changing a value — which would otherwise be an endless render loop. */
+function sameInputs<TInputs>(a: TInputs, b: TInputs): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  const keys = Object.keys(a as object);
+  if (keys.length !== Object.keys(b as object).length) return false;
+  return keys.every((key) => Object.is((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
 }
 
 function prefersReducedMotion(): boolean {
@@ -79,7 +150,10 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
 ): UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   const inputsRef = useRef(inputs);
   const configRef = useRef(config);
-  const stateRef = useRef(config.createInitialState());
+  // Lazy initialiser, not `useRef(settledState(...))`: a ref's argument is evaluated on every
+  // render, which would re-settle the engine on every pointer move of a slider drag.
+  const [initialState] = useState(() => settledState(config, inputs));
+  const stateRef = useRef(initialState);
   const historyRef = useRef(new RingBuffer<THistoryPoint>(config.historyCapacity));
 
   const [snapshot, setSnapshot] = useState<{ state: TState; derived: TDerived }>(() => ({
@@ -97,26 +171,41 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
   const playingRef = useRef(playing);
   const speedRef = useRef(speed);
 
-  useEffect(() => {
+  /**
+   * Layout effect, and it republishes the snapshot rather than only stashing the ref.
+   *
+   * Two things were broken by syncing the inputs in a plain effect and waiting for the next
+   * engine tick to re-derive. A paused module ignored its sliders completely — the readouts and
+   * the diagram did not move until Step was pressed — and a playing one lagged by up to a whole
+   * `renderIntervalMs`, which is 100ms on most modules. Running before paint means a drag lands
+   * in the same frame it happens in, playing or paused.
+   */
+  useLayoutEffect(() => {
+    const previous = inputsRef.current;
     inputsRef.current = inputs;
+    // Nothing to republish on mount, or when a caller rebuilds the object without moving a value.
+    if (sameInputs(previous, inputs)) return;
+    const cfg = configRef.current;
+    setSnapshot((prev) => ({ state: prev.state, derived: cfg.computeDerived(prev.state, inputs) }));
   }, [inputs]);
 
   useEffect(() => {
     configRef.current = config;
   }, [config]);
 
-  /** Integrate `realSeconds` of wall-clock time, sub-stepped so no single call to the
-   * engine ever exceeds `maxDtSeconds` — the stability bound every engine is written
-   * against. Returns the final snapshot, or null if nothing was integrated. */
+  /** Integrate `realSeconds` of wall-clock time. The real span is converted to simulated time
+   * FIRST and sub-stepped after, so no single call to the engine exceeds `maxDtSeconds` — the
+   * stability bound every engine is written against — however large `timeScale` is. Returns the
+   * final snapshot, or null if nothing was integrated. */
   const advance = useCallback((realSeconds: number) => {
     const cfg = configRef.current;
-    let remaining = realSeconds;
+    let remaining = realSeconds * cfg.timeScale * speedRef.current;
     let result: { state: TState; derived: TDerived } | null = null;
 
     while (remaining > 0) {
       const chunk = Math.min(remaining, cfg.maxDtSeconds);
       remaining -= chunk;
-      result = cfg.step(stateRef.current, inputsRef.current, chunk * cfg.timeScale * speedRef.current);
+      result = cfg.step(stateRef.current, inputsRef.current, chunk);
       stateRef.current = result.state;
       historyRef.current.push(cfg.toHistoryPoint(result));
     }
@@ -131,7 +220,7 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
 
     function frame(now: number) {
       const cfg = configRef.current;
-      const realDtSeconds = Math.min((now - lastTime) / 1000, cfg.maxDtSeconds);
+      const realDtSeconds = Math.min((now - lastTime) / 1000, MAX_FRAME_SECONDS);
       lastTime = now;
 
       if (playingRef.current) {
@@ -191,13 +280,18 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
     setSnapshot({ state, derived: cfg.computeDerived(state, activeInputs) });
   }, []);
 
-  const reset = useCallback(() => {
+  const reset = useCallback((inputsOverride?: TInputs) => {
     const cfg = configRef.current;
-    stateRef.current = cfg.createInitialState();
+    // `inputsRef` syncs via an effect, so the Reset button — which puts the sliders back to the
+    // module defaults in the SAME tick — must pass them explicitly. Without it the fresh state
+    // is derived against the scenario being reset AWAY from, and a paused module keeps showing
+    // the old readouts until something else re-renders it.
+    const activeInputs = inputsOverride ?? inputsRef.current;
+    stateRef.current = settledState(cfg, activeInputs);
     historyRef.current = new RingBuffer<THistoryPoint>(cfg.historyCapacity);
     setSnapshot({
       state: stateRef.current,
-      derived: cfg.computeDerived(stateRef.current, inputsRef.current),
+      derived: cfg.computeDerived(stateRef.current, activeInputs),
     });
     setHistory([]);
   }, []);
@@ -219,24 +313,43 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
     setPlaying(next);
   }, []);
 
-  const transport: SimTransport = {
-    playing,
-    speed,
-    play: useCallback(() => setPlayingNow(true), [setPlayingNow]),
-    pause: useCallback(() => setPlayingNow(false), [setPlayingNow]),
-    toggle: useCallback(() => setPlayingNow(!playingRef.current), [setPlayingNow]),
-    stepOnce,
-    setSpeed: useCallback((multiplier: number) => {
-      speedRef.current = multiplier;
-      setSpeedState(multiplier);
-    }, []),
-  };
+  const transportPlay = useCallback(() => setPlayingNow(true), [setPlayingNow]);
+  const transportPause = useCallback(() => setPlayingNow(false), [setPlayingNow]);
+  const transportToggle = useCallback(() => setPlayingNow(!playingRef.current), [setPlayingNow]);
+  const transportSetSpeed = useCallback((multiplier: number) => {
+    speedRef.current = multiplier;
+    setSpeedState(multiplier);
+  }, []);
+  // Restores the mount-time rule rather than hard-coding "playing", so a learner who has
+  // asked the OS for reduced motion is not handed a running animation by pressing Reset.
+  const transportReset = useCallback(() => {
+    speedRef.current = 1;
+    setSpeedState(1);
+    setPlayingNow(!prefersReducedMotion());
+  }, [setPlayingNow]);
 
-  const baseline: SimBaseline<THistoryPoint> = {
-    history: baselineHistory,
-    capture: useCallback(() => setBaselineHistory(historyRef.current.toArray()), []),
-    clear: useCallback(() => setBaselineHistory(null), []),
-  };
+  // Memoised: `SimControls` and the pages holding these can only skip a re-render if the
+  // object identity survives an engine tick.
+  const transport: SimTransport = useMemo(
+    () => ({
+      playing,
+      speed,
+      play: transportPlay,
+      pause: transportPause,
+      toggle: transportToggle,
+      stepOnce,
+      setSpeed: transportSetSpeed,
+      reset: transportReset,
+    }),
+    [playing, speed, transportPlay, transportPause, transportToggle, stepOnce, transportSetSpeed, transportReset],
+  );
+
+  const captureBaseline = useCallback(() => setBaselineHistory(historyRef.current.toArray()), []);
+  const clearBaseline = useCallback(() => setBaselineHistory(null), []);
+  const baseline: SimBaseline<THistoryPoint> = useMemo(
+    () => ({ history: baselineHistory, capture: captureBaseline, clear: clearBaseline }),
+    [baselineHistory, captureBaseline, clearBaseline],
+  );
 
   return { snapshot, history, reset, perturb, fastForward, transport, baseline };
 }

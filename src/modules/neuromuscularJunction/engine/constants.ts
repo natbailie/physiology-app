@@ -72,4 +72,8 @@ export const NMJ_SIMULATION = {
   HISTORY_CAPACITY: 600,
   /** Slower than real time: the events here are milliseconds apart. */
   TIME_SCALE: 0.35,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 20,
 } as const;

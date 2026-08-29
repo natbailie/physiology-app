@@ -25,7 +25,10 @@ export type ThermoPresetName =
 export const THERMO_PRESETS: Record<ThermoPresetName, Partial<ThermoInputs>> = {
   normothermic: { ...DEFAULT_THERMO_INPUTS },
   feverViral: { ...DEFAULT_THERMO_INPUTS, ambientTemperatureC: 22, pyrogenLevel: 62 },
-  feverOnAntipyretic: { ...DEFAULT_THERMO_INPUTS, ambientTemperatureC: 22, pyrogenLevel: 62 },
+  // The same viral pyrogen load with an antipyretic on board. Antipyretics do not cool the body;
+  // they block PGE2 synthesis and lower the set point the hypothalamus is defending, which in this
+  // model IS the pyrogen term — so the scenario is the same illness at a blunted set point.
+  feverOnAntipyretic: { ...DEFAULT_THERMO_INPUTS, ambientTemperatureC: 22, pyrogenLevel: 16 },
   heatStrokeExertional: {
     ...DEFAULT_THERMO_INPUTS,
     ambientTemperatureC: 38,

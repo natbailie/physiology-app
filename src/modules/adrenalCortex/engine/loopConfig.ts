@@ -24,6 +24,7 @@ export const adrenalLoopConfig: EngineLoopConfig<
     mcActivity: snapshot.derived.mineralocorticoidActivity,
   }),
   maxDtSeconds: ADRENAL_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: ADRENAL_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: ADRENAL_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: ADRENAL_SIMULATION.HISTORY_CAPACITY,
   timeScale: ADRENAL_SIMULATION.TIME_SCALE,

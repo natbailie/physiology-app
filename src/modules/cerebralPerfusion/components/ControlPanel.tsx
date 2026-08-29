@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { CerebralInputs } from '../engine/types';
@@ -9,7 +10,7 @@ interface ControlPanelProps {
 
 const percent = (v: number) => Math.round(v * 100).toString();
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider
@@ -87,6 +88,18 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         unit=" mmHg"
         onChange={(v) => onChange('venousOutflowPressureMmHg', v)}
       />
+      <Slider
+        label="BBB permeability"
+        value={inputs.bbbPermeabilityPct}
+        min={0}
+        max={200}
+        step={5}
+        unit="%"
+        formatValue={(v) => Math.round(v).toString()}
+        onChange={(v) => onChange('bbbPermeabilityPct', v)}
+      />
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -5,6 +5,7 @@ import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { MODULES } from '@/home/moduleRegistry';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import styles from './AccountPage.module.css';
+import { ThemeToggle } from '@/theme/ThemeToggle';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference');
 
@@ -14,6 +15,11 @@ export function AccountPage() {
       <header className={styles.header}>
         <h1 className={styles.title}>Your account</h1>
       </header>
+      {/* Reachable without a session: the theme is a device preference, not account data. */}
+      <section className={styles.body}>
+        <h2 className={styles.sectionTitle}>Appearance</h2>
+        <ThemeToggle />
+      </section>
       {isSupabaseConfigured ? <AccountBody /> : <LocalOnlyNotice />}
       <a href="#privacy" className={styles.footerLink}>
         What data do we hold?

@@ -1,7 +1,7 @@
 .bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--s-4);
   flex-wrap: wrap;
 }
 
@@ -9,7 +9,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--s-2);
   flex-wrap: wrap;
 }
 
@@ -21,13 +21,13 @@
 .group {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--s-2);
   flex-wrap: wrap;
 }
 
 .groupLabel {
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -37,86 +37,34 @@
 }
 
 .preset {
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text-dim);
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 6px;
-  padding: 0.35rem 0.7rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-
-.preset:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.preset:hover:not(:disabled) {
-  color: var(--text);
-  border-color: var(--text-faint);
-  background: var(--panel-raised);
-}
-
-.preset:focus-visible {
-  outline: 2px solid var(--accent, var(--text-dim));
-  outline-offset: 2px;
+  composes: button from '../../styles/button.module.css';
 }
 
 /* One-off stimulus applied to the running model. */
 .impulse {
-  composes: preset;
-  color: var(--accent, var(--text));
-  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
-  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
-}
-
-.impulse:hover:not(:disabled) {
-  color: var(--accent, var(--text));
-  border-color: var(--accent, var(--text-faint));
-  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
+  composes: accent from '../../styles/button.module.css';
 }
 
 /* An insult / injury applied to the model. */
 .danger {
-  composes: preset;
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 45%, var(--panel-border));
-  background: color-mix(in srgb, var(--danger) 7%, var(--panel));
-}
-
-.danger:hover:not(:disabled) {
-  color: var(--danger);
-  border-color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 13%, var(--panel));
+  composes: danger from '../../styles/button.module.css';
 }
 
 /* Ghost — always last, visually subordinate to the scenarios. */
 .reset {
-  composes: preset;
-  background: none;
-  border-color: transparent;
-  color: var(--text-faint);
+  composes: ghost from '../../styles/button.module.css';
 }
 
-.reset:hover:not(:disabled) {
-  background: var(--panel-raised);
-  border-color: var(--panel-border);
-  color: var(--text);
+/* Copy a link reproducing the current scenario. Subordinate to the scenarios themselves. */
+.share {
+  composes: dashed from '../../styles/button.module.css';
 }
 
 /* Narrow screens: vertical space is scarce and the top bar is sticky, so the
  * scenarios become a single swipeable strip rather than wrapping to three rows. */
 @media (max-width: 700px) {
   .bar {
-    gap: 0.5rem;
+    gap: var(--s-3);
   }
 
   .presets {
@@ -137,16 +85,4 @@
   .actions {
     margin-left: 0;
   }
-}
-
-/* Copy a link reproducing the current scenario. Subordinate to the scenarios themselves. */
-.share {
-  composes: preset;
-  color: var(--text-faint);
-  border-style: dashed;
-}
-
-.share:hover:not(:disabled) {
-  color: var(--text);
-  border-style: solid;
 }

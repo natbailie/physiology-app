@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ErythropoiesisDiagram } from './components/ErythropoiesisDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { erythropoiesisContent } from './content';
 import { erythroLoopConfig } from './engine/loopConfig';
 import { perturbAcuteBloodLoss } from './engine/engine';
-import { DEFAULT_ERYTHRO_INPUTS, ERYTHRO_PRESETS, type ErythroPresetName, ERYTHRO_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_ERYTHRO_INPUTS, ERYTHRO_PRESETS, ERYTHRO_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { ErythroInputs } from './engine/types';
 
 export function ErythropoiesisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ErythroInputs>('erythropoiesis', DEFAULT_ERYTHRO_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, erythroLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_ERYTHRO_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'erythropoiesis',
@@ -35,24 +46,25 @@ export function ErythropoiesisPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof ErythroInputs>(key: K, value: ErythroInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ErythroPresetName) {
-    setInputs((prev) => ({ ...prev, ...ERYTHRO_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_ERYTHRO_INPUTS,
+    presets: ERYTHRO_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerAcuteBleed() {
     perturb((state) => perturbAcuteBloodLoss(state));
   }
 
-  const hbHistory = history.map((h) => h.hemoglobin);
-  const hbHistoryBaseline = baseline.history?.map((h) => h.hemoglobin) ?? null;
-  const epoHistory = history.map((h) => h.epo * 100);
-  const epoHistoryBaseline = baseline.history?.map((h) => h.epo * 100) ?? null;
-  const reticHistory = history.map((h) => h.reticulocyteIndex);
-  const reticHistoryBaseline = baseline.history?.map((h) => h.reticulocyteIndex) ?? null;
+  const hbHistory = useSeries(history, (h) => h.hemoglobin);
+  const hbHistoryBaseline = useSeries(baseline.history, (h) => h.hemoglobin);
+  const epoHistory = useSeries(history, (h) => h.epo * 100);
+  const epoHistoryBaseline = useSeries(baseline.history, (h) => h.epo * 100);
+  const reticHistory = useSeries(history, (h) => h.reticulocyteIndex);
+  const reticHistoryBaseline = useSeries(baseline.history, (h) => h.reticulocyteIndex);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function ErythropoiesisPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={ERYTHRO_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Acute bleed', onClick: triggerAcuteBleed, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -85,7 +97,7 @@ export function ErythropoiesisPage() {
       blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={erythropoiesisContent} startCollapsed={session.phase !== 'idle'} />}
-      footnote={'A simplified, conceptual model of red cell production — not a clinical or diagnostic tool. Compare the presets on MCV and reticulocyte index together rather than on haemoglobin alone: that pair is what classifies an anemia. Aplastic anemia and anemia of CKD both show a low retic index, but only CKD has a LOW EPO to go with it. Simulated time is heavily compressed, since erythropoiesis plays out over weeks — try "Acute bleed" and watch the reticulocyte response lag behind the fall in haemoglobin before it catches up.'}
+      footnote={'A simplified, conceptual model of red cell production and iron regulation — not a clinical or diagnostic tool. Compare the presets on MCV and reticulocyte index together rather than on haemoglobin alone: that pair is what classifies an anemia, and the iron studies (saturation, TIBC, ferritin) separate the patterns MCV cannot. Ferritin carries an acute-phase veil under inflammation by design — read it alongside the hepcidin row. Simulated time is heavily compressed, since erythropoiesis plays out over weeks; store depletion and overload move faster here than in life. For where dietary iron actually comes from, see Digestion & Absorption.'}
     />
   );
 }

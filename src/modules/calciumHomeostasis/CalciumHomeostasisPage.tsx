@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { CalciumDiagram } from './components/CalciumDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { calciumHomeostasisContent } from './content';
 import { calciumLoopConfig } from './engine/loopConfig';
 import { perturbCalciumInfusion } from './engine/engine';
-import { CALCIUM_PRESETS, DEFAULT_CALCIUM_INPUTS, type CalciumPresetName, CALCIUM_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { CALCIUM_PRESETS, DEFAULT_CALCIUM_INPUTS, CALCIUM_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { CalciumInputs } from './engine/types';
 
 export function CalciumHomeostasisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CalciumInputs>('calciumHomeostasis', DEFAULT_CALCIUM_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, calciumLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_CALCIUM_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'calciumHomeostasis',
@@ -35,24 +46,25 @@ export function CalciumHomeostasisPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof CalciumInputs>(key: K, value: CalciumInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: CalciumPresetName) {
-    setInputs((prev) => ({ ...prev, ...CALCIUM_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_CALCIUM_INPUTS,
+    presets: CALCIUM_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerCalciumInfusion() {
     perturb((state) => perturbCalciumInfusion(state));
   }
 
-  const calciumHistory = history.map((h) => h.calcium);
-  const calciumHistoryBaseline = baseline.history?.map((h) => h.calcium) ?? null;
-  const phosphateHistory = history.map((h) => h.phosphate);
-  const phosphateHistoryBaseline = baseline.history?.map((h) => h.phosphate) ?? null;
-  const pthHistory = history.map((h) => h.pth * 100);
-  const pthHistoryBaseline = baseline.history?.map((h) => h.pth * 100) ?? null;
+  const calciumHistory = useSeries(history, (h) => h.calcium);
+  const calciumHistoryBaseline = useSeries(baseline.history, (h) => h.calcium);
+  const phosphateHistory = useSeries(history, (h) => h.phosphate);
+  const phosphateHistoryBaseline = useSeries(baseline.history, (h) => h.phosphate);
+  const pthHistory = useSeries(history, (h) => h.pth * 100);
+  const pthHistoryBaseline = useSeries(baseline.history, (h) => h.pth * 100);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function CalciumHomeostasisPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={CALCIUM_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Calcium infusion', onClick: triggerCalciumInfusion, variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<CalciumDiagram derived={snapshot.derived} />}

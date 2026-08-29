@@ -1,12 +1,10 @@
 /* Shared hairline tile grid for every module's ReadoutPanel. The panel components
  * themselves stay per-module (each reports different values); only the chrome is shared. */
 .grid {
+  composes: panel from '../../styles/panel.module.css';
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1px;
   background: var(--panel-border);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-1);
   overflow: hidden;
 }

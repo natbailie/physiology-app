@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlGroup, ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { VenousReturnInputs } from '../engine/types';
@@ -9,7 +10,7 @@ interface ControlPanelProps {
 
 const multiple = (v: number) => `${v.toFixed(2)}x`;
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <ControlGroup label="Venous return curve">
@@ -105,3 +106,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { ThermoInputs } from '../engine/types';
@@ -10,7 +11,7 @@ interface ControlPanelProps {
 const percent = (v: number) => Math.round(v).toString();
 const xTimes = (v: number) => `${Math.round(v * 10) / 10}×`;
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider
@@ -72,3 +73,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

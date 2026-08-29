@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { memo, useMemo, type CSSProperties } from 'react';
 import styles from './EcgStrip.module.css';
 
 interface EcgStripProps {
@@ -38,7 +38,7 @@ function buildPath(data: number[], mvRange: number, width: number, height: numbe
  * a tall unfilled trace with a baseline through the middle so deflections read above and
  * below isoelectric, plus the familiar grid for judging interval widths by eye.
  */
-export function EcgStrip({ label, data, mvRange, colorVar, currentSegment, width = 260, height = 120 }: EcgStripProps) {
+function EcgStripBase({ label, data, mvRange, colorVar, currentSegment, width = 260, height = 120 }: EcgStripProps) {
   const linePath = useMemo(() => buildPath(data, mvRange, width, height), [data, mvRange, width, height]);
   const gridId = useMemo(() => `${GRID_ID_PREFIX}-${Math.round(width)}x${Math.round(height)}`, [width, height]);
 
@@ -71,3 +71,5 @@ export function EcgStrip({ label, data, mvRange, colorVar, currentSegment, width
     </div>
   );
 }
+
+export const EcgStrip = memo(EcgStripBase);

@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,20 @@ import {
   FETAL_PRESETS,
   FETAL_PRESET_LABELS,
   FETAL_PRESET_ORDER,
-  type FetalPresetName,
+  FETAL_PRESET_SETTLE_SECONDS,
 } from './engine/presets';
 import type { FetalInputs } from './engine/types';
 
 export function FetalCirculationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<FetalInputs>('fetalCirculation', DEFAULT_FETAL_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, fetalLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_FETAL_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'fetalCirculation',
@@ -41,23 +52,26 @@ export function FetalCirculationPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof FetalInputs>(key: K, value: FetalInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: FetalPresetName) {
-    setInputs((prev) => ({ ...prev, ...FETAL_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_FETAL_INPUTS,
+    presets: FETAL_PRESETS,
+    resetEngine: reset,
+    settleOverrides: FETAL_PRESET_SETTLE_SECONDS,
+    fastForward,
+  });
 
-  const preHistory = history.map((h) => h.preDuctal);
-  const preHistoryBaseline = baseline.history?.map((h) => h.preDuctal) ?? null;
-  const postHistory = history.map((h) => h.postDuctal);
-  const pvrHistory = history.map((h) => h.pvr);
-  const pvrHistoryBaseline = baseline.history?.map((h) => h.pvr) ?? null;
-  const ductusHistory = history.map((h) => h.ductus);
-  const ductusHistoryBaseline = baseline.history?.map((h) => h.ductus) ?? null;
-  const pulmonaryFlowHistory = history.map((h) => h.pulmonaryFlow);
-  const pulmonaryFlowHistoryBaseline = baseline.history?.map((h) => h.pulmonaryFlow) ?? null;
+  const preHistory = useSeries(history, (h) => h.preDuctal);
+  const preHistoryBaseline = useSeries(baseline.history, (h) => h.preDuctal);
+  const postHistory = useSeries(history, (h) => h.postDuctal);
+  const pvrHistory = useSeries(history, (h) => h.pvr);
+  const pvrHistoryBaseline = useSeries(baseline.history, (h) => h.pvr);
+  const ductusHistory = useSeries(history, (h) => h.ductus);
+  const ductusHistoryBaseline = useSeries(baseline.history, (h) => h.ductus);
+  const pulmonaryFlowHistory = useSeries(history, (h) => h.pulmonaryFlow);
+  const pulmonaryFlowHistoryBaseline = useSeries(baseline.history, (h) => h.pulmonaryFlow);
 
   return (
     <ModulePage
@@ -69,10 +83,10 @@ export function FetalCirculationPage() {
         <PresetBar
           order={FETAL_PRESET_ORDER}
           labels={FETAL_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Reopen duct', onClick: () => perturb(perturbReopenDuct), variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

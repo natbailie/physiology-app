@@ -12,6 +12,7 @@ export const ecgLoopConfig: EngineLoopConfig<EcgState, EcgInputs, EcgDerived, Ec
     voltageMv: snapshot.derived.ecgVoltageMv,
   }),
   maxDtSeconds: ECG_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: ECG_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: ECG_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: ECG_SIMULATION.HISTORY_CAPACITY,
   timeScale: ECG_SIMULATION.TIME_SCALE,

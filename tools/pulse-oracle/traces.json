@@ -1,0 +1,421 @@
+{
+  "pulseImage": "kitware/pulse:4.3.1",
+  "$comment": [
+    "Scenarios are run VERBATIM from the Pulse container's own bundled library so the traces are",
+    "Kitware's validated cases, not ones we authored. Column selection happens here instead, in",
+    "the downsampler. `columns` maps the name we commit to the exact CSV header Pulse emits.",
+    "`landmarks` name the times the oracle tests assert against, so a test reads as physiology",
+    "rather than as an array index."
+  ],
+  "traces": [
+    {
+      "id": "hemorrhage-class3",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass3NoFluid.json",
+      "description": "35% blood loss (200 mL/min for 575 s from right leg and vena cava), then bleeding stops and the patient is observed for 500 s with no fluid given.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "midBleed": 300,
+        "bleedStops": 605,
+        "settled": 1105
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "baroreflex-class1",
+      "module": "cardiorenal",
+      "scenario": "/source/data/human/adult/scenarios/patient/Baroreceptors.json",
+      "description": "Kitware's baroreflex test: 1000 mL/min from the vena cava for 30 s (a ~500 mL, Class I loss), then bleeding stops and the reflex is watched for 200 s.",
+      "sampleIntervalSeconds": 5,
+      "landmarks": {
+        "baseline": 30,
+        "bleedStops": 60,
+        "settled": 260
+      },
+      "columns": {
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "glomerularFiltrationRateMlPerMin": "GlomerularFiltrationRate(mL/min)",
+        "renalBloodFlowLPerMin": "RenalBloodFlow(L/min)",
+        "urineProductionRateMlPerMin": "UrineProductionRate(mL/min)"
+      }
+    },
+    {
+      "id": "copd-exacerbation",
+      "module": "respiratory",
+      "scenario": "/source/data/human/adult/scenarios/patient/COPDExacerbation.json",
+      "description": "Kitware's COPD exacerbation: bronchitis and emphysema stepped through severities 0.3, 0.6 and 0.9, five minutes at each.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 120,
+        "mild": 420,
+        "moderate": 720,
+        "severe": 1020
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "Physiology",
+          "PropertyName": "BloodPH",
+          "Unit": "unitless"
+        }
+      ],
+      "columns": {
+        "arterialPH": "BloodPH",
+        "paO2MmHg": "Aorta-Oxygen-PartialPressure(mmHg)",
+        "paCO2MmHg": "Aorta-CarbonDioxide-PartialPressure(mmHg)",
+        "bicarbonateMEqL": "Aorta-Bicarbonate-Molarity(mEq/L)",
+        "oxygenSaturation": "OxygenSaturation",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "totalAlveolarVentilationLPerMin": "TotalAlveolarVentilation(L/min)",
+        "endTidalCO2MmHg": "EndTidalCarbonDioxidePressure(mmHg)"
+      }
+    },
+    {
+      "id": "asthma-severe",
+      "module": "respiratoryMechanics",
+      "scenario": "/source/data/human/adult/scenarios/patient/AsthmaAttackSevereAcute.json",
+      "description": "Kitware's severe acute asthma attack: obstruction at severity 0.75 for 550 s, then it resolves and the patient is watched for 200 s.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "attack": 580,
+        "recovered": 780
+      },
+      "columns": {
+        "totalLungVolumeMl": "TotalLungVolume(mL)",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "oxygenSaturation": "OxygenSaturation",
+        "totalAlveolarVentilationLPerMin": "TotalAlveolarVentilation(L/min)",
+        "inspiratoryResistanceCmH2OSPerL": "InspiratoryRespiratoryResistance(cmH2O_s/L)",
+        "expiratoryResistanceCmH2OSPerL": "ExpiratoryRespiratoryResistance(cmH2O_s/L)",
+        "lungComplianceLPerCmH2O": "LungCompliance(L/cmH2O)",
+        "shuntFraction": "ShuntFraction",
+        "deadSpaceTidalVolumeRatio": "PhysiologicDeadSpaceTidalVolumeRatio"
+      }
+    },
+    {
+      "id": "hemorrhage-class1",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass1Femoral.json",
+      "description": "Class I: 90 mL/min from the femoral artery for 550 s.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "bleedStops": 580,
+        "settled": 1080
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "hemorrhage-class2",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass2NoFluid.json",
+      "description": "Class II: 140 mL/min for 590 s, no fluid given.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "bleedStops": 620,
+        "settled": 1120
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "hemorrhage-class4",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass4NoFluid.json",
+      "description": "Class IV: 200 mL/min for 700 s, no fluid given. Pulse reaches cardiovascular collapse and an irreversible state at ~746 s and aborts, so this trace ends at collapse rather than at the scenario's nominal 1230 s. That endpoint is the point of it.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "bleedStops": 730,
+        "collapse": 740
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "pneumonia-moderate",
+      "module": "respiratoryMechanics",
+      "scenario": "/source/data/human/adult/scenarios/patient/PneumoniaModerateBothLungs.json",
+      "description": "Moderate pneumonia in both lungs, applied as a condition at stabilisation.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "shuntFraction": "ShuntFraction",
+        "lungComplianceLPerCmH2O": "LungCompliance(L/cmH2O)",
+        "respiratoryComplianceLPerCmH2O": "RespiratoryCompliance(L/cmH2O)",
+        "inspiratoryResistanceCmH2OSPerL": "InspiratoryRespiratoryResistance(cmH2O_s/L)",
+        "deadSpaceTidalVolumeRatio": "PhysiologicDeadSpaceTidalVolumeRatio",
+        "oxygenSaturation": "OxygenSaturation",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "paO2MmHg": "Aorta-Oxygen-PartialPressure(mmHg)"
+      }
+    },
+    {
+      "id": "pneumonia-zero",
+      "module": "respiratoryMechanics",
+      "scenario": "/source/data/human/adult/scenarios/patient/ZeroPneumonia.json",
+      "description": "The zero-severity control for the pneumonia condition \u2014 the same patient, healthy.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "shuntFraction": "ShuntFraction",
+        "lungComplianceLPerCmH2O": "LungCompliance(L/cmH2O)",
+        "respiratoryComplianceLPerCmH2O": "RespiratoryCompliance(L/cmH2O)",
+        "inspiratoryResistanceCmH2OSPerL": "InspiratoryRespiratoryResistance(cmH2O_s/L)",
+        "deadSpaceTidalVolumeRatio": "PhysiologicDeadSpaceTidalVolumeRatio",
+        "oxygenSaturation": "OxygenSaturation",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "paO2MmHg": "Aorta-Oxygen-PartialPressure(mmHg)"
+      }
+    },
+    {
+      "id": "ards-moderate",
+      "module": "respiratoryMechanics",
+      "scenario": "/source/data/human/adult/scenarios/patient/ARDSModerateBothLungs.json",
+      "description": "Moderate ARDS in both lungs, applied as a condition at stabilisation.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "shuntFraction": "ShuntFraction",
+        "lungComplianceLPerCmH2O": "LungCompliance(L/cmH2O)",
+        "respiratoryComplianceLPerCmH2O": "RespiratoryCompliance(L/cmH2O)",
+        "inspiratoryResistanceCmH2OSPerL": "InspiratoryRespiratoryResistance(cmH2O_s/L)",
+        "deadSpaceTidalVolumeRatio": "PhysiologicDeadSpaceTidalVolumeRatio",
+        "oxygenSaturation": "OxygenSaturation",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "paO2MmHg": "Aorta-Oxygen-PartialPressure(mmHg)"
+      }
+    },
+    {
+      "id": "ards-zero",
+      "module": "respiratoryMechanics",
+      "scenario": "/source/data/human/adult/scenarios/patient/ZeroARDS.json",
+      "description": "The zero-severity control for the ARDS condition \u2014 the same patient, healthy.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "shuntFraction": "ShuntFraction",
+        "lungComplianceLPerCmH2O": "LungCompliance(L/cmH2O)",
+        "respiratoryComplianceLPerCmH2O": "RespiratoryCompliance(L/cmH2O)",
+        "inspiratoryResistanceCmH2OSPerL": "InspiratoryRespiratoryResistance(cmH2O_s/L)",
+        "deadSpaceTidalVolumeRatio": "PhysiologicDeadSpaceTidalVolumeRatio",
+        "oxygenSaturation": "OxygenSaturation",
+        "tidalVolumeMl": "TidalVolume(mL)",
+        "respirationRatePerMin": "RespirationRate(1/min)",
+        "paO2MmHg": "Aorta-Oxygen-PartialPressure(mmHg)"
+      }
+    },
+    {
+      "id": "pv-loop",
+      "module": "cardiacElectro",
+      "scenario": "/source/data/human/adult/scenarios/patient/Baroreceptors.json",
+      "description": "Left-heart pressure and volume through Kitware's baroreflex scenario, sampled at full 50 Hz resolution over two windows: a healthy baseline before the bleed, and the reduced-preload state 200 s after it. Two PV loops from one run.",
+      "sampleIntervalSeconds": 10,
+      "denseWindows": [
+        [
+          24,
+          29
+        ],
+        [
+          254,
+          259
+        ]
+      ],
+      "landmarks": {
+        "baselineWindowEnd": 29,
+        "hypovolaemicWindowEnd": 259
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "LeftHeart",
+          "PropertyName": "Pressure",
+          "Unit": "mmHg"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "LeftHeart",
+          "PropertyName": "Volume",
+          "Unit": "mL"
+        }
+      ],
+      "columns": {
+        "lvPressureMmHg": "LeftHeart-Pressure(mmHg)",
+        "lvVolumeMl": "LeftHeart-Volume(mL)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "ejectionFraction": "HeartEjectionFraction"
+      }
+    }
+  ]
+}

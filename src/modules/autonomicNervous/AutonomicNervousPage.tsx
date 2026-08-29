@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { AnsDiagram } from './components/AnsDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -13,12 +17,19 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { autonomicNervousContent } from './content';
 import { ansLoopConfig } from './engine/loopConfig';
-import { ANS_PRESETS, DEFAULT_ANS_INPUTS, type AnsPresetName, ANS_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { ANS_PRESETS, DEFAULT_ANS_INPUTS, ANS_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { AnsInputs } from './engine/types';
 
 export function AutonomicNervousPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<AnsInputs>('autonomicNervous', DEFAULT_ANS_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, ansLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_ANS_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'autonomicNervous',
@@ -34,20 +45,21 @@ export function AutonomicNervousPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof AnsInputs>(key: K, value: AnsInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: AnsPresetName) {
-    setInputs((prev) => ({ ...prev, ...ANS_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_ANS_INPUTS,
+    presets: ANS_PRESETS,
+    resetEngine: reset,
+  });
 
-  const heartRateHistory = history.map((h) => h.heartRate);
-  const heartRateHistoryBaseline = baseline.history?.map((h) => h.heartRate) ?? null;
-  const giMotilityHistory = history.map((h) => h.giMotility);
-  const giMotilityHistoryBaseline = baseline.history?.map((h) => h.giMotility) ?? null;
-  const pupilHistory = history.map((h) => h.pupilDiameter);
-  const pupilHistoryBaseline = baseline.history?.map((h) => h.pupilDiameter) ?? null;
+  const heartRateHistory = useSeries(history, (h) => h.heartRate);
+  const heartRateHistoryBaseline = useSeries(baseline.history, (h) => h.heartRate);
+  const giMotilityHistory = useSeries(history, (h) => h.giMotility);
+  const giMotilityHistoryBaseline = useSeries(baseline.history, (h) => h.giMotility);
+  const pupilHistory = useSeries(history, (h) => h.pupilDiameter);
+  const pupilHistoryBaseline = useSeries(baseline.history, (h) => h.pupilDiameter);
 
   return (
     <ModulePage
@@ -59,9 +71,9 @@ export function AutonomicNervousPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={ANS_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<AnsDiagram derived={snapshot.derived} />}

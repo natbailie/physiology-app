@@ -31,6 +31,35 @@ export interface RenalTubularInputs {
   thiazideDose: number;
   /** Tubuloglomerular feedback strength, fraction (0-1.5) */
   maculaDensaFeedbackStrength: number;
+  // --- Acid, potassium & clearance arm ---
+
+  /** Aldosterone tone, fraction of normal (0-1.5). Drives ENaC-mediated distal Na reabsorption,
+   * whose lumen-negative potential is what secretes K+ and H+. Low = type 4 RTA,
+   * spironolactone's pharmacology, or hypoadosteronism. */
+  aldosteroneTone: number;
+  /** Amiloride-style ENaC blockade, % (0-100) — K+-sparing diuresis at the same target
+   * aldosterone opens. */
+  enacBlockade: number;
+  /** Distal alpha-intercalated-cell H+ secretion capacity, fraction (0-1). Collapsed in
+   * distal (type 1) RTA: the urine cannot be acidified however acidemic the patient is. */
+  distalAcidSecretion: number;
+  /** Proximal HCO3- reclaim capacity, fraction (0-1). Reduced in proximal (type 2) RTA and
+   * by carbonic anhydrase inhibition. */
+  proximalAcidReclaim: number;
+  /** Acetazolamide dose, % (0-100) — blocks proximal carbonic anhydrase, dumping bicarbonate. */
+  acetazolamideDose: number;
+  /** SGLT2 inhibition, % (0-100) — blocks proximal glucose reabsorption, spilling an osmotic
+   * load the tubule cannot take back. */
+  sglt2Blockade: number;
+  /** Osmotic diuresis (mannitol), % of a standard dose (0-150) — non-reabsorbable solute that
+   * obligates water excretion downstream of wherever it is injected. */
+  osmoticLoad: number;
+  /** V2-receptor blockade (tolvaptan), % (0-100) — ADH may be present and the duct intact,
+   * but the receptor cannot hear it. A pure aquaretic. */
+  v2Blockade: number;
+  /** Acute tubular injury (ATN), 0-1 — degrades active reabsorption along the whole nephron:
+   * sodium-wasting, isosthenuric urine and a rising creatinine. */
+  tubularInjury: number;
 }
 
 export interface RenalTubularState {
@@ -44,6 +73,12 @@ export interface RenalTubularState {
   adhLevel: number;
   /** Smoothed afferent arteriolar tone from tubuloglomerular feedback, 0..1 */
   afferentToneFromTGF: number;
+  /** Serum bicarbonate, mEq/L — the slow integrator of daily acid balance against the
+   * tubule's reclaiming and secreting capacities */
+  serumBicarbonateMeqL: number;
+  /** Serum creatinine, mg/dL — rises toward whatever equilibrium the current creatinine
+   * clearance can sustain */
+  serumCreatinineMgDl: number;
 }
 
 export interface RenalTubularDerived {
@@ -64,6 +99,26 @@ export interface RenalTubularDerived {
   freeWaterClearance: number;
   /** Fractional NaCl delivery to the macula densa — the TGF sensing signal */
   distalNaClDelivery: number;
+  // --- Acid, potassium & clearance readouts ---
+  /** Serum bicarbonate as it currently stands, mEq/L (the slow integrator's live value) */
+  serumBicarbonateMeqL: number;
+  /** Where bicarbonate is heading given the current tubular capacities, mEq/L */
+  hco3SteadyStateMeqL: number;
+  urinePH: number;
+  netAcidExcretionMeqPerDay: number;
+  /** Urine anion gap, mEq/L — positive when ammonium excretion fails (type 4 RTA) */
+  urineAnionGapMeqL: number;
+  /** Serum potassium as read off the same drives the tubule runs on, mEq/L */
+  serumPotassiumEstimateMeqL: number;
+  creatinineClearanceMLMin: number;
+  renalPlasmaFlowMLMin: number;
+  filtrationFractionPct: number;
+  urineSodiumMeqL: number;
+  fractionalExcretionNaPct: number;
+  /** Serum creatinine as it currently stands, mg/dL */
+  serumCreatinineMgDl: number;
+  /** Where creatinine is heading given the current clearance, mg/dL */
+  creatinineEquilibriumMgDl: number;
   // Passthrough of inputs so tick() can stay a pure (state, derived, dt) function.
   waterIntakeRate: number;
   adhSecretionCapacity: number;

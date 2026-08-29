@@ -59,4 +59,7 @@ export const CARDIAC_SIMULATION = {
   // Slower than real time: a beat lasts under a second, so slowing it down makes the four
   // PV-loop phases distinguishable as they are traced out.
   TIME_SCALE: 0.35,
+  /** Simulated seconds of settling applied before the first frame. See `settleSeconds`
+   * on `EngineLoopConfig`: measured as the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 10,
 };

@@ -21,6 +21,12 @@ export type EcgPresetName =
   | 'rbbb'
   | 'lbbb'
   | 'atrialFibrillation'
+  | 'atrialFlutter'
+  | 'wpw'
+  | 'sickSinus'
+  | 'ventricularTachycardia'
+  | 'torsades'
+  | 'ventricularFibrillation'
   | 'hyperkalemia'
   | 'inferiorStemi'
   | 'anteriorStemi'
@@ -40,6 +46,22 @@ export const ECG_PRESETS: Record<EcgPresetName, Partial<EcgInputs>> = {
   lbbb: { ...DEFAULT_ECG_INPUTS, leftBundleConduction: 0.05 },
   // No organised atrial activity and an irregularly irregular ventricular response.
   atrialFibrillation: { ...DEFAULT_ECG_INPUTS, rhythm: 'atrialFibrillation' },
+  // One circuit at a fixed 300/min; the AV node conducts every second wave, so the
+  // ventricles answer with a REGULAR 150 — the rate to think of when you see one.
+  atrialFlutter: { ...DEFAULT_ECG_INPUTS, rhythm: 'atrialFlutter' },
+  // The accessory pathway beats the AV node to the ventricle: PR shortens below 120 ms and
+  // the QRS starts with a slurred delta wave. Compare the PR with normal sinus.
+  wpw: { ...DEFAULT_ECG_INPUTS, rhythm: 'wpw' },
+  // The SA node fails intermittently; long pauses are filled by junctional escape beats.
+  sickSinus: { ...DEFAULT_ECG_INPUTS, rhythm: 'sickSinus' },
+  // A ventricular focus takes over: regular, WIDE-complex tachycardia around 180 bpm, with
+  // the atria marching independently behind (AV dissociation).
+  ventricularTachycardia: { ...DEFAULT_ECG_INPUTS, rhythm: 'ventricularTachycardia' },
+  // Polymorphic VT on a long QT: the axis visibly rotates round the baseline. The long-QT
+  // substrate is part of the diagnosis — treat the QT, and give magnesium.
+  torsades: { ...DEFAULT_ECG_INPUTS, ventricularAPD: 480, rhythm: 'torsades' },
+  // No organised depolarisation anywhere; no pulse either. This is an arrest rhythm.
+  ventricularFibrillation: { ...DEFAULT_ECG_INPUTS, rhythm: 'ventricularFibrillation' },
   // Tall peaked T waves from accelerated repolarisation, a widening QRS from slowed conduction,
   // and a P wave that flattens away. Compare with the Membrane & Action Potentials module.
   hyperkalemia: { ...DEFAULT_ECG_INPUTS, serumPotassium: 7.2 },
@@ -64,6 +86,12 @@ export const ECG_PRESET_LABELS: Record<EcgPresetName, string> = {
   rbbb: 'RBBB',
   lbbb: 'LBBB',
   atrialFibrillation: 'Atrial fibrillation',
+  atrialFlutter: 'Atrial flutter (2:1)',
+  wpw: 'WPW pre-excitation',
+  sickSinus: 'Sick sinus syndrome',
+  ventricularTachycardia: 'Ventricular tachycardia',
+  torsades: 'Torsades de pointes',
+  ventricularFibrillation: 'Ventricular fibrillation',
   hyperkalemia: 'Hyperkalemia',
   inferiorStemi: 'Inferior STEMI',
   anteriorStemi: 'Anterior STEMI',
@@ -78,6 +106,12 @@ export const PRESET_ORDER: EcgPresetName[] = [
   'rbbb',
   'lbbb',
   'atrialFibrillation',
+  'atrialFlutter',
+  'wpw',
+  'sickSinus',
+  'ventricularTachycardia',
+  'torsades',
+  'ventricularFibrillation',
   'hyperkalemia',
   'inferiorStemi',
   'anteriorStemi',

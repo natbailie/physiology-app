@@ -1,41 +1,13 @@
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  padding: 1.1rem 1.2rem;
-  text-decoration: none;
-  color: inherit;
-  border-left: 3px solid var(--card-accent, var(--panel-border));
-  box-shadow: var(--shadow-1);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
-}
-
-a.card:hover {
-  border-color: var(--card-accent, var(--text-faint));
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px);
-}
-
-a.card:focus-visible {
-  outline: 2px solid var(--card-accent, var(--anp));
-  outline-offset: 2px;
+  composes: card from '../../styles/card.module.css';
 }
 
 .name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text);
+  composes: name from '../../styles/card.module.css';
 }
 
 .tagline {
-  font-size: 0.8rem;
-  color: var(--text-dim);
+  composes: blurb from '../../styles/card.module.css';
 }
 
 .comingSoon {
@@ -60,33 +32,30 @@ a.card:focus-visible {
 
 .badge {
   align-self: flex-start;
-  font-size: 0.65rem;
+  font-size: var(--fs-micro);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-faint);
   border: 1px solid var(--panel-border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   padding: 0.15rem 0.55rem;
 }
 
 /* --- Progress affordances. Absent entirely until a module has been attempted. --- */
 
 .nameRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
+  composes: nameRow from '../../styles/card.module.css';
 }
 
 .due {
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--artery);
   background: color-mix(in srgb, var(--artery) 10%, transparent);
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   padding: 0.1rem 0.3rem;
   white-space: nowrap;
 }

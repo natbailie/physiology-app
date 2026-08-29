@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { MotorInputs } from '../engine/types';
@@ -9,7 +10,7 @@ interface ControlPanelProps {
 
 const percent = (v: number) => Math.round(v).toString();
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider
@@ -85,6 +86,17 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         unit="%"
         onChange={(v) => onChange('tremorSuppressantEffect', v)}
       />
+      <Slider
+        label="Dystonic co-contraction"
+        value={inputs.dystoniaSeverityPct}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        onChange={(v) => onChange('dystoniaSeverityPct', v)}
+      />
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   LIVER_PRESET_LABELS,
   LIVER_PRESET_ORDER,
   DEFAULT_LIVER_INPUTS,
-  type LiverPresetName,
 } from './engine/presets';
 import type { LiverInputs } from './engine/types';
 
 export function LiverPhysiologyPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<LiverInputs>('liverPhysiology', DEFAULT_LIVER_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, liverLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_LIVER_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'liverPhysiology',
@@ -41,22 +51,23 @@ export function LiverPhysiologyPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof LiverInputs>(key: K, value: LiverInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: LiverPresetName) {
-    setInputs((prev) => ({ ...prev, ...LIVER_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_LIVER_INPUTS,
+    presets: LIVER_PRESETS,
+    resetEngine: reset,
+  });
 
-  const totalHistory = history.map((h) => h.total);
-  const totalBaseline = baseline.history?.map((h) => h.total) ?? null;
-  const uncHistory = history.map((h) => h.unconjugated);
-  const uncBaseline = baseline.history?.map((h) => h.unconjugated) ?? null;
-  const conjHistory = history.map((h) => h.conjugated);
-  const conjBaseline = baseline.history?.map((h) => h.conjugated) ?? null;
-  const ammoniaHistory = history.map((h) => h.ammonia);
-  const ammoniaBaseline = baseline.history?.map((h) => h.ammonia) ?? null;
+  const totalHistory = useSeries(history, (h) => h.total);
+  const totalBaseline = useSeries(baseline.history, (h) => h.total);
+  const uncHistory = useSeries(history, (h) => h.unconjugated);
+  const uncBaseline = useSeries(baseline.history, (h) => h.unconjugated);
+  const conjHistory = useSeries(history, (h) => h.conjugated);
+  const conjBaseline = useSeries(baseline.history, (h) => h.conjugated);
+  const ammoniaHistory = useSeries(history, (h) => h.ammonia);
+  const ammoniaBaseline = useSeries(baseline.history, (h) => h.ammonia);
 
   return (
     <ModulePage
@@ -68,14 +79,14 @@ export function LiverPhysiologyPage() {
         <PresetBar
           order={LIVER_PRESET_ORDER}
           labels={LIVER_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Haemolytic episode', onClick: () => perturb(perturbHaemolyticEpisode), variant: 'danger' },
             { label: 'Alcohol binge', onClick: () => perturb(perturbAlcoholBinge), variant: 'danger' },
             { label: 'ERCP stent', onClick: () => perturb(perturbStentObstruction), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

@@ -21,7 +21,7 @@ export function HormoneArrow({ path, activation, colorVar, label, markerId, labe
   return (
     <g style={style}>
       <path className={arrowClassName} d={path} stroke={colorVar} markerEnd={`url(#${markerId})`} />
-      <text className={styles.pathLabel} x={labelPos.x} y={labelPos.y} fill={colorVar} opacity={activation}>
+      <text className={styles.pathLabel} x={labelPos.x} y={labelPos.y} fill={colorVar} opacity={0.35 + activation * 0.65}>
         {label}
       </text>
     </g>

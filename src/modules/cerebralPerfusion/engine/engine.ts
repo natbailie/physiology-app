@@ -1,5 +1,6 @@
 import { CRANIUM, CSF, VESSEL } from './constants';
 import {
+  bbbLeakRateMlPerMin,
   cerebralBloodFlow,
   cerebralBloodVolume,
   cerebralPerfusionPressure,
@@ -21,14 +22,16 @@ export function createInitialState(): CerebralInternalState {
     csfExcessMl: 0,
     drainedVolumeMl: 0,
     vesselCalibre: 1,
+    vasogenicOedemaMl: 0,
   };
 }
 
 export function computeDerived(state: CerebralInternalState, inputs: CerebralInputs): CerebralDerived {
   const bloodVolume = cerebralBloodVolume(state.vesselCalibre);
-  // Everything competing for room in a box that cannot expand.
+  // Everything competing for room in a box that cannot expand: mass lesion, blood, CSF,
+  // and vasogenic oedema from a leaky BBB.
   const totalExcessVolumeMl =
-    inputs.massVolumeMl + (bloodVolume - VESSEL.BASELINE_BLOOD_VOLUME_ML) + state.csfExcessMl - state.drainedVolumeMl;
+    inputs.massVolumeMl + (bloodVolume - VESSEL.BASELINE_BLOOD_VOLUME_ML) + state.csfExcessMl - state.drainedVolumeMl + state.vasogenicOedemaMl;
 
   const icp = state.intracranialPressureMmHg;
   const cpp = cerebralPerfusionPressure(inputs.meanArterialPressureMmHg, icp, inputs.venousOutflowPressureMmHg);
@@ -60,6 +63,8 @@ export function computeDerived(state: CerebralInternalState, inputs: CerebralInp
     csfAbsorptionCapacity: inputs.csfAbsorptionCapacity,
     autoregulationIntegrity: inputs.autoregulationIntegrity,
     venousOutflowPressureMmHg: inputs.venousOutflowPressureMmHg,
+    bbbPermeabilityPct: inputs.bbbPermeabilityPct,
+    vasogenicOedemaMl: state.vasogenicOedemaMl,
   };
 }
 
@@ -98,6 +103,13 @@ export function tick(
     // measure rather than a cure.
     drainedVolumeMl: Math.max(0, state.drainedVolumeMl - (CSF.PRODUCTION_ML_PER_MIN * dtSeconds) / 60),
     vesselCalibre: approach(state.vesselCalibre, calibreTarget, dtSeconds, VESSEL.TAU_SECONDS),
+    // Vasogenic oedema: fluid leaking through a disrupted BBB into the interstitial space.
+    // Accumulates over hours; at full disruption this adds several mL per hour to the mass effect.
+    vasogenicOedemaMl: clamp(
+      state.vasogenicOedemaMl + (bbbLeakRateMlPerMin(inputs.bbbPermeabilityPct) * dtSeconds) / 60,
+      0,
+      80,
+    ),
   };
 }
 

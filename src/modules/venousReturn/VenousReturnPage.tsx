@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { GuytonDiagram } from './components/GuytonDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -20,7 +24,6 @@ import {
   VENOUS_RETURN_PRESETS,
   VENOUS_RETURN_PRESET_LABELS,
   VENOUS_RETURN_PRESET_ORDER,
-  type VenousReturnPresetName,
 } from './engine/presets';
 import { PLOT } from './engine/constants';
 import type { VenousReturnInputs } from './engine/types';
@@ -28,6 +31,13 @@ import type { VenousReturnInputs } from './engine/types';
 export function VenousReturnPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<VenousReturnInputs>('venousReturn', DEFAULT_VENOUS_RETURN_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, venousReturnLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_VENOUS_RETURN_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'venousReturn',
@@ -43,14 +53,20 @@ export function VenousReturnPage() {
     fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
+  const guytonPoints = useSeries(history, (h) => ({ x: h.pra, y: h.cardiacOutput }));
+  const cardiacOutputHistory = useSeries(history, (h) => h.cardiacOutput);
+  const venousReturnHistory = useSeries(history, (h) => h.venousReturn);
+  const praHistory = useSeries(history, (h) => h.pra);
+  const msfpHistory = useSeries(history, (h) => h.meanSystemicFillingPressure);
 
-  function handleChange<K extends keyof VenousReturnInputs>(key: K, value: VenousReturnInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: VenousReturnPresetName) {
-    setInputs((prev) => ({ ...prev, ...VENOUS_RETURN_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_VENOUS_RETURN_INPUTS,
+    presets: VENOUS_RETURN_PRESETS,
+    resetEngine: reset,
+  });
 
   return (
     <ModulePage
@@ -62,25 +78,25 @@ export function VenousReturnPage() {
         <PresetBar
           order={VENOUS_RETURN_PRESET_ORDER}
           labels={VENOUS_RETURN_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Transfuse 1 L', onClick: () => perturb((s) => perturbTransfusion(s)), variant: 'impulse' },
             { label: 'Valsalva', onClick: () => perturb((s) => perturbValsalva(s)), variant: 'impulse' },
             { label: 'Haemorrhage 1 L', onClick: () => perturb((s) => perturbHemorrhage(s)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<GuytonDiagram derived={derived} />}
-      readouts={<ReadoutPanel derived={derived} />}
+      readouts={<ReadoutPanel derived={derived} inputs={inputs} />}
       practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
           {/* The operating point's path through the same state space the diagram plots. */}
           <XYTrajectoryChart
-            points={history.map((h) => ({ x: h.pra, y: h.cardiacOutput }))}
+            points={guytonPoints}
             currentPoint={{ x: derived.rightAtrialPressureMmHg, y: derived.cardiacOutputLPerMin }}
             xDomain={[PLOT.PRA_MIN, PLOT.PRA_MAX]}
             yDomain={[0, PLOT.MAX_FLOW_L_PER_MIN]}
@@ -94,8 +110,8 @@ export function VenousReturnPage() {
             label="Cardiac output"
             secondaryLabel="venous return"
             unit="L/min"
-            data={history.map((h) => h.cardiacOutput)}
-            secondaryData={history.map((h) => h.venousReturn)}
+            data={cardiacOutputHistory}
+            secondaryData={venousReturnHistory}
             secondaryColorVar="var(--venous)"
             domainMin={0}
             domainMax={PLOT.MAX_FLOW_L_PER_MIN}
@@ -104,7 +120,7 @@ export function VenousReturnPage() {
           <Sparkline
             label="Right atrial pressure"
             unit="mmHg"
-            data={history.map((h) => h.pra)}
+            data={praHistory}
             domainMin={PLOT.PRA_MIN}
             domainMax={PLOT.PRA_MAX}
             colorVar="var(--pv-loop)"
@@ -112,7 +128,7 @@ export function VenousReturnPage() {
           <Sparkline
             label="Mean systemic filling pressure"
             unit="mmHg"
-            data={history.map((h) => h.meanSystemicFillingPressure)}
+            data={msfpHistory}
             domainMin={0}
             domainMax={20}
             colorVar="var(--venous)"

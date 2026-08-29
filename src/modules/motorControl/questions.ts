@@ -18,6 +18,7 @@ const PANEL: readonly PanelField<Snapshot>[] = [
     tolerance: 0.2,
   },
   { label: 'Rigidity vs spasticity', value: (s) => s.derived.rigidityScore - s.derived.spasticityScore, decimals: 1, tolerance: 0.3 },
+  { label: 'Co-contraction', value: (s) => s.derived.cocontractionIndex, decimals: 2 },
 ];
 
 const SETTLE = 2000;
@@ -108,5 +109,29 @@ export const MOTOR_QUESTIONS: readonly MotorQuestion[] = [
     explanation:
       'It falls without anything else changing — the diagnostic signature of essential tremor, whose postural oscillator responds to beta-blockade (and famously to alcohol) while every other readout stays normal. Resting and intention tremors do not behave this way, which makes the response almost pathognomonic when the history fits. Propranolol remains first-line precisely because of this selectivity.',
     metric: (s) => s.derived.posturalTremorAmp,
+  },
+  {
+    id: 'dystonia-cocontraction-rise',
+    stem: 'A musician develops an involuntary head pull to one side when playing, worsening with effort.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Dystonic co-contraction develops.', inputs: { dystoniaSeverityPct: 65 } },
+    prompt: 'What happens to co-contraction?',
+    watch: 'co-contraction',
+    correctDirection: 'rises',
+    settleSeconds: 800,
+    observeSeconds: 600,
+    explanation:
+      'It rises steeply — the hallmark of dystonia is that the effort to activate one muscle simultaneously recruits its antagonist, producing a sustained postural pull rather than a tremor. Initiation speed stays normal because the basal ganglia gate is intact; the problem is in the pattern of execution, not the decision to move. This is task-specific focal dystonia in its classic form.',
+    metric: (s) => s.derived.cocontractionIndex,
+  },
+  {
+    id: 'sustained-posture-with-normal-start',
+    stem: 'A woman presents with a fixed head tilt to the left that worsens under stress. Her handwriting is normal, she walks heel-to-toe, and a wine glass held outstretched does not tremor.',
+    answer: 'focalDystonia',
+    options: ['focalDystonia', 'cerebellarAtaxia', 'earlyParkinson', 'strokeUmnHemiparesis'],
+    panel: PANEL,
+    settleSeconds: SETTLE,
+    explanation:
+      'Sustained abnormal posture with normal initiation, normal gait, no tremor and no spasticity is focal dystonia — the co-contraction readout is elevated while every other channel stays quiet. Cerebellar ataxia would produce dysmetria and intention tremor; early parkinsonism would slow initiation; a UMN lesion would add spasticity. Dystonia is a disorder of pattern, not power or speed.',
   },
 ];

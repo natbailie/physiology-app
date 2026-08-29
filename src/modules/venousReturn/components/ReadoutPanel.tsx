@@ -1,9 +1,10 @@
 import { ReadoutItem } from '@/shared/components/ReadoutItem/ReadoutItem';
 import styles from '@/shared/components/ReadoutPanel/ReadoutPanel.module.css';
-import type { VenousReturnDerived } from '../engine/types';
+import type { VenousReturnDerived, VenousReturnInputs } from '../engine/types';
 
 interface ReadoutPanelProps {
   derived: VenousReturnDerived;
+  inputs: VenousReturnInputs;
 }
 
 const LIMIT_EXPLANATION: Record<VenousReturnDerived['limitingFactor'], string> = {
@@ -12,7 +13,7 @@ const LIMIT_EXPLANATION: Record<VenousReturnDerived['limitingFactor'], string> =
   afterload: 'the ceiling is pulled down by afterload',
 };
 
-export function ReadoutPanel({ derived }: ReadoutPanelProps) {
+export function ReadoutPanel({ derived, inputs }: ReadoutPanelProps) {
   const equilibrated = Math.abs(derived.venousReturnLPerMin - derived.cardiacOutputLPerMin) < 0.05;
 
   return (
@@ -63,6 +64,8 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Blood volume"
         value={derived.totalBloodVolumeMl.toFixed(0)}
         unit="mL"
+        // Diverges from the slider whenever a haemorrhage or transfusion offset is live.
+        setPoint={inputs.bloodVolumeMl}
         secondary={`compliance ${derived.totalComplianceMlPerMmHg.toFixed(0)} mL/mmHg`}
         colorVar="var(--hemoglobin)"
       />
@@ -89,6 +92,8 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Intrathoracic pressure"
         value={derived.effectiveIntrathoracicPressure.toFixed(1)}
         unit="mmHg"
+        // The slider plus the Valsalva surge, so the two part company mid-strain.
+        setPoint={inputs.intrathoracicPressure}
         secondary="what the heart is squeezed by"
         colorVar="var(--compliance)"
       />

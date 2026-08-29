@@ -1,0 +1,108 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0 3rem;
+  gap: 1.4rem;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.backLink {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--text);
+}
+
+.title {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.lead {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 44rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.search {
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  width: min(100%, 24rem);
+}
+
+.search:focus {
+  outline: none;
+  border-color: var(--focus-ring);
+}
+
+/* Two-level tile grid, matching the main-menu surface. */
+.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--s-4);
+}
+
+.familyCard {
+  composes: card from '../shared/styles/card.module.css';
+  min-height: 6.5rem;
+}
+
+.classCard {
+  composes: card from '../shared/styles/card.module.css';
+}
+
+.nameRow {
+  composes: nameRow from '../shared/styles/card.module.css';
+}
+
+.name {
+  composes: name from '../shared/styles/card.module.css';
+}
+
+.blurb {
+  composes: blurb from '../shared/styles/card.module.css';
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.empty {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.footnote {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}

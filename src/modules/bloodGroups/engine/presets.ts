@@ -7,6 +7,9 @@ export const DEFAULT_BLOOD_INPUTS: BloodInputs = {
   donorRhPositive: 1,
   rhSensitised: 0,
   transfusionVolumeMl: 350,
+  hdnScenario: 0,
+  fetusRhPositive: 1,
+  antiDProtectionPct: 0,
 };
 
 export type BloodPresetName =
@@ -16,7 +19,10 @@ export type BloodPresetName =
   | 'oRecipientGetsAb'
   | 'abUniversal'
   | 'rhSensitisedMismatch'
-  | 'massiveMismatch';
+  | 'massiveMismatch'
+  | 'hdnAffected'
+  | 'hdnProtected'
+  | 'hdnMissedProphylaxis';
 
 /**
  * The presets are the five transfusion scenarios every exam asks. Note the quiet one:
@@ -45,6 +51,35 @@ export const BLOOD_PRESETS: Record<BloodPresetName, Partial<BloodInputs>> = {
     donorAboIndex: 1,
     transfusionVolumeMl: 500,
   },
+  // The second pregnancy: mother already sensitised by an earlier Rh+ baby, so anti-D now
+  // is too late — maternal IgG crosses the placenta and the fetus haemolyses.
+  hdnAffected: {
+    ...DEFAULT_BLOOD_INPUTS,
+    hdnScenario: 1,
+    recipientRhPositive: 0,
+    rhSensitised: 1,
+    fetusRhPositive: 1,
+  },
+  // Anti-D at the FIRST delivery did its job: no IgG exists, and this fetus is untouched —
+  // while the next-pregnancy readout shows what missing that dose would have cost.
+  hdnProtected: {
+    ...DEFAULT_BLOOD_INPUTS,
+    hdnScenario: 1,
+    recipientRhPositive: 0,
+    rhSensitised: 0,
+    fetusRhPositive: 1,
+    antiDProtectionPct: 95,
+  },
+  // No anti-D after the first birth. THIS baby usually escapes (sensitisation happens at
+  // delivery, mostly too late to harm it) — but the NEXT pregnancy reads as fully primed.
+  hdnMissedProphylaxis: {
+    ...DEFAULT_BLOOD_INPUTS,
+    hdnScenario: 1,
+    recipientRhPositive: 0,
+    rhSensitised: 0,
+    fetusRhPositive: 1,
+    antiDProtectionPct: 0,
+  },
 };
 
 export const BLOOD_PRESET_LABELS: Record<BloodPresetName, string> = {
@@ -55,6 +90,9 @@ export const BLOOD_PRESET_LABELS: Record<BloodPresetName, string> = {
   oRecipientGetsAb: 'AB unit → O patient',
   rhSensitisedMismatch: 'Rh+ unit → sensitised Rh−',
   massiveMismatch: 'Massive ABO mismatch (500 mL)',
+  hdnAffected: 'HDN — sensitised mother',
+  hdnProtected: 'HDN — anti-D given',
+  hdnMissedProphylaxis: 'HDN — prophylaxis missed',
 };
 
 export const BLOOD_PRESET_ORDER: BloodPresetName[] = [
@@ -65,4 +103,7 @@ export const BLOOD_PRESET_ORDER: BloodPresetName[] = [
   'oRecipientGetsAb',
   'rhSensitisedMismatch',
   'massiveMismatch',
+  'hdnAffected',
+  'hdnProtected',
+  'hdnMissedProphylaxis',
 ];

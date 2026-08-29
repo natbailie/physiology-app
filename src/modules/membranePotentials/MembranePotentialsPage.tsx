@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { MembraneDiagram } from './components/MembraneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,13 +18,20 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { membranePotentialsContent } from './content';
 import { membraneLoopConfig } from './engine/loopConfig';
 import { perturbStimulate } from './engine/engine';
-import { DEFAULT_MEMBRANE_INPUTS, MEMBRANE_PRESETS, type MembranePresetName, MEMBRANE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_MEMBRANE_INPUTS, MEMBRANE_PRESETS, MEMBRANE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import { CONDUCTANCE } from './engine/constants';
 import type { MembraneInputs } from './engine/types';
 
 export function MembranePotentialsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MembraneInputs>('membranePotentials', DEFAULT_MEMBRANE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, membraneLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_MEMBRANE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'membranePotentials',
@@ -36,24 +47,25 @@ export function MembranePotentialsPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof MembraneInputs>(key: K, value: MembraneInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: MembranePresetName) {
-    setInputs((prev) => ({ ...prev, ...MEMBRANE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_MEMBRANE_INPUTS,
+    presets: MEMBRANE_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerStimulate() {
     perturb((state) => perturbStimulate(state));
   }
 
-  const vmHistory = history.map((h) => h.vm);
-  const vmHistoryBaseline = baseline.history?.map((h) => h.vm) ?? null;
-  const gNaHistory = history.map((h) => h.gNa);
-  const gNaHistoryBaseline = baseline.history?.map((h) => h.gNa) ?? null;
-  const gKHistory = history.map((h) => h.gK);
-  const gKHistoryBaseline = baseline.history?.map((h) => h.gK) ?? null;
+  const vmHistory = useSeries(history, (h) => h.vm);
+  const vmHistoryBaseline = useSeries(baseline.history, (h) => h.vm);
+  const gNaHistory = useSeries(history, (h) => h.gNa);
+  const gNaHistoryBaseline = useSeries(baseline.history, (h) => h.gNa);
+  const gKHistory = useSeries(history, (h) => h.gK);
+  const gKHistoryBaseline = useSeries(baseline.history, (h) => h.gK);
 
   return (
     <ModulePage
@@ -65,10 +77,10 @@ export function MembranePotentialsPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={MEMBRANE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Stimulate', onClick: triggerStimulate, variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<MembraneDiagram derived={snapshot.derived} />}

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { GiInputs } from '../engine/types';
@@ -7,7 +8,7 @@ interface ControlPanelProps {
   onChange: <K extends keyof GiInputs>(key: K, value: GiInputs[K]) => void;
 }
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider label="Meal fat" value={inputs.mealFatGrams} min={0} max={100} step={5} unit="g" onChange={(v) => onChange('mealFatGrams', v)} />
@@ -61,3 +62,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

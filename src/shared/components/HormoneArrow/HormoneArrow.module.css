@@ -1,8 +1,13 @@
 .hormoneArrow {
   fill: none;
-  stroke-width: 2;
+  /* A driven pathway is thicker as well as brighter. */
+  stroke-width: calc(1.5px + var(--activation, 0) * 2px);
   stroke-dasharray: 5 5;
-  opacity: var(--activation, 0);
+  /* Floored, not zeroed. At rest an axis still HAS a pathway — the old rule faded it to nothing,
+   * so a resting HPA axis rendered as three glands with no connections between them and read as
+   * an axis that did not exist rather than one that was quiet. Activation now sets prominence
+   * on top of a pathway that is always drawn. */
+  opacity: calc(0.22 + var(--activation, 0) * 0.78);
   filter: drop-shadow(0 0 calc(var(--activation, 0) * 4px * var(--glow-blur)) currentColor);
   transition:
     opacity 0.5s ease,

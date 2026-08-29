@@ -1,5 +1,6 @@
 /* The circuit is drawn as a loop so the four lesion sites sit at four different points on it —
-   volume in the veins, the pump, the lungs between the two pressures, and the arterial tone. */
+   volume in the veins, the pump, the lungs between the two pressures, and the arterial tone.
+   Each is a different STRUCTURE, so the picture says where the problem is without a caption. */
 
 .vessel {
   fill: none;
@@ -9,16 +10,36 @@
   opacity: 0.85;
 }
 
-.venous {
-  composes: vessel;
+/* Calibre tracks resistance. Vasodilatation is the one lesion that makes the circuit look
+   healthier — a wide, open pipe — which is exactly why it catches people out. */
+.arterialLimb {
+  fill: none;
+  stroke: var(--artery);
+  stroke-linecap: round;
+  stroke-width: calc(3px * var(--calibre, 1));
+  transition: stroke-width 0.4s ease;
+}
+
+/* The reservoir the circulation draws from. A level, not a label. */
+.tank {
+  fill: none;
   stroke: var(--venous);
+  stroke-width: 2.5;
+}
+
+.tankFill {
+  fill: color-mix(in srgb, var(--venous) var(--wash-strong), transparent);
+  transition:
+    height 0.4s ease,
+    y 0.4s ease;
 }
 
 .chamber {
   stroke-width: 2.5;
   transition:
     fill 0.3s ease,
-    stroke 0.3s ease;
+    stroke 0.3s ease,
+    stroke-width 0.3s ease;
 }
 
 .rightHeart {
@@ -27,80 +48,73 @@
   fill: color-mix(in srgb, var(--venous) calc(var(--cvp-fill, 0.3) * 40%), transparent);
 }
 
+/* Wall thickness carries contractility, so a failing pump is visibly a thinner-walled one
+   even before the stroke volume beside it is read. */
 .leftHeart {
   composes: chamber;
   stroke: var(--artery);
+  stroke-width: calc(1px + var(--contractility, 1) * 2.5px);
   fill: color-mix(in srgb, var(--artery) calc(var(--wedge-fill, 0.3) * 40%), transparent);
+}
+
+/* A shell squeezing the chambers from outside. Its presence IS tamponade, and the two right
+   atrial pressures beneath it are what it does. */
+.pericardium {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: calc(1px + var(--pericardial, 0) * 5px);
+  opacity: calc(0.35 + var(--pericardial, 0) * 0.65);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
 }
 
 .lungs {
   fill: none;
   stroke: var(--o2);
   stroke-width: 2.5;
-  opacity: calc(1 - var(--pvr-block, 0) * 0.35);
+  opacity: calc(1 - var(--obstruction, 0) * 0.4);
 }
 
-/* A lesion marker only appears when that mechanism is actually contributing. */
-.lesion {
-  fill: var(--danger);
-  opacity: var(--lesion-opacity, 0);
-  transition: opacity 0.4s ease;
+/* A clamp on the pulmonary limb: the obstruction of embolism, drawn where it sits. */
+.clamp {
+  stroke: var(--danger);
+  stroke-width: calc(1.5px + var(--obstruction, 0) * 3.5px);
+  stroke-linecap: round;
+  opacity: calc(0.4 + var(--obstruction, 0) * 0.6);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
 }
 
-/* A lesion's LABEL must fade with its marker, or an inactive mechanism stays named on the
-   diagram and the picture stops telling you where the problem is. */
 .lesionLabel {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.06em;
   fill: var(--danger);
-  opacity: var(--lesion-opacity, 0);
-  transition: opacity 0.4s ease;
+  stroke: none;
 }
 
-.lesionRing {
-  fill: none;
-  stroke: var(--danger);
-  stroke-width: 2;
-  opacity: var(--lesion-opacity, 0);
-  transition: opacity 0.4s ease;
-}
-
-.label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+.tissue {
+  fill: color-mix(in srgb, var(--text-faint) var(--wash-faint), transparent);
+  stroke: var(--text-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
 }
 
 .value {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 12px;
   fill: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
-.caption {
+/* The transmural pressure sits under the measured one: same quantity, different reading. */
+.valueFaint {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 10px;
   fill: var(--text-faint);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.tissue {
-  fill: none;
-  stroke: var(--text-faint);
-  stroke-width: 2;
-  stroke-dasharray: 4 4;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Flow pips travel the loop at a rate set by cardiac output, so a failing circulation is
@@ -124,4 +138,27 @@
   .flowPip {
     animation: none;
   }
+}
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.label {
+  composes: label from '../../../shared/styles/diagramText.module.css';
+}
+
+.caption {
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.alarm {
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }

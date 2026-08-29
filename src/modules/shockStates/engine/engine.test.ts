@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { computeDerived, createInitialState, perturbFluidBolus, perturbHaemorrhage, step } from './engine';
 import { DEFAULT_SHOCK_INPUTS, SHOCK_PRESETS, SHOCK_PRESET_ORDER } from './presets';
+import { SHOCK_REFERENCE_RANGES } from './references';
+import { provenanceCoverage } from '@/shared/validation/referenceRange';
 import type { ShockDerived, ShockInputs, ShockState } from './types';
 
 function settle(patch: Partial<ShockInputs>, seconds = 3000, from?: ShockState): ShockDerived {
@@ -19,19 +21,43 @@ function settle(patch: Partial<ShockInputs>, seconds = 3000, from?: ShockState):
 }
 
 describe('baseline', () => {
-  it('settles a normal adult on textbook haemodynamics', () => {
+  // Bands and their provenance live in `references.ts` so a number cannot drift away from the
+  // reason it is that number. Read that file to see which of these are externally corroborated.
+  it('settles a normal adult inside every referenced band', () => {
     const d = settle(SHOCK_PRESETS.normal);
-    expect(d.cardiacOutputLPerMin).toBeCloseTo(5, 0);
-    expect(d.meanArterialPressureMmHg).toBeGreaterThan(88);
-    expect(d.meanArterialPressureMmHg).toBeLessThan(100);
-    expect(d.centralVenousPressureMmHg).toBeGreaterThan(1);
-    expect(d.centralVenousPressureMmHg).toBeLessThan(6);
-    expect(d.wedgePressureMmHg).toBeGreaterThan(7);
-    expect(d.wedgePressureMmHg).toBeLessThan(13);
-    expect(d.mixedVenousSaturationPercent).toBeGreaterThan(68);
-    expect(d.mixedVenousSaturationPercent).toBeLessThan(78);
-    expect(d.lactateMmolL).toBeLessThan(1.5);
+    const readings: Record<keyof typeof SHOCK_REFERENCE_RANGES, number> = {
+      cardiacOutputLPerMin: d.cardiacOutputLPerMin,
+      meanArterialPressureMmHg: d.meanArterialPressureMmHg,
+      centralVenousPressureMmHg: d.centralVenousPressureMmHg,
+      wedgePressureMmHg: d.wedgePressureMmHg,
+      mixedVenousSaturationPercent: d.mixedVenousSaturationPercent,
+      lactateMmolL: d.lactateMmolL,
+    };
+    // Object.keys widens to string, which would defeat the exhaustiveness the `readings` type
+    // above buys us — so the cast keeps the literal key union all the way through the loop.
+    const quantities = Object.keys(SHOCK_REFERENCE_RANGES) as (keyof typeof SHOCK_REFERENCE_RANGES)[];
+    for (const quantity of quantities) {
+      const range = SHOCK_REFERENCE_RANGES[quantity];
+      const value = readings[quantity];
+      expect(value, `${quantity} below its referenced range`).toBeGreaterThanOrEqual(range.low);
+      expect(value, `${quantity} above its referenced range`).toBeLessThanOrEqual(range.high);
+    }
     expect(d.classification).toBe('no shock');
+  });
+
+  it('has a reference range for every quantity the baseline asserts', () => {
+    // Guards the pairing above: adding a reading without a range, or a range without a reading,
+    // should fail rather than silently assert nothing.
+    const coverage = provenanceCoverage(SHOCK_REFERENCE_RANGES);
+    expect(coverage.total).toBe(6);
+    for (const range of Object.values(SHOCK_REFERENCE_RANGES)) {
+      expect(range.low).toBeLessThan(range.high);
+      expect(range.unit.length).toBeGreaterThan(0);
+      if (range.provenance.kind === 'unsourced') {
+        // An unsourced band must say what would settle it, so it reads as a work item.
+        expect(range.provenance.needs.length).toBeGreaterThan(40);
+      }
+    }
   });
 
   it('leaves the baroreflex almost idle at a normal pressure', () => {

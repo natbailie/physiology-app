@@ -43,6 +43,14 @@ export interface PituitaryDerived {
   effectiveDopamineFraction: number;
   stalkCompressionFraction: number;
   totalMassCc: number;
+  /**
+   * The same mass split by which cell line it grew from, cm³. A functioning adenoma IS
+   * somatotroph or lactotroph tissue, so the diagram colours the mass by its origin — which
+   * is the difference between three presets that all just say "sellar mass".
+   */
+  ghAdenomaCc: number;
+  prlAdenomaCc: number;
+  nonfunctioningCc: number;
   visualFieldDefectPct: number;
   heightVelocityCmPerYear: number;
   acromegalicIndex: number;
@@ -51,6 +59,13 @@ export interface PituitaryDerived {
   glucoseSuppressionTest: 'not tested' | 'suppressed (normal)' | 'fails to suppress';
   classification: PituitaryState_Classification;
   patternSummary: string;
+  // Passthrough of inputs and internal state so the diagram can draw what is acting on the
+  // gland — the dopamine brake, the drug blocking it, and the TRH drive — rather than only
+  // the hormone levels that result.
+  dopamineTonePct: number;
+  d2ReceptorBlockPct: number;
+  trhStimulusUnits: number;
+  bromocriptineEffectPct: number;
 }
 
 export interface PituitarySnapshot {

@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { GiDiagram } from './components/GiDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { gastrointestinalContent } from './content';
 import { giLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal } from './engine/engine';
-import { DEFAULT_GI_INPUTS, GI_PRESETS, type GiPresetName, GI_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_GI_INPUTS, GI_PRESETS, GI_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { GiInputs } from './engine/types';
 
 export function GastrointestinalPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GiInputs>('gastrointestinal', DEFAULT_GI_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, giLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_GI_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'gastrointestinal',
@@ -35,24 +46,25 @@ export function GastrointestinalPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof GiInputs>(key: K, value: GiInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: GiPresetName) {
-    setInputs((prev) => ({ ...prev, ...GI_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_GI_INPUTS,
+    presets: GI_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerEatMeal() {
     perturb((state) => perturbEatMeal(state));
   }
 
-  const gastricPHHistory = history.map((h) => h.gastricPH);
-  const gastricPHHistoryBaseline = baseline.history?.map((h) => h.gastricPH) ?? null;
-  const duodenalPHHistory = history.map((h) => h.duodenalPH);
-  const duodenalPHHistoryBaseline = baseline.history?.map((h) => h.duodenalPH) ?? null;
-  const gastrinHistory = history.map((h) => h.gastrinDrive * 100);
-  const gastrinHistoryBaseline = baseline.history?.map((h) => h.gastrinDrive * 100) ?? null;
+  const gastricPHHistory = useSeries(history, (h) => h.gastricPH);
+  const gastricPHHistoryBaseline = useSeries(baseline.history, (h) => h.gastricPH);
+  const duodenalPHHistory = useSeries(history, (h) => h.duodenalPH);
+  const duodenalPHHistoryBaseline = useSeries(baseline.history, (h) => h.duodenalPH);
+  const gastrinHistory = useSeries(history, (h) => h.gastrinDrive * 100);
+  const gastrinHistoryBaseline = useSeries(baseline.history, (h) => h.gastrinDrive * 100);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function GastrointestinalPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={GI_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Eat meal', onClick: triggerEatMeal, variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<GiDiagram derived={snapshot.derived} />}

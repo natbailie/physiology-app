@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
@@ -35,11 +36,17 @@ const TERRITORY_OPTIONS: { value: InjuryTerritory; label: string }[] = [
 const RHYTHM_OPTIONS: { value: Rhythm; label: string }[] = [
   { value: 'sinus', label: 'Sinus' },
   { value: 'atrialFibrillation', label: 'Atrial fib' },
+  { value: 'atrialFlutter', label: 'Flutter 2:1' },
+  { value: 'wpw', label: 'WPW' },
+  { value: 'sickSinus', label: 'Sick sinus' },
+  { value: 'ventricularTachycardia', label: 'VT' },
+  { value: 'torsades', label: 'Torsades' },
+  { value: 'ventricularFibrillation', label: 'VF' },
 ];
 
 const percent = (v: number) => Math.round(v * 100).toString();
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <ToggleGroup
@@ -66,7 +73,7 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         onChange={(v) => onChange('heartRate', v)}
       />
       <Slider
-        label="PR interval"
+        label="AV conduction delay"
         value={inputs.avDelayMs}
         min={80}
         max={400}
@@ -144,3 +151,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
 import { clamp } from '@/shared/lib/math';
@@ -8,105 +9,171 @@ interface VestibularDiagramProps {
   derived: VestibularDerived;
 }
 
-/** A horizontal canal pair with live cupula positions and firing bars, the nystagmus trace
- * drawn as slow-phase drift plus fast-phase resets, and a debris marker for BPPV. */
+const RESTING_RATE = 90;
+
+interface LabyrinthProps {
+  cx: number;
+  cy: number;
+  /** +1 draws the lateral side to the right (patient's left ear), -1 to the left. */
+  lateral: 1 | -1;
+  firing: number;
+  debris: number;
+  otolith: number;
+  label: string;
+}
+
+/**
+ * One labyrinth: three semicircular canals in their three planes, the ampulla at the end of
+ * each, and the otolith organs in the middle.
+ *
+ * Only the horizontal pair and the posterior canal are modelled by the engine — the horizontal
+ * canals carry the firing rates and the posterior one carries BPPV debris. The anterior canal
+ * is drawn because it is there; nothing in the model moves it.
+ */
+function Labyrinth({ cx, cy, lateral, firing, debris, otolith, label }: LabyrinthProps) {
+  const ampX = cx + lateral * 50;
+  const drive = clamp(firing / (RESTING_RATE * 2), 0, 1);
+  return (
+    <g>
+      {/* Three canals, in three planes. */}
+      <ellipse className={styles.canal} cx={cx} cy={cy} rx={50} ry={21} />
+      <ellipse className={styles.canal} cx={cx} cy={cy} rx={46} ry={20} transform={`rotate(-52 ${cx} ${cy})`} />
+      <ellipse className={styles.canalPosterior} style={{ '--debris': debris } as CSSProperties} cx={cx} cy={cy} rx={46} ry={20} transform={`rotate(52 ${cx} ${cy})`} />
+
+      {/* Canalith debris, which is what makes BPPV positional and posterior. */}
+      {debris > 0.05 &&
+        [0, 1, 2].map((i) => (
+          <circle
+            key={i}
+            className={styles.canalith}
+            style={{ '--debris': debris } as CSSProperties}
+            cx={cx + lateral * (18 + i * 7)}
+            cy={cy + 26 - i * 6}
+            r={2.6}
+          />
+        ))}
+
+      {/* The horizontal ampulla, where the cupula sits and the firing rate is set. */}
+      <circle className={styles.ampulla} style={{ '--drive': drive } as CSSProperties} cx={ampX} cy={cy} r={11} />
+      <text className={styles.rate} x={ampX} y={cy - 20} textAnchor="middle">
+        {firing.toFixed(0)}
+      </text>
+      <text className={styles.sideTick} x={ampX} y={cy - 36} textAnchor="middle">
+        spk/s
+      </text>
+
+      {/* Utricle and saccule: the otoliths. Unsteadiness, not vertigo. */}
+      <ellipse className={styles.otolith} style={{ '--otolith': otolith } as CSSProperties} cx={cx} cy={cy - 4} rx={12} ry={8} />
+      <ellipse className={styles.otolith} style={{ '--otolith': otolith } as CSSProperties} cx={cx} cy={cy + 12} rx={9} ry={7} />
+
+      <text className={styles.anatomyStrong} x={cx} y={cy + 70} textAnchor="middle">
+        {label}
+      </text>
+    </g>
+  );
+}
+
+/**
+ * Both labyrinths, and the push-pull between them.
+ *
+ * A vestibular nerve at rest fires about ninety spikes a second on each side, and the brain
+ * reads the DIFFERENCE. That is why a destructive lesion produces violent vertigo while a
+ * bilateral loss produces none — and why central compensation, which rebalances the difference
+ * without restoring either side, abolishes the nystagmus and leaves the head impulse positive.
+ *
+ * The old drawing showed two arcs and two firing rates, which cannot express a difference.
+ * The beam across the middle can: it tilts toward whichever side is firing harder, sits level
+ * when they match, and sits level again once compensation has done its work even though both
+ * rates are still wrong.
+ */
 export function VestibularDiagram({ derived }: VestibularDiagramProps) {
-  // Cupula deflection drawn as displacement of the cupula within each ampulla.
-  const deflPx = derived.cupulaDeflection * 22;
-  const CUPULA_R = { x: 150, y: 92 };
-  const CUPULA_L = { x: 410, y: 92 };
-
-  const fireBarMax = 130;
-  const barR = clamp(derived.canalFiringRightSpikesPerSec / fireBarMax, 0, 1) * 90;
-  const barL = clamp(derived.canalFiringLeftSpikesPerSec / fireBarMax, 0, 1) * 90;
-
-  const spv = derived.slowPhaseVelocityDegPerSec;
-  const positional = derived.positionalNystagmusPct;
-  const totalNystagmus = Math.abs(spv) + positional;
+  const right = derived.canalFiringRightSpikesPerSec;
+  const left = derived.canalFiringLeftSpikesPerSec;
+  const imbalance = clamp(derived.firingImbalanceSpikesPerSec / RESTING_RATE, -1, 1);
+  const debris = clamp(derived.canalithDebris, 0, 1);
+  const otolith = clamp(derived.otolithFunction, 0, 1);
+  const slip = clamp(derived.slowPhaseVelocityDegPerSec / 40, -1, 1);
 
   return (
-    <DiagramFrame viewBox="0 0 560 440" ariaLabel="Canal pair, cupula deflection and nystagmus trace">
-      {/* Right canal (left of frame = patient's right). */}
-      <path
-        className={styles.canalOutline}
-        d={`M ${CUPULA_R.x - 60} ${CUPULA_R.y + 40} a 62 62 0 1 1 120 0`}
-      />
-      <rect className={styles.cupulaBar} x={CUPULA_R.x - 6 + deflPx} y={CUPULA_R.y - 26} width={12} height={26} rx={5} />
-      <text className={styles.label} x={CUPULA_R.x - 44} y={CUPULA_R.y - 38}>
-        RIGHT · {derived.canalFiringRightSpikesPerSec.toFixed(0)} spk/s
+    <DiagramFrame
+      viewBox="0 0 560 440"
+      ariaLabel="Both vestibular labyrinths with their three semicircular canals, ampullae and otolith organs, the resting firing rate of each horizontal canal, and the imbalance between the two sides that produces nystagmus"
+      defs={
+        <marker id="vestArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+          <path className={styles.arrowHead} d="M 0 0.5 L 7.5 4 L 0 7.5 Z" />
+        </marker>
+      }
+    >
+      {/* ---- The push-pull, as a beam that tilts toward the stronger side ---- */}
+      <text className={styles.label} x={280} y={40} textAnchor="middle">
+        PUSH-PULL BETWEEN THE TWO SIDES
       </text>
-      {/* Firing bar */}
-      <rect x={CUPULA_R.x - 45} y={CUPULA_R.y + 58} width={barR} height={12} fill="var(--vestibular)" opacity={0.8} />
-      <rect x={CUPULA_R.x - 45} y={CUPULA_R.y + 58} width={90} height={12} fill="none" stroke="var(--panel-border)" />
-
-      {/* Left canal. */}
-      <path
-        className={styles.canalOutline}
-        d={`M ${CUPULA_L.x - 60} ${CUPULA_L.y + 40} a 62 62 0 1 1 120 0`}
-      />
-      <rect className={styles.cupulaBar} x={CUPULA_L.x - 6 - deflPx} y={CUPULA_L.y - 26} width={12} height={26} rx={5} />
-      <text className={styles.label} x={CUPULA_L.x - 40} y={CUPULA_L.y - 38}>
-        LEFT · {derived.canalFiringLeftSpikesPerSec.toFixed(0)} spk/s
+      <line className={styles.beamPivot} x1={280} y1={58} x2={280} y2={94} />
+      <g transform={`rotate(${(imbalance * 12).toFixed(2)} 280 68)`}>
+        <line className={styles.beam} x1={150} y1={68} x2={410} y2={68} />
+        <circle className={styles.beamEnd} cx={150} cy={68} r={5} />
+        <circle className={styles.beamEnd} cx={410} cy={68} r={5} />
+      </g>
+      <text className={styles.sideTick} x={280} y={106} textAnchor="middle">
+        peripheral imbalance {derived.firingImbalanceSpikesPerSec.toFixed(0)} spk/s
       </text>
-      <rect x={CUPULA_L.x - 45} y={CUPULA_L.y + 58} width={barL} height={12} fill="var(--vestibular)" opacity={0.8} />
-      <rect x={CUPULA_L.x - 45} y={CUPULA_L.y + 58} width={90} height={12} fill="none" stroke="var(--panel-border)" />
+      <text className={styles.sideTick} x={280} y={120} textAnchor="middle">
+        compensation does not level this — it stops the brain believing it
+      </text>
 
-      {/* Debris in the posterior canal when present. */}
-      {positional > 0 && (
-        <>
-          <circle className={styles.debris} cx={280} cy={210 + (100 - Math.min(positional, 100)) * 0.3} r={7} />
-          <text className={styles.alarm} x={300} y={222}>
-            canalith debris provoking — geotropic torsional nystagmus
-          </text>
-        </>
+      {/* ---- The two labyrinths ---- */}
+      <Labyrinth cx={136} cy={186} lateral={-1} firing={right} debris={debris} otolith={otolith} label="Right labyrinth" />
+      <Labyrinth cx={424} cy={186} lateral={1} firing={left} debris={debris} otolith={otolith} label="Left labyrinth" />
+
+
+      {/* ---- Vestibular nerves into the brainstem ---- */}
+      <path className={styles.nerve} d="M 186 200 C 226 216, 244 226, 250 238" markerEnd="url(#vestArrow)" />
+      <path className={styles.nerve} d="M 374 200 C 334 216, 316 226, 310 238" markerEnd="url(#vestArrow)" />
+      <rect className={styles.brainstem} x={246} y={238} width={68} height={52} rx={10} />
+      <text className={styles.anatomyStrong} x={280} y={262} textAnchor="middle">
+        Brainstem
+      </text>
+      <text className={styles.sideTick} x={280} y={278} textAnchor="middle">
+        reads the difference
+      </text>
+
+      {/* ---- What the imbalance produces ---- */}
+      <text className={styles.label} x={20} y={318}>
+        NYSTAGMUS
+      </text>
+      <line className={styles.slipTrack} x1={20} y1={336} x2={240} y2={336} />
+      {Math.abs(slip) > 0.02 && (
+        <line
+          className={styles.slipArrow}
+          x1={130}
+          y1={336}
+          x2={130 + slip * 100}
+          y2={336}
+          markerEnd="url(#vestArrow)"
+        />
       )}
-
-      {/* Nystagmus trace: slow drift with fast resets. */}
-      <line className={styles.axis} x1={40} x2={520} y1={290} y2={290} />
-      <text className={styles.label} x={40} y={272}>
-        NYSTAGMUS TRACE
+      <text className={styles.sideTick} x={20} y={354}>
+        slow phase {derived.slowPhaseVelocityDegPerSec.toFixed(1)}°/s
       </text>
-      {totalNystagmus > 1 ? (
-        <g>
-          {[0, 1, 2].map((i) => (
-            <path
-              key={i}
-              className={styles.eyeDrift}
-              d={`M ${60 + i * 160} ${290 - clamp(totalNystagmus / 4, 4, 46)}
-                  q 60 ${spv >= 0 ? 14 : -14} 120 0
-                  l ${spv >= 0 ? -18 : 18} 0`}
-              transform={`translate(${(i * 37) % 30},0)`}
-            />
-          ))}
-          <DiagramText className={styles.caption} x={60} y={310} maxWidth={484}>
-            fast phases {spv > 0 || positional > 0 ? 'rightward' : 'leftward'} · SPV {Math.abs(spv).toFixed(1)} °/s
-          </DiagramText>
-        </g>
-      ) : (
-        <line className={styles.eyeDrift} x1={60} x2={500} y1={290} y2={290} />
-      )}
 
-      <text className={styles.caption} x={40} y={338}>
-        VOR gain {derived.vorGain.toFixed(2)} · vertigo {derived.vertigoIntensityPct.toFixed(0)}% · oscillopsia{' '}
-        {derived.oscillopsiaPct.toFixed(0)}% · Romberg {derived.rombergUnsteadinessPct.toFixed(0)}%
+      <text className={styles.caption} x={300} y={320}>
+        VOR gain {derived.vorGain.toFixed(2)}
       </text>
-      {derived.headImpulsePositive && (
-        <text className={styles.alarm} x={40} y={352}>
-          Head impulse POSITIVE — corrective saccade betrays the deficit
-        </text>
-      )}
+      <text className={styles.caption} x={300} y={338}>
+        head impulse {derived.headImpulsePositive ? 'positive' : 'negative'}
+      </text>
+      <text className={styles.caption} x={300} y={356}>
+        vertigo {derived.vertigoIntensityPct.toFixed(0)}% · Romberg{' '}
+        {derived.rombergUnsteadinessPct.toFixed(0)}%
+      </text>
+      <text className={styles.caption} x={300} y={374}>
+        compensation {(derived.centralCompensation * 100).toFixed(0)}%
+      </text>
 
-      <text className={styles.verdict} x={40} y={374}>
+      <DiagramText className={styles.verdict} x={20} y={400} maxWidth={520} fontSize={15} tracking={0.04}>
         {derived.classification}
-      </text>
-      <DiagramText
-        className={styles.label}
-        x={40}
-        y={392}
-        maxWidth={504}
-        fontSize={11}
-        tracking={0.06}
-      >
+      </DiagramText>
+      <DiagramText className={styles.label} x={20} y={422} maxWidth={520} fontSize={11} tracking={0.06}>
         {derived.patternSummary}
       </DiagramText>
     </DiagramFrame>

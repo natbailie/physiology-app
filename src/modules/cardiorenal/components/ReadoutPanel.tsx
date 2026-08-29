@@ -27,7 +27,7 @@ export function ReadoutPanel({ state, derived, inputs }: ReadoutPanelProps) {
         label="Heart rate"
         value={derived.effectiveHeartRate.toFixed(0)}
         unit="bpm"
-        secondary={inputs.heartRate !== Math.round(derived.effectiveHeartRate) ? `slider: ${inputs.heartRate}` : undefined}
+        setPoint={inputs.heartRate}
         colorVar="var(--artery)"
       />
       <ReadoutItem label="Blood volume" value={state.bloodVolume.toFixed(0)} unit="%" colorVar="var(--text)" />

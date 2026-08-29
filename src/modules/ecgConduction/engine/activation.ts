@@ -1,4 +1,4 @@
-import { POTASSIUM, REPOLARIZATION, TIMING } from './constants';
+import { POTASSIUM, REPOLARIZATION, TIMING, VENTRICULAR_FOCUS, WPW, ATRIAL_FLUTTER } from './constants';
 import { ATRIAL_MYOCARDIUM, REGIONS, VENTRICULAR_MYOCARDIUM, type RegionDefinition } from './regions';
 import { clamp } from '@/shared/lib/math';
 import type { EcgInputs, RegionId } from './types';
@@ -61,6 +61,28 @@ function bundleFor(id: RegionId): 'left' | 'right' | null {
 }
 
 /**
+ * Activation order for a rhythm driven by a single VENTRICULAR focus, ranked by distance the
+ * wavefront must travel from a right-ventricular origin — the classic VT site. Unlike sinus
+ * rhythm there is no His-Purkinje highway: each region waits its turn and depolarises slowly
+ * once reached, which is exactly why a ventricular complex is wide.
+ */
+const FOCUS_RANK: Partial<Record<RegionId, number>> = {
+  rvFreeWall: 0,
+  septum: 1,
+  lvFreeWall: 2,
+  lvBase: 3,
+};
+
+function focusPenalty(id: RegionId): { delayMs: number; stretch: number } {
+  const rank = FOCUS_RANK[id];
+  if (rank === undefined) return { delayMs: 0, stretch: 1 };
+  return {
+    delayMs: rank * VENTRICULAR_FOCUS.FOCUS_RANK_DELAY_MS,
+    stretch: VENTRICULAR_FOCUS.FOCUS_QRS_STRETCH,
+  };
+}
+
+/**
  * Builds the full activation schedule for one beat from the current inputs.
  *
  * Every downstream behaviour — QRS width, axis shift, T-wave shape, ST deviation — is read
@@ -75,9 +97,24 @@ export function buildSchedule(inputs: EcgInputs, rrIntervalMs: number): Activati
   const leftPenalty = blockPenalty(inputs.leftBundleConduction);
   const rightPenalty = blockPenalty(inputs.rightBundleConduction);
 
+  // When a ventricular focus is driving, the His-Purkinje motorway is irrelevant — activation
+  // spreads from the focus itself, so bundle penalties must not stack on top of focal ones.
+  const focusRhythm =
+    inputs.rhythm === 'ventricularTachycardia' || inputs.rhythm === 'torsades' || inputs.rhythm === 'ventricularFibrillation'
+      ? inputs.rhythm
+      : null;
+  const isVentricularMyocardium = (id: RegionId) => VENTRICULAR_MYOCARDIUM.includes(id);
+  // In Wolff-Parkinson-White the earliest part of the QRS spreads slowly from the accessory
+  // pathway's insertion rather than racing down a Purkinje network — the slurred delta wave.
+  const isWpw = inputs.rhythm === 'wpw';
+  // Flutter's circuit captures the whole atrium uniformly, so its waves carry far more mass
+  // than a sinus P wave — and far more than fibrillation's chaotic ripples.
+  const flutterWaveScale = inputs.rhythm === 'atrialFlutter' ? ATRIAL_FLUTTER.WAVE_AMPLITUDE_SCALE : 1;
+
   const schedule: ActivationSchedule = new Map();
 
   for (const definition of REGIONS) {
+    const ventricularMyocardium = isVentricularMyocardium(definition.id);
     const bundle = bundleFor(definition.id);
     // The septum is supplied by the left bundle, but it is activated first and from several
     // directions, so a left-sided block slows it without meaningfully delaying its ONSET.
@@ -85,16 +122,26 @@ export function buildSchedule(inputs: EcgInputs, rrIntervalMs: number): Activati
     // bundle branch block widens the QRS without prolonging PR.
     const delayShare = definition.id === 'septum' ? 0 : 1;
     const stretchShare = definition.id === 'septum' ? 0.4 : 1;
-    const penalty =
-      bundle === 'left' ? { delayMs: leftPenalty.delayMs * delayShare, stretch: 1 + (leftPenalty.stretch - 1) * stretchShare }
-      : bundle === 'right' ? rightPenalty
-      : { delayMs: 0, stretch: 1 };
+    const bundleBlockPenalty =
+      focusRhythm && ventricularMyocardium
+        ? { delayMs: 0, stretch: 1 }
+        : bundle === 'left'
+          ? { delayMs: leftPenalty.delayMs * delayShare, stretch: 1 + (leftPenalty.stretch - 1) * stretchShare }
+          : bundle === 'right' ? rightPenalty
+          : { delayMs: 0, stretch: 1 };
 
-    const isMyocardium = VENTRICULAR_MYOCARDIUM.includes(definition.id) || ATRIAL_MYOCARDIUM.includes(definition.id);
-    const localSlowing = isMyocardium ? slowing : 1;
+    const focal = focusRhythm && ventricularMyocardium ? focusPenalty(definition.id) : { delayMs: 0, stretch: 1 };
+    // The delta wave slows the FIRST-activated tissue most: whatever the pathway reaches
+    // depolarises cell to cell until the fast system catches up mid-complex.
+    const deltaStretch = isWpw
+      ? definition.id === 'septum' ? WPW.DELTA_SEPTUM_STRETCH : ventricularMyocardium ? WPW.DELTA_MYOCARDIUM_STRETCH : 1
+      : 1;
 
-    const startMs = definition.offsetMs + penalty.delayMs;
-    const durationMs = definition.durationMs * penalty.stretch * localSlowing;
+    const isAtrialMyocardium = ATRIAL_MYOCARDIUM.includes(definition.id);
+    const localSlowing = isVentricularMyocardium(definition.id) || isAtrialMyocardium ? slowing : 1;
+
+    const startMs = definition.offsetMs + bundleBlockPenalty.delayMs + focal.delayMs;
+    const durationMs = definition.durationMs * bundleBlockPenalty.stretch * focal.stretch * deltaStretch * localSlowing;
     const endMs = startMs + durationMs;
 
     // Conduction tissue (apdScale 0) contributes nothing to repolarisation.
@@ -103,13 +150,12 @@ export function buildSchedule(inputs: EcgInputs, rrIntervalMs: number): Activati
     const repolEndMs = hasRepolarization ? startMs + regionApd : startMs;
     const repolStartMs = hasRepolarization ? Math.max(endMs, repolEndMs - REPOLARIZATION.DURATION_MS) : startMs;
 
-    const isAtrial = ATRIAL_MYOCARDIUM.includes(definition.id);
-    const massScale = isAtrial ? atrialFactor : 1;
+    const massScale = isAtrialMyocardium ? atrialFactor * flutterWaveScale : 1;
 
     // Hyperkalemia both shortens repolarisation and concentrates it into a taller deflection —
     // together, the tall narrow peaked T wave that is the earliest ECG sign of a rising K+.
     const potassiumExcess = Math.max(0, inputs.serumPotassium - POTASSIUM.NORMAL_MEQ_L);
-    const repolMagnitudeScale = isAtrial
+    const repolMagnitudeScale = isAtrialMyocardium
       ? REPOLARIZATION.ATRIAL_MAGNITUDE_SCALE
       : REPOLARIZATION.MAGNITUDE_SCALE * (1 + potassiumExcess * POTASSIUM.T_PEAKING_PER_MEQ);
 

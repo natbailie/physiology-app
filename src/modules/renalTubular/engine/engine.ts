@@ -1,9 +1,11 @@
-import { ADH, MEDULLA, PLASMA, TGF, TUBULE, URINE } from './constants';
+import { ADH, ACID, CLEARANCE, MEDULLA, PLASMA, TGF, TUBULE, URINE } from './constants';
 import { proximalTubule } from './proximalTubule';
 import { ascendingLimb, ascendingPumpActivity, descendingLimb } from './loopOfHenle';
 import { collectingDuct, distalTubule, effectiveADHAction } from './distalTubuleAndCD';
 import { adhLevelTarget } from './adhRegulation';
 import { afferentToneTarget, gfrAfterTGF } from './tubuloglomerularFeedback';
+import { acidSteadyState, estimateSerumPotassium } from './acidHandling';
+import { clearancePanel } from './clearance';
 import { approach, clamp } from '@/shared/lib/math';
 import type { NephronSegment, RenalTubularDerived, RenalTubularInputs, RenalTubularSnapshot, RenalTubularState } from './types';
 
@@ -14,6 +16,8 @@ export function createInitialState(): RenalTubularState {
     medullaryGradientStrength: 1,
     adhLevel: 0.4,
     afferentToneFromTGF: 0,
+    serumBicarbonateMeqL: ACID.NORMAL_BICARBONATE,
+    serumCreatinineMgDl: 1.0,
   };
 }
 
@@ -25,27 +29,64 @@ export function createInitialState(): RenalTubularState {
  */
 export function computeDerived(state: RenalTubularState, inputs: RenalTubularInputs): RenalTubularDerived {
   const bowmans: NephronSegment = { label: "Bowman's capsule", osmolality: TUBULE.FILTRATE_OSMOLALITY, flowFraction: 1 };
-  const proximal = proximalTubule();
+
+  // Tubular injury and an osmotic load hold extra water in the lumen; V2 blockade stops the
+  // collecting duct HEARING whatever ADH is present — aquaretic, not natriuretic.
+  const osmoticFactor = 1 + (clamp(inputs.osmoticLoad, 0, 150) / 100) * TUBULE.OSMOTIC_WATER_HOLD;
+  const sglt2Factor = 1 + (clamp(inputs.sglt2Blockade, 0, 100) / 100) * TUBULE.SGLT2_WATER_HOLD;
+  const adhActionRaw = effectiveADHAction(state.adhLevel, inputs.exogenousADH, inputs.collectingDuctADHSensitivity);
+  const v2Available = 1 - clamp(inputs.v2Blockade, 0, 100) / 100;
+  const adhAction = adhActionRaw * v2Available;
+
+  // Osmotic loads act at the segment that failed to reclaim their solute: mannitol is
+  // injected and stays for the whole tubule, SGLT2 blockade spills glucose proximally.
+  const baseProximal = proximalTubule();
+  const proximalLeakFactor = osmoticFactor * sglt2Factor;
+  const proximal: NephronSegment = {
+    label: baseProximal.label,
+    osmolality: baseProximal.osmolality,
+    flowFraction: clamp(1 - (1 - baseProximal.flowFraction) / proximalLeakFactor, TUBULE.MIN_FLOW_FRACTION, 1),
+  };
+
   const descending = descendingLimb(proximal, state.medullaryGradientStrength);
   const ascending = ascendingLimb(descending, inputs.loopDiureticDose);
   const distal = distalTubule(ascending, inputs.thiazideDose);
-
-  const adhAction = effectiveADHAction(state.adhLevel, inputs.exogenousADH, inputs.collectingDuctADHSensitivity);
   const collecting = collectingDuct(distal, adhAction, state.medullaryGradientStrength);
 
-  const segments = [bowmans, proximal, descending, ascending, distal, collecting];
+  // Dead tubules lose both water reclamation and concentrating machinery: the urine drifts
+  // toward isosthenuria (~300) and volume spills regardless of ADH.
+  const injury = clamp(inputs.tubularInjury, 0, 1);
+  const collectingFinal: NephronSegment = {
+    label: collecting.label,
+    osmolality: collecting.osmolality + (PLASMA.BASELINE_MOSM - collecting.osmolality) * injury * TUBULE.ATN_ISOSTHENURIA,
+    flowFraction: clamp(collecting.flowFraction * (1 + injury * TUBULE.ATN_WATER_SPILL), TUBULE.MIN_FLOW_FRACTION, 1.5),
+  };
+
+  const segments = [bowmans, proximal, descending, ascending, distal, collectingFinal];
 
   const gfr = gfrAfterTGF(inputs.gfrMLPerMin, state.afferentToneFromTGF);
-  const urineFlowRateMLPerMin = clamp(gfr * collecting.flowFraction, URINE.MIN_FLOW_ML_PER_MIN, URINE.MAX_FLOW_ML_PER_MIN);
+  const urineFlowRateMLPerMin = clamp(gfr * collectingFinal.flowFraction, URINE.MIN_FLOW_ML_PER_MIN, URINE.MAX_FLOW_ML_PER_MIN);
 
   // Osmolar clearance is the volume of plasma cleared of solute per minute; free water
   // clearance is whatever urine volume remains beyond that. Positive means the kidney is
   // shedding pure water (dilute urine); negative means it is retaining it (concentrated urine).
-  const osmolarClearance = (collecting.osmolality * urineFlowRateMLPerMin) / Math.max(state.plasmaOsmolality, 1);
+  const osmolarClearance = (collectingFinal.osmolality * urineFlowRateMLPerMin) / Math.max(state.plasmaOsmolality, 1);
   const freeWaterClearance = urineFlowRateMLPerMin - osmolarClearance;
 
   // NaCl arriving at the macula densa, as a fraction of the filtered load — the TGF signal.
   const distalNaClDelivery = ascending.flowFraction * (ascending.osmolality / TUBULE.FILTRATE_OSMOLALITY);
+
+  // --- Acid arm ---
+  const acid = acidSteadyState(inputs);
+  const serumPotassiumEstimateMeqL = estimateSerumPotassium(inputs, acid.serumBicarbonateMeqL);
+
+  // --- Clearance arm ---
+  const clearances = clearancePanel(gfr, urineFlowRateMLPerMin, inputs);
+  const creatinineEquilibriumMgDl = clamp(
+    CLEARANCE.CREATININE_PRODUCTION_MG_MIN / Math.max(clearances.creatinineClearanceMLMin / 1000, 0.0005) / 10,
+    CLEARANCE.MIN_CREATININE_MG_DL,
+    CLEARANCE.MAX_CREATININE_MG_DL,
+  );
 
   return {
     plasmaOsmolality: state.plasmaOsmolality,
@@ -55,10 +96,23 @@ export function computeDerived(state: RenalTubularState, inputs: RenalTubularInp
     afferentToneFromTGF: state.afferentToneFromTGF,
     gfrAfterTGF: gfr,
     segments,
-    finalUrineOsmolality: collecting.osmolality,
+    finalUrineOsmolality: collectingFinal.osmolality,
     urineFlowRateMLPerMin,
     freeWaterClearance,
     distalNaClDelivery,
+    serumBicarbonateMeqL: state.serumBicarbonateMeqL,
+    hco3SteadyStateMeqL: acid.serumBicarbonateMeqL,
+    urinePH: acid.urinePH,
+    netAcidExcretionMeqPerDay: acid.netAcidExcretionMeqPerDay,
+    urineAnionGapMeqL: acid.urineAnionGapMeqL,
+    serumPotassiumEstimateMeqL,
+    creatinineClearanceMLMin: clearances.creatinineClearanceMLMin,
+    renalPlasmaFlowMLMin: clearances.renalPlasmaFlowMLMin,
+    filtrationFractionPct: clearances.filtrationFractionPct,
+    urineSodiumMeqL: clearances.urineSodiumMeqL,
+    fractionalExcretionNaPct: clearances.fractionalExcretionNaPct,
+    serumCreatinineMgDl: state.serumCreatinineMgDl,
+    creatinineEquilibriumMgDl,
     waterIntakeRate: inputs.waterIntakeRate,
     adhSecretionCapacity: inputs.adhSecretionCapacity,
     collectingDuctADHSensitivity: inputs.collectingDuctADHSensitivity,
@@ -86,12 +140,17 @@ export function tick(state: RenalTubularState, derived: RenalTubularDerived, dtS
   const targetAdh = adhLevelTarget(state.plasmaOsmolality, derived.adhSecretionCapacity);
   const targetAfferentTone = afferentToneTarget(derived.distalNaClDelivery, derived.maculaDensaFeedbackStrength, derived.loopDiureticDose);
 
+  // Bicarbonate and creatinine are the slow lab values: they drift toward whatever the
+  // current tubular capacities and clearances can sustain, on the timescale of hours —
+  // which is why a creatinine is a LAGGING indicator of what has happened to the kidney.
   return {
     simTimeSeconds: state.simTimeSeconds + dtSeconds,
     plasmaOsmolality: clamp(state.plasmaOsmolality + dOsmolality, PLASMA.MIN_MOSM, PLASMA.MAX_MOSM),
     medullaryGradientStrength: approach(state.medullaryGradientStrength, targetGradient, dtSeconds, MEDULLA.BUILD_TAU_SECONDS),
     adhLevel: approach(state.adhLevel, targetAdh, dtSeconds, ADH.TAU_SECONDS),
     afferentToneFromTGF: approach(state.afferentToneFromTGF, targetAfferentTone, dtSeconds, TGF.TAU_SECONDS),
+    serumBicarbonateMeqL: approach(state.serumBicarbonateMeqL, derived.hco3SteadyStateMeqL, dtSeconds, ACID.HCO3_TAU_SECONDS),
+    serumCreatinineMgDl: approach(state.serumCreatinineMgDl, derived.creatinineEquilibriumMgDl, dtSeconds, CLEARANCE.CREATININE_TAU_SECONDS),
   };
 }
 

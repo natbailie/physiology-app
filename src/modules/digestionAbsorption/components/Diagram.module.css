@@ -1,0 +1,67 @@
+/* The gut drawn as one tube with the accessory organs hanging off it. */
+.organBox {
+  fill: color-mix(in srgb, var(--text-dim) 12%, transparent);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.gutLumen {
+  fill: color-mix(in srgb, var(--gastrin) 22%, transparent);
+  transition: width 0.3s ease;
+}
+
+.bileLoop {
+  fill: none;
+  stroke: var(--liver);
+  stroke-width: 2.5;
+  opacity: 0.65;
+  transition: opacity 0.3s ease;
+}
+
+.enzymeArrow {
+  fill: none;
+  stroke: var(--cck);
+  stroke-width: 2.5;
+  opacity: 0.7;
+}
+
+.absorbedFringe {
+  fill: color-mix(in srgb, var(--o2) 45%, transparent);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.stoolFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.stoolFill {
+  fill: color-mix(in srgb, var(--danger) 55%, transparent);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.storeBar {
+  fill: color-mix(in srgb, var(--marrow) 55%, transparent);
+  transition: height 0.3s ease, y 0.3s ease;
+}
+
+.axis {
+  composes: axis from '../../../shared/styles/diagramText.module.css';
+}
+
+.label {
+  composes: label from '../../../shared/styles/diagramText.module.css';
+}
+
+.caption {
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+}
+
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+}
+
+.alarm {
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}

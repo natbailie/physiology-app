@@ -1,0 +1,115 @@
+/* The app's one button.
+ *
+ * `PresetBar .preset`, `SimControls .button`, `QuizPanel .button` and `ToggleGroup .option`
+ * were four declarations of the same control. Every variant lives in THIS file rather than
+ * being overridden by the consumer: composed classes carry equal specificity, so which one
+ * wins depends on emitted stylesheet order. Keeping the colour variants together makes that
+ * order local and deterministic. Consumers compose a variant and add layout only —
+ * padding, width, flex, collapsed radii — never colour. */
+
+.button {
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-4);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+
+.button:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text-faint);
+  background: var(--panel-raised);
+}
+
+.button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Selected member of a segmented control. Free for any composed button that sets the
+ * attribute, which is how the speed control and the toggle options both get it. */
+.button[aria-pressed='true'],
+.button[aria-checked='true'] {
+  color: var(--accent, var(--text));
+  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 55%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 12%, var(--panel));
+  z-index: 1;
+}
+
+/* Carries the module accent: the primary action in its context. */
+.accent {
+  composes: button;
+  color: var(--accent, var(--text));
+  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
+}
+
+.accent:hover:not(:disabled) {
+  color: var(--accent, var(--text));
+  border-color: var(--accent, var(--text-faint));
+  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
+}
+
+/* An insult applied to the model — haemorrhage, occlusion, a bolus of the wrong thing. */
+.danger {
+  composes: button;
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--danger) 7%, var(--panel));
+}
+
+.danger:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 13%, var(--panel));
+}
+
+/* Subordinate to whatever it sits beside — reset, exit, dismiss. */
+.ghost {
+  composes: button;
+  background: none;
+  border-color: transparent;
+  color: var(--text-faint);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--panel-raised);
+  border-color: var(--panel-border);
+  color: var(--text);
+}
+
+/* Produces something dashed elsewhere in the UI — a share link, a frozen baseline trace —
+ * so the button and its result read as the same object. */
+.dashed {
+  composes: button;
+  color: var(--text-faint);
+  border-style: dashed;
+}
+
+.dashed:hover:not(:disabled) {
+  color: var(--text);
+  border-style: solid;
+}
+
+/* Member of a segmented run. Sits on the raised surface so the unselected options read as
+ * one control rather than a row of separate buttons. */
+.segment {
+  composes: button;
+  background: var(--panel-raised);
+  letter-spacing: 0.03em;
+}

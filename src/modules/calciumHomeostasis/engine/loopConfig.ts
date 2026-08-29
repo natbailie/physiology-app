@@ -14,6 +14,7 @@ export const calciumLoopConfig: EngineLoopConfig<CalciumState, CalciumInputs, Ca
     pth: snapshot.derived.pthLevel,
   }),
   maxDtSeconds: CALCIUM_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: CALCIUM_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: CALCIUM_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: CALCIUM_SIMULATION.HISTORY_CAPACITY,
   timeScale: CALCIUM_SIMULATION.TIME_SCALE,

@@ -1,23 +1,13 @@
 .wrap {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  padding: 0.6rem 0.75rem 0.5rem;
+  composes: wrap from '../../styles/chart.module.css';
 }
 
 .header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
+  composes: header from '../../styles/chart.module.css';
 }
 
 .current {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.8rem;
-  color: var(--chart-color, var(--text));
+  composes: current from '../../styles/chart.module.css';
 }
 
 .svg {

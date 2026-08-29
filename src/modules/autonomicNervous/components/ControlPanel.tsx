@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { AnsInputs } from '../engine/types';
@@ -7,7 +8,7 @@ interface ControlPanelProps {
   onChange: <K extends keyof AnsInputs>(key: K, value: AnsInputs[K]) => void;
 }
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider
@@ -77,3 +78,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

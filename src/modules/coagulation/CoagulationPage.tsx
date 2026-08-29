@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { CoagulationDiagram } from './components/CoagulationDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { coagulationContent } from './content';
 import { coagLoopConfig } from './engine/loopConfig';
 import { perturbInjury } from './engine/engine';
-import { COAG_PRESETS, DEFAULT_COAG_INPUTS, type CoagPresetName, COAG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { COAG_PRESETS, DEFAULT_COAG_INPUTS, COAG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { CoagInputs } from './engine/types';
 
 export function CoagulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CoagInputs>('coagulation', DEFAULT_COAG_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, coagLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_COAG_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'coagulation',
@@ -35,24 +46,25 @@ export function CoagulationPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof CoagInputs>(key: K, value: CoagInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: CoagPresetName) {
-    setInputs((prev) => ({ ...prev, ...COAG_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_COAG_INPUTS,
+    presets: COAG_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerInjury() {
     perturb((state) => perturbInjury(state));
   }
 
-  const thrombinHistory = history.map((h) => h.thrombin * 100);
-  const thrombinHistoryBaseline = baseline.history?.map((h) => h.thrombin * 100) ?? null;
-  const fibrinHistory = history.map((h) => h.fibrin * 100);
-  const fibrinHistoryBaseline = baseline.history?.map((h) => h.fibrin * 100) ?? null;
-  const plugHistory = history.map((h) => h.plateletPlug * 100);
-  const plugHistoryBaseline = baseline.history?.map((h) => h.plateletPlug * 100) ?? null;
+  const thrombinHistory = useSeries(history, (h) => h.thrombin * 100);
+  const thrombinHistoryBaseline = useSeries(baseline.history, (h) => h.thrombin * 100);
+  const fibrinHistory = useSeries(history, (h) => h.fibrin * 100);
+  const fibrinHistoryBaseline = useSeries(baseline.history, (h) => h.fibrin * 100);
+  const plugHistory = useSeries(history, (h) => h.plateletPlug * 100);
+  const plugHistoryBaseline = useSeries(baseline.history, (h) => h.plateletPlug * 100);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function CoagulationPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={COAG_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Injure vessel', onClick: triggerInjury, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

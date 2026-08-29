@@ -25,6 +25,7 @@ export const pregnancyLoopConfig: EngineLoopConfig<
     dilation: snapshot.state.cervicalDilationCm,
   }),
   maxDtSeconds: PREGNANCY_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: PREGNANCY_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: PREGNANCY_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: PREGNANCY_SIMULATION.HISTORY_CAPACITY,
   timeScale: PREGNANCY_SIMULATION.TIME_SCALE,

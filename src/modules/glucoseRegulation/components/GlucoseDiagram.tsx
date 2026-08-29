@@ -24,7 +24,7 @@ export function GlucoseDiagram({ derived }: GlucoseDiagramProps) {
 
   return (
     <DiagramFrame
-      viewBox="0 0 480 300"
+      viewBox="64 33 360 228"
       ariaLabel="Animated diagram of the pancreas and liver connected by the bloodstream, with insulin driving glucose uptake, glucagon driving hepatic glucose output, and counter-regulatory hormones engaging during hypoglycemia"
       defs={
         <>

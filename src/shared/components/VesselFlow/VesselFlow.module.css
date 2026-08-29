@@ -1,13 +1,15 @@
 .vessel {
   fill: none;
-  stroke-width: 3;
+  stroke-width: calc(3px * var(--vessel-calibre, 1));
+  transition: stroke-width 0.4s ease;
   stroke-linecap: round;
   opacity: 0.35;
 }
 
 .vesselFlow {
   fill: none;
-  stroke-width: 3;
+  stroke-width: calc(3px * var(--vessel-calibre, 1));
+  transition: stroke-width 0.4s ease;
   stroke-linecap: round;
   stroke-dasharray: 10 8;
   animation: flow calc(2.2s / max(var(--flow-speed, 1), 0.05)) linear infinite;

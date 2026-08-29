@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { memo, useMemo, type CSSProperties } from 'react';
 import styles from './OxygenDissociationCurve.module.css';
 
 interface OxygenDissociationCurveProps {
@@ -26,7 +26,7 @@ function project(x: number, y: number, xDomain: [number, number], yDomain: [numb
 
 /** Generic XY reference-curve chart: a static curve sampled from `curveFn`, plus a live
  * dot showing the current (x, y) position on it — e.g. the O2-Hb dissociation curve. */
-export function OxygenDissociationCurve({
+function OxygenDissociationCurveBase({
   curveFn,
   currentX,
   currentY,
@@ -67,3 +67,5 @@ export function OxygenDissociationCurve({
     </div>
   );
 }
+
+export const OxygenDissociationCurve = memo(OxygenDissociationCurveBase);

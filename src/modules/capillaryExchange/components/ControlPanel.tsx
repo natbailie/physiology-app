@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
 import { ControlGroup, ControlRail } from '@/shared/components/ControlRail/ControlRail';
@@ -20,7 +21,7 @@ const BED_OPTIONS: { value: TissueBed; label: string }[] = [
   { value: 'glomerulus', label: 'Glomerulus' },
 ];
 
-export function ControlPanel({ inputs, onChange, onSelectBed }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange, onSelectBed }: ControlPanelProps) {
   return (
     <ControlRail>
       <ToggleGroup
@@ -115,3 +116,5 @@ export function ControlPanel({ inputs, onChange, onSelectBed }: ControlPanelProp
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   VISION_PRESET_LABELS,
   VISION_PRESET_ORDER,
   DEFAULT_VISION_INPUTS,
-  type VisionPresetName,
 } from './engine/presets';
 import type { VisionInputs } from './engine/types';
 
 export function VisionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<VisionInputs>('vision', DEFAULT_VISION_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, visionLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_VISION_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'vision',
@@ -41,20 +51,21 @@ export function VisionPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof VisionInputs>(key: K, value: VisionInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: VisionPresetName) {
-    setInputs((prev) => ({ ...prev, ...VISION_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_VISION_INPUTS,
+    presets: VISION_PRESETS,
+    resetEngine: reset,
+  });
 
-  const brightnessHistory = history.map((h) => h.brightness);
-  const brightnessBaseline = baseline.history?.map((h) => h.brightness) ?? null;
-  const pupilHistory = history.map((h) => h.pupilR);
-  const pupilBaseline = baseline.history?.map((h) => h.pupilR) ?? null;
-  const bleachHistory = history.map((h) => h.bleached);
-  const bleachBaseline = baseline.history?.map((h) => h.bleached) ?? null;
+  const brightnessHistory = useSeries(history, (h) => h.brightness);
+  const brightnessBaseline = useSeries(baseline.history, (h) => h.brightness);
+  const pupilHistory = useSeries(history, (h) => h.pupilR);
+  const pupilBaseline = useSeries(baseline.history, (h) => h.pupilR);
+  const bleachHistory = useSeries(history, (h) => h.bleached);
+  const bleachBaseline = useSeries(baseline.history, (h) => h.bleached);
 
   return (
     <ModulePage
@@ -66,7 +77,7 @@ export function VisionPage() {
         <PresetBar
           order={VISION_PRESET_ORDER}
           labels={VISION_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Lights out', onClick: () => perturb(perturbLightsOut), variant: 'impulse' },
             { label: 'Torch → right', onClick: () => perturb((s) => perturbShineTorch(s, 1)), variant: 'impulse' },
@@ -75,7 +86,7 @@ export function VisionPage() {
             { label: 'Camera flash', onClick: () => perturb(perturbBrightGlare), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -117,7 +128,7 @@ export function VisionPage() {
       blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
       explainer={<ExplainerPanel content={visionContent} startCollapsed={session.phase !== 'idle'} />}
-      footnote="A simplified conceptual model of the dual receptor system, dark adaptation and the pupil reflexes — not a clinical or diagnostic tool. Colour processing is outside its scope: cone integrity here stands for the whole foveal mosaic rather than the L/M/S classes individually. Dark adaptation is compressed to run in minutes of simulated time; pupil responses stay snappy at that scale. For the ion channels underneath the photoreceptor potential, see Membrane & Action Potentials."
+      footnote="A simplified conceptual model of the dual receptor system, dark adaptation, the pupil reflexes, the aqueous circulation and the visual pathways — not a clinical or diagnostic tool. Colour processing is outside its scope: cone integrity here stands for the whole foveal mosaic rather than the L/M/S classes individually. Dark adaptation is compressed to run in minutes of simulated time; pupil responses stay snappy at that scale. Intraocular pressure relaxes over simulated hours, so glaucomatous scenarios are settled by the question harness before they are shown. Field defects map lesion site to territory as fixed anatomy rather than modelling tumour growth or demyelination. For the ion channels underneath the photoreceptor potential, see Membrane & Action Potentials."
     />
   );
 }

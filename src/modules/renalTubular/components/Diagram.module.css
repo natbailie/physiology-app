@@ -1,6 +1,10 @@
 /* Medullary gradient background: deepens toward the papilla, fading as the gradient washes out. */
 .medullaBand {
-  fill: color-mix(in srgb, var(--medulla) calc(var(--gradient-strength, 1) * var(--wash-soft)), transparent);
+  fill: color-mix(
+    in srgb,
+    var(--medulla) calc(var(--gradient-strength, 1) * var(--wash-soft) * var(--depth, 1)),
+    transparent
+  );
   transition: fill 0.6s ease;
 }
 
@@ -59,9 +63,5 @@
 }
 
 .pathLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
 }

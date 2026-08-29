@@ -1,6 +1,10 @@
 import { useCallback } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { MuscleDiagram } from './components/MuscleDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -23,7 +27,6 @@ import {
   MUSCLE_PRESETS,
   MUSCLE_PRESET_LABELS,
   MUSCLE_PRESET_ORDER,
-  type MusclePresetName,
 } from './engine/presets';
 import { FORCE_VELOCITY, LENGTH_TENSION, TENSION } from './engine/constants';
 import type { MuscleInputs } from './engine/types';
@@ -31,6 +34,13 @@ import type { MuscleInputs } from './engine/types';
 export function MuscleContractionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MuscleInputs>('muscleContraction', DEFAULT_MUSCLE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, muscleLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_MUSCLE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'muscleContraction',
@@ -46,14 +56,17 @@ export function MuscleContractionPage() {
     fastForwardEngine: fastForward,
   });
   const { derived, state } = snapshot;
+  const calciumHistory = useSeries(history, (h) => h.calcium);
+  const tensionHistory = useSeries(history, (h) => h.tension);
 
-  function handleChange<K extends keyof MuscleInputs>(key: K, value: MuscleInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: MusclePresetName) {
-    setInputs((prev) => ({ ...prev, ...MUSCLE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_MUSCLE_INPUTS,
+    presets: MUSCLE_PRESETS,
+    resetEngine: reset,
+  });
 
   // Total tension the muscle could develop at each length if fully activated — the classic
   // curve. The live dot sits below it whenever activation is submaximal.
@@ -76,13 +89,13 @@ export function MuscleContractionPage() {
         <PresetBar
           order={MUSCLE_PRESET_ORDER}
           labels={MUSCLE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Stimulate', onClick: () => perturb((s) => perturbStimulate(s)), variant: 'impulse' },
             { label: 'Caffeine', onClick: () => perturb((s) => perturbCaffeine(s)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<MuscleDiagram derived={derived} excitationPulse={state.excitationPulse} />}
@@ -94,7 +107,7 @@ export function MuscleContractionPage() {
           <Sparkline
             label="Cytosolic Ca2+"
             unit="uM"
-            data={history.map((h) => h.calcium)}
+            data={calciumHistory}
             domainMin={0}
             domainMax={3}
             colorVar="var(--calcium)"
@@ -102,7 +115,7 @@ export function MuscleContractionPage() {
           <Sparkline
             label="Tension"
             unit="%"
-            data={history.map((h) => h.tension)}
+            data={tensionHistory}
             domainMin={0}
             domainMax={120}
             colorVar="var(--sarcomere)"

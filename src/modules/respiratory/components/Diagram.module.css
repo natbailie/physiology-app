@@ -48,21 +48,11 @@
 /* --- Labels --- */
 
 .organLabel {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  fill: var(--text);
-  text-transform: uppercase;
-  text-anchor: middle;
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 .pathLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -168,11 +158,10 @@
 }
 
 .verdict {
-  font-family: var(--mono);
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.03em;
-  fill: var(--text);
 }
 
 .verdictMixed {

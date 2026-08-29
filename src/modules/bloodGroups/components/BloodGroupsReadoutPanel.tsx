@@ -22,9 +22,21 @@ export function BloodGroupsReadoutPanel({ derived }: ReadoutPanelProps) {
             ? 'none'
             : derived.reactionArm.startsWith('immediate')
               ? 'intravascular IgM'
-              : 'extravascular IgG'
+              : derived.reactionArm.startsWith('delayed')
+                ? 'extravascular IgG'
+                : 'placental IgG'
         }
-        secondary={derived.aboIncompatible ? 'preformed antibodies — minutes' : derived.rhIncompatible ? 'acquired antibodies — days' : 'no antigen meeting'}
+        secondary={
+          derived.hdnScenario > 0.5
+            ? derived.reactionArm.startsWith('fetal')
+              ? 'maternal IgG crossing the placenta'
+              : 'fetus not exposed to anti-D'
+            : derived.aboIncompatible
+              ? 'preformed antibodies — minutes'
+              : derived.rhIncompatible
+                ? 'acquired antibodies — days'
+                : 'no antigen meeting'
+        }
         colorVar="var(--transfusion)"
       />
       <ReadoutItem
@@ -68,6 +80,38 @@ export function BloodGroupsReadoutPanel({ derived }: ReadoutPanelProps) {
         secondary="dark urine once free Hb spills over"
         colorVar="var(--urine)"
       />
+      {derived.hdnScenario > 0.5 && (
+        <>
+          <ReadoutItem
+            label="Fetal haemoglobin"
+            value={derived.fetalHaemoglobinGDl.toFixed(1)}
+            unit="g/dL"
+            secondary={derived.fetalHaemoglobinGDl < 10 ? 'anaemic — consider transfusion' : 'healthy range'}
+            colorVar="var(--hemoglobin)"
+          />
+          <ReadoutItem
+            label="Cord bilirubin"
+            value={derived.cordBilirubinUmolL.toFixed(0)}
+            unit="µmol/L"
+            secondary="the kernicterus number"
+            colorVar="var(--liver)"
+          />
+          <ReadoutItem
+            label="Hydrops risk"
+            value={derived.hydropsRiskPct.toFixed(0)}
+            unit="%"
+            secondary="fetal failure from severe anaemia"
+            colorVar="var(--danger)"
+          />
+          <ReadoutItem
+            label="Next pregnancy risk"
+            value={derived.nextPregnancySensitisationRiskPct.toFixed(0)}
+            unit="%"
+            secondary="if anti-D is missed at this delivery"
+            colorVar="var(--transfusion)"
+          />
+        </>
+      )}
       <ReadoutItem
         label="State"
         value={derived.classification}

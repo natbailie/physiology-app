@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -18,13 +22,19 @@ import {
   ADRENAL_PRESET_LABELS,
   ADRENAL_PRESET_ORDER,
   DEFAULT_ADRENAL_INPUTS,
-  type AdrenalCortexPresetName,
 } from './engine/presets';
 import type { AdrenalCortexInputs } from './engine/types';
 
 export function AdrenalCortexPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<AdrenalCortexInputs>('adrenalCortex', DEFAULT_ADRENAL_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, adrenalLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_ADRENAL_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'adrenalCortex',
@@ -40,20 +50,21 @@ export function AdrenalCortexPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof AdrenalCortexInputs>(key: K, value: AdrenalCortexInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: AdrenalCortexPresetName) {
-    setInputs((prev) => ({ ...prev, ...ADRENAL_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_ADRENAL_INPUTS,
+    presets: ADRENAL_PRESETS,
+    resetEngine: reset,
+  });
 
-  const cortisolHistory = history.map((h) => h.cortisol);
-  const cortisolBaseline = baseline.history?.map((h) => h.cortisol) ?? null;
-  const androgenHistory = history.map((h) => h.androgens);
-  const androgenBaseline = baseline.history?.map((h) => h.androgens) ?? null;
-  const mcHistory = history.map((h) => h.mcActivity);
-  const mcBaseline = baseline.history?.map((h) => h.mcActivity) ?? null;
+  const cortisolHistory = useSeries(history, (h) => h.cortisol);
+  const cortisolBaseline = useSeries(baseline.history, (h) => h.cortisol);
+  const androgenHistory = useSeries(history, (h) => h.androgens);
+  const androgenBaseline = useSeries(baseline.history, (h) => h.androgens);
+  const mcHistory = useSeries(history, (h) => h.mcActivity);
+  const mcBaseline = useSeries(baseline.history, (h) => h.mcActivity);
 
   return (
     <ModulePage
@@ -65,14 +76,14 @@ export function AdrenalCortexPage() {
         <PresetBar
           order={ADRENAL_PRESET_ORDER}
           labels={ADRENAL_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
       diagram={<AdrenalCortexDiagram derived={snapshot.derived} inputs={inputs} />}
-      readouts={<AdrenalCortexReadoutPanel derived={snapshot.derived} />}
+      readouts={<AdrenalCortexReadoutPanel derived={snapshot.derived} inputs={inputs} />}
       practice={<QuizPanel session={session} summary={summary} presetLabels={ADRENAL_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

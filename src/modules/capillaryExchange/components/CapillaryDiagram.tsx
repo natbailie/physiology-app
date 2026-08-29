@@ -39,6 +39,9 @@ export function CapillaryDiagram({ derived }: CapillaryDiagramProps) {
           <marker id="flux-arrowhead" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
             <path className={styles.arrowHeadOut} d="M0,0 L8,4 L0,8 Z" />
           </marker>
+          <marker id="lymph-arrowhead" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path className={styles.lymphHead} d="M0,0 L9,4.5 L0,9 Z" />
+          </marker>
           <marker id="flux-arrowhead-in" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
             <path className={styles.arrowHeadIn} d="M0,0 L8,4 L0,8 Z" />
           </marker>
@@ -72,11 +75,17 @@ export function CapillaryDiagram({ derived }: CapillaryDiagramProps) {
       {/* Feeding arteriole and draining venule. */}
       <path className={styles.feedVessel} d={`M20,${CAPILLARY.y + 10} L${CAPILLARY.left},${CAPILLARY.y + 10}`} />
       <path className={styles.drainVessel} d={`M${CAPILLARY.right},${CAPILLARY.y + 10} L${CAPILLARY.right + 40},${CAPILLARY.y + 10}`} />
-      <text className={styles.pathLabel} x={16} y={CAPILLARY.y - 6}>
-        {derived.arteriolarEndPressure.toFixed(0)}
+      <text className={styles.anatomy} x={16} y={CAPILLARY.y - 20}>
+        Arteriolar end
       </text>
-      <text className={styles.pathLabel} x={CAPILLARY.right + 10} y={CAPILLARY.y - 6}>
-        {derived.venularEndPressure.toFixed(0)}
+      <text className={styles.valueLabel} x={16} y={CAPILLARY.y - 6}>
+        {derived.arteriolarEndPressure.toFixed(0)} mmHg
+      </text>
+      <text className={styles.anatomy} x={CAPILLARY.right + 40} y={CAPILLARY.y - 20} textAnchor="end">
+        Venular end
+      </text>
+      <text className={styles.valueLabel} x={CAPILLARY.right + 40} y={CAPILLARY.y - 6} textAnchor="end">
+        {derived.venularEndPressure.toFixed(0)} mmHg
       </text>
 
       <rect
@@ -124,14 +133,24 @@ export function CapillaryDiagram({ derived }: CapillaryDiagramProps) {
         rx={5}
       />
       <text className={styles.valueLabel} x={(TISSUE.left + TISSUE.right) / 2} y={TISSUE.top + 20}>
-        interstitium {derived.interstitialVolumeMl.toFixed(0)} mL ({derived.interstitialExcess >= 0 ? '+' : ''}
+        Interstitium {derived.interstitialVolumeMl.toFixed(0)} mL ({derived.interstitialExcess >= 0 ? '+' : ''}
         {(derived.interstitialExcess * 100).toFixed(0)}%)
       </text>
 
       {/* Lymphatic drainage, with the reserve that has to run out before anything accumulates. */}
-      <path className={styles.lymphVessel} d={`M${TISSUE.right},${TISSUE.top + 18} L${TISSUE.right + 34},${TISSUE.top - 24}`} />
-      <text className={styles.pathLabel} x={404} y={TISSUE.top - 32}>
-        lymph
+      <path
+        className={styles.lymphVessel}
+        markerEnd="url(#lymph-arrowhead)"
+        d={`M${TISSUE.right},${TISSUE.top + 18} L${TISSUE.right + 34},${TISSUE.top - 24}`}
+      />
+      {/* One-way valves: what makes this a lymphatic rather than another vein. */}
+      {[0.32, 0.66].map((t) => {
+        const x = TISSUE.right + 34 * t;
+        const y = TISSUE.top + 18 - 42 * t;
+        return <path key={t} className={styles.lymphValve} d={`M ${x - 5} ${y - 4} L ${x + 3} ${y - 5} L ${x + 5} ${y + 4}`} />;
+      })}
+      <text className={styles.anatomy} x={404} y={TISSUE.top - 34}>
+        Lymphatic
       </text>
       <text className={styles.pathLabel} x={22} y={TISSUE.top + 74}>
         lymph {derived.lymphFlowMlPerMin.toFixed(2)} of {derived.lymphaticCapacityMlPerMin.toFixed(1)} mL/min

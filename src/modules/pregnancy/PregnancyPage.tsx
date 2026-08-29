@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   PREGNANCY_PRESET_LABELS,
   PREGNANCY_PRESET_ORDER,
   DEFAULT_PREGNANCY_INPUTS,
-  type PregnancyPresetName,
 } from './engine/presets';
 import type { PregnancyInputs } from './engine/types';
 
 export function PregnancyPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<PregnancyInputs>('pregnancy', DEFAULT_PREGNANCY_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, pregnancyLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_PREGNANCY_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'pregnancy',
@@ -41,22 +51,23 @@ export function PregnancyPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof PregnancyInputs>(key: K, value: PregnancyInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: PregnancyPresetName) {
-    setInputs((prev) => ({ ...prev, ...PREGNANCY_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_PREGNANCY_INPUTS,
+    presets: PREGNANCY_PRESETS,
+    resetEngine: reset,
+  });
 
-  const hbHistory = history.map((h) => h.hb);
-  const hbBaseline = baseline.history?.map((h) => h.hb) ?? null;
-  const progesteroneHistory = history.map((h) => h.progesterone);
-  const progesteroneBaseline = baseline.history?.map((h) => h.progesterone) ?? null;
-  const milkHistory = history.map((h) => h.milk);
-  const milkBaseline = baseline.history?.map((h) => h.milk) ?? null;
-  const dilationHistory = history.map((h) => h.dilation);
-  const dilationBaseline = baseline.history?.map((h) => h.dilation) ?? null;
+  const hbHistory = useSeries(history, (h) => h.hb);
+  const hbBaseline = useSeries(baseline.history, (h) => h.hb);
+  const progesteroneHistory = useSeries(history, (h) => h.progesterone);
+  const progesteroneBaseline = useSeries(baseline.history, (h) => h.progesterone);
+  const milkHistory = useSeries(history, (h) => h.milk);
+  const milkBaseline = useSeries(baseline.history, (h) => h.milk);
+  const dilationHistory = useSeries(history, (h) => h.dilation);
+  const dilationBaseline = useSeries(baseline.history, (h) => h.dilation);
 
   return (
     <ModulePage
@@ -68,13 +79,13 @@ export function PregnancyPage() {
         <PresetBar
           order={PREGNANCY_PRESET_ORDER}
           labels={PREGNANCY_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Labour onset', onClick: () => perturb(perturbStartLabour), variant: 'impulse' },
             { label: 'Feed (let-down)', onClick: () => perturb(perturbFeedNow), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

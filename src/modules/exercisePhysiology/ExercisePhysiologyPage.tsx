@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   EXERCISE_PRESET_LABELS,
   EXERCISE_PRESET_ORDER,
   DEFAULT_EXERCISE_INPUTS,
-  type ExercisePresetName,
 } from './engine/presets';
 import type { ExerciseInputs } from './engine/types';
 
 export function ExercisePhysiologyPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ExerciseInputs>('exercisePhysiology', DEFAULT_EXERCISE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, exerciseLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_EXERCISE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'exercisePhysiology',
@@ -41,22 +51,23 @@ export function ExercisePhysiologyPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof ExerciseInputs>(key: K, value: ExerciseInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ExercisePresetName) {
-    setInputs((prev) => ({ ...prev, ...EXERCISE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_EXERCISE_INPUTS,
+    presets: EXERCISE_PRESETS,
+    resetEngine: reset,
+  });
 
-  const hrHistory = history.map((h) => h.hr);
-  const hrBaseline = baseline.history?.map((h) => h.hr) ?? null;
-  const vo2History = history.map((h) => h.vo2 / 100);
-  const vo2Baseline = baseline.history?.map((h) => h.vo2 / 100) ?? null;
-  const lactateHistory = history.map((h) => h.lactate);
-  const lactateBaseline = baseline.history?.map((h) => h.lactate) ?? null;
-  const fatigueHistory = history.map((h) => h.fatigue);
-  const fatigueBaseline = baseline.history?.map((h) => h.fatigue) ?? null;
+  const hrHistory = useSeries(history, (h) => h.hr);
+  const hrBaseline = useSeries(baseline.history, (h) => h.hr);
+  const vo2History = useSeries(history, (h) => h.vo2 / 100);
+  const vo2Baseline = useSeries(baseline.history, (h) => h.vo2 / 100);
+  const lactateHistory = useSeries(history, (h) => h.lactate);
+  const lactateBaseline = useSeries(baseline.history, (h) => h.lactate);
+  const fatigueHistory = useSeries(history, (h) => h.fatigue);
+  const fatigueBaseline = useSeries(baseline.history, (h) => h.fatigue);
 
   return (
     <ModulePage
@@ -68,12 +79,12 @@ export function ExercisePhysiologyPage() {
         <PresetBar
           order={EXERCISE_PRESET_ORDER}
           labels={EXERCISE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Anaerobic surge', onClick: () => perturb(perturbSprintSurge), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

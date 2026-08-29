@@ -74,5 +74,7 @@ export function patternSummary(pattern: {
       return 'IgG clears cells extravascularly over DAYS — no free Hb surge, a falling Hb next week instead';
     case 'massive ABO mismatch: DIC and renal failure':
       return `DIC ${pattern.dicRisk.toFixed(0)}% and renal injury ${pattern.renalRisk.toFixed(0)}% — the acute haemolytic crisis fully expressed`;
+    case 'HDN: fetal haemolysis from maternal IgG':
+      return 'maternal IgG crosses the placenta and clears fetal cells slowly — anaemia and jaundice in the fetus, never a transfusion reaction';
   }
 }

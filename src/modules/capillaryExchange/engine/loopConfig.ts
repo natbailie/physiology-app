@@ -16,6 +16,7 @@ export const capillaryLoopConfig: EngineLoopConfig<CapillaryState, CapillaryInpu
     capillaryPressure: snapshot.derived.capillaryPressureMmHg,
   }),
   maxDtSeconds: CAPILLARY_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: CAPILLARY_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: CAPILLARY_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: CAPILLARY_SIMULATION.HISTORY_CAPACITY,
   timeScale: CAPILLARY_SIMULATION.TIME_SCALE,

@@ -58,6 +58,11 @@ export interface VestibularDerived {
   // Passthrough so tick() can stay a pure (state, derived, dt) function.
   headTurnVelocityDegPerSec: number;
   centralCompensation: number;
+  /** Debris in the posterior canal, and otolith function. Both are structural facts the diagram
+   * draws whether or not a provoking manoeuvre is being performed — positional nystagmus is
+   * zero at rest even when the canaliths are sitting there. */
+  canalithDebris: number;
+  otolithFunction: number;
 }
 
 export interface VestibularSnapshot {

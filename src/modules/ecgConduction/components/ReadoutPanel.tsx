@@ -1,9 +1,10 @@
 import { ReadoutItem } from '@/shared/components/ReadoutItem/ReadoutItem';
 import styles from '@/shared/components/ReadoutPanel/ReadoutPanel.module.css';
-import type { EcgDerived } from '../engine/types';
+import type { EcgDerived, EcgInputs } from '../engine/types';
 
 interface ReadoutPanelProps {
   derived: EcgDerived;
+  inputs: EcgInputs;
 }
 
 function prStatus(prMs: number, dissociated: boolean): string | undefined {
@@ -22,7 +23,19 @@ function qtcStatus(qtcMs: number): string | undefined {
   return undefined;
 }
 
-export function ReadoutPanel({ derived }: ReadoutPanelProps) {
+/** One line on what is driving the rhythm — the fact each preset exists to teach. */
+const RHYTHM_NOTES: Record<EcgDerived['rhythm'], string> = {
+  sinus: 'sinus',
+  atrialFibrillation: 'atrial fibrillation',
+  atrialFlutter: 'flutter circuit, 2:1 conduction',
+  wpw: 'accessory pathway pre-excitation',
+  sickSinus: 'SA pauses, junctional escape',
+  ventricularTachycardia: 'ventricular focus, AV dissociation',
+  torsades: 'polymorphic VT, axis twisting',
+  ventricularFibrillation: 'no organised activity — arrest rhythm',
+};
+
+export function ReadoutPanel({ derived, inputs }: ReadoutPanelProps) {
   return (
     <div className={styles.grid}>
       <ReadoutItem
@@ -42,6 +55,8 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="PR interval"
         value={derived.isDissociated ? '—' : derived.prIntervalMs.toFixed(0)}
         unit={derived.isDissociated ? undefined : 'ms'}
+        // Measured PR is the AV delay the slider sets PLUS the QRS onset, so it always reads longer.
+        setPoint={derived.isDissociated ? undefined : inputs.avDelayMs}
         secondary={prStatus(derived.prIntervalMs, derived.isDissociated)}
         colorVar="var(--conduction-path)"
       />
@@ -64,14 +79,20 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Atrial rate"
         value={derived.heartRateBpm.toFixed(0)}
         unit="bpm"
-        secondary={derived.rhythmRegular ? undefined : 'no organised P waves'}
+        secondary={
+          derived.rhythm === 'atrialFibrillation' || derived.rhythm === 'ventricularFibrillation'
+            ? 'no organised P waves'
+            : derived.isDissociated && derived.rhythm !== 'sinus'
+              ? 'marching independently'
+              : undefined
+        }
         colorVar="var(--conduction-path)"
       />
       <ReadoutItem
         label="Ventricular rate"
         value={derived.ventricularRateBpm.toFixed(0)}
         unit="bpm"
-        secondary={derived.isDissociated ? 'independent' : undefined}
+        secondary={`mean ${derived.meanVentricularRateBpm.toFixed(0)}${derived.isDissociated ? ' · independent' : ''}`}
         colorVar="var(--depolarized)"
       />
       <ReadoutItem
@@ -83,7 +104,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
       <ReadoutItem
         label="Rhythm"
         value={derived.rhythmRegular ? 'Regular' : 'Irregular'}
-        secondary={derived.rhythm === 'atrialFibrillation' ? 'atrial fibrillation' : 'sinus'}
+        secondary={RHYTHM_NOTES[derived.rhythm]}
         colorVar="var(--conduction-path)"
       />
     </div>

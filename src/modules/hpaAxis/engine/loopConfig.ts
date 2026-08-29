@@ -14,6 +14,7 @@ export const hpaLoopConfig: EngineLoopConfig<HpaState, HpaInputs, HpaDerived, Hp
     adrenalReserve: snapshot.derived.adrenalReserve,
   }),
   maxDtSeconds: HPA_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: HPA_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: HPA_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: HPA_SIMULATION.HISTORY_CAPACITY,
   timeScale: HPA_SIMULATION.TIME_SCALE,

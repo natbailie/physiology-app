@@ -21,8 +21,7 @@
 }
 
 .axis {
-  stroke: var(--panel-border);
-  stroke-width: 1;
+  composes: axis from '../../../shared/styles/diagramText.module.css';
 }
 
 /* The skull as a fixed box, with its three contents drawn to scale. */
@@ -52,30 +51,17 @@
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .alarm {
-  font-family: var(--mono);
-  font-size: 12px;
-  fill: var(--danger);
-  letter-spacing: 0.06em;
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
 }

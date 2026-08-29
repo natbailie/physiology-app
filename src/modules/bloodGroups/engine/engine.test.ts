@@ -115,3 +115,63 @@ describe('numerical robustness', () => {
     }
   });
 });
+
+// --- Haemolytic disease of the newborn ---
+
+/** Fast settle for the fetal arm: its timescale is weeks, so step in hour chunks. */
+function settleFetal(patch: Partial<BloodInputs>, seconds = 1_800_000): BloodDerived {
+  const inputs = { ...DEFAULT_BLOOD_INPUTS, ...patch };
+  let state = createInitialState();
+  let derived = computeDerived(state, inputs);
+  let t = 0;
+  while (t < seconds) {
+    const dt = Math.min(seconds - t, 3600);
+    t += dt;
+    const next = step(state, inputs, dt);
+    state = next.state;
+    derived = next.derived;
+  }
+  return derived;
+}
+
+const HDN_BASE = { hdnScenario: 1, recipientRhPositive: 0, fetusRhPositive: 1 } as Partial<BloodInputs>;
+
+describe('HDN — haemolytic disease of the newborn', () => {
+  it('a sensitised Rh− mother with a Rh+ fetus slowly anaemises that fetus', () => {
+    const affected = settleFetal({ ...HDN_BASE, rhSensitised: 1 });
+
+    expect(affected.reactionArm).toBe('fetal haemolysis (maternal IgG)');
+    expect(affected.fetalHaemoglobinGDl).toBeLessThan(10);
+    expect(affected.cordBilirubinUmolL).toBeGreaterThan(100);
+    expect(affected.hydropsRiskPct).toBeGreaterThan(0);
+    // The mother was already sensitised — there is nothing left for anti-D to prevent.
+    expect(affected.nextPregnancySensitisationRiskPct).toBe(0);
+  });
+
+  it('anti-D protects only before sensitisation: this baby fine, next pregnancy primed', () => {
+    const protectedCase = settleFetal({ ...HDN_BASE, rhSensitised: 0, antiDProtectionPct: 95 });
+    const missedCase = settleFetal({ ...HDN_BASE, rhSensitised: 0, antiDProtectionPct: 0 });
+
+    // Both fetuses escape THIS pregnancy — sensitisation happens at a delivery.
+    expect(protectedCase.fetalHaemoglobinGDl).toBeGreaterThan(14);
+    expect(missedCase.fetalHaemoglobinGDl).toBeGreaterThan(14);
+    // The entire difference is what happens NEXT time.
+    expect(protectedCase.nextPregnancySensitisationRiskPct).toBeLessThan(10);
+    expect(missedCase.nextPregnancySensitisationRiskPct).toBeGreaterThan(90);
+  });
+
+  it('giving anti-D after sensitisation changes nothing', () => {
+    const untreated = settleFetal({ ...HDN_BASE, rhSensitised: 1 }, 3_600_000);
+    const treatedLate = settleFetal({ ...HDN_BASE, rhSensitised: 1, antiDProtectionPct: 95 }, 3_600_000);
+
+    // The antibody already exists; prophylaxis is prevention, never treatment.
+    expect(treatedLate.fetalHaemoglobinGDl).toBeCloseTo(untreated.fetalHaemoglobinGDl, 1);
+  });
+
+  it('an Rh-negative fetus is never affected regardless of maternal antibody', () => {
+    const negativeFetus = settleFetal({ ...HDN_BASE, rhSensitised: 1, fetusRhPositive: 0 });
+
+    expect(negativeFetus.fetalHaemoglobinGDl).toBeCloseTo(15, 1);
+    expect(negativeFetus.cordBilirubinUmolL).toBe(0);
+  });
+});

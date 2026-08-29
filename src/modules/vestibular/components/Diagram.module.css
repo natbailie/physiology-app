@@ -34,35 +34,138 @@
 }
 
 .axis {
-  stroke: var(--panel-border);
-  stroke-width: 1;
+  composes: axis from '../../../shared/styles/diagramText.module.css';
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .alarm {
-  font-family: var(--mono);
-  font-size: 12px;
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- The labyrinth --- */
+
+.canal {
+  fill: none;
+  stroke: var(--vestibular);
+  stroke-width: 2.5;
+  opacity: 0.75;
+}
+
+/* The posterior canal is where canalith debris collects, which is what makes BPPV both
+   positional and specific to one canal. */
+.canalPosterior {
+  fill: none;
+  stroke: var(--vestibular);
+  stroke-width: calc(2.5px + var(--debris, 0) * 2px);
+  opacity: calc(0.6 + var(--debris, 0) * 0.4);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
+}
+
+.canalith {
   fill: var(--danger);
-  letter-spacing: 0.06em;
+  opacity: calc(0.3 + var(--debris, 0) * 0.7);
+}
+
+/* The ampulla, filled by how hard that side is firing. At rest both sit at the same shade —
+   which is what makes an imbalance visible rather than merely numerical. */
+.ampulla {
+  fill: color-mix(in srgb, var(--vestibular) calc(var(--drive, 0.5) * 130%), var(--panel));
+  stroke: var(--vestibular);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+.otolith {
+  fill: color-mix(in srgb, var(--vestibular) calc(var(--otolith, 1) * var(--wash)), var(--panel));
+  stroke: color-mix(in srgb, var(--vestibular) calc(var(--otolith, 1) * 70%), var(--panel-border));
+  stroke-width: 1.2;
+  transition: fill 0.4s ease;
+}
+
+.rate {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+}
+
+/* --- The push-pull beam --- */
+
+.beam {
+  stroke: var(--text-dim);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: transform 0.4s ease;
+}
+
+.beamEnd {
+  fill: var(--vestibular);
+}
+
+.beamPivot {
+  stroke: var(--panel-border);
+  stroke-width: 2;
+}
+
+/* --- Nerves and brainstem --- */
+
+.nerve {
+  fill: none;
+  stroke: var(--axon);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.brainstem {
+  fill: color-mix(in srgb, var(--axon) var(--wash-faint), var(--panel));
+  stroke: var(--axon);
+  stroke-width: 1.5;
+}
+
+.arrowHead {
+  fill: context-stroke;
+}
+
+/* --- Nystagmus direction --- */
+
+.slipTrack {
+  stroke: var(--panel-border);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.slipArrow {
+  stroke: var(--danger);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: all 0.4s ease;
+}
+
+.sideTick {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+}
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.anatomyStrong {
+  composes: anatomyStrong from '../../../shared/styles/diagramText.module.css';
 }

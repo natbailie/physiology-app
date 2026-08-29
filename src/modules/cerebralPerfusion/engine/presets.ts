@@ -9,6 +9,7 @@ export const DEFAULT_CEREBRAL_INPUTS: CerebralInputs = {
   csfAbsorptionCapacity: 1,
   autoregulationIntegrity: 1,
   venousOutflowPressureMmHg: 5,
+  bbbPermeabilityPct: 100,
 };
 
 export type CerebralPresetName =
@@ -19,7 +20,8 @@ export type CerebralPresetName =
   | 'hypoventilated'
   | 'lostAutoregulation'
   | 'hydrocephalus'
-  | 'venousObstruction';
+  | 'venousObstruction'
+  | 'bbbDisruption';
 
 /**
  * The presets walk the pressure-volume curve and then the levers that move along it. Each
@@ -45,6 +47,9 @@ export const CEREBRAL_PRESETS: Record<CerebralPresetName, Partial<CerebralInputs
   hydrocephalus: { ...DEFAULT_CEREBRAL_INPUTS, csfAbsorptionCapacity: 0.12 },
   // Nothing is wrong inside the skull; the blood simply cannot leave it.
   venousObstruction: { ...DEFAULT_CEREBRAL_INPUTS, venousOutflowPressureMmHg: 22 },
+  // A disrupted BBB leaks protein and fluid into the interstitial space: vasogenic oedema
+  // adds to the mass effect inside the skull over hours, raising ICP and lowering perfusion.
+  bbbDisruption: { ...DEFAULT_CEREBRAL_INPUTS, bbbPermeabilityPct: 180, massVolumeMl: 20 },
 };
 
 export const CEREBRAL_PRESET_LABELS: Record<CerebralPresetName, string> = {
@@ -56,6 +61,7 @@ export const CEREBRAL_PRESET_LABELS: Record<CerebralPresetName, string> = {
   lostAutoregulation: 'Autoregulation lost',
   hydrocephalus: 'Hydrocephalus',
   venousObstruction: 'Venous obstruction',
+  bbbDisruption: 'BBB disruption (vasogenic oedema)',
 };
 
 export const CEREBRAL_PRESET_ORDER: CerebralPresetName[] = [
@@ -67,4 +73,5 @@ export const CEREBRAL_PRESET_ORDER: CerebralPresetName[] = [
   'lostAutoregulation',
   'hydrocephalus',
   'venousObstruction',
+  'bbbDisruption',
 ];

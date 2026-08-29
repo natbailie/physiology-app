@@ -14,6 +14,7 @@ export const ansLoopConfig: EngineLoopConfig<AnsState, AnsInputs, AnsDerived, An
     pupilDiameter: snapshot.derived.pupilDiameterMm,
   }),
   maxDtSeconds: ANS_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: ANS_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: ANS_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: ANS_SIMULATION.HISTORY_CAPACITY,
   timeScale: ANS_SIMULATION.TIME_SCALE,

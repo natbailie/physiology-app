@@ -20,6 +20,7 @@ export const liverLoopConfig: EngineLoopConfig<
     ammonia: snapshot.derived.ammoniaUmolL,
   }),
   maxDtSeconds: LIVER_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: LIVER_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: LIVER_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: LIVER_SIMULATION.HISTORY_CAPACITY,
   timeScale: LIVER_SIMULATION.TIME_SCALE,

@@ -8,6 +8,10 @@ export const DEFAULT_ERYTHRO_INPUTS: ErythroInputs = {
   bloodLossRate: 0,
   hemolysisRate: 0,
   inspiredOxygen: 100,
+  inflammationLevelPct: 0,
+  liverSyntheticFunctionPct: 100,
+  erythropoieticDriveMultiplier: 1,
+  ironSensingIntegrityPct: 100,
 };
 
 export type ErythroPresetName =
@@ -18,7 +22,11 @@ export type ErythroPresetName =
   | 'hemolyticAnemia'
   | 'chronicBloodLoss'
   | 'highAltitude'
-  | 'aplasticAnemia';
+  | 'aplasticAnemia'
+  | 'anaemiaChronicDisease'
+  | 'ironDeficientAndInflamed'
+  | 'haemochromatosis'
+  | 'erythropoieticDriveHigh';
 
 /**
  * The presets are chosen so that MCV and the reticulocyte index between them separate every
@@ -44,6 +52,22 @@ export const ERYTHRO_PRESETS: Record<ErythroPresetName, Partial<ErythroInputs>> 
   highAltitude: { ...DEFAULT_ERYTHRO_INPUTS, inspiredOxygen: 62 },
   // The marrow itself is gone, so nothing can respond no matter how high the EPO climbs.
   aplasticAnemia: { ...DEFAULT_ERYTHRO_INPUTS, marrowFunction: 0.08 },
+  // Rheumatoid-style inflammation: hepcidin slams ferroportin shut, transferrin falls as a
+  // negative acute-phase reactant, ferritin rises — and stores never leave the body.
+  anaemiaChronicDisease: { ...DEFAULT_ERYTHRO_INPUTS, inflammationLevelPct: 80 },
+  // The trap: genuinely empty-ish stores behind an acute-phase veil that reads a normal ferritin.
+  // Ordinary diet but slow losses — the stores drain over weeks rather than collapsing outright.
+  ironDeficientAndInflamed: {
+    ...DEFAULT_ERYTHRO_INPUTS,
+    bloodLossRate: 8,
+    inflammationLevelPct: 55,
+  },
+  // HFE-type sensing failure: hepcidin inappropriately low however full the stores, so
+  // absorption keeps running and saturation climbs past forty-five.
+  haemochromatosis: { ...DEFAULT_ERYTHRO_INPUTS, ironAvailability: 145, ironSensingIntegrityPct: 12 },
+  // Ineffective erythropoiesis (thalassaemia-intermedia style): erythroferrone suppresses
+  // hepcidin despite replete stores, and iron overload arrives without any transfusion.
+  erythropoieticDriveHigh: { ...DEFAULT_ERYTHRO_INPUTS, erythropoieticDriveMultiplier: 3, ironAvailability: 120 },
 };
 
 export const ERYTHRO_PRESET_LABELS: Record<ErythroPresetName, string> = {
@@ -55,6 +79,10 @@ export const ERYTHRO_PRESET_LABELS: Record<ErythroPresetName, string> = {
   chronicBloodLoss: 'Chronic blood loss',
   highAltitude: 'High altitude',
   aplasticAnemia: 'Aplastic anemia',
+  anaemiaChronicDisease: 'Anemia of chronic disease',
+  ironDeficientAndInflamed: 'Iron deficient AND inflamed',
+  haemochromatosis: 'Haemochromatosis',
+  erythropoieticDriveHigh: 'High erythropoietic drive',
 };
 
 export const PRESET_ORDER: ErythroPresetName[] = [
@@ -66,4 +94,8 @@ export const PRESET_ORDER: ErythroPresetName[] = [
   'chronicBloodLoss',
   'highAltitude',
   'aplasticAnemia',
+  'anaemiaChronicDisease',
+  'ironDeficientAndInflamed',
+  'haemochromatosis',
+  'erythropoieticDriveHigh',
 ];

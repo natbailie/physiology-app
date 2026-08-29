@@ -1,8 +1,18 @@
+/* Practice is the product, so it is the one block on a module page allowed to change the
+ * page's mode: idle it is a quiet panel, live it takes the module accent down its left edge. */
+
 .panel {
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  background: var(--panel);
-  padding: 0.85rem 1rem;
+  composes: panel from '../../styles/panel.module.css';
+  padding: var(--s-4) var(--s-5);
+}
+
+.live {
+  composes: panel from '../../styles/panel.module.css';
+  padding: var(--s-5);
+  border-left: 3px solid var(--accent, var(--text-faint));
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
 }
 
 /* --- Idle / complete --- */
@@ -11,145 +21,179 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--s-5);
   flex-wrap: wrap;
 }
 
 .idleTitle {
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
   font-weight: 650;
   color: var(--text);
   margin: 0 0 0.15rem;
 }
 
 .idleBlurb {
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   margin: 0;
-  max-width: 46ch;
+  max-width: 52ch;
+  line-height: var(--lh-snug);
 }
 
 .idleActions {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: var(--s-3);
 }
 
 /* --- Question --- */
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: var(--s-4);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--panel-border);
+}
+
+.dot[data-state='done'] {
+  background: var(--text-faint);
+}
+
+.dot[data-state='current'] {
+  background: var(--accent, var(--text));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--text)) 18%, transparent);
 }
 
 .stem {
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-prose);
   color: var(--text);
-  margin: 0 0 0.5rem;
+  margin: 0;
+  max-width: 72ch;
 }
 
 .prompt {
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-prose);
   color: var(--text);
-  margin: 0 0 0.7rem;
+  margin: 0;
+  max-width: 72ch;
 }
 
+/* Choices are deliberately uniform — no styling hints at which one is right. The letter is a
+ * keyboard affordance, not a rank. */
 .choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s-3);
+  margin-top: var(--s-1);
+}
+
+.choice {
+  composes: button from '../../styles/button.module.css';
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  text-align: left;
+  white-space: normal;
+}
+
+.key {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: var(--r-sm);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-border);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+}
+
+.choiceLabel {
+  min-width: 0;
 }
 
 .watch {
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
-  margin: 0.55rem 0 0;
-}
-
-/* --- Buttons --- */
-
-.button {
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  white-space: nowrap;
-  border: 1px solid var(--panel-border);
-  background: var(--panel);
-  color: var(--text-dim);
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-
-.button:hover {
-  color: var(--text);
-  border-color: var(--text-faint);
-  background: var(--panel-raised);
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--accent, var(--text-dim));
-  outline-offset: 2px;
-}
-
-.primary {
-  composes: button;
-  color: var(--accent, var(--text));
-  border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
-  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 8%, var(--panel));
-}
-
-.primary:hover {
-  border-color: var(--accent, var(--text-faint));
-  background: color-mix(in srgb, var(--accent, var(--panel-raised)) 14%, var(--panel));
-}
-
-.secondary {
-  composes: button;
-}
-
-/* Choices are deliberately uniform — no styling hints at which one is right. */
-.choice {
-  composes: button;
-  min-width: 7.5rem;
-  text-align: center;
+  margin: 0;
 }
 
 .exit {
-  composes: button;
-  font-size: 0.72rem;
-  padding: 0.2rem 0.5rem;
-  border-color: transparent;
-  background: none;
-  color: var(--text-faint);
+  composes: ghost from '../../styles/button.module.css';
+  font-size: var(--fs-xs);
+  padding: var(--s-1) var(--s-3);
+}
+
+.primary {
+  composes: accent from '../../styles/button.module.css';
+}
+
+.secondary {
+  composes: button from '../../styles/button.module.css';
 }
 
 /* --- Reveal --- */
 
 .reveal {
-  margin-top: 0.4rem;
-  padding-top: 0.7rem;
+  margin-top: var(--s-1);
+  padding-top: var(--s-4);
   border-top: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
 }
 
 .verdict {
-  font-size: 0.85rem;
-  font-weight: 650;
-  margin: 0 0 0.4rem;
-  color: var(--danger);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  font-size: var(--fs-base);
+  line-height: var(--lh-snug);
+  margin: 0;
+  color: var(--text);
 }
 
-.reveal[data-correct='true'] .verdict {
-  color: var(--accent, var(--text));
+/* The one place a colour is allowed to say right or wrong, and it says it in a word too:
+ * the tag is never the only carrier of the verdict. */
+.verdictTag {
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 0.2rem var(--s-3);
+  border-radius: var(--r-pill);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.reveal[data-correct='true'] .verdictTag {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
 }
 
 .verdictDetail {
@@ -159,47 +203,34 @@
 
 /* Points at the frozen baseline. Only shown on a miss, where the comparison is the lesson. */
 .counterfactual {
-  font-size: 0.78rem;
-  line-height: 1.5;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
   color: var(--text-dim);
-  margin: 0 0 0.5rem;
-  padding-left: 0.6rem;
+  margin: 0;
+  padding-left: var(--s-4);
   border-left: 2px dashed var(--panel-border);
 }
 
+/* The 60-100 word payoff. This is the thing the learner is here for, so it is set as prose
+ * rather than as the fine print it used to be at 0.82rem. */
 .explanation {
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: var(--text-dim);
+  font-size: var(--fs-base);
+  line-height: var(--lh-prose);
+  color: var(--text);
   margin: 0;
+  max-width: 72ch;
 }
 
 .revealActions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 0.7rem;
+  gap: var(--s-4);
 }
 
 .record {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
-}
-
-@media (max-width: 700px) {
-  .choice {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-}
-
-/* Scenario options wrap freely — there are more of them than the three directions, and their
-   labels are long enough that a single row would overflow. */
-.options {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
 }

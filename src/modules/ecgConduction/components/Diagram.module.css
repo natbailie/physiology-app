@@ -94,21 +94,14 @@
 /* --- Labels --- */
 
 .organLabel {
-  font-family: var(--mono);
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
   font-size: 8.5px;
-  font-weight: 600;
   letter-spacing: 0.05em;
-  fill: var(--text);
-  text-transform: uppercase;
-  text-anchor: middle;
 }
 
 .pathLabel {
-  font-family: var(--mono);
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
   font-size: 8px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
 }
 
 .leadLabel {
@@ -130,10 +123,7 @@
 }
 
 .valueLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-  fill: var(--text);
+  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 .segmentBadge {

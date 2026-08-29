@@ -1,0 +1,177 @@
+/* --- Hypothalamus and the stalk --- */
+
+.hypothalamus {
+  fill: color-mix(in srgb, var(--co2) var(--wash-faint), var(--panel));
+  stroke: var(--co2);
+  stroke-width: 1.8;
+}
+
+/* Neurosecretory neurons ending on the primary plexus. They carry the releasing hormone the
+   short way, into the portal system rather than into the blood. */
+.neuron {
+  fill: none;
+  stroke: var(--co2);
+  stroke-width: calc(1px + var(--level, 0) * 1.6px);
+  stroke-linecap: round;
+  opacity: calc(0.3 + var(--level, 0) * 0.7);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
+}
+
+.stalk {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+/* The hypophyseal portal vessels: the whole reason a stalk lesion behaves the way it does. */
+.portal {
+  fill: none;
+  stroke: var(--co2);
+  stroke-width: calc(1.5px + var(--level, 0) * 2px);
+  stroke-linecap: round;
+  opacity: calc(0.35 + var(--level, 0) * 0.65);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
+}
+
+/* --- Pituitary --- */
+
+.sella {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 3;
+  opacity: 0.35;
+  stroke-linecap: round;
+}
+
+/* Fades as the gland is lost, so a hypopituitary pituitary looks like one. */
+.anteriorLobe {
+  fill: color-mix(in srgb, var(--pituitary) calc(var(--level, 1) * var(--wash)), var(--panel));
+  stroke: color-mix(in srgb, var(--pituitary) calc(0.35 + var(--level, 1) * 0.65) 100%, transparent);
+  stroke-width: 1.8;
+  transition: fill 0.4s ease;
+}
+
+.posteriorLobe {
+  fill: color-mix(in srgb, var(--adh) var(--wash-faint), var(--panel));
+  stroke: var(--adh);
+  stroke-width: 1.5;
+}
+
+.lobeLabel {
+  font-family: var(--sans);
+  font-size: 9px;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+/* --- Hormone routes --- */
+
+.route {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: calc(1.5px + var(--level, 0) * 2.5px);
+  opacity: calc(0.28 + var(--level, 0) * 0.72);
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
+}
+
+.trophic {
+  composes: route;
+}
+
+.secretion {
+  composes: route;
+}
+
+.exogenous {
+  composes: route;
+  stroke: var(--danger);
+  stroke-dasharray: 6 4;
+}
+
+.exogenousLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--danger);
+  opacity: calc(0.3 + var(--level, 0) * 0.7);
+}
+
+.feedback {
+  composes: route;
+  stroke-dasharray: 4 4;
+}
+
+.feedbackNegative {
+  stroke: var(--text-dim);
+}
+
+.feedbackPositive {
+  stroke: var(--ok);
+}
+
+.feedbackLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  fill: currentColor;
+}
+
+.toTissue {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* --- Circulation and target tissue --- */
+
+.circulation {
+  fill: color-mix(in srgb, var(--artery) var(--wash-faint), transparent);
+  stroke: color-mix(in srgb, var(--artery) 40%, transparent);
+  stroke-width: 1.5;
+}
+
+.tissue {
+  fill: color-mix(in srgb, var(--sarcomere) calc(var(--level, 0) * var(--wash)), var(--panel));
+  stroke: color-mix(in srgb, var(--sarcomere) 55%, transparent);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+.tissueDetail {
+  font-family: var(--sans);
+  font-size: 9px;
+  fill: var(--text-faint);
+}
+
+.hormoneTag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.markerExcite {
+  fill: context-stroke;
+}
+
+.markerInhibit {
+  fill: none;
+  stroke: context-stroke;
+  stroke-width: 2;
+}
+
+.anatomy {
+  composes: anatomy from '../../styles/diagramText.module.css';
+}
+
+.anatomyStrong {
+  composes: anatomyStrong from '../../styles/diagramText.module.css';
+}

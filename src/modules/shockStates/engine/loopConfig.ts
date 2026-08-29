@@ -16,6 +16,7 @@ export const shockLoopConfig: EngineLoopConfig<ShockState, ShockInputs, ShockDer
     svo2: snapshot.derived.mixedVenousSaturationPercent,
   }),
   maxDtSeconds: SHOCK_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: SHOCK_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: SHOCK_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: SHOCK_SIMULATION.HISTORY_CAPACITY,
   timeScale: SHOCK_SIMULATION.TIME_SCALE,

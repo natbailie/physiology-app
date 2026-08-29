@@ -15,6 +15,7 @@ export const respiratoryLoopConfig: EngineLoopConfig<RespState, RespInputs, Resp
     plasmaHCO3: snapshot.derived.plasmaHCO3,
   }),
   maxDtSeconds: RESP_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: RESP_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: RESP_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: RESP_SIMULATION.HISTORY_CAPACITY,
   timeScale: RESP_SIMULATION.TIME_SCALE,

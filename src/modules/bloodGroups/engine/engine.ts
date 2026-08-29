@@ -1,4 +1,4 @@
-import { BLOOD_SIMULATION, REACTION, TRANSFUSION } from './constants';
+import { BLOOD_SIMULATION, HAEMOLYTIC_DISEASE, REACTION, TRANSFUSION } from './constants';
 import {
   aboMajorIncompatible,
   classifyReaction,
@@ -6,6 +6,12 @@ import {
   patternSummary,
   reactionSeverity,
 } from './bloodMechanics';
+import {
+  cordBilirubinUmolL,
+  fetalExposure,
+  fetalHaemoglobinGDl,
+  nextPregnancySensitisationRiskPct,
+} from './hdn';
 import { aboName } from './bloodMechanics';
 import { approach, clamp } from '@/shared/lib/math';
 import type {
@@ -22,7 +28,12 @@ export function createInitialState(): BloodInternalState {
   };
 }
 
-function reactionArmOf(inputs: BloodInputs): 'none' | 'immediate intravascular (IgM)' | 'delayed extravascular (IgG)' {
+function reactionArmOf(inputs: BloodInputs): 'none' | 'immediate intravascular (IgM)' | 'delayed extravascular (IgG)' | 'fetal haemolysis (maternal IgG)' {
+  // The two scenarios are mutually exclusive worlds: in the HDN scenario the transfusion
+  // inputs are inert (they describe a unit of blood nobody gave), so only the placental
+  // arm can ever fire.
+  if (inputs.hdnScenario > 0.5)
+    return fetalExposure(inputs) ? 'fetal haemolysis (maternal IgG)' : 'none';
   if (aboMajorIncompatible(inputs.recipientAboIndex, inputs.donorAboIndex))
     return 'immediate intravascular (IgM)';
   if (!inputs.recipientRhPositive && inputs.donorRhPositive > 0.5 && inputs.rhSensitised > 0.5)
@@ -30,18 +41,32 @@ function reactionArmOf(inputs: BloodInputs): 'none' | 'immediate intravascular (
   return 'none';
 }
 
+/** Severity target for the active reaction arm, plus its timescale in seconds. */
+function severityTargetOf(
+  inputs: BloodInputs,
+): { target: number; tau: number } {
+  const arm = reactionArmOf(inputs);
+  if (arm === 'immediate intravascular (IgM)')
+    return { target: reactionSeverity(inputs.recipientAboIndex, inputs.donorAboIndex, inputs.transfusionVolumeMl), tau: REACTION.ABO_FAST_TAU_SECONDS };
+  if (arm === 'delayed extravascular (IgG)')
+    return {
+      target: clamp((inputs.transfusionVolumeMl / TRANSFUSION.MAX_VOLUME_ML) * 55 * (inputs.rhSensitised > 0.5 ? 1 : 0.15), 0, 100),
+      tau: REACTION.RH_SLOW_TAU_SECONDS,
+    };
+  if (arm === 'fetal haemolysis (maternal IgG)')
+    // Continuous placental exposure through the third trimester: slower and deeper than a
+    // single transfused unit, which is why severe HDN threatens hydrops rather than shock.
+    return { target: clamp(70 + inputs.transfusionVolumeMl / 50, 0, 100), tau: REACTION.RH_SLOW_TAU_SECONDS * 1.4 };
+  return { target: 0, tau: REACTION.ABO_FAST_TAU_SECONDS };
+}
+
 export function computeDerived(state: BloodInternalState, inputs: BloodInputs): BloodDerived {
   const arm = reactionArmOf(inputs);
-  const severityTarget =
-    arm === 'immediate intravascular (IgM)'
-      ? reactionSeverity(inputs.recipientAboIndex, inputs.donorAboIndex, inputs.transfusionVolumeMl)
-      : arm === 'delayed extravascular (IgG)'
-        ? clamp((inputs.transfusionVolumeMl / TRANSFUSION.MAX_VOLUME_ML) * 55 * (inputs.rhSensitised > 0.5 ? 1 : 0.15), 0, 100)
-        : 0;
+  const severityTarget = severityTargetOf(inputs).target;
+  void severityTarget;
 
   // Severity itself relaxes toward the target along the matching timescale.
   const severity = state.haemolyticSeverity;
-  void severityTarget;
 
   const freeHb = arm === 'immediate intravascular (IgM)' ? clamp(severity * REACTION.FREE_HB_PER_SEVERITY, 0, 350) : clamp(severity * 0.4, 0, 60);
   const complement = arm === 'immediate intravascular (IgM)' ? clamp(severity * REACTION.COMPLEMENT_CONSUMPTION_PER_SEVERITY, 0, 100) : clamp(severity * 0.2, 0, 40);
@@ -59,11 +84,22 @@ export function computeDerived(state: BloodInternalState, inputs: BloodInputs): 
     rhIncompatible: rhInc,
     volumeMl: inputs.transfusionVolumeMl,
   };
+  const isFetal = arm === 'fetal haemolysis (maternal IgG)';
+  const baseClassification = classifyReaction(classificationPattern);
+  const classification = isFetal ? ('HDN: fetal haemolysis from maternal IgG' as const) : baseClassification;
+  const fetalHb = fetalHaemoglobinGDl(severity);
+  const cordBilirubin = cordBilirubinUmolL(severity);
 
   return {
     recipientType: `${aboName(inputs.recipientAboIndex)}${inputs.recipientRhPositive > 0.5 ? '+' : '−'}`,
     donorType: `${aboName(inputs.donorAboIndex)}${inputs.donorRhPositive > 0.5 ? '+' : '−'}`,
-    crossmatchVerdict: crossmatchVerdict(inputs),
+    crossmatchVerdict: inputs.hdnScenario > 0.5
+      ? nextPregnancySensitisationRiskPct(inputs) > 0
+        ? 'anti-D indicated — prevent sensitisation at this delivery'
+        : inputs.rhSensitised > 0.5
+          ? 'already sensitised — monitor fetal haemolysis; anti-D cannot help now'
+          : 'no sensitisation risk'
+      : crossmatchVerdict(inputs),
     aboIncompatible: aboInc,
     rhIncompatible: rhInc,
     reactionArm: arm,
@@ -74,14 +110,24 @@ export function computeDerived(state: BloodInternalState, inputs: BloodInputs): 
     dicRiskPct: dicRisk,
     renalInjuryRiskPct: renalRisk,
     shockIndex,
-    classification: classifyReaction(classificationPattern),
-    patternSummary: patternSummary({
-      classification: classifyReaction(classificationPattern),
-      freeHb,
-      complementPct: complement,
-      dicRisk,
-      renalRisk,
-    }),
+    classification,
+    hdnScenario: inputs.hdnScenario > 0.5 ? 1 : 0,
+    patternSummary: isFetal
+      ? `fetal Hb ${fetalHb.toFixed(1)} g/dL, cord bilirubin ${cordBilirubin.toFixed(0)} µmol/L — IgG clears cells extravascularly across the placenta`
+      : patternSummary({
+          classification: baseClassification,
+          freeHb,
+          complementPct: complement,
+          dicRisk,
+          renalRisk,
+        }),
+    fetalHaemoglobinGDl: inputs.hdnScenario > 0.5 ? fetalHb : HAEMOLYTIC_DISEASE.FETAL_HB_BASELINE_GDL,
+    cordBilirubinUmolL: inputs.hdnScenario > 0.5 ? cordBilirubin : 0,
+    hydropsRiskPct:
+      inputs.hdnScenario > 0.5 && isFetal
+        ? clamp(((severity - HAEMOLYTIC_DISEASE.HYDROPS_ONSET_SEVERITY) / (100 - HAEMOLYTIC_DISEASE.HYDROPS_ONSET_SEVERITY)) * 100, 0, 100)
+        : 0,
+    nextPregnancySensitisationRiskPct: nextPregnancySensitisationRiskPct(inputs),
   };
 }
 
@@ -90,15 +136,7 @@ export function tick(
   inputs: BloodInputs,
   dtSeconds: number,
 ): BloodInternalState {
-  const arm = reactionArmOf(inputs);
-  let target = 0;
-  let tau: number = REACTION.ABO_FAST_TAU_SECONDS;
-  if (arm === 'immediate intravascular (IgM)') {
-    target = reactionSeverity(inputs.recipientAboIndex, inputs.donorAboIndex, inputs.transfusionVolumeMl);
-  } else if (arm === 'delayed extravascular (IgG)') {
-    target = clamp((inputs.transfusionVolumeMl / TRANSFUSION.MAX_VOLUME_ML) * 55 * (inputs.rhSensitised > 0.5 ? 1 : 0.15), 0, 100);
-    tau = REACTION.RH_SLOW_TAU_SECONDS;
-  }
+  const { target, tau } = severityTargetOf(inputs);
 
   return {
     simTimeSeconds: state.simTimeSeconds + dtSeconds,

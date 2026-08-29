@@ -1,0 +1,47 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ring {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.marker {
+  fill: var(--text, #fff);
+  stroke: var(--danger, #c33);
+  stroke-width: 2;
+}
+
+.phaseLabel {
+  fill: var(--text, #ddd);
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.subLabel {
+  fill: var(--text-faint);
+  font-size: 12px;
+}
+
+.badge,
+.badgeActive {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.badge {
+  color: var(--text-faint);
+  border-color: var(--panel-border);
+}
+
+.badgeActive {
+  color: var(--warn, #da5);
+  border-color: currentColor;
+}

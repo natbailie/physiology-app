@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { HpaDiagram } from './components/HpaDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hpaAxisContent } from './content';
 import { hpaLoopConfig } from './engine/loopConfig';
 import { perturbAcuteStressor } from './engine/engine';
-import { DEFAULT_HPA_INPUTS, HPA_PRESETS, type HpaPresetName, HPA_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_HPA_INPUTS, HPA_PRESETS, HPA_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { HpaInputs } from './engine/types';
 
 export function HpaPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HpaInputs>('hpaAxis', DEFAULT_HPA_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hpaLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_HPA_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'hpaAxis',
@@ -35,24 +46,25 @@ export function HpaPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof HpaInputs>(key: K, value: HpaInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: HpaPresetName) {
-    setInputs((prev) => ({ ...prev, ...HPA_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_HPA_INPUTS,
+    presets: HPA_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerAcuteStressor() {
     perturb((state) => perturbAcuteStressor(state));
   }
 
-  const cortisolHistory = history.map((h) => h.cortisol);
-  const cortisolHistoryBaseline = baseline.history?.map((h) => h.cortisol) ?? null;
-  const acthHistory = history.map((h) => h.acth * 100);
-  const acthHistoryBaseline = baseline.history?.map((h) => h.acth * 100) ?? null;
-  const reserveHistory = history.map((h) => h.adrenalReserve * 100);
-  const reserveHistoryBaseline = baseline.history?.map((h) => h.adrenalReserve * 100) ?? null;
+  const cortisolHistory = useSeries(history, (h) => h.cortisol);
+  const cortisolHistoryBaseline = useSeries(baseline.history, (h) => h.cortisol);
+  const acthHistory = useSeries(history, (h) => h.acth * 100);
+  const acthHistoryBaseline = useSeries(baseline.history, (h) => h.acth * 100);
+  const reserveHistory = useSeries(history, (h) => h.adrenalReserve * 100);
+  const reserveHistoryBaseline = useSeries(baseline.history, (h) => h.adrenalReserve * 100);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function HpaPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={HPA_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Acute stressor', onClick: triggerAcuteStressor, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

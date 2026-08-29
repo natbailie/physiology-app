@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
 import { ControlGroup, ControlRail } from '@/shared/components/ControlRail/ControlRail';
@@ -38,7 +39,7 @@ const INFUSION_OPTIONS: { value: Infusion; label: string }[] = [
   { value: 'potassiumReplacement', label: 'K+ replacement' },
 ];
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <ControlGroup label="Intake">
@@ -166,3 +167,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

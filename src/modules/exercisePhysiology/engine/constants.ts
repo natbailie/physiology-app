@@ -55,4 +55,8 @@ export const EXERCISE_SIMULATION = {
   HISTORY_CAPACITY: 700,
   /** Responses settle over minutes; compressed so long efforts stay watchable. */
   TIME_SCALE: 60,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 720,
 } as const;

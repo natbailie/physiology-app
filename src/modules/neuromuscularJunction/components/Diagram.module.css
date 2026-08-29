@@ -51,23 +51,135 @@
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- Presynaptic --- */
+
+.bouton {
+  fill: color-mix(in srgb, var(--axon) var(--wash-faint), var(--panel));
+  stroke: var(--axon);
+  stroke-width: 2;
+}
+
+/* The reserve pool, back from the membrane. Depletes with sustained high-frequency firing,
+   which is what turns a train into a fade. */
+.vesicleReserve {
+  fill: color-mix(in srgb, var(--axon) calc(var(--pool, 1) * var(--wash)), transparent);
+  stroke: color-mix(in srgb, var(--axon) calc(var(--pool, 1) * 50%), transparent);
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+/* Docked and ready. Botulinum toxin cleaves the SNAREs that put them here, so this is the row
+   that empties first and the reason release collapses at the very first step. */
+.vesicleDocked {
+  fill: color-mix(in srgb, var(--axon) var(--wash-strong), var(--panel));
+  stroke: var(--axon);
+  stroke-width: 1.2;
+}
+
+.activeZone {
+  fill: var(--axon);
+  opacity: 0.7;
+}
+
+/* The Lambert-Eaton target: no calcium entry, no release, however many vesicles are waiting. */
+.calciumChannel {
+  fill: color-mix(in srgb, var(--calcium-signal, var(--pth)) calc(var(--calcium, 1) * 85%), transparent);
+  stroke: color-mix(in srgb, var(--pth) calc(var(--calcium, 1) * 70%), transparent);
+  stroke-width: 1;
+  transition: fill 0.4s ease;
+}
+
+.transmitter {
+  fill: var(--second-messenger);
+  opacity: 0.8;
+}
+
+/* --- Cleft --- */
+
+/* Acetylcholinesterase in the basal lamina. Strip it out and each quantum lingers; that is
+   pyridostigmine at one dose and an organophosphate at another. */
+.esterase {
+  fill: none;
+  stroke: var(--somatostatin);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: calc(0.12 + var(--esterase, 1) * 0.6);
+  transition: opacity 0.4s ease;
+}
+
+/* --- Postsynaptic --- */
+
+.folds {
+  fill: none;
+  stroke: var(--sarcomere);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+/* Receptors sit on the crests, where the transmitter arrives. Myasthenia thins them and leaves
+   everything presynaptic untouched. */
+.receptor {
+  fill: var(--sarcomere);
+  opacity: 0.85;
+}
+
+/* Occupied by a competitive blocker: present, but not available. */
+.receptorBlocked {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1.2;
+}
+
+.muscle {
+  fill: color-mix(in srgb, var(--sarcomere) calc(var(--force, 1) * var(--wash)), var(--panel));
+  stroke: var(--sarcomere);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+/* --- The end-plate potential against the threshold it must clear --- */
+
+.eppTrack {
+  fill: var(--panel-raised);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.eppFill {
+  fill: color-mix(in srgb, var(--vm) var(--wash-strong), transparent);
+  transition:
+    height 0.3s ease,
+    y 0.3s ease;
+}
+
+.threshold {
+  stroke: var(--danger);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.sideTick {
   font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+}
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.anatomyStrong {
+  composes: anatomyStrong from '../../../shared/styles/diagramText.module.css';
 }

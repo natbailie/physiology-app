@@ -29,7 +29,7 @@ export function CalciumDiagram({ derived }: CalciumDiagramProps) {
 
   return (
     <DiagramFrame
-      viewBox="0 0 480 300"
+      viewBox="60 17 376 294"
       ariaLabel="Animated diagram of calcium homeostasis: parathyroid glands releasing PTH which acts on bone and kidney, the kidney activating vitamin D to calcitriol which drives gut calcium absorption, and serum calcium feeding back to suppress PTH"
       defs={
         <>

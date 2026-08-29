@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -14,13 +18,20 @@ import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPane
 import { cardiorenalContent } from './content';
 import { cardiorenalLoopConfig } from './engine/loopConfig';
 import { perturbBloodVolume } from './engine/engine';
-import { DEFAULT_INPUTS, PRESETS, PRESET_LABELS, PRESET_ORDER, type PresetName } from './engine/presets';
+import { DEFAULT_INPUTS, PRESETS, PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import { SIMULATION } from './engine/constants';
 import type { SimInputs } from './engine/types';
 
 export function CardiorenalPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<SimInputs>('cardiorenal', DEFAULT_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cardiorenalLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'cardiorenal',
@@ -36,24 +47,25 @@ export function CardiorenalPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof SimInputs>(key: K, value: SimInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: PresetName) {
-    setInputs((prev) => ({ ...prev, ...PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_INPUTS,
+    presets: PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerHemorrhage() {
     perturb((state) => perturbBloodVolume(state, SIMULATION.HEMORRHAGE_BV_MULTIPLIER));
   }
 
-  const mapHistory = history.map((h) => h.map);
-  const mapHistoryBaseline = baseline.history?.map((h) => h.map) ?? null;
-  const gfrHistory = history.map((h) => h.gfr);
-  const gfrHistoryBaseline = baseline.history?.map((h) => h.gfr) ?? null;
-  const bvHistory = history.map((h) => h.bloodVolume);
-  const bvHistoryBaseline = baseline.history?.map((h) => h.bloodVolume) ?? null;
+  const mapHistory = useSeries(history, (h) => h.map);
+  const mapHistoryBaseline = useSeries(baseline.history, (h) => h.map);
+  const gfrHistory = useSeries(history, (h) => h.gfr);
+  const gfrHistoryBaseline = useSeries(baseline.history, (h) => h.gfr);
+  const bvHistory = useSeries(history, (h) => h.bloodVolume);
+  const bvHistoryBaseline = useSeries(baseline.history, (h) => h.bloodVolume);
 
   return (
     <ModulePage
@@ -65,10 +77,10 @@ export function CardiorenalPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Hemorrhage', onClick: triggerHemorrhage, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<PhysiologyDiagram derived={snapshot.derived} />}

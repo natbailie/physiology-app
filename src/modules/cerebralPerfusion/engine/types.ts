@@ -27,6 +27,9 @@ export interface CerebralInputs {
   /** Cerebral venous outflow pressure, mmHg (0-25). Raised by jugular obstruction, a tight
    * collar, or head-down positioning. */
   venousOutflowPressureMmHg: number;
+  /** Blood-brain barrier permeability, % of normal (0 = impermeable, 100 = normal,
+   * >100 = disrupted). Raised by trauma, tumour, inflammation or hypertensive crisis. */
+  bbbPermeabilityPct: number;
 }
 
 export interface CerebralInternalState {
@@ -41,6 +44,9 @@ export interface CerebralInternalState {
   /** Smoothed arteriolar calibre, 1 = normal. Carries the vasodilatory response to CO2 and to
    * a falling perfusion pressure. */
   vesselCalibre: number;
+  /** Vasogenic oedema: fluid extravasated through a disrupted BBB, mL. Accumulates over hours
+   * and contributes directly to the mass effect inside the skull. */
+  vasogenicOedemaMl: number;
 }
 
 export interface CerebralDerived {
@@ -74,6 +80,8 @@ export interface CerebralDerived {
   csfAbsorptionCapacity: number;
   autoregulationIntegrity: number;
   venousOutflowPressureMmHg: number;
+  bbbPermeabilityPct: number;
+  vasogenicOedemaMl: number;
 }
 
 export interface CerebralSnapshot {

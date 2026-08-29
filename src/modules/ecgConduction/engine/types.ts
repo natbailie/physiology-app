@@ -19,7 +19,30 @@ export type LeadName = LimbLeadName | PrecordialLeadName;
  */
 export type InjuryTerritory = 'anterior' | 'inferior' | 'lateral' | 'posterior';
 
-export type Rhythm = 'sinus' | 'atrialFibrillation';
+/**
+ * The rhythms the engine can run. Each one is a statement about WHO is driving the chambers:
+ *
+ * - `sinus` / `sickSinus` — the SA node drives; sick sinus fails intermittently, with
+ *   junctional escape filling the pauses.
+ * - `atrialFibrillation` / `atrialFlutter` — the atria drive themselves (chaotically or as a
+ *   macro re-entry circuit) and the AV node gates what reaches the ventricles.
+ * - `wpw` — an accessory pathway arrives alongside the AV node and pre-excites the ventricles.
+ * - `ventricularTachycardia` / `torsades` — a ventricular focus takes over and the atria are
+ *   left marching independently behind it (AV dissociation).
+ * - `ventricularFibrillation` — nobody drives anything; no organised depolarisation at all.
+ */
+export type Rhythm =
+  | 'sinus'
+  | 'atrialFibrillation'
+  | 'atrialFlutter'
+  | 'wpw'
+  | 'sickSinus'
+  | 'ventricularTachycardia'
+  | 'torsades'
+  | 'ventricularFibrillation';
+
+/** The rhythms in which a ventricular focus, not the conduction system, drives the ventricles. */
+export type VentricularFocusRhythm = 'ventricularTachycardia' | 'torsades';
 
 /** Anatomical regions of the conduction system and myocardium, in activation order. */
 export type RegionId =
@@ -80,6 +103,11 @@ export interface EcgState {
   /** Interval between the last two ventricular beats, ms — needed for rate-corrected QT and
    * for the irregular ventricular response of atrial fibrillation */
   lastRrIntervalMs: number;
+  /** Exponential moving average of RR intervals across recent ventricular beats, ms. A single
+   * RR interval is a sample of a possibly erratic rhythm; the running mean is what a monitor's
+   * heart-rate counter actually shows, and it is the stable quantity for a rhythm with
+   * pauses (sick sinus) or an irregular response (atrial fibrillation) to settle onto. */
+  emaRrMs: number;
   /** Length of the atrial cycle currently in progress, ms */
   currentAtrialIntervalMs: number;
   /** Length of the ventricular cycle in progress, ms — used when the ventricles are running
@@ -87,6 +115,10 @@ export interface EcgState {
   currentVentricularIntervalMs: number;
   /** Whether the atrial beat in progress will conduct through to the ventricles */
   currentBeatConducts: boolean;
+  /** True while the SA node is mid-pause in sick sinus syndrome: the stretched atrial cycle
+   * in progress carries NO impulse yet, so nothing may conduct from it and no P wave is
+   * being written — the pause is electrical silence, not a delayed beat. */
+  saPaused: boolean;
   /** Guards against re-triggering the ventricles twice from one atrial beat */
   ventricularTriggeredThisBeat: boolean;
 }
@@ -123,6 +155,9 @@ export interface EcgDerived {
   qtcMs: number;
   heartRateBpm: number;
   ventricularRateBpm: number;
+  /** Rate averaged over recent beats — the number a bedside monitor displays, and the one
+   * that stays readable when individual RR intervals are erratic or punctuated by pauses. */
+  meanVentricularRateBpm: number;
   /** True when atria and ventricles are beating independently */
   isDissociated: boolean;
   rhythmRegular: boolean;

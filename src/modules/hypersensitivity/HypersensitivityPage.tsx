@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ReactionTimeline } from './components/ReactionTimeline';
 import { MechanismDiagram } from './components/MechanismDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -18,7 +22,6 @@ import { perturbAdrenaline, perturbChallenge, perturbDiurese, perturbTransfuse }
 import {
   DEFAULT_HYPERSENSITIVITY_INPUTS,
   HYPERSENSITIVITY_PRESETS,
-  type HypersensitivityPresetName,
   HYPERSENSITIVITY_PRESET_LABELS,
   MECHANISM_PRESET_ORDER,
   PRESET_ORDER,
@@ -29,6 +32,13 @@ import type { HypersensitivityInputs } from './engine/types';
 export function HypersensitivityPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HypersensitivityInputs>('hypersensitivity', DEFAULT_HYPERSENSITIVITY_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hypersensitivityLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_HYPERSENSITIVITY_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'hypersensitivity',
@@ -44,20 +54,21 @@ export function HypersensitivityPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof HypersensitivityInputs>(key: K, value: HypersensitivityInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: HypersensitivityPresetName) {
-    setInputs((prev) => ({ ...prev, ...HYPERSENSITIVITY_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_HYPERSENSITIVITY_INPUTS,
+    presets: HYPERSENSITIVITY_PRESETS,
+    resetEngine: reset,
+  });
 
-  const injuryHistory = history.map((h) => h.tissueInjury * 100);
-  const injuryBaseline = baseline.history?.map((h) => h.tissueInjury * 100) ?? null;
-  const typeIHistory = history.map((h) => h.typeI * 100);
-  const typeIBaseline = baseline.history?.map((h) => h.typeI * 100) ?? null;
-  const typeIVHistory = history.map((h) => h.typeIV * 100);
-  const typeIVBaseline = baseline.history?.map((h) => h.typeIV * 100) ?? null;
+  const injuryHistory = useSeries(history, (h) => h.tissueInjury * 100);
+  const injuryBaseline = useSeries(baseline.history, (h) => h.tissueInjury * 100);
+  const typeIHistory = useSeries(history, (h) => h.typeI * 100);
+  const typeIBaseline = useSeries(baseline.history, (h) => h.typeI * 100);
+  const typeIVHistory = useSeries(history, (h) => h.typeIV * 100);
+  const typeIVBaseline = useSeries(baseline.history, (h) => h.typeIV * 100);
 
   return (
     <ModulePage
@@ -73,7 +84,7 @@ export function HypersensitivityPage() {
             { label: 'Transfusion', order: TRANSFUSION_PRESET_ORDER },
           ]}
           labels={HYPERSENSITIVITY_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Adrenaline', onClick: () => perturb((state) => perturbAdrenaline(state)), variant: 'impulse' },
             { label: 'Diurese', onClick: () => perturb((state) => perturbDiurese(state)), variant: 'impulse' },
@@ -85,7 +96,7 @@ export function HypersensitivityPage() {
             { label: 'Transfuse', onClick: () => perturb((state) => perturbTransfuse(state)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

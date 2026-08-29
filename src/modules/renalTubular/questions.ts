@@ -1,9 +1,9 @@
-import type { PredictQuestion } from '@/shared/assessment/types';
+import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
 import type { RenalTubularDerived, RenalTubularInputs, RenalTubularState } from './engine/types';
 import type { RenalTubularPresetName } from './engine/presets';
 
 type Snapshot = { state: RenalTubularState; derived: RenalTubularDerived };
-export type RenalTubularQuestion = PredictQuestion<RenalTubularInputs, RenalTubularPresetName, Snapshot>;
+export type RenalTubularQuestion = ModuleQuestion<RenalTubularInputs, RenalTubularPresetName, Snapshot>;
 
 export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
   {
@@ -81,5 +81,105 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     explanation:
       'The GFR falls, because the macula densa reads high distal sodium chloride as evidence that the glomerulus above it is filtering too fast and constricts the afferent arteriole in response. It is a single-nephron autoregulatory loop, and it normally protects against losing enormous volumes when filtration transiently rises. Here it is being fooled: the sodium is high because reabsorption was blocked, not because filtration rose — which is part of why the diuretic response to a loop agent plateaus.',
     metric: (s) => s.derived.gfrAfterTGF,
+  },
+
+  // --- The RTAs: one acid arm, three different failures ---
+
+  {
+    id: 'distal-rta-alkaline-urine',
+    stem: 'A patient with recurrent calcium phosphate stones is found to have a serum bicarbonate of 14. Their distal H+-ATPase has failed.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Distal H+ secretion fails (type 1 RTA).', inputs: { distalAcidSecretion: 0.08 } },
+    prompt: 'What happens to the urine pH?',
+    watch: 'the urine pH',
+    correctDirection: 'rises',
+    observeSeconds: 7200,
+    explanation:
+      'It rises ABOVE 5.5 — inappropriately alkaline for an acidemic patient, and that contradiction IS the diagnosis. Every other acidotic kidney pushes urine pH toward 4.5; a distal RTA cannot, because the alpha-intercalated cell\'s pump is what creates the hydrogen ion gradient in the first place. The stones follow mechanically: alkaline urine precipitates calcium phosphate, and chronic citrate loss leaves nothing to hold the calcium in solution. Compare with proximal RTA, where the pump works and the urine can still be acidified.',
+    metric: (s) => s.derived.urinePH,
+  },
+  {
+    id: 'type4-rta-hyperkalaemia',
+    stem: 'A diabetic patient with CKD has a bicarbonate of 17 and a potassium of 6.0. Hypoaldosteronism is suspected.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Aldosterone tone collapses (type 4 RTA).', inputs: { aldosteroneTone: 0.12 } },
+    prompt: 'What happens to serum potassium?',
+    watch: 'serum potassium',
+    correctDirection: 'rises',
+    observeSeconds: 7200,
+    explanation:
+      'It climbs toward 6, and the potassium is the danger that makes type 4 worth catching early. Aldosterone does three jobs through one distal mechanism: it secretes potassium, drives ammoniagenesis so acid can be buffered and excreted, and reclaims sodium. Its failure therefore produces hyperkalaemia, a positive urine anion gap, and a mild acidosis from a single cause. Note the urine still acidifies below 5.5 — the pump is fine; only the hormone is missing — which separates this from distal RTA on the plainest of tests.',
+    metric: (s) => s.derived.serumPotassiumEstimateMeqL,
+  },
+  {
+    id: 'acetazolamide-bicarbonate-diuresis',
+    stem: 'A climber takes acetazolamide for altitude prophylaxis. The drug blocks carbonic anhydrase in the proximal tubule.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Acetazolamide is started.', inputs: { acetazolamideDose: 85 } },
+    prompt: 'What happens to serum bicarbonate?',
+    watch: 'serum bicarbonate',
+    correctDirection: 'falls',
+    observeSeconds: 7200,
+    explanation:
+      'It falls by several points, because blocking carbonic anhydrase paralyzes the reaction the proximal tubule uses to reclaim filtered bicarbonate. What cannot be reclaimed is lost, taking water with it — an osmotic-style diuresis of alkaline fluid, which is why the drug produces both a metabolic acidosis and an ALKALINE urine, a combination no other common agent causes. The acidosis is exactly why it helps at altitude: it mimics acclimatisation by ventilatory drive, compensating for the bicarbonate the kidney has been made to waste.',
+    metric: (s) => s.derived.serumBicarbonateMeqL,
+  },
+  {
+    id: 'mannitol-osmotic-diuresis',
+    stem: 'A patient with rising intracranial pressure is given mannitol. It is filtered at the glomerulus and then not reabsorbed anywhere at all.',
+    setup: { preset: 'normal' },
+    intervention: { label: 'An osmotic load is infused.', inputs: { osmoticLoad: 120 } },
+    prompt: 'What happens to urine flow?',
+    watch: 'urine flow',
+    correctDirection: 'rises',
+    observeSeconds: 2400,
+    explanation:
+      'It rises sharply, and no transporter was blocked to make it happen. Mannitol stays in the tubular lumen purely by being un-reclaimable, and the water that would have followed solute out of the nephron instead follows the mannitol OUT — osmotic diuresis is hydraulics, not pharmacology. This is also why any uncontrolled solute does the same thing: glucose above threshold in diabetes produces precisely this pattern, which is the polyuria that first brings those patients to medical attention.',
+    metric: (s) => s.derived.urineFlowRateMLPerMin,
+  },
+  {
+    id: 'tolvaptan-overcomes-siadh',
+    stem: 'A patient with SIADH remains hyponatraemic despite fluid restriction. A V2-receptor antagonist (tolvaptan) is started on top of their inappropriately high ADH.',
+    setup: { preset: 'siadh' },
+    intervention: { label: 'The V2 receptor is blocked.', inputs: { v2Blockade: 85 } },
+    prompt: 'What happens to urine osmolality?',
+    watch: 'urine osmolality',
+    correctDirection: 'falls',
+    observeSeconds: 2400,
+    explanation:
+      'It falls toward dilute, even though the ADH level itself never dropped — because tolvaptan does not argue with the hormone, it deafens the receptor. SIADH is the one sodium-water disorder treated by promoting water EXCRETION rather than by replacing or removing hormone, and this is the mechanism: aquaporin-2 never inserts, the duct stays water-tight, and free water that would have been retained leaves as dilute urine. Watch electrolyte-free water clearance rise while sodium handling is untouched — aquaretic, not diuretic, in the strict sense.',
+    metric: (s) => s.derived.finalUrineOsmolality,
+  },
+  {
+    id: 'atn-wastes-sodium',
+    stem: 'Two patients both have a creatinine of 2.3 and falling urine output. In this one the tubules themselves have died (acute tubular necrosis).',
+    setup: { preset: 'normal' },
+    intervention: { label: 'Tubular injury develops.', inputs: { tubularInjury: 0.9, gfrMLPerMin: 45 } },
+    prompt: 'What happens to the fractional excretion of sodium?',
+    watch: 'FENa',
+    correctDirection: 'rises',
+    observeSeconds: 7200,
+    explanation:
+      'It climbs above 2%, because active sodium reabsorption along the proximal tubule and loop is exactly what necrosis destroys. This number is how a rising creatinine is split into its two great families: prerenal kidneys are intact and starving, so they reclaim sodium ferociously under aldosterone and the FENa sits below 1%; post-renal-of-the-tubule kidneys shed it. The creatinine looks identical in both — it lags by hours and reflects filtration alone. When the question is "is this kidney failing because of perfusion or because of injury", the urine answers and the blood does not.',
+    metric: (s) => s.derived.fractionalExcretionNaPct,
+  },
+
+  // --- Naming the AKI from the urine ---
+
+  {
+    id: 'aki-urine-differentiation',
+    stem: 'A hypotensive postoperative patient has a creatinine of 2.4. The panel below was sent before any fluids were given.',
+    answer: 'preRenalAzotaemia',
+    options: ['preRenalAzotaemia', 'atn', 'type4RTA'],
+    panel: [
+      { label: 'FENa (%)', unit: '%', value: (s: Snapshot) => s.derived.fractionalExcretionNaPct, decimals: 2 },
+      { label: 'Urine Na (mEq/L)', unit: '', value: (s: Snapshot) => s.derived.urineSodiumMeqL, decimals: 0 },
+      { label: 'Urine osmolality (mOsm/kg)', unit: '', value: (s: Snapshot) => s.derived.finalUrineOsmolality, decimals: 0 },
+      { label: 'Serum K (mEq/L)', unit: '', value: (s: Snapshot) => s.derived.serumPotassiumEstimateMeqL, decimals: 1 },
+      { label: 'Creatinine (mg/dL)', unit: '', value: (s: Snapshot) => s.derived.serumCreatinineMgDl, decimals: 2 },
+    ] as readonly PanelField<Snapshot>[],
+    settleSeconds: 90000,
+    explanation:
+      'FENa under 1% with urine sodium below 20 and concentrated urine: an intact, aldosterone-driven nephron is scavenging every millimole it can while the glomerulus starves — prerenal azotaemia, and the right treatment is volume, not diuretics. Acute tubular necrosis produces the same creatinine but sheds sodium (FENa >2%) into an isosthenuric urine, because dead tubules cannot scavenge anything. Type 4 RTA raises the potassium with a positive anion gap but spares the creatinine entirely. One panel, three completely different resuscitation decisions.',
   }
 ];

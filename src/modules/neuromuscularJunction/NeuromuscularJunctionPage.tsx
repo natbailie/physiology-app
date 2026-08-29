@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,20 @@ import {
   NMJ_PRESETS,
   NMJ_PRESET_LABELS,
   NMJ_PRESET_ORDER,
-  type NmjPresetName,
 } from './engine/presets';
 import type { NmjInputs } from './engine/types';
+import { TrainOfFour } from './components/TrainOfFour';
 
 export function NeuromuscularJunctionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<NmjInputs>('neuromuscularJunction', DEFAULT_NMJ_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, nmjLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_NMJ_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'neuromuscularJunction',
@@ -41,22 +52,23 @@ export function NeuromuscularJunctionPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof NmjInputs>(key: K, value: NmjInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: NmjPresetName) {
-    setInputs((prev) => ({ ...prev, ...NMJ_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_NMJ_INPUTS,
+    presets: NMJ_PRESETS,
+    resetEngine: reset,
+  });
 
-  const eppHistory = history.map((h) => h.epp);
-  const eppHistoryBaseline = baseline.history?.map((h) => h.epp) ?? null;
-  const forceHistory = history.map((h) => h.force);
-  const forceHistoryBaseline = baseline.history?.map((h) => h.force) ?? null;
-  const safetyHistory = history.map((h) => h.safetyFactor);
-  const safetyHistoryBaseline = baseline.history?.map((h) => h.safetyFactor) ?? null;
-  const tofHistory = history.map((h) => h.tofRatio);
-  const tofHistoryBaseline = baseline.history?.map((h) => h.tofRatio) ?? null;
+  const eppHistory = useSeries(history, (h) => h.epp);
+  const eppHistoryBaseline = useSeries(baseline.history, (h) => h.epp);
+  const forceHistory = useSeries(history, (h) => h.force);
+  const forceHistoryBaseline = useSeries(baseline.history, (h) => h.force);
+  const safetyHistory = useSeries(history, (h) => h.safetyFactor);
+  const safetyHistoryBaseline = useSeries(baseline.history, (h) => h.safetyFactor);
+  const tofHistory = useSeries(history, (h) => h.tofRatio);
+  const tofHistoryBaseline = useSeries(baseline.history, (h) => h.tofRatio);
 
   return (
     <ModulePage
@@ -68,13 +80,13 @@ export function NeuromuscularJunctionPage() {
         <PresetBar
           order={NMJ_PRESET_ORDER}
           labels={NMJ_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Tetanic burst', onClick: () => perturb(perturbTetanicBurst), variant: 'impulse' },
             { label: 'Rest', onClick: () => perturb(perturbRest) },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -84,6 +96,7 @@ export function NeuromuscularJunctionPage() {
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
+          <TrainOfFour derived={snapshot.derived} />
           <Sparkline
             label="Muscle force"
             unit="%"

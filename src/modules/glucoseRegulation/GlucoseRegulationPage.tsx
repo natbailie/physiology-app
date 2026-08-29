@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { GlucoseDiagram } from './components/GlucoseDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { glucoseRegulationContent } from './content';
 import { glucoseLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal, perturbGiveInsulin } from './engine/engine';
-import { DEFAULT_GLUCOSE_INPUTS, GLUCOSE_PRESETS, type GlucosePresetName, GLUCOSE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_GLUCOSE_INPUTS, GLUCOSE_PRESETS, GLUCOSE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { GlucoseInputs } from './engine/types';
 
 export function GlucoseRegulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GlucoseInputs>('glucoseRegulation', DEFAULT_GLUCOSE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, glucoseLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_GLUCOSE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'glucoseRegulation',
@@ -35,13 +46,14 @@ export function GlucoseRegulationPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof GlucoseInputs>(key: K, value: GlucoseInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: GlucosePresetName) {
-    setInputs((prev) => ({ ...prev, ...GLUCOSE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_GLUCOSE_INPUTS,
+    presets: GLUCOSE_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerEatMeal() {
     perturb((state) => perturbEatMeal(state, inputs.mealCarbLoadGrams));
@@ -51,12 +63,12 @@ export function GlucoseRegulationPage() {
     perturb((state) => perturbGiveInsulin(state, inputs.exogenousInsulinUnits));
   }
 
-  const glucoseHistory = history.map((h) => h.bloodGlucose);
-  const glucoseHistoryBaseline = baseline.history?.map((h) => h.bloodGlucose) ?? null;
-  const insulinHistory = history.map((h) => h.insulin * 100);
-  const insulinHistoryBaseline = baseline.history?.map((h) => h.insulin * 100) ?? null;
-  const glucagonHistory = history.map((h) => h.glucagon * 100);
-  const glucagonHistoryBaseline = baseline.history?.map((h) => h.glucagon * 100) ?? null;
+  const glucoseHistory = useSeries(history, (h) => h.bloodGlucose);
+  const glucoseHistoryBaseline = useSeries(baseline.history, (h) => h.bloodGlucose);
+  const insulinHistory = useSeries(history, (h) => h.insulin * 100);
+  const insulinHistoryBaseline = useSeries(baseline.history, (h) => h.insulin * 100);
+  const glucagonHistory = useSeries(history, (h) => h.glucagon * 100);
+  const glucagonHistoryBaseline = useSeries(baseline.history, (h) => h.glucagon * 100);
 
   return (
     <ModulePage
@@ -68,10 +80,10 @@ export function GlucoseRegulationPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={GLUCOSE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Eat meal', onClick: triggerEatMeal, variant: 'impulse' }, { label: 'Give insulin', onClick: triggerGiveInsulin, variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<GlucoseDiagram derived={snapshot.derived} />}

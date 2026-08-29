@@ -128,6 +128,69 @@ export const ATRIAL_FIBRILLATION = {
   RR_VARIATION_MAX: 1.42,
 };
 
+/**
+ * Atrial flutter is the disciplined cousin of fibrillation: one macro re-entry circuit, usually
+ * around the tricuspid annulus, driving the atria at a near-fixed rate. Because the circuit
+ * captures the whole atrium uniformly, its waves are FAR more prominent than fibrillation's.
+ */
+export const ATRIAL_FLUTTER = {
+  CIRCUIT_RATE_BPM: 300,
+  // The AV node cannot conduct 300 impulses a minute, so it filters: every second wave gets
+  // through and the ventricles respond at a regular ~150 — the signature of typical flutter.
+  CONDUCTION_RATIO: 2,
+  WAVE_AMPLITUDE_SCALE: 1.7,
+};
+
+/** Rhythms driven by a single ventricular focus activating myocardium cell to cell. */
+export const VENTRICULAR_FOCUS = {
+  VT_RATE_BPM: 180,
+  TORSADES_RATE_BPM: 220,
+  // Cell-to-cell spread is an order of magnitude slower than His-Purkinje conduction, so each
+  // region waits its turn behind the focus and depolarises slowly once reached — a wide QRS.
+  FOCUS_RANK_DELAY_MS: 22,
+  FOCUS_QRS_STRETCH: 2.0,
+  // Ventricular fibrillation: no organised depolarisation survives, only rapidly shifting
+  // small loops that never align long enough to write a QRS.
+  VF_AMPLITUDE_MV: 0.14,
+  VF_BASE_HZ: 4.6,
+  VF_MIN_INTERVAL_MS: 120,
+  VF_MAX_INTERVAL_MS: 260,
+  // Torsades twists because the mean axis itself rotates round the baseline over seconds —
+  // the complexes swing from positive through isoelectric to negative as they go. The
+  // rotation has to be wide enough to carry the frontal axis past every limb lead's null,
+  // otherwise some leads would never see the negative half of the twist.
+  TWIST_PERIOD_S: 2.4,
+  // Wide enough that the rotating frontal axis sweeps past EVERY limb lead's null, so any
+  // lead — not just whichever faces the original axis — witnesses both polarities.
+  TWIST_AMPLITUDE_RADIANS: 2.9,
+};
+
+/** Pre-excitation via an accessory pathway (Wolff-Parkinson-White). */
+export const WPW = {
+  // The accessory bundle skips most of the AV node's protective delay, so part of the
+  // ventricle is activated early — shortening PR and slurring the QRS onset (the delta wave).
+  AV_DELAY_SAVED_MS: 50,
+  MIN_AV_DELAY_MS: 70,
+  // The delta wave slows the earliest forces without bypassing the conduction system
+  // entirely, so the complex widens modestly — never as far as a true bundle branch block.
+  DELTA_SEPTUM_STRETCH: 2.0,
+  DELTA_MYOCARDIUM_STRETCH: 1.9,
+};
+
+/** Sick sinus syndrome: the SA node fails intermittently, and a junctional escape pacemaker
+ * fills the pauses. */
+export const SICK_SINUS = {
+  PAUSE_PROBABILITY: 0.34,
+  PAUSE_STRETCH: 3.0,
+  JUNCTIONAL_RATE_BPM: 42,
+};
+
+/** Weight given to each new RR interval when updating the running mean. Chosen so roughly
+ * three beats settle the estimate — responsive to a real change, deaf to one wild interval. */
+export const RATE_AVERAGING = {
+  EMA_NEW_WEIGHT: 0.35,
+};
+
 export const AXIS = {
   NORMAL_MIN_DEGREES: -30,
   NORMAL_MAX_DEGREES: 90,
@@ -144,4 +207,7 @@ export const ECG_SIMULATION = {
   // watchable while its wave is being inscribed. The heart diagram and the trace are driven by
   // the same clock, so they stay provably in step.
   TIME_SCALE: 0.35,
+  /** Simulated seconds of settling applied before the first frame. See `settleSeconds`
+   * on `EngineLoopConfig`: measured as the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 20,
 };

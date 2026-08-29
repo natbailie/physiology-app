@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './PresetBar.module.css';
 
 export interface PresetAction {
@@ -38,7 +39,7 @@ interface PresetBarProps<T extends string> {
 
 /** Scenario presets and one-off actions, pinned in ModulePage's sticky top bar —
  * the fastest path to a teaching point, so it stays reachable at every scroll position. */
-export function PresetBar<T extends string>({
+function PresetBarBase<T extends string>({
   order,
   groups,
   labels,
@@ -49,6 +50,26 @@ export function PresetBar<T extends string>({
   disabled = false,
 }: PresetBarProps<T>) {
   const [copied, setCopied] = useState(false);
+  const { registerScenarios } = useModuleShell();
+
+  /**
+   * Publish the scenarios so the explainer can offer "show me" buttons beside the prose that
+   * names them. The bar already holds both halves — the labels and the apply handler — so
+   * registering here is what keeps this feature out of all 45 module pages.
+   *
+   * `labels` and `onApply` are module-level constants and a `useCallback`, so this settles after
+   * the first commit; `disabled` re-registers only on a practice phase change.
+   */
+  useEffect(() => {
+    // A `Record<T, string>` over a union has no index signature, so it needs the widening
+    // cast the shell's untyped, module-agnostic view of scenarios requires.
+    registerScenarios({
+      labels: labels as Record<string, string>,
+      apply: onApply as (id: string) => void,
+      disabled,
+    });
+    return () => registerScenarios(null);
+  }, [registerScenarios, labels, onApply, disabled]);
 
   /**
    * Copy, then say so for a moment.
@@ -121,3 +142,5 @@ export function PresetBar<T extends string>({
     </div>
   );
 }
+
+export const PresetBar = memo(PresetBarBase) as typeof PresetBarBase;

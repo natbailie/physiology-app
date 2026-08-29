@@ -125,7 +125,7 @@ export function GuytonDiagram({ derived }: GuytonDiagramProps) {
       </text>
 
       {/* --- The venous reservoir: what actually sets the filling pressure --- */}
-      <text className={styles.pathLabel} x={314} y={54}>
+      <text className={styles.anatomy} x={314} y={54}>
         Venous reservoir
       </text>
       <rect className={styles.reservoirBody} x={RESERVOIR.x} y={RESERVOIR.y} width={RESERVOIR.width} height={RESERVOIR.height} rx={6} />

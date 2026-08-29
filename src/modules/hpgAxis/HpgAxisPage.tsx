@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { HpgDiagram } from './components/HpgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -13,12 +17,19 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hpgAxisContent } from './content';
 import { hpgLoopConfig } from './engine/loopConfig';
-import { DEFAULT_HPG_INPUTS, HPG_PRESETS, type HpgPresetName, HPG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_HPG_INPUTS, HPG_PRESETS, HPG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { HpgInputs } from './engine/types';
 
 export function HpgAxisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HpgInputs>('hpgAxis', DEFAULT_HPG_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hpgLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_HPG_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'hpgAxis',
@@ -34,21 +45,22 @@ export function HpgAxisPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof HpgInputs>(key: K, value: HpgInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: HpgPresetName) {
-    setInputs((prev) => ({ ...prev, ...HPG_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_HPG_INPUTS,
+    presets: HPG_PRESETS,
+    resetEngine: reset,
+  });
 
   const isFemale = snapshot.derived.sex === 'female';
-  const lhHistory = history.map((h) => h.lh * 100);
-  const lhHistoryBaseline = baseline.history?.map((h) => h.lh * 100) ?? null;
-  const fshHistory = history.map((h) => h.fsh * 100);
-  const fshHistoryBaseline = baseline.history?.map((h) => h.fsh * 100) ?? null;
-  const steroidHistory = history.map((h) => h.gonadalSteroid * 100);
-  const steroidHistoryBaseline = baseline.history?.map((h) => h.gonadalSteroid * 100) ?? null;
+  const lhHistory = useSeries(history, (h) => h.lh * 100);
+  const lhHistoryBaseline = useSeries(baseline.history, (h) => h.lh * 100);
+  const fshHistory = useSeries(history, (h) => h.fsh * 100);
+  const fshHistoryBaseline = useSeries(baseline.history, (h) => h.fsh * 100);
+  const steroidHistory = useSeries(history, (h) => h.gonadalSteroid * 100);
+  const steroidHistoryBaseline = useSeries(baseline.history, (h) => h.gonadalSteroid * 100);
 
   return (
     <ModulePage
@@ -60,9 +72,9 @@ export function HpgAxisPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={HPG_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<HpgDiagram derived={snapshot.derived} />}

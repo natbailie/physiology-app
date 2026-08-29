@@ -58,8 +58,44 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Ferritin"
         value={derived.ferritinNgMl.toFixed(0)}
         unit="ng/mL"
-        secondary={derived.ferritinNgMl < 30 ? 'depleted' : undefined}
+        secondary={derived.ferritinNgMl < 30 ? 'depleted' : derived.inflammationLevelPct > 20 ? 'acute-phase veil' : undefined}
         colorVar="var(--iron)"
+      />
+      <ReadoutItem
+        label="Hepcidin"
+        value={(derived.hepcidinFraction * 100).toFixed(0)}
+        unit="%"
+        secondary={
+          derived.hepcidinFraction > 2.5
+            ? 'ferroportin shut — iron locked away'
+            : derived.hepcidinFraction < 0.4
+              ? 'export door wide open'
+              : undefined
+        }
+        colorVar="var(--liver)"
+      />
+      <ReadoutItem
+        label="Transferrin saturation"
+        value={derived.transferrinSaturationPct.toFixed(0)}
+        unit="%"
+        secondary={
+          derived.transferrinSaturationPct < 16
+            ? 'deficient range'
+            : derived.transferrinSaturationPct > 45
+              ? 'overload range'
+              : 'normal range'
+        }
+        colorVar={
+          derived.transferrinSaturationPct < 16 || derived.transferrinSaturationPct > 45
+            ? 'var(--danger)'
+            : 'var(--text)'
+        }
+      />
+      <ReadoutItem
+        label="Serum iron / TIBC"
+        value={`${derived.serumIronUgDl.toFixed(0)}/${derived.tibcUgDl.toFixed(0)}`}
+        unit="µg/dL"
+        colorVar="var(--text)"
       />
       <ReadoutItem
         label="O2 delivery"

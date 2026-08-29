@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   CEREBRAL_PRESET_LABELS,
   CEREBRAL_PRESET_ORDER,
   DEFAULT_CEREBRAL_INPUTS,
-  type CerebralPresetName,
 } from './engine/presets';
 import type { CerebralInputs } from './engine/types';
 
 export function CerebralPerfusionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CerebralInputs>('cerebralPerfusion', DEFAULT_CEREBRAL_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cerebralLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_CEREBRAL_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'cerebralPerfusion',
@@ -41,22 +51,23 @@ export function CerebralPerfusionPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof CerebralInputs>(key: K, value: CerebralInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: CerebralPresetName) {
-    setInputs((prev) => ({ ...prev, ...CEREBRAL_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_CEREBRAL_INPUTS,
+    presets: CEREBRAL_PRESETS,
+    resetEngine: reset,
+  });
 
-  const icpHistory = history.map((h) => h.icp);
-  const icpHistoryBaseline = baseline.history?.map((h) => h.icp) ?? null;
-  const cppHistory = history.map((h) => h.cpp);
-  const cppHistoryBaseline = baseline.history?.map((h) => h.cpp) ?? null;
-  const cbfHistory = history.map((h) => h.cbf);
-  const cbfHistoryBaseline = baseline.history?.map((h) => h.cbf) ?? null;
-  const cbvHistory = history.map((h) => h.cbv);
-  const cbvHistoryBaseline = baseline.history?.map((h) => h.cbv) ?? null;
+  const icpHistory = useSeries(history, (h) => h.icp);
+  const icpHistoryBaseline = useSeries(baseline.history, (h) => h.icp);
+  const cppHistory = useSeries(history, (h) => h.cpp);
+  const cppHistoryBaseline = useSeries(baseline.history, (h) => h.cpp);
+  const cbfHistory = useSeries(history, (h) => h.cbf);
+  const cbfHistoryBaseline = useSeries(baseline.history, (h) => h.cbf);
+  const cbvHistory = useSeries(history, (h) => h.cbv);
+  const cbvHistoryBaseline = useSeries(baseline.history, (h) => h.cbv);
 
   return (
     <ModulePage
@@ -68,13 +79,13 @@ export function CerebralPerfusionPage() {
         <PresetBar
           order={CEREBRAL_PRESET_ORDER}
           labels={CEREBRAL_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Drain CSF', onClick: () => perturb((s) => perturbDrainCsf(s, 12)), variant: 'impulse' },
             { label: 'Acute bleed', onClick: () => perturb((s) => perturbAcuteBleed(s, 20)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

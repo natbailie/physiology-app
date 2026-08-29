@@ -1,0 +1,57 @@
+/* Grid tile chrome, shared by ModuleCard and ThemeCard.
+ *
+ * The two were near-clones: `.card`, its hover, its focus-visible, `.nameRow` and `.name`
+ * were byte-identical between them. Only the body copy, the badge and the progress meter
+ * genuinely differ, and those stay in the component stylesheets. */
+
+.card {
+  composes: panel from './panel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-5) var(--s-5);
+  text-decoration: none;
+  color: inherit;
+  border-left: 3px solid var(--card-accent, var(--panel-border));
+  transition:
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+
+a.card:hover {
+  border-color: var(--card-accent, var(--text-faint));
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+
+a.card:focus-visible {
+  outline: 2px solid var(--card-accent, var(--anp));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.card:hover {
+    transform: none;
+  }
+}
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.name {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* The one-line description under the name. */
+.blurb {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  line-height: var(--lh-snug);
+}

@@ -62,6 +62,17 @@ export const FETAL_PRESETS: Record<FetalPresetName, Partial<FetalInputs>> = {
   },
 };
 
+/**
+ * Scenarios that are the same inputs LATER rather than different inputs.
+ *
+ * "Transitioned" is "First breath" once the duct has closed, and duct closure is a state variable
+ * with a 260s time constant, not a setting. Without this the two buttons produced an identical
+ * picture. Five time constants, so the duct is shut rather than shutting.
+ */
+export const FETAL_PRESET_SETTLE_SECONDS: Partial<Record<FetalPresetName, number>> = {
+  transitioned: 1300,
+};
+
 export const FETAL_PRESET_LABELS: Record<FetalPresetName, string> = {
   fetal: 'In utero',
   firstBreath: 'First breath',

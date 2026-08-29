@@ -88,7 +88,7 @@
   border-radius: 8px;
   border: none;
   background: var(--text);
-  color: var(--bg, #10141a);
+  color: var(--bg);
   cursor: pointer;
   text-align: center;
   text-decoration: none;

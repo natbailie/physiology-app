@@ -1,4 +1,4 @@
-import { CLASSIFICATION, CRANIUM, CSF, CUSHING, FLOW, VESSEL } from './constants';
+import { BBB, CLASSIFICATION, CRANIUM, CSF, CUSHING, FLOW, VESSEL } from './constants';
 import { clamp, scaleClamped } from '@/shared/lib/math';
 import type { CerebralState_Classification } from './types';
 
@@ -137,4 +137,14 @@ export function patternSummary(icpMmHg: number, cppMmHg: number, reserveMl: numb
     reserveMl < CLASSIFICATION.LOW_RESERVE_ML ? 'no reserve left' : `${reserveMl.toFixed(0)} mL reserve`;
   const perfusion = cppMmHg < CLASSIFICATION.LOW_CPP_MMHG ? 'perfusion inadequate' : 'perfusion adequate';
   return `${pressure}, ${reserve}, ${perfusion}, ${autoregulating ? 'autoregulating' : 'pressure-passive'}`;
+}
+
+/** Vasogenic oedema leak rate through a disrupted blood-brain barrier, mL per minute.
+ * Proportional to permeability above the normal threshold (100%) and to the hydrostatic
+ * gradient across the capillary wall. At normal permeability (100%) the barrier holds and
+ * leak is negligible; at 200% (severe disruption) the rate reaches MAX_LEAK_RATE. */
+export function bbbLeakRateMlPerMin(permPct: number): number {
+  const excess = Math.max(0, permPct - BBB.LEAK_THRESHOLD_PCT);
+  const maxExcess = 200 - BBB.LEAK_THRESHOLD_PCT;
+  return BBB.MAX_LEAK_RATE_ML_PER_MIN * clamp(excess / maxExcess, 0, 1);
 }

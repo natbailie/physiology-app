@@ -26,8 +26,7 @@
 }
 
 .axis {
-  stroke: var(--panel-border);
-  stroke-width: 1;
+  composes: axis from '../../../shared/styles/diagramText.module.css';
 }
 
 .eyeOutline {
@@ -54,31 +53,108 @@
   opacity: 0.85;
 }
 
-.label {
+/* Per-eye field charts: four quadrants each, shaded when the pathway cuts them off. */
+.fieldFrame {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.fieldQuadLost {
+  fill: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.fieldQuadKept {
+  fill: color-mix(in srgb, var(--retina) 18%, transparent);
+}
+
+.fieldLetter {
   font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  font-size: 8px;
+  fill: var(--text-faint);
+}
+
+.label {
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .alarm {
-  font-family: var(--mono);
-  font-size: 12px;
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- The pathway --- */
+
+/* Fibres are coloured by the HEMIFIELD they carry, not the eye they came from. Two colours
+   entering the chiasm and one leaving each tract is the decussation, drawn. */
+.fibre {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fibreLeftField {
+  composes: fibre;
+  stroke: var(--retina);
+}
+
+/* Purple against green, not purple against blue. The dark palette lifts every signal 55% of
+   the way to a near-white, which collapses adjacent hues: --retina and --o2 measured 0.008
+   apart in Oklab lightness and 0.05 in chroma, which is not a distinction anyone can use.
+   A categorical coding needs hues that survive that lift. */
+.fibreRightField {
+  composes: fibre;
+  stroke: var(--bicarb);
+}
+
+.chiasm {
+  fill: color-mix(in srgb, var(--retina) var(--wash-faint), var(--panel));
+  stroke: var(--text-faint);
+  stroke-width: 1.2;
+}
+
+.lgn {
+  fill: color-mix(in srgb, var(--retina) var(--wash-soft), var(--panel));
+  stroke: var(--retina);
+  stroke-width: 1.2;
+}
+
+.cortex {
+  fill: color-mix(in srgb, var(--retina) var(--wash-faint), var(--panel));
+  stroke: var(--retina);
+  stroke-width: 1.5;
+}
+
+/* The lesion, drawn at its site. */
+.lesionMark {
+  stroke: var(--danger);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.lesionLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
   fill: var(--danger);
-  letter-spacing: 0.06em;
+  stroke: none;
+}
+
+.sideTick {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+}
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
 }

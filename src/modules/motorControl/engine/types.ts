@@ -6,7 +6,8 @@ export type MotorState_Classification =
   | 'hemiballismus'
   | 'cerebellar ataxia'
   | 'spastic (UMN) hemiparesis'
-  | 'essential tremor';
+  | 'essential tremor'
+  | 'focal dystonia';
 
 export interface MotorInputs {
   /** Amplitude of the intended reach, 0-100 — the task the system is asked to perform. */
@@ -25,6 +26,8 @@ export interface MotorInputs {
   essentialTremorDrive: number;
   /** Suppression by beta-blockade or alcohol, 0-100. */
   tremorSuppressantEffect: number;
+  /** Dystonic co-contraction severity, % (0-100). Sustained involuntary agonist-antagonist co-activation. */
+  dystoniaSeverityPct: number;
 }
 
 export interface MotorInternalState {
@@ -50,6 +53,8 @@ export interface MotorDerived {
   involuntaryMovementIndex: number;
   rigidityScore: number;
   spasticityScore: number;
+  dystoniaAmp: number;
+  cocontractionIndex: number;
   gaitClass: string;
   classification: MotorState_Classification;
   patternSummary: string;

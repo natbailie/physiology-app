@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { EcgDiagram } from './components/EcgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { ecgConductionContent } from './content';
 import { ecgLoopConfig } from './engine/loopConfig';
-import { DEFAULT_ECG_INPUTS, ECG_PRESETS, type EcgPresetName, ECG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_ECG_INPUTS, ECG_PRESETS, ECG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { EcgInputs } from './engine/types';
 
 export function EcgConductionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<EcgInputs>('ecgConduction', DEFAULT_ECG_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, ecgLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_ECG_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'ecgConduction',
@@ -35,15 +46,16 @@ export function EcgConductionPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof EcgInputs>(key: K, value: EcgInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: EcgPresetName) {
-    setInputs((prev) => ({ ...prev, ...ECG_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_ECG_INPUTS,
+    presets: ECG_PRESETS,
+    resetEngine: reset,
+  });
 
-  const trace = history.map((point) => point.voltageMv);
+  const trace = useSeries(history, (point) => point.voltageMv);
 
   return (
     <ModulePage
@@ -55,9 +67,9 @@ export function EcgConductionPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={ECG_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -79,7 +91,7 @@ export function EcgConductionPage() {
           />
         </>
       }
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
       practice={<QuizPanel session={session} summary={summary} presetLabels={ECG_PRESET_LABELS} />}
       transport={<SimControls transport={transport} />}
       blindControls={session.blinded}

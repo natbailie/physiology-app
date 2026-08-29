@@ -50,6 +50,48 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         colorVar="var(--tubule)"
       />
       <ReadoutItem label="GFR (after TGF)" value={derived.gfrAfterTGF.toFixed(0)} unit="mL/min" colorVar="var(--kidney)" />
+      <ReadoutItem
+        label="Serum bicarbonate"
+        value={derived.serumBicarbonateMeqL.toFixed(1)}
+        unit="mEq/L"
+        secondary={`heading to ${derived.hco3SteadyStateMeqL.toFixed(0)}`}
+        colorVar="var(--tubule)"
+      />
+      <ReadoutItem
+        label="Urine pH"
+        value={derived.urinePH.toFixed(2)}
+        secondary={derived.urinePH > 5.5 ? 'cannot acidify' : 'acidified'}
+        colorVar="var(--urine)"
+      />
+      <ReadoutItem
+        label="Urine anion gap"
+        value={derived.urineAnionGapMeqL.toFixed(0)}
+        unit="mEq/L"
+        secondary={derived.urineAnionGapMeqL > 0 ? 'NH4 excretion failing' : 'NH4 excretion intact'}
+        colorVar="var(--urine)"
+      />
+      <ReadoutItem label="Serum potassium" value={derived.serumPotassiumEstimateMeqL.toFixed(2)} unit="mEq/L" colorVar="var(--potassium)" />
+      <ReadoutItem
+        label="Serum creatinine"
+        value={derived.serumCreatinineMgDl.toFixed(2)}
+        unit="mg/dL"
+        secondary={`heading to ${derived.creatinineEquilibriumMgDl.toFixed(1)}`}
+        colorVar="var(--kidney)"
+      />
+      <ReadoutItem
+        label="Creatinine clearance"
+        value={derived.creatinineClearanceMLMin.toFixed(0)}
+        unit="mL/min"
+        secondary={`RPF ${derived.renalPlasmaFlowMLMin.toFixed(0)} · FF ${derived.filtrationFractionPct.toFixed(0)}%`}
+        colorVar="var(--kidney)"
+      />
+      <ReadoutItem
+        label="FENa"
+        value={derived.fractionalExcretionNaPct.toFixed(2)}
+        unit="%"
+        secondary={`urine Na ${derived.urineSodiumMeqL.toFixed(0)} mEq/L`}
+        colorVar="var(--potassium)"
+      />
     </div>
   );
 }

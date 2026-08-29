@@ -49,13 +49,13 @@ export function CascadeLadder({ x, y, derived }: CascadeLadderProps) {
 
   return (
     <g transform={`translate(${x}, ${y})`}>
-      <text className={styles.limbLabel} x={-46} y={-22}>
+      <text className={styles.limbLabel} x={-46} y={-25}>
         Extrinsic
       </text>
       <text className={styles.limbLabel} x={-46} y={-13} fill="var(--text-faint)">
         (PT)
       </text>
-      <text className={styles.limbLabel} x={46} y={-22}>
+      <text className={styles.limbLabel} x={46} y={-25}>
         Intrinsic
       </text>
       <text className={styles.limbLabel} x={46} y={-13} fill="var(--text-faint)">

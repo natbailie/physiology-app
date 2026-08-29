@@ -25,6 +25,7 @@ export const exerciseLoopConfig: EngineLoopConfig<
     fatigue: snapshot.state.fatiguePct,
   }),
   maxDtSeconds: EXERCISE_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: EXERCISE_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: EXERCISE_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: EXERCISE_SIMULATION.HISTORY_CAPACITY,
   timeScale: EXERCISE_SIMULATION.TIME_SCALE,

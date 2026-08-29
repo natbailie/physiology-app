@@ -19,6 +19,7 @@ export const renalTubularLoopConfig: EngineLoopConfig<
     adhLevel: snapshot.derived.adhLevel,
   }),
   maxDtSeconds: RENAL_TUBULAR_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: RENAL_TUBULAR_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: RENAL_TUBULAR_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: RENAL_TUBULAR_SIMULATION.HISTORY_CAPACITY,
   timeScale: RENAL_TUBULAR_SIMULATION.TIME_SCALE,

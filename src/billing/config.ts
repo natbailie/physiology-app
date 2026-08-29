@@ -15,6 +15,7 @@ export const FREE_MODULE_IDS: ReadonlySet<string> = new Set([
   'respiratory',
   'glucoseRegulation',
   'reference',
+  'medications',
 ]);
 
 /** Subscription states that unlock everything. Mirrors Stripe's own status vocabulary. */

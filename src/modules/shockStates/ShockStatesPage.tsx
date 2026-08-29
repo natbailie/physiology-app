@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   SHOCK_PRESETS,
   SHOCK_PRESET_LABELS,
   SHOCK_PRESET_ORDER,
-  type ShockPresetName,
 } from './engine/presets';
 import type { ShockInputs } from './engine/types';
 
 export function ShockStatesPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ShockInputs>('shockStates', DEFAULT_SHOCK_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, shockLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_SHOCK_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'shockStates',
@@ -41,24 +51,25 @@ export function ShockStatesPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof ShockInputs>(key: K, value: ShockInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ShockPresetName) {
-    setInputs((prev) => ({ ...prev, ...SHOCK_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_SHOCK_INPUTS,
+    presets: SHOCK_PRESETS,
+    resetEngine: reset,
+  });
 
-  const mapHistory = history.map((h) => h.map);
-  const mapHistoryBaseline = baseline.history?.map((h) => h.map) ?? null;
-  const cardiacOutputHistory = history.map((h) => h.cardiacOutput);
-  const cardiacOutputHistoryBaseline = baseline.history?.map((h) => h.cardiacOutput) ?? null;
-  const cvpHistory = history.map((h) => h.cvp);
-  const cvpHistoryBaseline = baseline.history?.map((h) => h.cvp) ?? null;
-  const lactateHistory = history.map((h) => h.lactate);
-  const lactateHistoryBaseline = baseline.history?.map((h) => h.lactate) ?? null;
-  const svo2History = history.map((h) => h.svo2);
-  const svo2HistoryBaseline = baseline.history?.map((h) => h.svo2) ?? null;
+  const mapHistory = useSeries(history, (h) => h.map);
+  const mapHistoryBaseline = useSeries(baseline.history, (h) => h.map);
+  const cardiacOutputHistory = useSeries(history, (h) => h.cardiacOutput);
+  const cardiacOutputHistoryBaseline = useSeries(baseline.history, (h) => h.cardiacOutput);
+  const cvpHistory = useSeries(history, (h) => h.cvp);
+  const cvpHistoryBaseline = useSeries(baseline.history, (h) => h.cvp);
+  const lactateHistory = useSeries(history, (h) => h.lactate);
+  const lactateHistoryBaseline = useSeries(baseline.history, (h) => h.lactate);
+  const svo2History = useSeries(history, (h) => h.svo2);
+  const svo2HistoryBaseline = useSeries(baseline.history, (h) => h.svo2);
 
   return (
     <ModulePage
@@ -70,13 +81,13 @@ export function ShockStatesPage() {
         <PresetBar
           order={SHOCK_PRESET_ORDER}
           labels={SHOCK_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Fluid bolus', onClick: () => perturb((s) => perturbFluidBolus(s, 1000)), variant: 'impulse' },
             { label: 'Haemorrhage', onClick: () => perturb((s) => perturbHaemorrhage(s, 1000)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

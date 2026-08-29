@@ -72,6 +72,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         secondary={derived.patternSummary}
         colorVar="var(--text)"
         wide
+        revealsPattern
       />
     </div>
   );

@@ -24,6 +24,12 @@
   letter-spacing: 0.02em;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
 .accountLink {
   font-size: 0.8rem;
   color: var(--text-dim);
@@ -41,10 +47,30 @@
   line-height: 1.5;
 }
 
-.grid {
+.themeGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 0.9rem;
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.toolsTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 28ch));
 }
 
 .footnote {

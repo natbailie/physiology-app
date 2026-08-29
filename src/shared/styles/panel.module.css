@@ -1,0 +1,27 @@
+/* Panel chrome, in one place.
+ *
+ * `background / border / radius / shadow` was retyped in ~25 stylesheets, at 8px in
+ * some and 10px in others, with and without the shadow. Compose from here instead. */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+}
+
+/* The one element on a module page that should read as lifted off the bench: the diagram. */
+.lifted {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+}
+
+/* A panel that sits inside another surface, or in a collapsed run of siblings, and so
+ * must not cast its own shadow. */
+.quiet {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+}

@@ -121,6 +121,31 @@ describe('essential tremor', () => {
   });
 });
 
+describe('focal dystonia', () => {
+  it('produces sustained co-contraction with normal initiation and no resting tremor', () => {
+    const d = settle(MOTOR_PRESETS.focalDystonia);
+    expect(d.cocontractionIndex).toBeGreaterThan(0.4);
+    expect(d.dystoniaAmp).toBeGreaterThan(3);
+    expect(d.initiationLatencyMs).toBeLessThan(300);
+    expect(d.restingTremorAmp).toBeLessThan(1);
+    expect(d.classification).toBe('focal dystonia');
+  });
+
+  it('dystonia amplitude scales with severity', () => {
+    const mild = settle({ ...DEFAULT_MOTOR_INPUTS, dystoniaSeverityPct: 30 });
+    const severe = settle({ ...DEFAULT_MOTOR_INPUTS, dystoniaSeverityPct: 85 });
+    expect(severe.dystoniaAmp).toBeGreaterThan(mild.dystoniaAmp * 1.5);
+    expect(severe.cocontractionIndex).toBeGreaterThan(mild.cocontractionIndex);
+  });
+
+  it('does not impair initiation speed or produce rigidity at moderate severity', () => {
+    const d = settle(MOTOR_PRESETS.focalDystonia);
+    expect(d.initiationLatencyMs).toBeLessThan(300);
+    expect(d.rigidityScore).toBeLessThan(1);
+    expect(d.spasticityScore).toBeLessThan(1);
+  });
+});
+
 describe('deep brain stimulation', () => {
   it('damps the parkinsonian resting tremor while active', () => {
     const inputs = { ...DEFAULT_MOTOR_INPUTS, dopamineFraction: 12 };

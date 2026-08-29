@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   VESTIBULAR_PRESET_LABELS,
   VESTIBULAR_PRESET_ORDER,
   DEFAULT_VESTIBULAR_INPUTS,
-  type VestibularPresetName,
 } from './engine/presets';
 import type { VestibularInputs } from './engine/types';
 
 export function VestibularPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<VestibularInputs>('vestibular', DEFAULT_VESTIBULAR_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, vestibularLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_VESTIBULAR_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'vestibular',
@@ -41,20 +51,21 @@ export function VestibularPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof VestibularInputs>(key: K, value: VestibularInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: VestibularPresetName) {
-    setInputs((prev) => ({ ...prev, ...VESTIBULAR_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_VESTIBULAR_INPUTS,
+    presets: VESTIBULAR_PRESETS,
+    resetEngine: reset,
+  });
 
-  const spvHistory = history.map((h) => h.spv);
-  const spvBaseline = baseline.history?.map((h) => h.spv) ?? null;
-  const vertigoHistory = history.map((h) => h.vertigo);
-  const vertigoBaseline = baseline.history?.map((h) => h.vertigo) ?? null;
-  const cupulaHistory = history.map((h) => h.cupula);
-  const cupulaBaseline = baseline.history?.map((h) => h.cupula) ?? null;
+  const spvHistory = useSeries(history, (h) => h.spv);
+  const spvBaseline = useSeries(baseline.history, (h) => h.spv);
+  const vertigoHistory = useSeries(history, (h) => h.vertigo);
+  const vertigoBaseline = useSeries(baseline.history, (h) => h.vertigo);
+  const cupulaHistory = useSeries(history, (h) => h.cupula);
+  const cupulaBaseline = useSeries(baseline.history, (h) => h.cupula);
 
   return (
     <ModulePage
@@ -66,13 +77,13 @@ export function VestibularPage() {
         <PresetBar
           order={VESTIBULAR_PRESET_ORDER}
           labels={VESTIBULAR_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Dix-Hallpike', onClick: () => perturb(perturbPerformHallpike), variant: 'impulse' },
             { label: 'Head impulse', onClick: () => perturb(perturbHeadImpulse), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

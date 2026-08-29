@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import {
   DIRECTION_CHOICES,
   isPatternQuestion,
   orderedOptions,
   type Direction,
+  type ModuleQuestion,
 } from '@/shared/assessment/types';
 import type { QuizSession } from '@/shared/assessment/useQuizSession';
 import type { ModuleSummary } from '@/shared/assessment/progressStore';
+import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './QuizPanel.module.css';
 
 interface QuizPanelProps<TInputs, TPreset extends string, TSnapshot> {
@@ -17,6 +20,36 @@ interface QuizPanelProps<TInputs, TPreset extends string, TSnapshot> {
 
 function directionLabel(direction: string): string {
   return DIRECTION_CHOICES.find((choice) => choice.id === direction)?.label ?? direction;
+}
+
+const KEYS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+/** The answer ids on offer, in display order. Scenario options are shuffled per question id;
+ * directions are always the same three. */
+function choiceIds<TInputs, TPreset extends string, TSnapshot>(
+  question: ModuleQuestion<TInputs, TPreset, TSnapshot> | null,
+): string[] {
+  if (!question) return [];
+  return isPatternQuestion<TInputs, TPreset, TSnapshot>(question)
+    ? orderedOptions(question.id, question.options)
+    : DIRECTION_CHOICES.map((choice: { id: Direction; label: string }) => choice.id);
+}
+
+/** Filled for answered, ringed for the current question, empty for the rest. Replaces a
+ * "QUESTION 3 OF 8" line that was set in 11px caps and read as chrome rather than progress. */
+function ProgressDots({ index, total }: { index: number; total: number }) {
+  return (
+    <span className={styles.dots} aria-label={`Question ${index} of ${total}`}>
+      {Array.from({ length: total }, (_, i) => (
+        <span
+          key={i}
+          className={styles.dot}
+          data-state={i < index - 1 ? 'done' : i === index - 1 ? 'current' : 'todo'}
+          aria-hidden="true"
+        />
+      ))}
+    </span>
+  );
 }
 
 /**
@@ -33,6 +66,40 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   presetLabels,
 }: QuizPanelProps<TInputs, TPreset, TSnapshot>) {
   const { phase, question, index, total, answer, correct, score, mode, dueCount } = session;
+  const { registerStartPractice } = useModuleShell();
+
+  // Publish the start handler so the sticky header can offer a practice button. Withdrawn
+  // while a session is running, which is what makes that button disappear.
+  const idle = phase === 'idle' || phase === 'complete';
+  const { start } = session;
+  useEffect(() => {
+    registerStartPractice(idle ? start : null);
+    return () => registerStartPractice(null);
+  }, [idle, start, registerStartPractice]);
+
+  const choices = choiceIds<TInputs, TPreset, TSnapshot>(question);
+
+  // Answer from the keyboard: 1-4 and A-D. A learner working through a set should not have to
+  // move to the pointer for every question.
+  const predicting = phase === 'predicting';
+  const { commit } = session;
+  useEffect(() => {
+    if (!predicting || choices.length === 0) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      const key = event.key.toUpperCase();
+      const byLetter = KEYS.indexOf(key);
+      const byNumber = /^[1-9]$/.test(key) ? Number(key) - 1 : -1;
+      const picked = choices[byLetter >= 0 ? byLetter : byNumber];
+      if (picked === undefined) return;
+      event.preventDefault();
+      commit(picked);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [predicting, choices, commit]);
 
   if (phase === 'idle') {
     return (
@@ -111,11 +178,12 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   const label = (id: string) => (pattern ? (presetLabels?.[id as TPreset] ?? id) : directionLabel(id));
 
   return (
-    <section className={styles.panel} aria-label="Practice question">
+    <section className={styles.live} aria-label="Practice question">
       <header className={styles.header}>
-        <span className="label">
-          {mode === 'review' ? 'Review' : 'Question'} {index} of {total}
-        </span>
+        <div className={styles.headerLeft}>
+          <span className="label">{mode === 'review' ? 'Review' : 'Practice'}</span>
+          <ProgressDots index={index} total={total} />
+        </div>
         <button type="button" className={styles.exit} onClick={session.exit}>
           Exit {mode === 'review' ? 'review' : 'practice'}
         </button>
@@ -132,32 +200,16 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
 
       {phase === 'predicting' && (
         <>
-          <div
-            className={pattern ? styles.options : styles.choices}
-            role="group"
-            aria-label={pattern ? 'Candidate scenarios' : question.prompt}
-          >
-            {pattern
-              ? orderedOptions(question.id, question.options).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    className={styles.choice}
-                    onClick={() => session.commit(option)}
-                  >
-                    {presetLabels?.[option] ?? option}
-                  </button>
-                ))
-              : DIRECTION_CHOICES.map((choice: { id: Direction; label: string }) => (
-                  <button
-                    key={choice.id}
-                    type="button"
-                    className={styles.choice}
-                    onClick={() => session.commit(choice.id)}
-                  >
-                    {choice.label}
-                  </button>
-                ))}
+          {/* Choices are deliberately uniform — nothing here may hint at which one is right. */}
+          <div className={styles.choices} role="group" aria-label={pattern ? 'Candidate scenarios' : question.prompt}>
+            {choices.map((choice, i) => (
+              <button key={choice} type="button" className={styles.choice} onClick={() => session.commit(choice)}>
+                <span className={styles.key} aria-hidden="true">
+                  {KEYS[i]}
+                </span>
+                <span className={styles.choiceLabel}>{label(choice)}</span>
+              </button>
+            ))}
           </div>
           <p className={styles.watch}>
             {pattern
@@ -170,7 +222,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
       {phase === 'revealed' && (
         <div className={styles.reveal} data-correct={correct}>
           <p className={styles.verdict}>
-            {correct ? 'Correct — ' : 'Not quite — '}
+            <span className={styles.verdictTag}>{correct ? 'Correct' : 'Not quite'}</span>
             <span className={styles.verdictDetail}>
               {correct
                 ? pattern

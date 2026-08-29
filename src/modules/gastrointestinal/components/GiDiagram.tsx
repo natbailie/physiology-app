@@ -73,7 +73,7 @@ export function GiDiagram({ derived }: GiDiagramProps) {
         colorVar="var(--cck)"
         label="CCK"
         markerId="cck-arrow"
-        labelPos={{ x: 300, y: 165 }}
+        labelPos={{ x: 300, y: 178 }}
       />
       <HormoneArrow
         path={SECRETIN_PATH}

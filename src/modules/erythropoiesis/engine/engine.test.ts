@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { classifyAnemia, computeDerived, createInitialState, perturbAcuteBloodLoss, step } from './engine';
 import { DEFAULT_ERYTHRO_INPUTS, ERYTHRO_PRESETS } from './presets';
-import { HEMOGLOBIN, RETICULOCYTE } from './constants';
+import { HEMOGLOBIN, IRON_PANEL, RETICULOCYTE } from './constants';
 import type { ErythroInputs } from './types';
 
 const DT = 1;
@@ -183,5 +183,76 @@ describe('erythropoiesis — chronic blood loss and altitude', () => {
     const normal = settle(DEFAULT_ERYTHRO_INPUTS).derived;
     const anemic = settle(preset('aplasticAnemia')).derived;
     expect(anemic.oxygenDeliveryMlPerMin).toBeLessThan(normal.oxygenDeliveryMlPerMin * 0.5);
+  });
+});
+
+describe('hepcidin and the iron studies', () => {
+  it('sits at a normal baseline: mid hepcidin, saturation in range, quiet TIBC and ferritin', () => {
+    const { derived } = settle(DEFAULT_ERYTHRO_INPUTS);
+    expect(derived.hepcidinFraction).toBeGreaterThan(0.7);
+    expect(derived.hepcidinFraction).toBeLessThan(1.3);
+    expect(derived.transferrinSaturationPct).toBeGreaterThan(IRON_PANEL.SATURATION_NORMAL_LOW_PCT);
+    expect(derived.transferrinSaturationPct).toBeLessThan(IRON_PANEL.SATURATION_OVERLOAD_PCT);
+    expect(derived.tibcUgDl).toBeGreaterThan(280);
+    expect(derived.tibcUgDl).toBeLessThan(390);
+  });
+
+  it('iron deficiency suppresses hepcidin and produces the classic IDA quartet', () => {
+    const ida = settle(preset('ironDeficiency'), 60000).derived;
+    expect(ida.hepcidinFraction).toBeLessThan(0.35);
+    expect(ida.transferrinSaturationPct).toBeLessThan(IRON_PANEL.SATURATION_DEFICIENT_PCT);
+    // The marrow, starved of iron, up-regulates transferrin: TIBC climbs.
+    expect(ida.tibcUgDl).toBeGreaterThan(400);
+    expect(ida.ferritinNgMl).toBeLessThan(25);
+  });
+
+  it('inflammation locks iron away while stores remain full — the ACD quartet', () => {
+    const { state: acdState, derived: acd } = settle(preset('anaemiaChronicDisease'), 40000);
+    // IL-6 drives hepcidin far above normal despite replete stores.
+    expect(acd.hepcidinFraction).toBeGreaterThan(2.5);
+    expect(acd.transferrinSaturationPct).toBeLessThan(IRON_PANEL.SATURATION_DEFICIENT_PCT);
+    // Transferrin is a NEGATIVE acute-phase reactant: TIBC falls, unlike IDA where it rises.
+    expect(acd.tibcUgDl).toBeLessThan(280);
+    // Ferritin RISES with the inflammation even though no iron has been lost.
+    expect(acd.ferritinNgMl).toBeGreaterThan(200);
+    expect(acdState.ironStores).toBeGreaterThan(0.85);
+  });
+
+  it('the trap: inflamed and truly deficient reads a deceptively normal ferritin', () => {
+    const { state: pureState, derived: pure } = settle(preset('ironDeficiency'), 60000);
+    // Sampled while stores are still draining — weeks into blood loss, mid-way to empty.
+    const { state: trappedState, derived: trapped } = settle(preset('ironDeficientAndInflamed'), 200);
+    expect(trappedState.ironStores).toBeGreaterThan(0.2);
+    expect(trappedState.ironStores).toBeLessThan(0.7);
+    expect(pureState.ironStores).toBeLessThan(0.2);
+    expect(pure.ferritinNgMl).toBeLessThan(12);
+    expect(trapped.ferritinNgMl).toBeGreaterThan(50);
+  });
+
+  it('haemochromatosis senses nothing: hepcidin stays low while iron piles up', () => {
+    const { state: hcState, derived: hc } = settle(preset('haemochromatosis'), 90000);
+    expect(hcState.ironStores).toBeGreaterThan(1.15);
+    expect(hc.hepcidinFraction).toBeLessThan(0.4);
+    expect(hc.transferrinSaturationPct).toBeGreaterThan(IRON_PANEL.SATURATION_OVERLOAD_PCT);
+  });
+
+  it('an erythropoietic drive beyond supply suppresses hepcidin too', () => {
+    const driven = settle(preset('erythropoieticDriveHigh'), 40000).derived;
+    expect(driven.hepcidinFraction).toBeLessThan(0.5);
+    expect(driven.transferrinSaturationPct).toBeGreaterThan(40);
+  });
+
+  it('a failing liver makes both hepcidin AND transferrin poorly', () => {
+    const cirrhotic = settle({ ...DEFAULT_ERYTHRO_INPUTS, liverSyntheticFunctionPct: 22 }, 40000).derived;
+    expect(cirrhotic.hepcidinFraction).toBeLessThan(0.45);
+    expect(cirrhotic.tibcUgDl).toBeLessThan(260);
+  });
+
+  it('the anaemia of chronic disease emerges from a locked door, not an empty store', () => {
+    const acd = settle(preset('anaemiaChronicDisease'), 120000);
+    expect(acd.derived.hemoglobinGDl).toBeLessThan(13.5);
+    // Stores are still there — the marrow simply cannot get at them.
+    expect(acd.state.ironStores).toBeGreaterThan(0.8);
+    expect(acd.derived.anemiaClassification).toBe('normocytic anemia');
   });
 });

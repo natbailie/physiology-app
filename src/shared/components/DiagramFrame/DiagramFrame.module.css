@@ -1,27 +1,22 @@
 .panel {
+  composes: lifted from '../../styles/panel.module.css';
   position: relative;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-1);
   padding: 0;
   overflow: hidden;
 }
 
-/* Laboratory graph paper: a 32px major rule over a 6.4px minor rule,
- * the same two-tier treatment EcgStrip uses for ECG paper. */
+/* No graph paper. The drawings already carry colour, translucent washes and glow, and a
+ * two-tier grid behind all of that was the single busiest thing on a module page.
+ *
+ * The grids that remain elsewhere are the ones that are measurements rather than decoration:
+ * EcgStrip's ECG paper (small square 40ms, large 200ms — judging an interval by eye is what
+ * the strip is FOR) and the axis gridlines in the four modules whose diagram genuinely is a
+ * plot you read a value off. */
 .screen {
   display: block;
   width: 100%;
   height: auto;
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(var(--grid-line-minor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line-minor) 1px, transparent 1px);
-  background-size:
-    32px 32px,
-    32px 32px,
-    6.4px 6.4px,
-    6.4px 6.4px;
+  /* preserveAspectRatio defaults to `meet`, so the drawing scales down and centres rather
+   * than being cropped. With no grid behind it the letterboxing is invisible. */
+  max-height: min(52svh, 520px);
 }

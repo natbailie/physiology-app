@@ -1,75 +1,135 @@
-.trace {
-  fill: none;
-  stroke: var(--basal-ganglia);
-  stroke-width: 2;
+/* --- Circuit nodes --- */
+
+.node {
+  fill: color-mix(in srgb, var(--basal-ganglia) var(--wash-faint), var(--panel));
+  stroke: color-mix(in srgb, var(--basal-ganglia) 55%, transparent);
+  stroke-width: 1.5;
 }
 
-.pathwayDirect {
-  stroke: var(--ok);
-  stroke-width: 3.5;
+/* A node a preset can lesion. Fades toward the panel as it is lost, so a damaged nucleus reads
+   as damaged rather than as a number somewhere else on the page. */
+.nodeLesioned {
+  fill: color-mix(in srgb, var(--basal-ganglia) calc(var(--integrity, 1) * var(--wash)), var(--panel));
+  stroke: color-mix(in srgb, var(--basal-ganglia) calc(var(--integrity, 1) * 65%), var(--panel-border));
+  stroke-width: 1.5;
+  transition:
+    fill 0.4s ease,
+    stroke 0.4s ease;
 }
 
-.pathwayIndirect {
-  stroke: var(--danger);
-  stroke-width: 2.5;
-  stroke-dasharray: 6 3;
+/* The dopamine source. */
+.nigra {
+  fill: color-mix(in srgb, var(--second-messenger) calc(var(--integrity, 1) * var(--wash-strong)), var(--panel));
+  stroke: var(--second-messenger);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+.outputNode {
+  fill: color-mix(in srgb, var(--sarcomere) calc(var(--integrity, 1) * var(--wash)), var(--panel));
+  stroke: color-mix(in srgb, var(--sarcomere) 60%, transparent);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
 }
 
 .nodeLabel {
-  font-family: var(--mono);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--text);
+  text-anchor: middle;
+}
+
+.nodeLabelSmall {
+  font-family: var(--sans);
   font-size: 10px;
-  fill: var(--text-dim);
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  fill: var(--text);
+  text-anchor: middle;
 }
 
-.reachTarget {
+.nodeValue {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+  text-anchor: middle;
+}
+
+.pathTag {
+  font-family: var(--sans);
+  font-size: 10px;
+  fill: var(--text-faint);
+}
+
+/* --- Connections. Weight is traffic: a pathway that stops carrying thins out. --- */
+
+.connection {
   fill: none;
-  stroke: var(--text-faint);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 3;
+  stroke-width: calc(1px + var(--strength, 1) * 2.6px);
+  opacity: calc(0.3 + var(--strength, 1) * 0.5);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    stroke-width 0.4s ease,
+    opacity 0.4s ease;
 }
 
-.reachActual {
-  fill: color-mix(in srgb, var(--basal-ganglia) 40%, transparent);
-  transition: all 0.3s ease;
+/* Arrowhead excites, crossbar inhibits — the standard signing, and the only way to show that
+   the direct pathway works by inhibiting an inhibitor. */
+.excitatory {
+  composes: connection;
+  stroke: var(--basal-ganglia);
 }
 
-.tremorWave {
-  fill: none;
+.inhibitory {
+  composes: connection;
   stroke: var(--nociception);
+}
+
+.modulatory {
+  composes: connection;
+  stroke: var(--second-messenger);
+  stroke-dasharray: 5 4;
+}
+
+.corticospinal {
+  composes: connection;
+  stroke: var(--sarcomere);
+}
+
+/* `context-stroke`, not `currentColor`: inside a <marker>, currentColor resolves against the
+   marker's own ancestors in <defs>, so every arrowhead would come out the same colour whatever
+   path referenced it. context-stroke takes the referencing path's stroke. */
+.markerExcite {
+  fill: context-stroke;
+  stroke: none;
+}
+
+.markerInhibit {
+  fill: none;
+  stroke: context-stroke;
   stroke-width: 2;
 }
 
+/* --- Shared text --- */
+
 .axis {
-  stroke: var(--panel-border);
-  stroke-width: 1;
+  composes: axis from '../../../shared/styles/diagramText.module.css';
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  composes: label from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }
 
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .alarm {
-  font-family: var(--mono);
-  font-size: 12px;
-  fill: var(--danger);
-  letter-spacing: 0.06em;
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
 }

@@ -24,6 +24,7 @@ export const medullaLoopConfig: EngineLoopConfig<
     volume: snapshot.state.bloodVolumePct,
   }),
   maxDtSeconds: MEDULLA_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: MEDULLA_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: MEDULLA_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: MEDULLA_SIMULATION.HISTORY_CAPACITY,
   timeScale: MEDULLA_SIMULATION.TIME_SCALE,

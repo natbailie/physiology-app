@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -18,13 +22,19 @@ import {
   BLOOD_PRESET_LABELS,
   BLOOD_PRESET_ORDER,
   DEFAULT_BLOOD_INPUTS,
-  type BloodPresetName,
 } from './engine/presets';
 import type { BloodInputs } from './engine/types';
 
 export function BloodGroupsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<BloodInputs>('bloodGroups', DEFAULT_BLOOD_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, bloodLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_BLOOD_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'bloodGroups',
@@ -40,18 +50,19 @@ export function BloodGroupsPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof BloodInputs>(key: K, value: BloodInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: BloodPresetName) {
-    setInputs((prev) => ({ ...prev, ...BLOOD_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_BLOOD_INPUTS,
+    presets: BLOOD_PRESETS,
+    resetEngine: reset,
+  });
 
-  const severityHistory = history.map((h) => h.severity);
-  const severityBaseline = baseline.history?.map((h) => h.severity) ?? null;
-  const freeHbHistory = history.map((h) => h.freeHb);
-  const freeHbBaseline = baseline.history?.map((h) => h.freeHb) ?? null;
+  const severityHistory = useSeries(history, (h) => h.severity);
+  const severityBaseline = useSeries(baseline.history, (h) => h.severity);
+  const freeHbHistory = useSeries(history, (h) => h.freeHb);
+  const freeHbBaseline = useSeries(baseline.history, (h) => h.freeHb);
 
   return (
     <ModulePage
@@ -63,8 +74,8 @@ export function BloodGroupsPage() {
         <PresetBar
           order={BLOOD_PRESET_ORDER}
           labels={BLOOD_PRESET_LABELS}
-          onApply={handleApplyPreset}
-          onReset={reset}
+          onApply={applyPreset}
+          onReset={resetScenario}
           onShare={shareLink}
           disabled={session.blinded}
         />

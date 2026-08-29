@@ -36,4 +36,22 @@ export const BLOOD_SIMULATION = {
   HISTORY_CAPACITY: 700,
   /** The ABO arm runs inside minutes of simulated time; the Rh arm needs days compressed. */
   TIME_SCALE: 720,
+  /** Simulated seconds of settling applied before the first frame — and, through `reset`,
+   * before a scenario button's first frame, so pressing one shows the scenario rather than
+   * the moment before it. */
+  SETTLE_SECONDS: 600,
+} as const;
+
+/** Haemolytic disease of the newborn: maternal IgG crossing the placenta and clearing
+ * fetal cells slowly, extravascularly. Calibrated to textbook baselines — an unaffected
+ * fetus holds ~15 g/dL, a severely affected one falls toward 6 with hydrops. */
+export const HAEMOLYTIC_DISEASE = {
+  /** Fetal haemoglobin when unharmed, g/dL. */
+  FETAL_HB_BASELINE_GDL: 15,
+  /** g/dL fallen per unit of haemolytic severity. */
+  FETAL_HB_FALL_PER_SEVERITY: 0.09,
+  /** µmol/L of cord bilirubin per unit severity (severe HDN reaches the kernicterus range). */
+  BILIRUBIN_PER_SEVERITY: 3.4,
+  /** Severity above which hydrops becomes the dominant risk. */
+  HYDROPS_ONSET_SEVERITY: 55,
 } as const;

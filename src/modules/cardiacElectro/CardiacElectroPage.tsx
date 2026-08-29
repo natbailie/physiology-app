@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { CardiacDiagram } from './components/CardiacDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { cardiacElectroContent } from './content';
 import { cardiacLoopConfig } from './engine/loopConfig';
-import { CARDIAC_PRESETS, DEFAULT_CARDIAC_INPUTS, type CardiacPresetName, CARDIAC_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { CARDIAC_PRESETS, DEFAULT_CARDIAC_INPUTS, CARDIAC_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { CardiacInputs } from './engine/types';
 
 export function CardiacElectroPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CardiacInputs>('cardiacElectro', DEFAULT_CARDIAC_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, cardiacLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_CARDIAC_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'cardiacElectro',
@@ -35,18 +46,19 @@ export function CardiacElectroPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof CardiacInputs>(key: K, value: CardiacInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: CardiacPresetName) {
-    setInputs((prev) => ({ ...prev, ...CARDIAC_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_CARDIAC_INPUTS,
+    presets: CARDIAC_PRESETS,
+    resetEngine: reset,
+  });
 
-  const pvPoints = history.map((h) => ({ x: h.lvVolume, y: h.lvPressure }));
-  const pvPointsBaseline = baseline.history?.map((h) => ({ x: h.lvVolume, y: h.lvPressure })) ?? null;
-  const ecgHistory = history.map((h) => h.ecgVoltage);
-  const ecgHistoryBaseline = baseline.history?.map((h) => h.ecgVoltage) ?? null;
+  const pvPoints = useSeries(history, (h) => ({ x: h.lvVolume, y: h.lvPressure }));
+  const pvPointsBaseline = useSeries(baseline.history, (h) => ({ x: h.lvVolume, y: h.lvPressure }));
+  const ecgHistory = useSeries(history, (h) => h.ecgVoltage);
+  const ecgHistoryBaseline = useSeries(baseline.history, (h) => h.ecgVoltage);
 
   return (
     <ModulePage
@@ -58,13 +70,13 @@ export function CardiacElectroPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={CARDIAC_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<CardiacDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
       practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

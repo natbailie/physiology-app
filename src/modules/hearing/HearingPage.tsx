@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,20 @@ import {
   HEARING_PRESET_LABELS,
   HEARING_PRESET_ORDER,
   DEFAULT_HEARING_INPUTS,
-  type HearingPresetName,
 } from './engine/presets';
 import type { HearingInputs } from './engine/types';
+import { Audiogram } from './components/Audiogram';
 
 export function HearingPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HearingInputs>('hearing', DEFAULT_HEARING_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hearingLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_HEARING_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'hearing',
@@ -41,20 +52,21 @@ export function HearingPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof HearingInputs>(key: K, value: HearingInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: HearingPresetName) {
-    setInputs((prev) => ({ ...prev, ...HEARING_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_HEARING_INPUTS,
+    presets: HEARING_PRESETS,
+    resetEngine: reset,
+  });
 
-  const ptaHistory = history.map((h) => h.pta);
-  const ptaBaseline = baseline.history?.map((h) => h.pta) ?? null;
-  const loudnessHistory = history.map((h) => h.loudness);
-  const loudnessBaseline = baseline.history?.map((h) => h.loudness) ?? null;
-  const ttsHistory = history.map((h) => h.tts);
-  const ttsBaseline = baseline.history?.map((h) => h.tts) ?? null;
+  const ptaHistory = useSeries(history, (h) => h.pta);
+  const ptaBaseline = useSeries(baseline.history, (h) => h.pta);
+  const loudnessHistory = useSeries(history, (h) => h.loudness);
+  const loudnessBaseline = useSeries(baseline.history, (h) => h.loudness);
+  const ttsHistory = useSeries(history, (h) => h.tts);
+  const ttsBaseline = useSeries(baseline.history, (h) => h.tts);
 
   return (
     <ModulePage
@@ -66,12 +78,12 @@ export function HearingPage() {
         <PresetBar
           order={HEARING_PRESET_ORDER}
           labels={HEARING_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Loud concert (no plugs)', onClick: () => perturb(perturbNoiseExposure), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -81,6 +93,7 @@ export function HearingPage() {
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
+          <Audiogram derived={snapshot.derived} />
           <Sparkline
             label="Pure-tone average"
             unit="dB"

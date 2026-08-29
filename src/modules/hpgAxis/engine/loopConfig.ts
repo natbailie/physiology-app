@@ -14,6 +14,7 @@ export const hpgLoopConfig: EngineLoopConfig<HpgState, HpgInputs, HpgDerived, Hp
     gonadalSteroid: snapshot.derived.sex === 'male' ? snapshot.derived.testosteroneLevel : snapshot.derived.estrogenLevel,
   }),
   maxDtSeconds: HPG_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: HPG_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: HPG_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: HPG_SIMULATION.HISTORY_CAPACITY,
   timeScale: HPG_SIMULATION.TIME_SCALE,

@@ -167,4 +167,8 @@ export const MUSCLE_SIMULATION = {
    * slow: a twitch is over in a tenth of a second. Run at 1/20 real time so the calcium
    * transient and the force it produces can be seen to be separate events. */
   TIME_SCALE: 0.05,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 60,
 };

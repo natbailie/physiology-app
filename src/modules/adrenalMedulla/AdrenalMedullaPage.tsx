@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   MEDULLA_PRESET_LABELS,
   MEDULLA_PRESET_ORDER,
   DEFAULT_MEDULLA_INPUTS,
-  type MedullaPresetName,
 } from './engine/presets';
 import type { MedullaInputs } from './engine/types';
 
 export function AdrenalMedullaPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MedullaInputs>('adrenalMedulla', DEFAULT_MEDULLA_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, medullaLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_MEDULLA_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'adrenalMedulla',
@@ -41,20 +51,21 @@ export function AdrenalMedullaPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof MedullaInputs>(key: K, value: MedullaInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: MedullaPresetName) {
-    setInputs((prev) => ({ ...prev, ...MEDULLA_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_MEDULLA_INPUTS,
+    presets: MEDULLA_PRESETS,
+    resetEngine: reset,
+  });
 
-  const mapHistory = history.map((h) => h.map);
-  const mapBaseline = baseline.history?.map((h) => h.map) ?? null;
-  const hrHistory = history.map((h) => h.hr);
-  const hrBaseline = baseline.history?.map((h) => h.hr) ?? null;
-  const volumeHistory = history.map((h) => h.volume);
-  const volumeBaseline = baseline.history?.map((h) => h.volume) ?? null;
+  const mapHistory = useSeries(history, (h) => h.map);
+  const mapBaseline = useSeries(baseline.history, (h) => h.map);
+  const hrHistory = useSeries(history, (h) => h.hr);
+  const hrBaseline = useSeries(baseline.history, (h) => h.hr);
+  const volumeHistory = useSeries(history, (h) => h.volume);
+  const volumeBaseline = useSeries(baseline.history, (h) => h.volume);
 
   return (
     <ModulePage
@@ -66,12 +77,12 @@ export function AdrenalMedullaPage() {
         <PresetBar
           order={MEDULLA_PRESET_ORDER}
           labels={MEDULLA_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Paroxysm', onClick: () => perturb(perturbParoxysm), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

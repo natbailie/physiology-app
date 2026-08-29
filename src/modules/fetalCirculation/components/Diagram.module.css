@@ -1,17 +1,89 @@
+/* Vessels are coloured by how oxygenated their blood is, set inline from the engine, so the
+ * stroke colour here is only a fallback for the ones that carry no computed saturation. */
 .vessel {
   fill: none;
   stroke-width: 3;
   stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.4s ease;
 }
 
-.systemic {
+.aorta {
   composes: vessel;
   stroke: var(--artery);
+  stroke-width: 3.5;
 }
 
-.venous {
+/* Drawn under the aorta so a vessel passing behind reads as behind. Matches the panel, so it
+ * takes a bite out of the graph paper — which is what "in front" looks like. */
+.aortaCasing {
+  fill: none;
+  stroke: var(--panel);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.umbilicalVein {
+  composes: vessel;
+  stroke: var(--artery);
+  opacity: var(--placental, 1);
+  transition:
+    opacity 0.5s ease,
+    stroke 0.4s ease;
+}
+
+.umbilicalArtery {
   composes: vessel;
   stroke: var(--venous);
+  opacity: var(--placental, 1);
+  transition:
+    opacity 0.5s ease,
+    stroke 0.4s ease;
+}
+
+/* The bypass that keeps the placental stream away from the liver sinusoids. Fades as it
+ * closes, which is what makes it redundant once the cord is cut. */
+.ductusVenosus {
+  composes: vessel;
+  stroke: var(--artery);
+  stroke-width: 3;
+  opacity: calc(0.15 + var(--dv-open, 1) * 0.85);
+  transition:
+    opacity 0.5s ease,
+    stroke 0.4s ease;
+}
+
+.ivc {
+  composes: vessel;
+}
+
+/* Systemic venous return and the right-heart outflow: the engine computes no saturation for
+ * these, so they stay the conventional blue rather than being given an invented number. */
+.pulmonary {
+  composes: vessel;
+  stroke: var(--venous);
+}
+
+.pulmonaryVein {
+  composes: vessel;
+  stroke: var(--artery);
+  stroke-width: 2.5;
+  opacity: calc(0.2 + var(--lung-flow, 0) * 0.8);
+  transition: opacity 0.5s ease;
+}
+
+/* Width tracks how much of the right ventricle's output actually reaches the lung, which in
+ * utero is almost none. */
+.lungBranch {
+  fill: none;
+  stroke: var(--venous);
+  stroke-linecap: round;
+  stroke-width: calc(1.5px + var(--lung-flow, 0) * 6px);
+  opacity: calc(0.45 + var(--lung-flow, 0) * 0.55);
+  transition:
+    stroke-width 0.5s ease,
+    opacity 0.5s ease;
 }
 
 /* A shunt's width tracks how much flow it is carrying, so the picture changes shape as the
@@ -43,6 +115,10 @@
   stroke-dasharray: 3 5;
 }
 
+.arrowHead {
+  fill: currentColor;
+}
+
 .chamber {
   stroke-width: 2.5;
   fill: none;
@@ -58,32 +134,60 @@
   stroke: var(--artery);
 }
 
+.chamberLabel {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--text);
+  text-anchor: middle;
+}
+
+/* Upper and lower body, where the two saturations are actually sampled. */
+.bodyBlock {
+  fill: var(--panel-raised);
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.liver {
+  fill: color-mix(in srgb, var(--liver) var(--wash-faint), transparent);
+  stroke: var(--liver);
+  stroke-width: 2;
+}
+
 .placenta {
-  fill: none;
-  stroke: var(--o2);
+  fill: color-mix(in srgb, var(--placenta) var(--wash-faint), transparent);
+  stroke: var(--placenta);
   stroke-width: 2.5;
   opacity: var(--placental, 1);
   transition: opacity 0.5s ease;
 }
 
 .lung {
-  fill: none;
+  fill: color-mix(in srgb, var(--o2) calc(var(--inflation, 0) * 30%), transparent);
   stroke: var(--o2);
   stroke-width: 2.5;
   opacity: calc(0.25 + var(--inflation, 0) * 0.75);
-  transition: opacity 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    fill 0.5s ease;
 }
 
-.label {
+.legendBar {
+  fill: url(#fetalSatScale);
+}
+
+.pressure {
   font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-dim);
-  letter-spacing: 0.06em;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
 }
 
 .probe {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -97,17 +201,26 @@
   fill: var(--danger);
 }
 
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+.anatomyStrong {
+  composes: anatomyStrong from '../../../shared/styles/diagramText.module.css';
+}
+
+.tickLabel {
+  composes: tickLabel from '../../../shared/styles/diagramText.module.css';
+}
+
+.alarm {
+  composes: alarm from '../../../shared/styles/diagramText.module.css';
+}
+
 .verdict {
-  font-family: var(--mono);
-  font-size: 15px;
-  fill: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
 }
 
 .caption {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--text-faint);
-  letter-spacing: 0.06em;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
 }

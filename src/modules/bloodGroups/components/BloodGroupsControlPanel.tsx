@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
 import type { BloodInputs } from '../engine/types';
@@ -12,7 +13,7 @@ const aboFormat = (v: number) => aboName(v);
 const rhFormat = (v: number) => (v >= 0.5 ? 'positive' : 'negative');
 const yesNo = (v: number) => (v >= 0.5 ? 'yes' : 'no');
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <Slider
@@ -69,6 +70,35 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
         unit=" mL"
         onChange={(v) => onChange('transfusionVolumeMl', v)}
       />
+      <Slider
+        label="Maternal-fetal scenario (HDN)"
+        value={inputs.hdnScenario}
+        min={0}
+        max={1}
+        step={1}
+        formatValue={yesNo}
+        onChange={(v) => onChange('hdnScenario', v)}
+      />
+      <Slider
+        label="Fetus Rh"
+        value={inputs.fetusRhPositive}
+        min={0}
+        max={1}
+        step={1}
+        formatValue={rhFormat}
+        onChange={(v) => onChange('fetusRhPositive', v)}
+      />
+      <Slider
+        label="Anti-D coverage"
+        value={inputs.antiDProtectionPct}
+        min={0}
+        max={100}
+        step={5}
+        unit="%"
+        onChange={(v) => onChange('antiDProtectionPct', v)}
+      />
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

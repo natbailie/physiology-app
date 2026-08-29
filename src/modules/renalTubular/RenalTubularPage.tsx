@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { NephronDiagram } from './components/NephronDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { renalTubularContent } from './content';
 import { renalTubularLoopConfig } from './engine/loopConfig';
 import { perturbWaterDeprivation } from './engine/engine';
-import { DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS, type RenalTubularPresetName, RENAL_TUBULAR_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS, RENAL_TUBULAR_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { RenalTubularInputs } from './engine/types';
 
 export function RenalTubularPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RenalTubularInputs>('renalTubular', DEFAULT_RENAL_TUBULAR_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_RENAL_TUBULAR_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'renalTubular',
@@ -35,24 +46,25 @@ export function RenalTubularPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof RenalTubularInputs>(key: K, value: RenalTubularInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: RenalTubularPresetName) {
-    setInputs((prev) => ({ ...prev, ...RENAL_TUBULAR_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_RENAL_TUBULAR_INPUTS,
+    presets: RENAL_TUBULAR_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerWaterDeprivation() {
     perturb((state) => perturbWaterDeprivation(state));
   }
 
-  const plasmaHistory = history.map((h) => h.plasmaOsmolality);
-  const plasmaHistoryBaseline = baseline.history?.map((h) => h.plasmaOsmolality) ?? null;
-  const urineHistory = history.map((h) => h.urineOsmolality);
-  const urineHistoryBaseline = baseline.history?.map((h) => h.urineOsmolality) ?? null;
-  const adhHistory = history.map((h) => h.adhLevel * 100);
-  const adhHistoryBaseline = baseline.history?.map((h) => h.adhLevel * 100) ?? null;
+  const plasmaHistory = useSeries(history, (h) => h.plasmaOsmolality);
+  const plasmaHistoryBaseline = useSeries(baseline.history, (h) => h.plasmaOsmolality);
+  const urineHistory = useSeries(history, (h) => h.urineOsmolality);
+  const urineHistoryBaseline = useSeries(baseline.history, (h) => h.urineOsmolality);
+  const adhHistory = useSeries(history, (h) => h.adhLevel * 100);
+  const adhHistoryBaseline = useSeries(baseline.history, (h) => h.adhLevel * 100);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function RenalTubularPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={RENAL_TUBULAR_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Water deprivation', onClick: triggerWaterDeprivation, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<NephronDiagram derived={snapshot.derived} />}

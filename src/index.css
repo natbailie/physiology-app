@@ -1,20 +1,48 @@
+/* Self-hosted, latin subset, variable. Two files and no network request at runtime — the
+ * CLAUDE.md rule is about runtime DEPENDENCIES, and these are assets.
+ *
+ * The mono is the one that fixes a bug rather than an aesthetic. Diagram labels are positioned
+ * by hand against 8-11px monospace text, and the system stack resolves to SF Mono on macOS and
+ * Consolas on Windows — different metrics, so every hand-placed label drifted by platform.
+ * Pinning the face is what makes those coordinates mean the same thing everywhere. */
+@font-face {
+  font-family: 'Inter var';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono var';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-var.woff2') format('woff2');
+}
+
 :root {
   /* Surfaces — clinical/laboratory light: paper panels on a cool bench grey */
   --bg: #f2f5f8;
   --panel: #ffffff;
   --panel-raised: #eaeff5;
   --panel-border: #cfd8e3;
-  --grid-line: #dde5ef; /* graph-paper major rule on diagram screens */
-  --grid-line-minor: #edf1f6; /* graph-paper minor rule */
+  /* Axis gridlines. Only the four modules whose diagram is genuinely a plot use these —
+   * the graph paper that used to sit behind every diagram is gone. */
+  --grid-line: #dde5ef;
+  --grid-line-minor: #edf1f6;
 
   /* Text */
   --text: #14202e;
   --text-dim: #55677f;
   --text-faint: #67768e;
+  /* Text sitting ON a solid signal colour (a filled danger button, a badge). */
+  --on-solid: #ffffff;
 
   /* Elevation — on paper, panels need a hairline plus a whisper of shadow */
   --shadow-1: 0 1px 2px rgba(20, 32, 46, 0.05);
   --shadow-2: 0 2px 6px rgba(20, 32, 46, 0.08);
+  --shadow-3: 0 4px 14px rgba(20, 32, 46, 0.10); /* the one element that should read as lifted: the diagram */
 
   /* Diagram effect tuning. The diagrams encode physiological intensity as
    * translucent washes and coloured halos; these tokens let the whole set be
@@ -27,104 +55,157 @@
   --glow-blur: 0.7; /* multiplier on halo blur radius — tighter than a dark-mode neon glow */
   --glow-mix: 42%; /* colour strength inside the halo */
 
-  /* Signal colors, following anatomical/monitor convention. Tuned for legibility
-   * on white: >=4.5:1 against --panel where used as label text, >=3:1 as a 2px stroke. */
-  --artery: #c62828; /* oxygenated blood, heart, arterial flow */
-  --kidney: #9c6608; /* renal function / GFR */
-  --raas: #6a3fc9; /* renin-angiotensin-aldosterone pathway */
-  --anp: #007a6f; /* ANP counter-regulatory pathway */
-  --urine: #7d6c0a; /* excretion */
-  --o2: #0a72b8; /* oxygenation: PaO2, SaO2, O2-Hb curve */
-  --co2: #b4500c; /* CO2 / ventilation / chemoreceptor drive */
-  --ph: #c2258c; /* acid-base status */
-  --bicarb: #177d36; /* HCO3- / renal acid-base compensation */
-  --cortisol: #9e6215; /* HPA axis: cortisol / adrenal output */
-  --acth: #1c6ee0; /* HPA axis: ACTH / pituitary drive */
-  --thyroid: #0b7d6b; /* HPT axis: T4/T3 / thyroid output */
-  --tsh: #9b45d1; /* HPT axis: TSH / pituitary drive */
-  --gastrin: #8f6a10; /* GI: gastrin / gastric acid drive */
-  --somatostatin: #5a6c96; /* GI: somatostatin brake on gastrin/acid */
-  --cck: #177a57; /* GI: cholecystokinin (fat/protein signal) */
-  --secretin: #31659c; /* GI: secretin / pancreatic bicarbonate signal */
-  --motility: #8f4aa8; /* GI: peristalsis / migrating motor complex */
-  --glucose: #8a6c00; /* glucose regulation: blood glucose */
-  --insulin: #0a72b8; /* glucose regulation: insulin / beta cell */
-  --glucagon: #b4500c; /* glucose regulation: glucagon / alpha cell */
-  --epinephrine: #c2258c; /* glucose regulation: counter-regulatory hormones */
-  --calcium: #7a6f52; /* calcium homeostasis: serum calcium / bone mineral */
-  --pth: #c43d75; /* calcium homeostasis: parathyroid hormone */
-  --calcitriol: #357c35; /* calcium homeostasis: active vitamin D */
-  --phosphate: #4a5fd0; /* calcium homeostasis: serum phosphate */
-  --calcitonin: #0e7d94; /* calcium homeostasis: calcitonin */
-  --vm: #7c6d00; /* membrane potentials: membrane voltage trace */
-  --na-current: #cf3f26; /* membrane potentials: sodium current / conductance */
-  --k-current: #0b7ea8; /* membrane potentials: potassium current / conductance */
-  --axon: #6b4fa8; /* membrane potentials: axon / myelin / conduction */
-  --sympathetic: #bd481a; /* ANS: sympathetic outflow */
-  --parasympathetic: #0e8468; /* ANS: parasympathetic / vagal outflow */
-  --second-messenger: #8a3fb5; /* ANS: cAMP / IP3 second-messenger cascades */
-  --tubule: #0e7d94; /* renal tubular: nephron segments / tubular fluid */
-  --adh: #6a3fc9; /* renal tubular: antidiuretic hormone */
-  --medulla: #9c6608; /* renal tubular: medullary osmotic gradient */
-  --sa-node: #8a6c00; /* cardiac electro: SA node / pacemaker */
-  --conduction: #1c6ee0; /* cardiac electro: AV conduction / ECG trace */
-  --pv-loop: #b02a5e; /* cardiac electro: pressure-volume loop */
-  --ecg-trace: #177d36; /* ECG: the recorded trace */
-  --depolarized: #cf3f26; /* ECG: tissue actively depolarising */
-  --repolarizing: #1c6ee0; /* ECG: tissue repolarising */
-  --conduction-path: #8a6c00; /* ECG: specialised conduction tissue */
-  --fibrin: #9b45d1; /* coagulation: fibrin mesh */
-  --thrombin: #c2258c; /* coagulation: thrombin burst */
-  --platelet: #8a6c00; /* coagulation: platelets / primary haemostasis */
-  --plasmin: #177a57; /* coagulation: fibrinolysis / D-dimer */
-  --hemoglobin: #c62828; /* erythropoiesis: haemoglobin / red cell mass */
-  --epo: #0b7d6b; /* erythropoiesis: erythropoietin */
-  --marrow: #9e6215; /* erythropoiesis: bone marrow output */
-  --iron: #9a6b2e; /* erythropoiesis: iron stores / ferritin */
-  --pathogen: #c62828; /* immune: pathogen burden */
-  --innate: #9e6215; /* immune: innate first line */
-  --adaptive: #1c6ee0; /* immune: adaptive / T cells */
-  --antibody: #0b7d6b; /* immune: antibody titres */
-  --memory: #8a3fb5; /* immune: immunological memory */
-  --compliance: #0f7c66; /* respiratory mechanics: lung compliance / volumes */
-  --resistance: #ab5814; /* respiratory mechanics: airway resistance / flow */
-  --vq: #5b4fd0; /* respiratory mechanics: ventilation-perfusion matching */
-  --gnrh: #9e6215; /* HPG axis: GnRH / hypothalamic drive */
-  --lh: #c2258c; /* HPG axis: luteinizing hormone */
-  --fsh: #1c6ee0; /* HPG axis: follicle-stimulating hormone */
-  --estrogen: #9b45d1; /* HPG axis: estrogen */
-  --progesterone: #0b7d6b; /* HPG axis: progesterone */
-  --testosterone: #0b7ea8; /* HPG axis: testosterone */
-  --sarcomere: #a8452b; /* muscle: sarcomere filaments / developed tension */
-  --potassium: #0b6f93; /* electrolytes: serum & total-body potassium */
-  --sodium: #b8431f; /* electrolytes: serum sodium / tonicity */
-  --capillary: #c0396b; /* capillary exchange: capillary & hydrostatic pressure */
-  --interstitium: #6f8a2e; /* capillary exchange: interstitial compartment / oedema */
-  --lymph: #2f8a7a; /* capillary exchange: lymphatic return */
-  --venous: #3b4fa0; /* venous return: venous reservoir & filling pressure */
-  --ige: #c2258c; /* hypersensitivity: type I, IgE & mast cell mediators */
-  --cytotoxic-ab: #b4500c; /* hypersensitivity: type II, antibody against a cell surface */
-  --immune-complex: #6a3fc9; /* hypersensitivity: type III, immune complex deposition */
-  --delayed-type: #0f7c66; /* hypersensitivity: type IV, T cells & macrophages */
-  --complement: #0b7ea8; /* hypersensitivity: complement consumption (C3/C4) */
-  --retina: #6d4fc1; /* vision: photoreceptor response / retinal signal */
-  --cochlea: #a06a10; /* hearing: cochlear thresholds / travelling wave */
-  --vestibular: #0f7c66; /* vestibular: canal firing / nystagmus trace */
-  --nociception: #8c2f39; /* somatosensation & pain: nociceptive traffic / gate output */
-  --basal-ganglia: #47679e; /* motor control: gating circuit / executed movement */
-  --liver: #99551b; /* liver: bile / conjugated bilirubin flow */
-  --placenta: #2f7fa3; /* pregnancy: fetal-placental unit / maternal adaptation */
-  --pituitary: #7c4f8f; /* anterior pituitary: hypothalamic-pituitary signalling */
-  --adrenal-medulla: #a02f2f; /* adrenal medulla: catecholamine secretion */
-  --transfusion: #2f6db5; /* blood groups & transfusion: donor-recipient matching */
-  --thermal: #cf5b00; /* thermoregulation: heat load vs defended set point */
-  --exercise: #2e7d46; /* exercise physiology: integrated metabolic response */
-  --ok: #007a6f;
-  --warn: #9c6608;
-  --danger: #c62828;
+  /* Signal derivation. Identity in light: the bases ARE the light palette. */
+  --signal-tint: #ffffff;
+  --signal-lift: 0%;
 
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  /* Signal colour BASES, following anatomical/monitor convention. Calibrated on white:
+   * >=4.5:1 against --panel as label text, >=3:1 as a 2px stroke.
+   *
+   * These are never used directly. The derived block below lifts each one towards
+   * --signal-tint by --signal-lift, which is how the same 102 colours survive a dark
+   * surface without 93 second opinions about what each should become. Both halves are
+   * asserted by src/theme/palette.test.ts, in both themes. */
+  --artery-base: #c62828; /* oxygenated blood, heart, arterial flow */
+  --kidney-base: #9c6608; /* renal function / GFR */
+  --raas-base: #6a3fc9; /* renin-angiotensin-aldosterone pathway */
+  --anp-base: #007a6f; /* ANP counter-regulatory pathway */
+  --urine-base: #7d6c0a; /* excretion */
+  --o2-base: #0a72b8; /* oxygenation: PaO2, SaO2, O2-Hb curve */
+  --co2-base: #b4500c; /* CO2 / ventilation / chemoreceptor drive */
+  --ph-base: #c2258c; /* acid-base status */
+  --bicarb-base: #177d36; /* HCO3- / renal acid-base compensation */
+  --cortisol-base: #9e6215; /* HPA axis: cortisol / adrenal output */
+  --acth-base: #1c6ee0; /* HPA axis: ACTH / pituitary drive */
+  --thyroid-base: #0b7d6b; /* HPT axis: T4/T3 / thyroid output */
+  --tsh-base: #9b45d1; /* HPT axis: TSH / pituitary drive */
+  --gastrin-base: #8f6a10; /* GI: gastrin / gastric acid drive */
+  --somatostatin-base: #5a6c96; /* GI: somatostatin brake on gastrin/acid */
+  --cck-base: #177a57; /* GI: cholecystokinin (fat/protein signal) */
+  --secretin-base: #31659c; /* GI: secretin / pancreatic bicarbonate signal */
+  --motility-base: #8f4aa8; /* GI: peristalsis / migrating motor complex */
+  --glucose-base: #8a6c00; /* glucose regulation: blood glucose */
+  --insulin-base: #0a72b8; /* glucose regulation: insulin / beta cell */
+  --glucagon-base: #b4500c; /* glucose regulation: glucagon / alpha cell */
+  --epinephrine-base: #c2258c; /* glucose regulation: counter-regulatory hormones */
+  --calcium-base: #7a6f52; /* calcium homeostasis: serum calcium / bone mineral */
+  --pth-base: #c43d75; /* calcium homeostasis: parathyroid hormone */
+  --calcitriol-base: #357c35; /* calcium homeostasis: active vitamin D */
+  --phosphate-base: #4a5fd0; /* calcium homeostasis: serum phosphate */
+  --calcitonin-base: #0e7d94; /* calcium homeostasis: calcitonin */
+  --vm-base: #7c6d00; /* membrane potentials: membrane voltage trace */
+  --na-current-base: #cf3f26; /* membrane potentials: sodium current / conductance */
+  --k-current-base: #0b7ea8; /* membrane potentials: potassium current / conductance */
+  --axon-base: #6b4fa8; /* membrane potentials: axon / myelin / conduction */
+  --sympathetic-base: #bd481a; /* ANS: sympathetic outflow */
+  --parasympathetic-base: #0e8468; /* ANS: parasympathetic / vagal outflow */
+  --second-messenger-base: #8a3fb5; /* ANS: cAMP / IP3 second-messenger cascades */
+  --tubule-base: #0e7d94; /* renal tubular: nephron segments / tubular fluid */
+  --adh-base: #6a3fc9; /* renal tubular: antidiuretic hormone */
+  --medulla-base: #9c6608; /* renal tubular: medullary osmotic gradient */
+  --sa-node-base: #8a6c00; /* cardiac electro: SA node / pacemaker */
+  --conduction-base: #1c6ee0; /* cardiac electro: AV conduction / ECG trace */
+  --pv-loop-base: #b02a5e; /* cardiac electro: pressure-volume loop */
+  --ecg-trace-base: #177d36; /* ECG: the recorded trace */
+  --depolarized-base: #cf3f26; /* ECG: tissue actively depolarising */
+  --repolarizing-base: #1c6ee0; /* ECG: tissue repolarising */
+  --conduction-path-base: #8a6c00; /* ECG: specialised conduction tissue */
+  --fibrin-base: #9b45d1; /* coagulation: fibrin mesh */
+  --thrombin-base: #c2258c; /* coagulation: thrombin burst */
+  --platelet-base: #8a6c00; /* coagulation: platelets / primary haemostasis */
+  --plasmin-base: #177a57; /* coagulation: fibrinolysis / D-dimer */
+  --hemoglobin-base: #c62828; /* erythropoiesis: haemoglobin / red cell mass */
+  --epo-base: #0b7d6b; /* erythropoiesis: erythropoietin */
+  --marrow-base: #9e6215; /* erythropoiesis: bone marrow output */
+  --iron-base: #9a6b2e; /* erythropoiesis: iron stores / ferritin */
+  --pathogen-base: #c62828; /* immune: pathogen burden */
+  --innate-base: #9e6215; /* immune: innate first line */
+  --adaptive-base: #1c6ee0; /* immune: adaptive / T cells */
+  --antibody-base: #0b7d6b; /* immune: antibody titres */
+  --memory-base: #8a3fb5; /* immune: immunological memory */
+  --compliance-base: #0f7c66; /* respiratory mechanics: lung compliance / volumes */
+  --resistance-base: #ab5814; /* respiratory mechanics: airway resistance / flow */
+  --vq-base: #5b4fd0; /* respiratory mechanics: ventilation-perfusion matching */
+  --gnrh-base: #9e6215; /* HPG axis: GnRH / hypothalamic drive */
+  --lh-base: #c2258c; /* HPG axis: luteinizing hormone */
+  --fsh-base: #1c6ee0; /* HPG axis: follicle-stimulating hormone */
+  --estrogen-base: #9b45d1; /* HPG axis: estrogen */
+  --progesterone-base: #0b7d6b; /* HPG axis: progesterone */
+  --testosterone-base: #0b7ea8; /* HPG axis: testosterone */
+  --sarcomere-base: #a8452b; /* muscle: sarcomere filaments / developed tension */
+  --potassium-base: #0b6f93; /* electrolytes: serum & total-body potassium */
+  --sodium-base: #b8431f; /* electrolytes: serum sodium / tonicity */
+  --capillary-base: #c0396b; /* capillary exchange: capillary & hydrostatic pressure */
+  --interstitium-base: #657f21; /* capillary exchange: interstitial compartment / oedema */
+  --lymph-base: #278474; /* capillary exchange: lymphatic return */
+  --venous-base: #3b4fa0; /* venous return: venous reservoir & filling pressure */
+  --ige-base: #c2258c; /* hypersensitivity: type I, IgE & mast cell mediators */
+  --cytotoxic-ab-base: #b4500c; /* hypersensitivity: type II, antibody against a cell surface */
+  --immune-complex-base: #6a3fc9; /* hypersensitivity: type III, immune complex deposition */
+  --delayed-type-base: #0f7c66; /* hypersensitivity: type IV, T cells & macrophages */
+  --complement-base: #0b7ea8; /* hypersensitivity: complement consumption (C3/C4) */
+  --retina-base: #6d4fc1; /* vision: photoreceptor response / retinal signal */
+  --cochlea-base: #a06a10; /* hearing: cochlear thresholds / travelling wave */
+  --vestibular-base: #0f7c66; /* vestibular: canal firing / nystagmus trace */
+  --nociception-base: #8c2f39; /* somatosensation & pain: nociceptive traffic / gate output */
+  --basal-ganglia-base: #47679e; /* motor control: gating circuit / executed movement */
+  --liver-base: #99551b; /* liver: bile / conjugated bilirubin flow */
+  --placenta-base: #2e7ea2; /* pregnancy: fetal-placental unit / maternal adaptation */
+  --pituitary-base: #7c4f8f; /* anterior pituitary: hypothalamic-pituitary signalling */
+  --adrenal-medulla-base: #a02f2f; /* adrenal medulla: catecholamine secretion */
+  --transfusion-base: #2f6db5; /* blood groups & transfusion: donor-recipient matching */
+  --thermal-base: #c65200; /* thermoregulation: heat load vs defended set point */
+  --exercise-base: #2e7d46; /* exercise physiology: integrated metabolic response */
+  --ok-base: #007a6f;
+  --warn-base: #9c6608;
+  --danger-base: #c62828;
+
+  --sans: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'JetBrains Mono var', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+
+  /* --- Scales ---------------------------------------------------------------
+   * Colour was the only tokenised axis. Before this block the app carried 31
+   * distinct font sizes, 9 radii and `0.15s ease` retyped dozens of times across
+   * 78 stylesheets. Everything below is a closed set: if a value is not here,
+   * it should not be in a component. */
+
+  /* Spacing. Every gap and pad rounds to one of these eight. */
+  --s-1: 0.25rem;
+  --s-2: 0.375rem;
+  --s-3: 0.5rem;
+  --s-4: 0.75rem;
+  --s-5: 1rem;
+  --s-6: 1.5rem;
+  --s-7: 2rem;
+  --s-8: 3rem;
+
+  /* Radii. Four steps replacing nine ad-hoc values. */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  /* Type. --fs-micro is the tracked instrument label; --fs-base is prose. */
+  --fs-micro: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --lh-tight: 1.2;
+  --lh-snug: 1.4;
+  --lh-prose: 1.6;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Focus. Modules set --accent, so a ring picks up the module's colour and
+   * falls back to a neutral teal on pages that have none. */
+  --focus-ring: 2px solid var(--accent, var(--anp));
 
   color-scheme: light;
   color: var(--text);
@@ -134,6 +215,152 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Derived signal colours. Mechanical — one line per base, no exceptions here.
+ * Anything that needs a different answer in dark overrides it in the dark block. */
+:root {
+  --artery: color-mix(in oklab, var(--artery-base), var(--signal-tint) var(--signal-lift));
+  --kidney: color-mix(in oklab, var(--kidney-base), var(--signal-tint) var(--signal-lift));
+  --raas: color-mix(in oklab, var(--raas-base), var(--signal-tint) var(--signal-lift));
+  --anp: color-mix(in oklab, var(--anp-base), var(--signal-tint) var(--signal-lift));
+  --urine: color-mix(in oklab, var(--urine-base), var(--signal-tint) var(--signal-lift));
+  --o2: color-mix(in oklab, var(--o2-base), var(--signal-tint) var(--signal-lift));
+  --co2: color-mix(in oklab, var(--co2-base), var(--signal-tint) var(--signal-lift));
+  --ph: color-mix(in oklab, var(--ph-base), var(--signal-tint) var(--signal-lift));
+  --bicarb: color-mix(in oklab, var(--bicarb-base), var(--signal-tint) var(--signal-lift));
+  --cortisol: color-mix(in oklab, var(--cortisol-base), var(--signal-tint) var(--signal-lift));
+  --acth: color-mix(in oklab, var(--acth-base), var(--signal-tint) var(--signal-lift));
+  --thyroid: color-mix(in oklab, var(--thyroid-base), var(--signal-tint) var(--signal-lift));
+  --tsh: color-mix(in oklab, var(--tsh-base), var(--signal-tint) var(--signal-lift));
+  --gastrin: color-mix(in oklab, var(--gastrin-base), var(--signal-tint) var(--signal-lift));
+  --somatostatin: color-mix(in oklab, var(--somatostatin-base), var(--signal-tint) var(--signal-lift));
+  --cck: color-mix(in oklab, var(--cck-base), var(--signal-tint) var(--signal-lift));
+  --secretin: color-mix(in oklab, var(--secretin-base), var(--signal-tint) var(--signal-lift));
+  --motility: color-mix(in oklab, var(--motility-base), var(--signal-tint) var(--signal-lift));
+  --glucose: color-mix(in oklab, var(--glucose-base), var(--signal-tint) var(--signal-lift));
+  --insulin: color-mix(in oklab, var(--insulin-base), var(--signal-tint) var(--signal-lift));
+  --glucagon: color-mix(in oklab, var(--glucagon-base), var(--signal-tint) var(--signal-lift));
+  --epinephrine: color-mix(in oklab, var(--epinephrine-base), var(--signal-tint) var(--signal-lift));
+  --calcium: color-mix(in oklab, var(--calcium-base), var(--signal-tint) var(--signal-lift));
+  --pth: color-mix(in oklab, var(--pth-base), var(--signal-tint) var(--signal-lift));
+  --calcitriol: color-mix(in oklab, var(--calcitriol-base), var(--signal-tint) var(--signal-lift));
+  --phosphate: color-mix(in oklab, var(--phosphate-base), var(--signal-tint) var(--signal-lift));
+  --calcitonin: color-mix(in oklab, var(--calcitonin-base), var(--signal-tint) var(--signal-lift));
+  --vm: color-mix(in oklab, var(--vm-base), var(--signal-tint) var(--signal-lift));
+  --na-current: color-mix(in oklab, var(--na-current-base), var(--signal-tint) var(--signal-lift));
+  --k-current: color-mix(in oklab, var(--k-current-base), var(--signal-tint) var(--signal-lift));
+  --axon: color-mix(in oklab, var(--axon-base), var(--signal-tint) var(--signal-lift));
+  --sympathetic: color-mix(in oklab, var(--sympathetic-base), var(--signal-tint) var(--signal-lift));
+  --parasympathetic: color-mix(in oklab, var(--parasympathetic-base), var(--signal-tint) var(--signal-lift));
+  --second-messenger: color-mix(in oklab, var(--second-messenger-base), var(--signal-tint) var(--signal-lift));
+  --tubule: color-mix(in oklab, var(--tubule-base), var(--signal-tint) var(--signal-lift));
+  --adh: color-mix(in oklab, var(--adh-base), var(--signal-tint) var(--signal-lift));
+  --medulla: color-mix(in oklab, var(--medulla-base), var(--signal-tint) var(--signal-lift));
+  --sa-node: color-mix(in oklab, var(--sa-node-base), var(--signal-tint) var(--signal-lift));
+  --conduction: color-mix(in oklab, var(--conduction-base), var(--signal-tint) var(--signal-lift));
+  --pv-loop: color-mix(in oklab, var(--pv-loop-base), var(--signal-tint) var(--signal-lift));
+  --ecg-trace: color-mix(in oklab, var(--ecg-trace-base), var(--signal-tint) var(--signal-lift));
+  --depolarized: color-mix(in oklab, var(--depolarized-base), var(--signal-tint) var(--signal-lift));
+  --repolarizing: color-mix(in oklab, var(--repolarizing-base), var(--signal-tint) var(--signal-lift));
+  --conduction-path: color-mix(in oklab, var(--conduction-path-base), var(--signal-tint) var(--signal-lift));
+  --fibrin: color-mix(in oklab, var(--fibrin-base), var(--signal-tint) var(--signal-lift));
+  --thrombin: color-mix(in oklab, var(--thrombin-base), var(--signal-tint) var(--signal-lift));
+  --platelet: color-mix(in oklab, var(--platelet-base), var(--signal-tint) var(--signal-lift));
+  --plasmin: color-mix(in oklab, var(--plasmin-base), var(--signal-tint) var(--signal-lift));
+  --hemoglobin: color-mix(in oklab, var(--hemoglobin-base), var(--signal-tint) var(--signal-lift));
+  --epo: color-mix(in oklab, var(--epo-base), var(--signal-tint) var(--signal-lift));
+  --marrow: color-mix(in oklab, var(--marrow-base), var(--signal-tint) var(--signal-lift));
+  --iron: color-mix(in oklab, var(--iron-base), var(--signal-tint) var(--signal-lift));
+  --pathogen: color-mix(in oklab, var(--pathogen-base), var(--signal-tint) var(--signal-lift));
+  --innate: color-mix(in oklab, var(--innate-base), var(--signal-tint) var(--signal-lift));
+  --adaptive: color-mix(in oklab, var(--adaptive-base), var(--signal-tint) var(--signal-lift));
+  --antibody: color-mix(in oklab, var(--antibody-base), var(--signal-tint) var(--signal-lift));
+  --memory: color-mix(in oklab, var(--memory-base), var(--signal-tint) var(--signal-lift));
+  --compliance: color-mix(in oklab, var(--compliance-base), var(--signal-tint) var(--signal-lift));
+  --resistance: color-mix(in oklab, var(--resistance-base), var(--signal-tint) var(--signal-lift));
+  --vq: color-mix(in oklab, var(--vq-base), var(--signal-tint) var(--signal-lift));
+  --gnrh: color-mix(in oklab, var(--gnrh-base), var(--signal-tint) var(--signal-lift));
+  --lh: color-mix(in oklab, var(--lh-base), var(--signal-tint) var(--signal-lift));
+  --fsh: color-mix(in oklab, var(--fsh-base), var(--signal-tint) var(--signal-lift));
+  --estrogen: color-mix(in oklab, var(--estrogen-base), var(--signal-tint) var(--signal-lift));
+  --progesterone: color-mix(in oklab, var(--progesterone-base), var(--signal-tint) var(--signal-lift));
+  --testosterone: color-mix(in oklab, var(--testosterone-base), var(--signal-tint) var(--signal-lift));
+  --sarcomere: color-mix(in oklab, var(--sarcomere-base), var(--signal-tint) var(--signal-lift));
+  --potassium: color-mix(in oklab, var(--potassium-base), var(--signal-tint) var(--signal-lift));
+  --sodium: color-mix(in oklab, var(--sodium-base), var(--signal-tint) var(--signal-lift));
+  --capillary: color-mix(in oklab, var(--capillary-base), var(--signal-tint) var(--signal-lift));
+  --interstitium: color-mix(in oklab, var(--interstitium-base), var(--signal-tint) var(--signal-lift));
+  --lymph: color-mix(in oklab, var(--lymph-base), var(--signal-tint) var(--signal-lift));
+  --venous: color-mix(in oklab, var(--venous-base), var(--signal-tint) var(--signal-lift));
+  --ige: color-mix(in oklab, var(--ige-base), var(--signal-tint) var(--signal-lift));
+  --cytotoxic-ab: color-mix(in oklab, var(--cytotoxic-ab-base), var(--signal-tint) var(--signal-lift));
+  --immune-complex: color-mix(in oklab, var(--immune-complex-base), var(--signal-tint) var(--signal-lift));
+  --delayed-type: color-mix(in oklab, var(--delayed-type-base), var(--signal-tint) var(--signal-lift));
+  --complement: color-mix(in oklab, var(--complement-base), var(--signal-tint) var(--signal-lift));
+  --retina: color-mix(in oklab, var(--retina-base), var(--signal-tint) var(--signal-lift));
+  --cochlea: color-mix(in oklab, var(--cochlea-base), var(--signal-tint) var(--signal-lift));
+  --vestibular: color-mix(in oklab, var(--vestibular-base), var(--signal-tint) var(--signal-lift));
+  --nociception: color-mix(in oklab, var(--nociception-base), var(--signal-tint) var(--signal-lift));
+  --basal-ganglia: color-mix(in oklab, var(--basal-ganglia-base), var(--signal-tint) var(--signal-lift));
+  --liver: color-mix(in oklab, var(--liver-base), var(--signal-tint) var(--signal-lift));
+  --placenta: color-mix(in oklab, var(--placenta-base), var(--signal-tint) var(--signal-lift));
+  --pituitary: color-mix(in oklab, var(--pituitary-base), var(--signal-tint) var(--signal-lift));
+  --adrenal-medulla: color-mix(in oklab, var(--adrenal-medulla-base), var(--signal-tint) var(--signal-lift));
+  --transfusion: color-mix(in oklab, var(--transfusion-base), var(--signal-tint) var(--signal-lift));
+  --thermal: color-mix(in oklab, var(--thermal-base), var(--signal-tint) var(--signal-lift));
+  --exercise: color-mix(in oklab, var(--exercise-base), var(--signal-tint) var(--signal-lift));
+  --ok: color-mix(in oklab, var(--ok-base), var(--signal-tint) var(--signal-lift));
+  --warn: color-mix(in oklab, var(--warn-base), var(--signal-tint) var(--signal-lift));
+  --danger: color-mix(in oklab, var(--danger-base), var(--signal-tint) var(--signal-lift));
+}
+
+/* --- Dark ------------------------------------------------------------------
+ * One block, not two. A script in index.html resolves the preference (stored choice, else
+ * the OS) and stamps `data-theme` before first paint, so the CSS never has to express the
+ * same palette once for `prefers-color-scheme` and again for an explicit override — and
+ * there is no flash of the wrong theme on load.
+ *
+ * The 93 signal colours are NOT restated here. They lift towards --signal-tint automatically;
+ * only the two knobs below and the handful of hand-overrides at the end of this block differ. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #10161d;
+  --panel: #18202a;
+  --panel-raised: #212b37;
+  --panel-border: #2e3a48;
+  --grid-line: #222d3a;
+  --grid-line-minor: #1a222c;
+
+  --text: #e8eef6;
+  --text-dim: #a3b4c8;
+  --text-faint: #8194aa;
+
+  /* On a lifted signal colour the ground reads, not white. */
+  --on-solid: #10161d;
+
+  /* Shadow does less work on dark, so the hairline border carries the separation instead. */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 4px 18px rgba(0, 0, 0, 0.5);
+
+  /* Lift every signal towards a cool near-white. Tuned against the contrast assertions in
+   * src/theme/palette.test.ts — raising it washes the hues together, lowering it loses the
+   * text-contrast floor on the darker signals. */
+  --signal-tint: #dbe8f8;
+  --signal-lift: 55%;
+
+  /* Diagram effects retune from here rather than from ~160 individual declarations. Washes
+   * need more presence over a dark panel; translucent strokes need less, because a light
+   * stroke on dark already separates; and a halo is the one effect dark does better. */
+  --wash-faint: 18%;
+  --wash-soft: 26%;
+  --wash: 36%;
+  --wash-strong: 52%;
+  --stroke-mix: 58%;
+  --glow-blur: 1;
+  --glow-mix: 58%;
 }
 
 * {
@@ -164,6 +391,33 @@ p {
 
 button {
   font-family: inherit;
+}
+
+/* Fallback focus ring. Twelve stylesheets declare their own; without this a new
+ * component starts with no visible focus at all. Components override freely. */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion, everywhere.
+ *
+ * 41 of the 45 diagram stylesheets animate or transition and only 5 declared a guard of their
+ * own, so this is a blanket rule rather than 36 near-identical media blocks — it is also the
+ * only version that stays true for diagrams added later. Jumping each animation to its end
+ * state rather than removing it keeps looped flow overlays looking deliberate rather than
+ * broken, and matches what the five hand-written guards already did.
+ *
+ * Where motion is the only thing distinguishing two states, the diagram is at fault and should
+ * be fixed there; nothing here should be load-bearing on its own. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 /* Utility: clinical instrument label treatment — tracked, uppercase, muted */

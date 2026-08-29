@@ -123,17 +123,28 @@
 /* --- Labels --- */
 
 .pathLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 .valueLabel {
-  font-family: var(--mono);
+  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
   font-size: 10px;
-  font-variant-numeric: tabular-nums;
-  fill: var(--text);
   text-anchor: middle;
+}
+
+.anatomy {
+  composes: anatomy from '../../../shared/styles/diagramText.module.css';
+}
+
+/* The one-way valves that define a lymphatic. */
+.lymphValve {
+  fill: none;
+  stroke: var(--lymph);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lymphHead {
+  fill: var(--lymph);
 }

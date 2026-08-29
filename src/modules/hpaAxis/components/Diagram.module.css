@@ -44,19 +44,40 @@
 /* --- Labels --- */
 
 .organLabel {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  fill: var(--text);
-  text-transform: uppercase;
-  text-anchor: middle;
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 .pathLabel {
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- Adrenal, drawn as cortex over medulla --- */
+
+.kidneyShape {
+  fill: color-mix(in srgb, var(--kidney) var(--wash-faint), var(--panel));
+  stroke: var(--kidney);
+  stroke-width: 1.2;
+  opacity: 0.7;
+}
+
+/* Stroke width is the cortical thickness, and cortical thickness is the reserve. */
+.adrenalCortex {
+  fill: none;
+  stroke: color-mix(in srgb, var(--cortisol) calc(0.45 + var(--cortisol-intensity, 0) * 0.55) 100%, transparent);
+  stroke-linejoin: round;
+  transition:
+    stroke-width 0.5s ease,
+    stroke 0.4s ease;
+}
+
+.adrenalMedulla {
+  fill: color-mix(in srgb, var(--adrenal-medulla) var(--wash-soft), var(--panel));
+  stroke: var(--adrenal-medulla);
+  stroke-width: 1.2;
+}
+
+.glandTick {
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
+  font-size: 8px;
+  fill: var(--text-faint);
 }

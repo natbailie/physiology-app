@@ -1,8 +1,5 @@
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-1);
+  composes: panel from '../../styles/panel.module.css';
   padding: 0.85rem 1.1rem;
 }
 
@@ -39,10 +36,12 @@
   flex: none;
 }
 
-.panel[open] .chevron {
+.panel[open] > .summary .chevron,
+.card[open] > .cardSummary .chevron {
   transform: rotate(225deg) translate(-2px, -2px);
 }
 
+/* Legacy flat prose, directly under the panel summary. */
 .paragraphs {
   display: flex;
   flex-direction: column;
@@ -57,6 +56,101 @@
   line-height: 1.6;
   color: var(--text-dim);
   max-width: 78ch;
+}
+
+/* --- Sectioned prose --- */
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--panel-border);
+  list-style: none;
+}
+
+/* `quiet` rather than `panel`: a card in a run of siblings inside another surface must not
+   cast its own shadow. */
+.card {
+  composes: quiet from '../../styles/panel.module.css';
+  padding: 0.6rem 0.8rem;
+}
+
+.cardSummary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cardSummary::-webkit-details-marker {
+  display: none;
+}
+
+.cardSummary:focus-visible {
+  outline: 2px solid var(--accent, var(--text-dim));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* The step number gives the run of claims a legible order without any state to track. */
+.ordinal {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  color: var(--accent, var(--text-faint));
+  flex: none;
+  min-width: 1ch;
+}
+
+.heading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  flex: 1;
+}
+
+.cardSummary .chevron {
+  align-self: center;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.55rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+/* --- Scenario buttons --- */
+
+.demoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  align-items: center;
+  margin-top: var(--s-1);
+}
+
+.demo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+/* Layout only — the colour variants all live in button.module.css by design. */
+.demoButton {
+  composes: accent from '../../styles/button.module.css';
+  font-size: var(--fs-micro);
+  padding: var(--s-1) var(--s-3);
+}
+
+.watch {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
 }
 
 @media (prefers-reduced-motion: reduce) {

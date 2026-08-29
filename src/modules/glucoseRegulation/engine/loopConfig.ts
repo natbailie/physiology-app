@@ -14,6 +14,7 @@ export const glucoseLoopConfig: EngineLoopConfig<GlucoseState, GlucoseInputs, Gl
     glucagon: snapshot.derived.glucagonLevel,
   }),
   maxDtSeconds: GLUCOSE_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: GLUCOSE_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: GLUCOSE_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: GLUCOSE_SIMULATION.HISTORY_CAPACITY,
   timeScale: GLUCOSE_SIMULATION.TIME_SCALE,

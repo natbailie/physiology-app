@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail, ControlGroup } from '@/shared/components/ControlRail/ControlRail';
 import type { CoagInputs } from '../engine/types';
@@ -7,7 +8,7 @@ interface ControlPanelProps {
   onChange: <K extends keyof CoagInputs>(key: K, value: CoagInputs[K]) => void;
 }
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <ControlGroup label="Clotting factors">
@@ -102,3 +103,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

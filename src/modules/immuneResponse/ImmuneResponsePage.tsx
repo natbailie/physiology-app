@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ImmuneDiagram } from './components/ImmuneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { immuneResponseContent } from './content';
 import { immuneLoopConfig } from './engine/loopConfig';
 import { perturbInfect, perturbVaccinate } from './engine/engine';
-import { DEFAULT_IMMUNE_INPUTS, IMMUNE_PRESETS, type ImmunePresetName, IMMUNE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_IMMUNE_INPUTS, IMMUNE_PRESETS, IMMUNE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { ImmuneInputs } from './engine/types';
 
 export function ImmuneResponsePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ImmuneInputs>('immuneResponse', DEFAULT_IMMUNE_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, immuneLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_IMMUNE_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'immuneResponse',
@@ -35,20 +46,21 @@ export function ImmuneResponsePage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof ImmuneInputs>(key: K, value: ImmuneInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ImmunePresetName) {
-    setInputs((prev) => ({ ...prev, ...IMMUNE_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_IMMUNE_INPUTS,
+    presets: IMMUNE_PRESETS,
+    resetEngine: reset,
+  });
 
-  const loadHistory = history.map((h) => h.pathogenLoad * 100);
-  const loadHistoryBaseline = baseline.history?.map((h) => h.pathogenLoad * 100) ?? null;
-  const iggHistory = history.map((h) => h.iggTitre * 100);
-  const iggHistoryBaseline = baseline.history?.map((h) => h.iggTitre * 100) ?? null;
-  const memoryHistory = history.map((h) => h.memoryLevel * 100);
-  const memoryHistoryBaseline = baseline.history?.map((h) => h.memoryLevel * 100) ?? null;
+  const loadHistory = useSeries(history, (h) => h.pathogenLoad * 100);
+  const loadHistoryBaseline = useSeries(baseline.history, (h) => h.pathogenLoad * 100);
+  const iggHistory = useSeries(history, (h) => h.iggTitre * 100);
+  const iggHistoryBaseline = useSeries(baseline.history, (h) => h.iggTitre * 100);
+  const memoryHistory = useSeries(history, (h) => h.memoryLevel * 100);
+  const memoryHistoryBaseline = useSeries(baseline.history, (h) => h.memoryLevel * 100);
 
   return (
     <ModulePage
@@ -60,10 +72,10 @@ export function ImmuneResponsePage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={IMMUNE_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Vaccinate', onClick: () => perturb((state) => perturbVaccinate(state)), variant: 'impulse' }, { label: 'Infect', onClick: () => perturb((state) => perturbInfect(state)), variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

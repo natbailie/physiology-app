@@ -67,4 +67,8 @@ export const LIVER_SIMULATION = {
   HISTORY_CAPACITY: 600,
   /** Bilirubin pools equilibrate over hours to days; compressed to stay watchable. */
   TIME_SCALE: 900,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 32000,
 } as const;

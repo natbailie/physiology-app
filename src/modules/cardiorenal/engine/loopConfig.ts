@@ -14,6 +14,7 @@ export const cardiorenalLoopConfig: EngineLoopConfig<SimState, SimInputs, Derive
     bloodVolume: snapshot.state.bloodVolume,
   }),
   maxDtSeconds: SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: SIMULATION.HISTORY_CAPACITY,
   timeScale: SIMULATION.TIME_SCALE,

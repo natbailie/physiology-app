@@ -67,7 +67,7 @@
   cursor: pointer;
   border: none;
   background: var(--text);
-  color: var(--bg, #10141a);
+  color: var(--bg);
 }
 
 .primaryButton:disabled {

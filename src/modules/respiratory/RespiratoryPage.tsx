@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { RespiratoryDiagram } from './components/RespiratoryDiagram';
 import { DavenportDiagram } from './components/DavenportDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -17,12 +21,19 @@ import { respiratoryContent } from './content';
 import { respiratoryLoopConfig } from './engine/loopConfig';
 import { perturbAirwayObstruction } from './engine/engine';
 import { saO2 } from './engine/gasExchange';
-import { DEFAULT_RESP_INPUTS, RESP_PRESETS, type RespPresetName, RESP_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_RESP_INPUTS, RESP_PRESETS, RESP_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { RespInputs } from './engine/types';
 
 export function RespiratoryPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RespInputs>('respiratory', DEFAULT_RESP_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, respiratoryLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_RESP_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'respiratory',
@@ -38,24 +49,25 @@ export function RespiratoryPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof RespInputs>(key: K, value: RespInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: RespPresetName) {
-    setInputs((prev) => ({ ...prev, ...RESP_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_RESP_INPUTS,
+    presets: RESP_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerBronchospasm() {
     perturb((state) => perturbAirwayObstruction(state));
   }
 
-  const pHHistory = history.map((h) => h.pH);
-  const pHHistoryBaseline = baseline.history?.map((h) => h.pH) ?? null;
-  const paCO2History = history.map((h) => h.paCO2);
-  const paCO2HistoryBaseline = baseline.history?.map((h) => h.paCO2) ?? null;
-  const saO2History = history.map((h) => h.saO2);
-  const saO2HistoryBaseline = baseline.history?.map((h) => h.saO2) ?? null;
+  const pHHistory = useSeries(history, (h) => h.pH);
+  const pHHistoryBaseline = useSeries(baseline.history, (h) => h.pH);
+  const paCO2History = useSeries(history, (h) => h.paCO2);
+  const paCO2HistoryBaseline = useSeries(baseline.history, (h) => h.paCO2);
+  const saO2History = useSeries(history, (h) => h.saO2);
+  const saO2HistoryBaseline = useSeries(baseline.history, (h) => h.saO2);
 
   return (
     <ModulePage
@@ -67,10 +79,10 @@ export function RespiratoryPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={RESP_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Bronchospasm', onClick: triggerBronchospasm, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }
@@ -80,7 +92,7 @@ export function RespiratoryPage() {
           <DavenportDiagram derived={snapshot.derived} history={history} baselineHistory={baseline.history} />
         </>
       }
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
       practice={<QuizPanel session={session} summary={summary} presetLabels={RESP_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

@@ -145,4 +145,96 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     explanation:
       'This is a posterior infarct, and nothing is elevated because no electrode faces the back of the heart. What the anterior leads are showing is the mirror image of an elevation happening on a wall nobody is recording from — depression in V1 to V3 is, geometrically, elevation seen from the opposite side. Mistaking it for anterior ischaemia is the classic error, and the consequence is real: this patient needs reperfusion, not observation. Compare the anterior option, where the same leads move the other way entirely.',
   },
+
+  // --- Rhythms: who is driving, and what that does to the numbers ---
+
+  {
+    id: 'flutter-two-to-one',
+    stem: 'A patient presents breathless with a regular tachycardia. An atrial re-entry circuit is driving their atria at 300 per minute.',
+    setup: { preset: 'normalSinus' },
+    intervention: { label: 'Atrial flutter develops with 2:1 conduction.', inputs: { rhythm: 'atrialFlutter' } },
+    prompt: 'What happens to the ventricular rate?',
+    watch: 'the ventricular rate',
+    correctDirection: 'rises',
+    explanation:
+      'It settles at almost exactly 150 — half the atrial rate — and that number is worth knowing cold. The AV node cannot conduct 300 impulses a minute; its long refractory period turns it into a filter, letting every second wave through. So flutter is one of the few tachycardias whose rate diagnoses it: a REGULAR narrow-complex tachycardia at very nearly 150 should be treated as flutter until proven otherwise. Watch the sawtooth baseline appear between QRS complexes while the ventricular rhythm stays perfectly disciplined.',
+    metric: (s) => s.derived.ventricularRateBpm,
+    settleSeconds: 12,
+    observeSeconds: 12,
+  },
+  {
+    id: 'vt-widens-qrs',
+    stem: 'A patient with a previous infarct suddenly becomes presyncopal. A single ventricular focus has taken over pacing at 180 per minute.',
+    setup: { preset: 'normalSinus' },
+    intervention: { label: 'Monomorphic ventricular tachycardia begins.', inputs: { rhythm: 'ventricularTachycardia' } },
+    prompt: 'What happens to the QRS duration?',
+    watch: 'the QRS duration',
+    correctDirection: 'rises',
+    explanation:
+      'It widens well past 120 ms, because a ventricular focus has no access to the His-Purkinje motorway: depolarisation spreads from myocyte to myocyte, which is several times slower than specialised conduction. The result is a REGULAR wide-complex tachycardia with the sinus-ridden atria marching independently behind it — AV dissociation, the signature that separates VT from any supraventricular rhythm with aberrant conduction. Treat every regular broad-complex tachycardia in an older patient as VT: the wrong assumption kills faster than the right one embarrasses.',
+    metric: (s) => s.derived.qrsDurationMs,
+    settleSeconds: 8,
+    observeSeconds: 8,
+  },
+  {
+    id: 'wpw-shortens-pr',
+    stem: 'A young patient with palpitations has an accessory pathway bypassing the AV node. Their ECG is recorded in sinus rhythm.',
+    setup: { preset: 'normalSinus' },
+    intervention: { label: 'The accessory pathway conducts (pre-excitation).', inputs: { rhythm: 'wpw' } },
+    prompt: 'What happens to the PR interval?',
+    watch: 'the PR interval',
+    correctDirection: 'falls',
+    explanation:
+      'It shortens below 120 ms, because PR measures atrial-onset-to-ventricular-onset and the accessory pathway reaches the ventricle having skipped most of the AV node\'s protective delay. Part of the muscle depolarises early and slowly, slurring the start of the QRS into the delta wave. The pattern is benign-looking but matters enormously: if that patient later develops atrial fibrillation, the accessory pathway can conduct at absurd rates and degenerate into ventricular fibrillation.',
+    metric: (s) => s.derived.prIntervalMs,
+    settleSeconds: 8,
+    observeSeconds: 8,
+  },
+  {
+    id: 'sick-sinus-drops-mean-rate',
+    stem: 'An elderly patient has dizzy spells. Their SA node fails intermittently, and when it does, the AV junction escapes at its own slow intrinsic rate.',
+    setup: { preset: 'normalSinus' },
+    intervention: { label: 'Sick sinus syndrome with junctional escape.', inputs: { rhythm: 'sickSinus' } },
+    prompt: 'What happens to the mean ventricular rate?',
+    watch: 'the mean ventricular rate',
+    correctDirection: 'falls',
+    explanation:
+      'It falls below the sinus rate, and by less than you might expect — because the junctional pacemaker is doing exactly its job, firing at its own sluggish intrinsic rate whenever the SA node pauses. The rhythm reads as sinus beats punctuated by pauses filled with escape complexes, so the averaged rate lands somewhere between the two pacemakers. That is the therapeutic point: the escapes are keeping this patient conscious between pauses, which is why drugs that suppress them come before a pacemaker does.',
+    metric: (s) => s.derived.meanVentricularRateBpm,
+    settleSeconds: 20,
+    observeSeconds: 90,
+    tolerance: 0.04,
+  },
+  {
+    id: 'torsades-on-long-qt',
+    stem: 'A patient on several QT-prolonging drugs develops collapsing pulses. Their monitor shows a fast rhythm whose complexes visibly twist around the baseline.',
+    setup: { preset: 'longQt' },
+    intervention: { label: 'Torsades de pointes begins.', inputs: { rhythm: 'torsades' } },
+    prompt: 'What happens to the ventricular rate?',
+    watch: 'the ventricular rate',
+    correctDirection: 'rises',
+    explanation:
+      'It surges past 200 per minute as the polymorphic tachycardia takes over. Torsades de pointes — literally "twisting of the points" — is VT on a long-QT substrate: after-depolarisations triggered during the prolonged repolarisation you can still see in the QTc readout. The twisting appearance reflects the mean axis rotating round the baseline, so every lead sees the amplitude wax and wane. Acute management is magnesium and removing the offending drugs; the QT is the disease, not just a number.',
+    metric: (s) => s.derived.ventricularRateBpm,
+    settleSeconds: 8,
+    observeSeconds: 8,
+  },
+
+  // --- Naming a broad-complex tachycardia from the monitor alone ---
+
+  {
+    id: 'broad-complex-tachycardia',
+    stem: 'A 70-year-old with chest pain is hypotensive and pale. The monitor shows a fast rhythm; the panel below is what the machine reports.',
+    answer: 'ventricularTachycardia',
+    options: ['ventricularTachycardia', 'rbbb', 'lbbb', 'hyperkalemia'],
+    panel: [
+      { label: 'Ventricular rate', unit: 'bpm', value: (s: Snapshot) => s.derived.meanVentricularRateBpm, decimals: 0 },
+      { label: 'QRS width', unit: 'ms', value: (s: Snapshot) => s.derived.qrsDurationMs, decimals: 0 },
+      { label: 'PR interval', unit: 'ms', value: (s: Snapshot) => s.derived.prIntervalMs, decimals: 0 },
+      { label: 'QTc', unit: 'ms', value: (s: Snapshot) => s.derived.qtcMs, decimals: 0 },
+    ],
+    settleSeconds: 10,
+    explanation:
+      'Regular, 180 a minute, QRS near 170 ms with no measurable PR: a ventricular focus driving dissociated ventricles — ventricular tachycardia. The distractors all widen the QRS too, which is exactly what makes this decision hard at the bedside: bundle branch block and hyperkalaemia produce broad complexes at SINUS rates with an intact PR, and none of them triples the rate. In a hypotensive 70-year-old with chest pain, broad complex plus tachycardia is VT until conclusively proven otherwise — the survival-cost of assuming "aberrancy" is measured in defibrillation minutes.',
+  },
 ];

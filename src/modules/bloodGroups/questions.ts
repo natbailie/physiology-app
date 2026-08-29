@@ -72,4 +72,55 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
       'It collapses toward zero — severity scales with the VOLUME of incompatible cells infused, which is why stopping at the first few millilitres aborts the entire syndrome before free haemoglobin reaches the kidney or thrombin generation begins. The fifteen-minute supervised start of every transfusion is not ceremony; it is the single most effective safety intervention in transfusion medicine.',
     metric: (s) => s.derived.dicRiskPct,
   },
+
+  // --- Haemolytic disease of the newborn: prevention is a TIMING question ---
+
+  {
+    id: 'hdn-fetus-anaemia',
+    stem: 'A Rh-negative mother who was sensitised by a previous pregnancy now carries a Rh-positive fetus. Nothing intervenes.',
+    setup: { preset: 'compatibleMatch' },
+    intervention: {
+      label: 'The maternal-fetal pair is followed through the third trimester.',
+      inputs: { hdnScenario: 1, recipientRhPositive: 0, rhSensitised: 1 },
+    },
+    prompt: 'What happens to fetal haemoglobin?',
+    watch: 'fetal haemoglobin',
+    correctDirection: 'falls',
+    settleSeconds: 600000,
+    observeSeconds: 200000,
+    explanation:
+      'It drifts down week after week, because maternal IgG crosses the placenta continuously and clears fetal red cells in the spleen — extravascularly, slowly, with no complement burst and no free haemoglobin surge. That slowness is why HDN announces itself as progressive anaemia and jaundice rather than collapse, and why surveillance (and intrauterine transfusion when needed) is timed against the antibody titre rather than against any acute event. Same antibody chemistry as an Rh transfusion reaction; completely different tempo and completely different patient.',
+    metric: (s) => s.derived.fetalHaemoglobinGDl,
+  },
+  {
+    id: 'anti-d-prevents-next-time',
+    stem: 'A Rh-negative mother has just delivered her first Rh-positive baby. She was not previously sensitised, and no anti-D has been given yet.',
+    setup: { preset: 'hdnMissedProphylaxis' },
+    intervention: { label: 'Anti-D immunoglobulin is given at this delivery.', inputs: { antiDProtectionPct: 95 } },
+    prompt: 'What happens to the sensitisation risk for her NEXT pregnancy?',
+    watch: 'next-pregnancy risk',
+    correctDirection: 'falls',
+    observeSeconds: 30000,
+    explanation:
+      'It collapses from near-certain to almost nil, and that is the entire point of anti-D: it destroys any fetal cells that crossed into the maternal circulation at THIS delivery before her immune system can learn them. Note what it did not do — it did not treat this baby, because this baby never needed treating; sensitisation happens around delivery, too late for significant harm the first time. The disease anti-D prevents belongs to the next child, which is why the dose is audited with the same rigour as a blood product, because that is what it is.',
+    metric: (s) => s.derived.nextPregnancySensitisationRiskPct,
+  },
+
+  // --- The HDN trio as pattern discrimination ---
+
+  {
+    id: 'hdn-trio',
+    stem: 'Three Rh-negative mothers, each carrying a Rh-positive fetus. One panel explains why only one baby is at risk.',
+    answer: 'hdnAffected',
+    options: ['hdnAffected', 'hdnProtected', 'hdnMissedProphylaxis'],
+    panel: [
+      { label: 'Fetal Hb (g/dL)', unit: '', value: (s) => s.derived.fetalHaemoglobinGDl, decimals: 1 },
+      { label: 'Cord bilirubin (µmol/L)', unit: '', value: (s) => s.derived.cordBilirubinUmolL, decimals: 0 },
+      { label: 'Hydrops risk (%)', unit: '', value: (s) => s.derived.hydropsRiskPct, decimals: 0 },
+      { label: 'Next-pregnancy risk (%)', unit: '', value: (s) => s.derived.nextPregnancySensitisationRiskPct, decimals: 0 },
+    ] as readonly PanelField<Snapshot>[],
+    settleSeconds: 900000,
+    explanation:
+      'Only the sensitised mother threatens THIS fetus: falling Hb, rising bilirubin, hydrops on the horizon — the antibody already exists and the placenta is a highway for IgG. The other two fetuses are both healthy today, and the panel separates them by exactly one row: whether anti-D was given when it could still work. Missed prophylaxis leaves this pregnancy unscathed while writing a blank cheque against the next one. That asymmetry is why anti-D is counted, signed for, and given within seventy-two hours of every qualifying delivery.',
+  },
 ];

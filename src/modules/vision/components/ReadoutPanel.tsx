@@ -1,6 +1,6 @@
 import { ReadoutItem } from '@/shared/components/ReadoutItem/ReadoutItem';
 import styles from '@/shared/components/ReadoutPanel/ReadoutPanel.module.css';
-import { CLINICAL, PUPIL } from '../engine/constants';
+import { AQUEOUS, CLINICAL, PUPIL } from '../engine/constants';
 import type { VisionDerived } from '../engine/types';
 
 interface ReadoutPanelProps {
@@ -75,11 +75,62 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         colorVar="var(--danger)"
       />
       <ReadoutItem
+        label="Intraocular pressure"
+        value={derived.intraocularPressureMmHg.toFixed(0)}
+        unit="mmHg"
+        secondary={
+          derived.intraocularPressureMmHg >= AQUEOUS.CRISIS_IOP_MMHG
+            ? 'crisis — painful red eye'
+            : derived.intraocularPressureMmHg >= AQUEOUS.GLAUCOMA_IOP_MMHG
+              ? 'raised — glaucoma range'
+              : 'normal range'
+        }
+        colorVar={derived.intraocularPressureMmHg >= AQUEOUS.GLAUCOMA_IOP_MMHG ? 'var(--danger)' : 'var(--text)'}
+      />
+      <ReadoutItem
+        label="Angle closure"
+        value={(derived.angleClosureFraction * 100).toFixed(0)}
+        unit="%"
+        secondary={
+          derived.angleClosureFraction > 0.5
+            ? 'iris in the meshwork'
+            : derived.angleClosureFraction > 0.05
+              ? 'narrow, threatened'
+              : 'angle open'
+        }
+        colorVar="var(--danger)"
+      />
+      <ReadoutItem
+        label="Accommodation"
+        value={`×${derived.accommodativeResponseD.toFixed(1)}`}
+        unit="D"
+        secondary={
+          derived.blurActive
+            ? `blurred — ${derived.accommodationDeficitD.toFixed(1)} D short`
+            : `demand ${derived.accommodationDemandD.toFixed(1)} D met`
+        }
+        colorVar={derived.blurActive ? 'var(--danger)' : 'var(--text)'}
+      />
+      <ReadoutItem
+        label="Near point"
+        value={derived.nearPointCm.toFixed(0)}
+        unit="cm"
+        secondary={`convergence ${derived.convergenceDemandPrismD.toFixed(0)} Δ`}
+        colorVar="var(--text)"
+      />
+      <ReadoutItem
+        label="Visual fields"
+        value={derived.fieldDefectLabel}
+        secondary={derived.maculaSpared ? 'central vision spared' : undefined}
+        colorVar={derived.fieldDefectLabel === 'no field defect' ? 'var(--text)' : 'var(--danger)'}
+      />
+      <ReadoutItem
         label="State"
         value={derived.classification}
         secondary={derived.patternSummary}
         colorVar="var(--text)"
         wide
+        revealsPattern
       />
     </div>
   );

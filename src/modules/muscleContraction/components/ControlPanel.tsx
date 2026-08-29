@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
 import { ControlGroup, ControlRail } from '@/shared/components/ControlRail/ControlRail';
@@ -16,7 +17,7 @@ const MUSCLE_TYPE_OPTIONS: { value: MuscleType; label: string }[] = [
   { value: 'smooth', label: 'Smooth' },
 ];
 
-export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
+function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
   return (
     <ControlRail>
       <ToggleGroup
@@ -118,3 +119,5 @@ export function ControlPanel({ inputs, onChange }: ControlPanelProps) {
     </ControlRail>
   );
 }
+
+export const ControlPanel = memo(ControlPanelBase);

@@ -3,7 +3,7 @@ import { computeDerived, createInitialState, perturbBrightGlare, perturbLightsOu
 import { DEFAULT_VISION_INPUTS, VISION_PRESETS } from './presets';
 import type { VisionDerived, VisionInputs } from './types';
 
-function settle(patch: Partial<VisionInputs>, seconds = 6000): VisionDerived {
+function settle(patch: Partial<VisionInputs>, seconds = 9000): VisionDerived {
   const inputs = { ...DEFAULT_VISION_INPUTS, ...patch };
   let state = createInitialState();
   let derived = computeDerived(state, inputs);
@@ -161,6 +161,141 @@ describe('adaptation and bleaching', () => {
 
 const CLINICAL_ANISOCORIA = 1.5;
 
+describe('the aqueous circulation', () => {
+  it('settles a normal eye inside the textbook pressure range', () => {
+    const d = settle(VISION_PRESETS.normalDaylight);
+    expect(d.intraocularPressureMmHg).toBeGreaterThanOrEqual(10);
+    expect(d.intraocularPressureMmHg).toBeLessThanOrEqual(21);
+    expect(d.angleClosureFraction).toBeLessThan(0.05);
+  });
+
+  it('makes a failing trabecular meshwork a silent, painless rise', () => {
+    const glaucoma = settle(VISION_PRESETS.openAngleGlaucoma);
+    expect(glaucoma.intraocularPressureMmHg).toBeGreaterThan(21);
+    expect(glaucoma.classification).toBe('chronic glaucoma (open angle)');
+    // Nothing is occluded: the angle is open, the drainage is merely resistant.
+    expect(glaucoma.angleClosureFraction).toBeLessThan(0.05);
+  });
+
+  it('lowers pressure when carbonic anhydrase is blocked — production meets outflow again', () => {
+    const untreated = settle(VISION_PRESETS.openAngleGlaucoma);
+    const treated = settle({ ...VISION_PRESETS.openAngleGlaucoma, acetazolamideDosePct: 70 });
+    expect(treated.intraocularPressureMmHg).toBeLessThan(untreated.intraocularPressureMmHg - 4);
+  });
+
+  it('provokes an acute crisis when a mydriatic meets an occludable angle', () => {
+    const crisis = settle({ ...VISION_PRESETS.acuteAngleClosure }, 12000);
+    expect(crisis.intraocularPressureMmHg).toBeGreaterThan(40);
+    expect(crisis.angleClosureFraction).toBeGreaterThan(0.7);
+    expect(crisis.classification).toBe('acute angle closure');
+  });
+
+  it('rescues the crisis with pilocarpine, which reopens the meshwork mechanically', () => {
+    const crisisInputs = { ...DEFAULT_VISION_INPUTS, ...VISION_PRESETS.acuteAngleClosure };
+    const rescued = settle({ ...crisisInputs, pilocarpineDosePct: 90 }, 12000);
+    const untreated = settle(crisisInputs, 12000);
+    expect(rescued.intraocularPressureMmHg).toBeLessThan(untreated.intraocularPressureMmHg - 15);
+    expect(rescued.angleClosureFraction).toBeLessThan(untreated.angleClosureFraction * 0.3);
+  });
+
+  it('dilates a WIDE-angle eye safely: pressure barely moves', () => {
+    const before = settle({});
+    const after = settle({ mydriaticDosePct: 90 });
+    expect(Math.abs(after.intraocularPressureMmHg - before.intraocularPressureMmHg)).toBeLessThan(2);
+  });
+});
+
+describe('accommodation and presbyopia', () => {
+  it('meets a near target in a young lens with reserve to spare', () => {
+    const d = settle({ targetDistanceMetres: 0.25 });
+    expect(d.accommodationDeficitD).toBeLessThan(0.1);
+    expect(d.blurActive).toBe(false);
+    // The near point lies closer than any reading distance.
+    expect(d.nearPointCm).toBeLessThan(20);
+  });
+
+  it('blurs print for the presbyope at reading distance while distance stays clear', () => {
+    const near = settle({ ...VISION_PRESETS.presbyopia, targetDistanceMetres: 0.4 });
+    expect(near.accommodationDeficitD).toBeGreaterThan(0.5);
+    expect(near.blurActive).toBe(true);
+    expect(near.nearPointCm).toBeGreaterThan(50);
+
+    const far = settle({ ...VISION_PRESETS.presbyopia, targetDistanceMetres: 6 });
+    expect(far.accommodationDeficitD).toBeLessThan(0.1);
+    expect(far.blurActive).toBe(false);
+  });
+
+  it('constricts the pupils for near work beyond what the light reflex alone produces', () => {
+    const lightOnly = settle({ targetDistanceMetres: 6 });
+    const nearWork = settle({ targetDistanceMetres: 0.25 });
+    expect(nearWork.pupilRightMm).toBeLessThan(lightOnly.pupilRightMm - 0.3);
+  });
+});
+
+describe('the visual pathways', () => {
+  it('puts a pituitary mass between the crossing fibres: bitemporal hemianopia', () => {
+    const d = settle(VISION_PRESETS.chiasmalCompression);
+    expect(d.fieldSectors.leftEye.superiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.inferiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.superiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.inferiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.superiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldSectors.rightEye.superiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldDefectLabel).toContain('bitemporal');
+  });
+
+  it('kills one whole field with an optic nerve lesion but spares the other eye entirely', () => {
+    const d = settle({ fieldLesionSite: 'leftOpticNerve' });
+    expect(d.fieldSectors.leftEye.superiorNasal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.inferiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.superiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldSectors.rightEye.inferiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldDefectLabel).toContain('monocular');
+  });
+
+  it('maps a left optic tract lesion to RIGHT homonymous hemianopia', () => {
+    const d = settle({ fieldLesionSite: 'leftOpticTract' });
+    expect(d.fieldSectors.rightEye.superiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.inferiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.superiorNasal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.inferiorNasal).toBeLessThan(0.05);
+    // The uncrossed halves survive on both sides.
+    expect(d.fieldSectors.rightEye.superiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldSectors.leftEye.superiorTemporal).toBeGreaterThan(0.95);
+    expect(d.fieldDefectLabel).toContain('homonymous hemianopia');
+  });
+
+  it('gives Meyer\'s loop its pie in the sky: contralateral superior quadrantanopia', () => {
+    const d = settle({ fieldLesionSite: 'leftTemporalRadiation' });
+    expect(d.fieldSectors.rightEye.superiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.superiorNasal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.inferiorTemporal).toBeGreaterThan(0.95);
+    expect(d.fieldSectors.leftEye.inferiorNasal).toBeGreaterThan(0.95);
+    expect(d.fieldDefectLabel).toContain('superior quadrantanopia');
+  });
+
+  it('spares the macula behind an occipital lobe infarct', () => {
+    // A RIGHT posterior cerebral infarct blinds the LEFT field of both eyes.
+    const d = settle(VISION_PRESETS.occipitalInfarctRight);
+    expect(d.fieldSectors.leftEye.superiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.leftEye.inferiorTemporal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.superiorNasal).toBeLessThan(0.05);
+    expect(d.fieldSectors.rightEye.inferiorNasal).toBeLessThan(0.05);
+    expect(d.maculaSpared).toBe(true);
+    expect(d.fieldDefectLabel).toContain('macula sparing');
+  });
+
+  it('leaves every sector intact without a lesion', () => {
+    const d = settle({});
+    for (const eye of [d.fieldSectors.leftEye, d.fieldSectors.rightEye]) {
+      for (const integrity of Object.values(eye)) {
+        expect(integrity).toBeGreaterThan(0.99);
+      }
+    }
+    expect(d.fieldDefectLabel).toBe('no field defect');
+  });
+});
+
 describe('numerical robustness', () => {
   it('never produces NaN or Infinity across extreme inputs', () => {
     const extremes: Partial<VisionInputs>[] = [
@@ -168,6 +303,9 @@ describe('numerical robustness', () => {
       { sceneLuminanceLogCd: 4.5, coneIntegrity: 0, leftOpticNerveAfferent: 0 },
       { rodIntegrity: 0.05, coneIntegrity: 0.05, rightPupilEfferentGain: 0 },
       { sceneLuminanceLogCd: 0, leftOpticNerveAfferent: 0.1, rightPupilEfferentGain: 0.1 },
+      { angleWidthPct: 0, mydriaticDosePct: 100, targetDistanceMetres: 0.12 },
+      { aqueousProductionRate: 0, trabecularOutflowFacility: 0, maximumAccommodationD: 0 },
+      { fieldLesionSite: 'rightOccipitalLobe', pilocarpineDosePct: 100, acetazolamideDosePct: 100 },
     ];
     for (const patch of extremes) {
       const d = settle(patch, 3000);

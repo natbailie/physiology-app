@@ -1,12 +1,13 @@
 import { ReadoutItem } from '@/shared/components/ReadoutItem/ReadoutItem';
 import styles from '@/shared/components/ReadoutPanel/ReadoutPanel.module.css';
-import type { AdrenalCortexDerived } from '../engine/types';
+import type { AdrenalCortexDerived, AdrenalCortexInputs } from '../engine/types';
 
 interface ReadoutPanelProps {
   derived: AdrenalCortexDerived;
+  inputs: AdrenalCortexInputs;
 }
 
-export function AdrenalCortexReadoutPanel({ derived }: ReadoutPanelProps) {
+export function AdrenalCortexReadoutPanel({ derived, inputs }: ReadoutPanelProps) {
   return (
     <div className={styles.grid}>
       <ReadoutItem
@@ -54,6 +55,9 @@ export function AdrenalCortexReadoutPanel({ derived }: ReadoutPanelProps) {
         label="ACTH drive"
         value={derived.acthEffectivePct.toFixed(0)}
         unit="%"
+        // The slider is the drive ordered; negative feedback amplifies it against a blocked gland
+        // and replacement steroid suppresses it, so the two routinely part company.
+        setPoint={inputs.acthDrivePct}
         secondary={derived.acthEffectivePct > 140 ? 'flogging a blocked gland' : 'feedback intact'}
         colorVar="var(--acth)"
       />

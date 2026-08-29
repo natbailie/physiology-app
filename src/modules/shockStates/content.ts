@@ -1,13 +1,58 @@
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import type { ShockPresetName } from './engine/presets';
 
-export const shockStatesContent: ExplainerContent = {
+export const shockStatesContent: ExplainerContent<ShockPresetName> = {
   title: 'Four ways to fail, and the numbers that separate them',
-  paragraphs: [
-    'Shock is inadequate tissue perfusion, not a low blood pressure — and holding those apart is the single most useful thing this module teaches. Pressure is the PRODUCT of flow and resistance, so a circulation that clamps down hard enough can hold a respectable blood pressure while the flow beneath it collapses. Watch the haemorrhage preset: the mean arterial pressure sits above 70 while the cardiac index is already below the threshold and the mixed venous saturation has fallen by half. That patient is in shock and their blood pressure says otherwise.',
-    'Three numbers name the cause between them, and no single one does it alone. Is the OUTPUT low or high? Are the FILLING PRESSURES full or empty? Is the RESISTANCE clamped down or wide open? Hypovolaemia empties both filling pressures. Cardiogenic shock fills both, because the pump cannot clear what reaches it. Distributive shock leaves output high and resistance on the floor. Obstruction is the odd one out — full on the right and empty on the left, because the blockage sits between the two measurements.',
-    'That last pattern is worth dwelling on, because it is what a wedge pressure is FOR. Both a large pulmonary embolus and a failing left ventricle produce a low output with a high central venous pressure; at the bedside they can look identical. The wedge separates them instantly. In cardiogenic shock blood dams back into the lungs and the wedge is high. In embolism little blood crosses the lungs at all, so the wedge is low. Load the two presets in turn and compare only that one number.',
-    'Tamponade makes the same point through a different route, and it is the one state where a high venous pressure means an EMPTY ventricle. What distends a heart is transmural pressure — inside minus outside. Fluid in the pericardium raises the pressure outside, so the measured venous pressure climbs while true filling falls. The readout shows both numbers side by side for exactly this reason. Give fluid and you raise the measured pressure further while achieving very little, which is why the treatment is drainage.',
-    'Oxygen transport tells a story the blood pressure cannot. Delivery is haemoglobin times saturation times cardiac output — a product, so anaemia, hypoxaemia and low output each cut it independently. Normally consumption is set by demand and is independent of delivery, because tissue simply extracts more when less arrives; mixed venous saturation falls as that reserve is spent. Below a critical delivery the reserve runs out, consumption starts to follow delivery, and lactate accumulates. That transition IS shock, defined without reference to a blood pressure at all.',
-    'Sepsis produces the finding that catches people out: a HIGH mixed venous saturation in a patient who is simultaneously making lactate. The tissue cannot extract what is being delivered, so oxygen returns to the right heart unused. A reassuring SvO₂ means nothing on its own — it is reassuring only alongside a normal lactate. Finally, note what compensation is hiding: switch the baroreflex off in a bleeding patient and the pressure falls immediately, because the reflex, not the circulating volume, was what had been holding it up.',
+  sections: [
+    {
+      heading: 'Shock is a flow problem, and the blood pressure can lie about it',
+      paragraphs: [
+        'Shock is inadequate tissue perfusion, not a low blood pressure — and holding those apart is the single most useful thing this module teaches. Pressure is the PRODUCT of flow and resistance, so a circulation that clamps down hard enough can hold a respectable blood pressure while the flow beneath it collapses. Watch the haemorrhage preset: the mean arterial pressure sits above 70 while the cardiac index is already below the threshold and the mixed venous saturation has fallen by half. That patient is in shock and their blood pressure says otherwise.',
+      ],
+      demos: [
+        { preset: 'haemorrhagic', watch: 'cardiac index' },
+      ],
+    },
+    {
+      heading: 'Output, filling pressure and resistance name the cause between them',
+      paragraphs: [
+        'Three numbers name the cause between them, and no single one does it alone. Is the OUTPUT low or high? Are the FILLING PRESSURES full or empty? Is the RESISTANCE clamped down or wide open? Hypovolaemia empties both filling pressures. Cardiogenic shock fills both, because the pump cannot clear what reaches it. Distributive shock leaves output high and resistance on the floor. Obstruction is the odd one out — full on the right and empty on the left, because the blockage sits between the two measurements.',
+      ],
+    },
+    {
+      heading: 'The wedge is the one number that separates the two low-output states',
+      paragraphs: [
+        'That last pattern is worth dwelling on, because it is what a wedge pressure is FOR. Both a large pulmonary embolus and a failing left ventricle produce a low output with a high central venous pressure; at the bedside they can look identical. The wedge separates them instantly. In cardiogenic shock blood dams back into the lungs and the wedge is high. In embolism little blood crosses the lungs at all, so the wedge is low. Load the two presets in turn and compare only that one number.',
+      ],
+      demos: [
+        { preset: 'cardiogenic', watch: 'wedge' },
+        { preset: 'pulmonaryEmbolism', watch: 'wedge' },
+      ],
+    },
+    {
+      heading: 'Tamponade is the one state where a high venous pressure means an empty ventricle',
+      paragraphs: [
+        'Tamponade makes the same point through a different route, and it is the one state where a high venous pressure means an EMPTY ventricle. What distends a heart is transmural pressure — inside minus outside. Fluid in the pericardium raises the pressure outside, so the measured venous pressure climbs while true filling falls. The readout shows both numbers side by side for exactly this reason. Give fluid and you raise the measured pressure further while achieving very little, which is why the treatment is drainage.',
+      ],
+      demos: [
+        { preset: 'tamponade', watch: 'transmural pressure' },
+      ],
+    },
+    {
+      heading: 'Oxygen transport defines shock without reference to a blood pressure',
+      paragraphs: [
+        'Oxygen transport tells a story the blood pressure cannot. Delivery is haemoglobin times saturation times cardiac output — a product, so anaemia, hypoxaemia and low output each cut it independently. Normally consumption is set by demand and is independent of delivery, because tissue simply extracts more when less arrives; mixed venous saturation falls as that reserve is spent. Below a critical delivery the reserve runs out, consumption starts to follow delivery, and lactate accumulates. That transition IS shock, defined without reference to a blood pressure at all.',
+      ],
+    },
+    {
+      heading: 'Sepsis produces the reassuring number that means nothing on its own',
+      paragraphs: [
+        'Sepsis produces the finding that catches people out: a HIGH mixed venous saturation in a patient who is simultaneously making lactate. The tissue cannot extract what is being delivered, so oxygen returns to the right heart unused. A reassuring SvO₂ means nothing on its own — it is reassuring only alongside a normal lactate. Finally, note what compensation is hiding: switch the baroreflex off in a bleeding patient and the pressure falls immediately, because the reflex, not the circulating volume, was what had been holding it up.',
+      ],
+      demos: [
+        { preset: 'septic', watch: 'SvO₂' },
+        { preset: 'decompensating', watch: 'MAP' },
+      ],
+    },
   ],
 };

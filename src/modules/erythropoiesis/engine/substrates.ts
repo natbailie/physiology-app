@@ -43,9 +43,17 @@ export function producedMcvTarget(ironAvailability: number, ironStores: number, 
  * This is separate from cell size: a marrow short of iron or B12 makes not only abnormal cells
  * but fewer of them, which is why these anemias are hypoproliferative — a low reticulocyte
  * count despite a high EPO.
+ *
+ * Iron may arrive PRE-GATED: hepcidin closes ferroportin upstream of the marrow, so anaemia
+ * of chronic disease starves production while stores sit untouched.
  */
-export function substrateProductionLimit(ironAvailability: number, ironStores: number, b12FolateStatus: number): number {
-  const iron = clamp(ironAdequacy(ironAvailability, ironStores), 0, 1);
+export function substrateProductionLimit(
+  ironAvailability: number,
+  ironStores: number,
+  b12FolateStatus: number,
+  gatedIronAdequacyValue?: number,
+): number {
+  const iron = clamp(gatedIronAdequacyValue ?? ironAdequacy(ironAvailability, ironStores), 0, 1);
   const b12 = clamp(b12FolateAdequacy(b12FolateStatus), 0, 1);
   // Whichever is scarcer limits the whole process.
   return Math.min(iron, b12);

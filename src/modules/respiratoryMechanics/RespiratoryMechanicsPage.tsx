@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { RespMechDiagram } from './components/RespMechDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -15,12 +19,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryMechanicsContent } from './content';
 import { respMechLoopConfig } from './engine/loopConfig';
 import { perturbFvcManeuver } from './engine/engine';
-import { DEFAULT_RESP_MECH_INPUTS, RESP_MECH_PRESETS, type RespMechPresetName, RESP_MECH_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_RESP_MECH_INPUTS, RESP_MECH_PRESETS, RESP_MECH_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { RespMechInputs } from './engine/types';
 
 export function RespiratoryMechanicsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RespMechInputs>('respiratoryMechanics', DEFAULT_RESP_MECH_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, respMechLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_RESP_MECH_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'respiratoryMechanics',
@@ -36,13 +47,14 @@ export function RespiratoryMechanicsPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof RespMechInputs>(key: K, value: RespMechInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: RespMechPresetName) {
-    setInputs((prev) => ({ ...prev, ...RESP_MECH_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_RESP_MECH_INPUTS,
+    presets: RESP_MECH_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerFvcManeuver() {
     perturb((state) => perturbFvcManeuver(state));
@@ -50,10 +62,10 @@ export function RespiratoryMechanicsPage() {
 
   // Flow-volume loop: expiratory flow against lung volume, the same trajectory chart the
   // cardiac module uses for its PV loop.
-  const flowVolumePoints = history.map((h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 }));
-  const flowVolumePointsBaseline = baseline.history?.map((h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 })) ?? null;
-  const volumeHistory = history.map((h) => h.lungVolume / 1000);
-  const volumeHistoryBaseline = baseline.history?.map((h) => h.lungVolume / 1000) ?? null;
+  const flowVolumePoints = useSeries(history, (h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 }));
+  const flowVolumePointsBaseline = useSeries(baseline.history, (h) => ({ x: h.lungVolume / 1000, y: h.airflow / 1000 }));
+  const volumeHistory = useSeries(history, (h) => h.lungVolume / 1000);
+  const volumeHistoryBaseline = useSeries(baseline.history, (h) => h.lungVolume / 1000);
 
   return (
     <ModulePage
@@ -65,10 +77,10 @@ export function RespiratoryMechanicsPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={RESP_MECH_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'FVC maneuver', onClick: triggerFvcManeuver, variant: 'impulse' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<RespMechDiagram derived={snapshot.derived} />}

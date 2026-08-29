@@ -18,6 +18,7 @@ export const bloodLoopConfig: EngineLoopConfig<
     freeHb: snapshot.derived.plasmaFreeHaemoglobin,
   }),
   maxDtSeconds: BLOOD_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: BLOOD_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: BLOOD_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: BLOOD_SIMULATION.HISTORY_CAPACITY,
   timeScale: BLOOD_SIMULATION.TIME_SCALE,

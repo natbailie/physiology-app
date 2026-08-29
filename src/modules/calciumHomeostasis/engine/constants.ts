@@ -118,4 +118,8 @@ export const CALCIUM_SIMULATION = {
   RENDER_INTERVAL_MS: 100,
   HISTORY_CAPACITY: 600,
   TIME_SCALE: 6,
+  /** Simulated seconds of settling applied before the first frame — and, through `reset`,
+   * before a scenario button's first frame, so pressing one shows the scenario rather than
+   * the moment before it. */
+  SETTLE_SECONDS: 3600,
 };

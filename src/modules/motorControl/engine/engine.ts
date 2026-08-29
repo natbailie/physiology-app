@@ -5,6 +5,8 @@ import {
   bradykinesiaIndex,
   choreaAmp,
   classifyMotor,
+  cocontractionIndex,
+  dystoniaAmp,
   dysmetriaPct,
   gaitClass,
   initiationLatencyMs,
@@ -47,6 +49,9 @@ export function computeDerived(state: MotorInternalState, inputs: MotorInputs): 
   const chorea = choreaAmp(inputs.striatalOutputLoss, state.dbsActive);
   const ballism = ballismAmp(inputs.subthalamicLesion, state.dbsActive);
 
+  const dystonia = dystoniaAmp(inputs.dystoniaSeverityPct);
+  const coContraction = cocontractionIndex(inputs.dystoniaSeverityPct);
+
   const classificationPattern = {
     subthalamicLesionPct: clamp(inputs.subthalamicLesion, 0, 100),
     striatalOutputLossPct: clamp(inputs.striatalOutputLoss, 0, 100),
@@ -54,6 +59,7 @@ export function computeDerived(state: MotorInternalState, inputs: MotorInputs): 
     cerebellarCalibrationPct: clamp(inputs.cerebellarCalibration, 0, 100),
     corticospinalIntegrityPct: clamp(inputs.corticospinalIntegrity, 0, 100),
     essentialTremorDrivePct: clamp(inputs.essentialTremorDrive, 0, 100),
+    dystoniaSeverityPct: clamp(inputs.dystoniaSeverityPct, 0, 100),
   };
 
   return {
@@ -71,11 +77,14 @@ export function computeDerived(state: MotorInternalState, inputs: MotorInputs): 
     involuntaryMovementIndex: chorea + ballism,
     rigidityScore: bradykinesia * 10,
     spasticityScore: (1 - clamp(inputs.corticospinalIntegrity, 0, 100) / 100) * 10,
+    dystoniaAmp: dystonia,
+    cocontractionIndex: coContraction,
     gaitClass: gaitClass({
       parkinsonian: effectiveDopaminePct <= 55,
       cerebellar: clamp(inputs.cerebellarCalibration, 0, 100) <= 30,
       spastic: clamp(inputs.corticospinalIntegrity, 0, 100) <= 30,
       choreiform: clamp(inputs.striatalOutputLoss, 0, 100) >= 50,
+      dystonic: inputs.dystoniaSeverityPct >= 40,
     }),
     classification: classifyMotor(classificationPattern),
     patternSummary: patternSummary({
@@ -87,6 +96,7 @@ export function computeDerived(state: MotorInternalState, inputs: MotorInputs): 
       posturalTremorAmp: postural,
       rigidityScore: bradykinesia * 10,
       spasticityScore: (1 - clamp(inputs.corticospinalIntegrity, 0, 100) / 100) * 10,
+      cocontractionIndex: coContraction,
     }),
   };
 }

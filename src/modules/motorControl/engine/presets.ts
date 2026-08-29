@@ -9,6 +9,7 @@ export const DEFAULT_MOTOR_INPUTS: MotorInputs = {
   corticospinalIntegrity: 100,
   essentialTremorDrive: 0,
   tremorSuppressantEffect: 0,
+  dystoniaSeverityPct: 0,
 };
 
 export type MotorPresetName =
@@ -19,7 +20,8 @@ export type MotorPresetName =
   | 'hemiballismus'
   | 'cerebellarAtaxia'
   | 'strokeUmnHemiparesis'
-  | 'essentialTremor';
+  | 'essentialTremor'
+  | 'focalDystonia';
 
 /**
  * Each preset isolates one element of the motor system's circuit diagram. The discriminating
@@ -37,6 +39,7 @@ export const MOTOR_PRESETS: Record<MotorPresetName, Partial<MotorInputs>> = {
   cerebellarAtaxia: { ...DEFAULT_MOTOR_INPUTS, cerebellarCalibration: 18 },
   strokeUmnHemiparesis: { ...DEFAULT_MOTOR_INPUTS, corticospinalIntegrity: 22 },
   essentialTremor: { ...DEFAULT_MOTOR_INPUTS, essentialTremorDrive: 70 },
+  focalDystonia: { ...DEFAULT_MOTOR_INPUTS, dystoniaSeverityPct: 65 },
 };
 
 export const MOTOR_PRESET_LABELS: Record<MotorPresetName, string> = {
@@ -48,6 +51,7 @@ export const MOTOR_PRESET_LABELS: Record<MotorPresetName, string> = {
   cerebellarAtaxia: 'Cerebellar ataxia',
   strokeUmnHemiparesis: 'UMN hemiparesis',
   essentialTremor: 'Essential tremor',
+  focalDystonia: 'Focal dystonia',
 };
 
 export const MOTOR_PRESET_ORDER: MotorPresetName[] = [
@@ -59,4 +63,5 @@ export const MOTOR_PRESET_ORDER: MotorPresetName[] = [
   'cerebellarAtaxia',
   'strokeUmnHemiparesis',
   'essentialTremor',
+  'focalDystonia',
 ];

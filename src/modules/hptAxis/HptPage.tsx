@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { HptDiagram } from './components/HptDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,12 +18,19 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hptAxisContent } from './content';
 import { hptLoopConfig } from './engine/loopConfig';
 import { perturbAcuteIllness } from './engine/engine';
-import { DEFAULT_HPT_INPUTS, HPT_PRESETS, type HptPresetName, HPT_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
+import { DEFAULT_HPT_INPUTS, HPT_PRESETS, HPT_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { HptInputs } from './engine/types';
 
 export function HptPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HptInputs>('hptAxis', DEFAULT_HPT_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hptLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_HPT_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'hptAxis',
@@ -35,24 +46,25 @@ export function HptPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof HptInputs>(key: K, value: HptInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: HptPresetName) {
-    setInputs((prev) => ({ ...prev, ...HPT_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_HPT_INPUTS,
+    presets: HPT_PRESETS,
+    resetEngine: reset,
+  });
 
   function triggerAcuteIllness() {
     perturb((state) => perturbAcuteIllness(state));
   }
 
-  const tshHistory = history.map((h) => h.tsh);
-  const tshHistoryBaseline = baseline.history?.map((h) => h.tsh) ?? null;
-  const t4History = history.map((h) => h.t4);
-  const t4HistoryBaseline = baseline.history?.map((h) => h.t4) ?? null;
-  const t3History = history.map((h) => h.t3);
-  const t3HistoryBaseline = baseline.history?.map((h) => h.t3) ?? null;
+  const tshHistory = useSeries(history, (h) => h.tsh);
+  const tshHistoryBaseline = useSeries(baseline.history, (h) => h.tsh);
+  const t4History = useSeries(history, (h) => h.t4);
+  const t4HistoryBaseline = useSeries(baseline.history, (h) => h.t4);
+  const t3History = useSeries(history, (h) => h.t3);
+  const t3HistoryBaseline = useSeries(baseline.history, (h) => h.t3);
 
   return (
     <ModulePage
@@ -64,10 +76,10 @@ export function HptPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={HPT_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[{ label: 'Acute illness', onClick: triggerAcuteIllness, variant: 'danger' }]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

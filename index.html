@@ -4,9 +4,46 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f2f5f8" />
+    <link
+      rel="preload"
+      href="/fonts/inter-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/jetbrains-mono-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <title>Physiology Lab</title>
+    <!--
+      Resolve the theme before first paint. The stylesheet expresses dark in exactly one
+      `:root[data-theme='dark']` block rather than duplicating the palette for
+      `prefers-color-scheme` and again for an explicit override, which means the attribute has
+      to be on <html> by the time the CSS applies. Doing it here rather than in React is also
+      what prevents a flash of light theme on a dark-set machine.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var resolved = stored === 'dark' || stored === 'light' ? stored : system;
+          document.documentElement.dataset.theme = resolved;
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute('content', resolved === 'dark' ? '#10161d' : '#f2f5f8');
+        } catch (e) {
+          /* Private mode can throw on localStorage. Light is the safe default. */
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -60,6 +60,12 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         colorVar="var(--basal-ganglia)"
       />
       <ReadoutItem
+        label="Co-contraction"
+        value={derived.cocontractionIndex.toFixed(2)}
+        secondary={derived.cocontractionIndex > 0.3 ? 'dystonic overflow — agonist recruits antagonist' : 'selective activation'}
+        colorVar="var(--o2)"
+      />
+      <ReadoutItem
         label="Gait"
         value={derived.gaitClass}
         colorVar="var(--text)"
@@ -70,6 +76,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         secondary={derived.patternSummary}
         colorVar="var(--text)"
         wide
+        revealsPattern
       />
     </div>
   );

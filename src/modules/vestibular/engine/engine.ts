@@ -82,6 +82,8 @@ export function computeDerived(state: VestibularInternalState, inputs: Vestibula
     }),
     headTurnVelocityDegPerSec: effectiveHeadVel,
     centralCompensation: inputs.centralCompensation,
+    canalithDebris: inputs.canalithDebris,
+    otolithFunction: inputs.otolithFunction,
   };
 }
 

@@ -48,4 +48,8 @@ export const MEDULLA_SIMULATION = {
   HISTORY_CAPACITY: 700,
   /** Volume contraction takes weeks; compressed so it is watchable. */
   TIME_SCALE: 240,
+  /** Simulated seconds of settling applied before the first frame — and, through `reset`,
+   * before a scenario button's first frame, so pressing one shows the scenario rather than
+   * the moment before it. */
+  SETTLE_SECONDS: 3600,
 } as const;

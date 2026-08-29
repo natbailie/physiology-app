@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { CSSProperties } from 'react';
 import styles from './XYTrajectoryChart.module.css';
 
@@ -40,7 +41,7 @@ function project(point: TrajectoryPoint, xDomain: [number, number], yDomain: [nu
  * it suits closed cyclic loops (a pressure-volume loop, a flow-volume loop) where the shape
  * of the path is itself the thing being taught.
  */
-export function XYTrajectoryChart({
+function XYTrajectoryChartBase({
   points,
   currentPoint,
   xDomain,
@@ -93,3 +94,5 @@ export function XYTrajectoryChart({
     </div>
   );
 }
+
+export const XYTrajectoryChart = memo(XYTrajectoryChartBase);

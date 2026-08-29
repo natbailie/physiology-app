@@ -127,7 +127,7 @@
 
 .dangerArmed {
   background: var(--danger);
-  color: #ffffff;
+  color: var(--on-solid);
 }
 
 .prose {

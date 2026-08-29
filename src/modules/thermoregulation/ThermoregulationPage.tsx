@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   THERMO_PRESET_LABELS,
   THERMO_PRESET_ORDER,
   DEFAULT_THERMO_INPUTS,
-  type ThermoPresetName,
 } from './engine/presets';
 import type { ThermoInputs } from './engine/types';
 
 export function ThermoregulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ThermoInputs>('thermoregulation', DEFAULT_THERMO_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, thermoLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_THERMO_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'thermoregulation',
@@ -41,20 +51,21 @@ export function ThermoregulationPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof ThermoInputs>(key: K, value: ThermoInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: ThermoPresetName) {
-    setInputs((prev) => ({ ...prev, ...THERMO_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_THERMO_INPUTS,
+    presets: THERMO_PRESETS,
+    resetEngine: reset,
+  });
 
-  const coreHistory = history.map((h) => h.core);
-  const coreBaseline = baseline.history?.map((h) => h.core) ?? null;
-  const setPointHistory = history.map((h) => h.setPoint);
-  const setPointBaseline = baseline.history?.map((h) => h.setPoint) ?? null;
-  const skinHistory = history.map((h) => h.skin);
-  const skinBaseline = baseline.history?.map((h) => h.skin) ?? null;
+  const coreHistory = useSeries(history, (h) => h.core);
+  const coreBaseline = useSeries(baseline.history, (h) => h.core);
+  const setPointHistory = useSeries(history, (h) => h.setPoint);
+  const setPointBaseline = useSeries(baseline.history, (h) => h.setPoint);
+  const skinHistory = useSeries(history, (h) => h.skin);
+  const skinBaseline = useSeries(baseline.history, (h) => h.skin);
 
   return (
     <ModulePage
@@ -66,14 +77,14 @@ export function ThermoregulationPage() {
         <PresetBar
           order={THERMO_PRESET_ORDER}
           labels={THERMO_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Antipyretic', onClick: () => perturb(perturbGiveAntipyretic), variant: 'impulse' },
             { label: 'Active cooling', onClick: () => perturb(perturbActiveCooling), variant: 'impulse' },
             { label: 'Active rewarming', onClick: () => perturb(perturbActiveRewarming), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

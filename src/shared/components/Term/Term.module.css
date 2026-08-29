@@ -22,13 +22,17 @@
   outline-offset: 2px;
 }
 
+/* Fixed rather than absolute: the readout grid clips its overflow (that clip is what rounds the
+   panel corners when an odd tile count leaves the last cell empty), and an absolutely positioned
+   bubble on a top-row tile was sliced off at the panel's edge. Term.tsx measures `left`/`top` on
+   hover — until then the bubble sits off-screen rather than in the corner of the viewport. */
 .bubble {
-  position: absolute;
-  bottom: calc(100% + 0.4rem);
+  position: fixed;
+  top: -100vh;
   left: 0;
   z-index: 20;
   width: max-content;
-  max-width: 24rem;
+  max-width: min(24rem, calc(100vw - 1rem));
   padding: 0.55rem 0.7rem;
   font-family: var(--sans);
   font-size: 0.75rem;
@@ -58,9 +62,8 @@
   margin-bottom: 0.15rem;
 }
 
-/* Near the right edge the bubble would otherwise overflow the panel. */
 @media (max-width: 600px) {
   .bubble {
-    max-width: 15rem;
+    max-width: min(15rem, calc(100vw - 1rem));
   }
 }

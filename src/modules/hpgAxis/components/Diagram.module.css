@@ -29,23 +29,6 @@
     filter 0.4s ease;
 }
 
-.follicle {
-  fill: color-mix(in srgb, var(--estrogen) var(--wash-strong), transparent);
-  stroke: var(--estrogen);
-  stroke-width: 1.5;
-  transition: r 0.5s ease;
-}
-
-.corpusLuteum {
-  fill: color-mix(in srgb, var(--progesterone) calc(var(--cl-activity, 0) * var(--wash-strong)), transparent);
-  stroke: var(--progesterone);
-  stroke-width: 1.5;
-  opacity: var(--cl-activity, 0);
-  transition:
-    opacity 0.5s ease,
-    fill 0.5s ease;
-}
-
 /* The feedback-mode badge is the module's headline: it is the only place in the app where a
    feedback loop changes sign. */
 .feedbackBadge {
@@ -67,26 +50,94 @@
 }
 
 .organLabel {
-  font-family: var(--mono);
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
   font-size: 9px;
-  font-weight: 600;
   letter-spacing: 0.05em;
-  fill: var(--text);
-  text-transform: uppercase;
-  text-anchor: middle;
 }
 
 .pathLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  fill: var(--text-dim);
-  text-transform: uppercase;
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
 }
 
 .valueLabel {
+  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
+}
+
+/* --- Gonad --- */
+
+.gonadBody {
+  fill: color-mix(in srgb, var(--gnrh) var(--wash-faint), var(--panel));
+  stroke: var(--gnrh);
+  stroke-width: 1.8;
+}
+
+.antralFollicle {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+}
+
+/* The selected follicle. One of the antral cohort grows; the rest do not. */
+.follicle {
+  fill: color-mix(in srgb, var(--estrogen) var(--wash-soft), var(--panel));
+  stroke: var(--estrogen);
+  stroke-width: 1.6;
+  transition: r 0.5s ease;
+}
+
+.corpusLuteum {
+  fill: color-mix(in srgb, var(--progesterone) calc((0.25 + var(--luteum, 0) * 0.6) * 100%), transparent);
+  stroke: var(--progesterone);
+  stroke-width: 1.4;
+  transition: fill 0.5s ease;
+}
+
+.tubule {
+  fill: none;
+  stroke: var(--testosterone);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.epididymis {
+  fill: none;
+  stroke: var(--testosterone);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+/* --- GnRH pulsatility --- */
+
+.pulseLabel {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--gnrh);
+}
+
+.pulseBaseline {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.pulseSpike {
+  stroke: var(--gnrh);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Continuous GnRH is not a strong signal — it is no signal at all, and the flat line is the
+   point: an agonist infusion shuts the axis down. */
+.pulseContinuous {
+  stroke: var(--danger);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.pulseTick {
   font-family: var(--mono);
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-  fill: var(--text);
+  font-size: 8.5px;
+  fill: var(--text-faint);
 }

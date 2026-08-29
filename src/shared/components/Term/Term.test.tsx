@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Term } from './Term';
 import { GLOSSARY, lookupTerm } from '@/shared/glossary/terms';
 
@@ -26,6 +26,20 @@ describe('Term', () => {
     render(<Term label="Some unlabelled quantity" />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByText('Some unlabelled quantity')).toBeTruthy();
+  });
+
+  it('places the bubble without help from layout', () => {
+    // jsdom reports every rect as zero, so this cannot assert a position — what it does assert
+    // is that the measuring runs on a page with no layout at all rather than throwing and
+    // taking the whole readout panel down with it.
+    render(<Term label="MAP" />);
+    const trigger = screen.getByRole('button', { name: 'MAP' });
+    const bubble = document.getElementById(trigger.getAttribute('aria-describedby')!)!;
+
+    fireEvent.pointerEnter(trigger);
+    expect(bubble.style.top).toBeTruthy();
+    fireEvent.focus(trigger);
+    expect(bubble.style.left).toBeTruthy();
   });
 
   it('matches a label regardless of case or spacing', () => {

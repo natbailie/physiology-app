@@ -90,6 +90,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         value={derived.classification}
         secondary={derived.patternSummary}
         colorVar="var(--text)"
+        revealsPattern
       />
     </div>
   );

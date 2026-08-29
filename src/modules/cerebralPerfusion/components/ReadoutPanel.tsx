@@ -65,6 +65,13 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         colorVar="var(--o2)"
       />
       <ReadoutItem
+        label="Vasogenic oedema"
+        value={derived.vasogenicOedemaMl.toFixed(1)}
+        unit="mL"
+        secondary={derived.vasogenicOedemaMl > 10 ? 'BBB leak — mass effect rising' : 'no extravasation'}
+        colorVar="var(--warn)"
+      />
+      <ReadoutItem
         label="Autoregulation"
         value={derived.autoregulating ? 'intact' : 'lost'}
         secondary={derived.autoregulating ? 'flow defended' : 'flow follows pressure'}
@@ -82,6 +89,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         value={derived.classification}
         secondary={derived.patternSummary}
         colorVar="var(--text)"
+        revealsPattern
       />
     </div>
   );

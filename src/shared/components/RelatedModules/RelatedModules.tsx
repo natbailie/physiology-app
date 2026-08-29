@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { MODULES } from '@/home/moduleRegistry';
 import styles from './RelatedModules.module.css';
 
@@ -16,7 +17,7 @@ interface RelatedModulesProps {
  * rather than "ECG & Cardiac Conduction" — because a learner deciding whether to follow a link
  * needs to know what they will get, not where they will land.
  */
-export function RelatedModules({ moduleId }: RelatedModulesProps) {
+function RelatedModulesBase({ moduleId }: RelatedModulesProps) {
   const module = MODULES.find((entry) => entry.id === moduleId);
   const related = module?.related ?? [];
   if (related.length === 0) return null;
@@ -41,3 +42,5 @@ export function RelatedModules({ moduleId }: RelatedModulesProps) {
     </nav>
   );
 }
+
+export const RelatedModules = memo(RelatedModulesBase);

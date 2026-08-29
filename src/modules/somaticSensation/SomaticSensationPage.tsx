@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   SOMATIC_PRESET_LABELS,
   SOMATIC_PRESET_ORDER,
   DEFAULT_SOMATIC_INPUTS,
-  type SomaticPresetName,
 } from './engine/presets';
 import type { SomaticInputs } from './engine/types';
 
 export function SomaticSensationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<SomaticInputs>('somaticSensation', DEFAULT_SOMATIC_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, somaticLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_SOMATIC_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'somaticSensation',
@@ -41,20 +51,21 @@ export function SomaticSensationPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof SomaticInputs>(key: K, value: SomaticInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: SomaticPresetName) {
-    setInputs((prev) => ({ ...prev, ...SOMATIC_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_SOMATIC_INPUTS,
+    presets: SOMATIC_PRESETS,
+    resetEngine: reset,
+  });
 
-  const painHistory = history.map((h) => h.pain);
-  const painBaseline = baseline.history?.map((h) => h.pain) ?? null;
-  const gateHistory = history.map((h) => h.gate);
-  const gateBaseline = baseline.history?.map((h) => h.gate) ?? null;
-  const sensHistory = history.map((h) => h.sensitisation);
-  const sensBaseline = baseline.history?.map((h) => h.sensitisation) ?? null;
+  const painHistory = useSeries(history, (h) => h.pain);
+  const painBaseline = useSeries(baseline.history, (h) => h.pain);
+  const gateHistory = useSeries(history, (h) => h.gate);
+  const gateBaseline = useSeries(baseline.history, (h) => h.gate);
+  const sensHistory = useSeries(history, (h) => h.sensitisation);
+  const sensBaseline = useSeries(baseline.history, (h) => h.sensitisation);
 
   return (
     <ModulePage
@@ -66,13 +77,13 @@ export function SomaticSensationPage() {
         <PresetBar
           order={SOMATIC_PRESET_ORDER}
           labels={SOMATIC_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Opioid bolus', onClick: () => perturb(perturbOpioidBolus), variant: 'impulse' },
             { label: 'Fresh injury', onClick: () => perturb(perturbTissueInjury), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

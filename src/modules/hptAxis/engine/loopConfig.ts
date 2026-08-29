@@ -14,6 +14,7 @@ export const hptLoopConfig: EngineLoopConfig<HptState, HptInputs, HptDerived, Hp
     t3: snapshot.derived.t3Level,
   }),
   maxDtSeconds: HPT_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: HPT_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: HPT_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: HPT_SIMULATION.HISTORY_CAPACITY,
   timeScale: HPT_SIMULATION.TIME_SCALE,

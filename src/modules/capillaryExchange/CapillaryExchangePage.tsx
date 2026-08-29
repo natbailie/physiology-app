@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { CapillaryDiagram } from './components/CapillaryDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -20,13 +24,19 @@ import {
   CAPILLARY_PRESET_ORDER,
   DEFAULT_CAPILLARY_INPUTS,
   bedDefaults,
-  type CapillaryPresetName,
 } from './engine/presets';
 import type { CapillaryInputs, TissueBed } from './engine/types';
 
 export function CapillaryExchangePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CapillaryInputs>('capillaryExchange', DEFAULT_CAPILLARY_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, capillaryLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_CAPILLARY_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'capillaryExchange',
@@ -42,18 +52,23 @@ export function CapillaryExchangePage() {
     fastForwardEngine: fastForward,
   });
   const { derived } = snapshot;
+  const interstitialVolumeHistory = useSeries(history, (h) => h.interstitialVolume);
+  const filtrationRateHistory = useSeries(history, (h) => h.filtrationRate);
+  const lymphFlowHistory = useSeries(history, (h) => h.lymphFlow);
+  const capillaryPressureHistory = useSeries(history, (h) => h.capillaryPressure);
 
-  function handleChange<K extends keyof CapillaryInputs>(key: K, value: CapillaryInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
   function handleSelectBed(bed: TissueBed) {
     setInputs((prev) => ({ ...prev, ...bedDefaults(bed) }));
   }
 
-  function handleApplyPreset(name: CapillaryPresetName) {
-    setInputs((prev) => ({ ...prev, ...CAPILLARY_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_CAPILLARY_INPUTS,
+    presets: CAPILLARY_PRESETS,
+    resetEngine: reset,
+  });
 
   return (
     <ModulePage
@@ -65,13 +80,13 @@ export function CapillaryExchangePage() {
         <PresetBar
           order={CAPILLARY_PRESET_ORDER}
           labels={CAPILLARY_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Albumin infusion', onClick: () => perturb((s) => perturbAlbuminInfusion(s)), variant: 'impulse' },
             { label: 'Stand up', onClick: () => perturb((s) => perturbStandUp(s)), variant: 'danger' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
         />
       }
       diagram={<CapillaryDiagram derived={derived} />}
@@ -83,7 +98,7 @@ export function CapillaryExchangePage() {
           <Sparkline
             label="Interstitial volume"
             unit="% of normal"
-            data={history.map((h) => h.interstitialVolume)}
+            data={interstitialVolumeHistory}
             domainMin={80}
             domainMax={260}
             colorVar="var(--interstitium)"
@@ -94,8 +109,8 @@ export function CapillaryExchangePage() {
             label="Filtration"
             secondaryLabel="lymph flow"
             unit="mL/min"
-            data={history.map((h) => h.filtrationRate)}
-            secondaryData={history.map((h) => h.lymphFlow)}
+            data={filtrationRateHistory}
+            secondaryData={lymphFlowHistory}
             secondaryColorVar="var(--lymph)"
             domainMin={0}
             domainMax={Math.max(6, derived.lymphaticCapacityMlPerMin * 1.2)}
@@ -104,7 +119,7 @@ export function CapillaryExchangePage() {
           <Sparkline
             label="Capillary pressure"
             unit="mmHg"
-            data={history.map((h) => h.capillaryPressure)}
+            data={capillaryPressureHistory}
             domainMin={0}
             domainMax={60}
             colorVar="var(--artery)"

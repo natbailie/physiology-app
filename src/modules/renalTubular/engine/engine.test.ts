@@ -187,3 +187,168 @@ describe('engine — tubuloglomerular feedback', () => {
     expect(weakDerived.gfrAfterTGF).toBeCloseTo(180, 0);
   });
 });
+
+// --- The acid arm: baselines and the three RTAs ---
+
+function settledLong(name: keyof typeof RENAL_TUBULAR_PRESETS, overrides: Partial<RenalTubularInputs> = {}) {
+  // Bicarbonate and creatinine move on a timescale of hours; give them simulated days.
+  const inputs: RenalTubularInputs = { ...DEFAULT_RENAL_TUBULAR_INPUTS, ...RENAL_TUBULAR_PRESETS[name], ...overrides };
+  return computeDerived(settle(inputs, 90000), inputs);
+}
+
+describe('engine — acid-base baseline', () => {
+  it('holds serum bicarbonate near 24 while excreting roughly the daily acid load', () => {
+    const derived = settledLong('normal');
+
+    expect(derived.serumBicarbonateMeqL).toBeGreaterThan(22);
+    expect(derived.serumBicarbonateMeqL).toBeLessThan(26);
+    expect(derived.netAcidExcretionMeqPerDay).toBeGreaterThan(60);
+    expect(derived.netAcidExcretionMeqPerDay).toBeLessThan(85);
+  });
+
+  it('keeps urine mildly acidic and the urine anion gap negative in health', () => {
+    const derived = settledLong('normal');
+
+    expect(derived.urinePH).toBeGreaterThan(5.8);
+    expect(derived.urinePH).toBeLessThan(6.8);
+    expect(derived.urineAnionGapMeqL).toBeLessThan(-10);
+    expect(derived.serumPotassiumEstimateMeqL).toBeGreaterThan(3.8);
+    expect(derived.serumPotassiumEstimateMeqL).toBeLessThan(4.4);
+  });
+});
+
+describe('engine — the three renal tubular acidoses separate on three facts', () => {
+  it('distal RTA cannot acidify the urine however low its bicarbonate falls', () => {
+    const derived = settledLong('distalRTA');
+
+    expect(derived.serumBicarbonateMeqL).toBeLessThan(16);
+    // THE diagnostic fact: systemic acidaemia with an inappropriately ALKALINE urine.
+    expect(derived.urinePH).toBeGreaterThan(7.0);
+    // Ammoniagenesis still works under normal aldosterone tone, so the UAG stays negative.
+    expect(derived.urineAnionGapMeqL).toBeLessThan(-10);
+    // Potassium is wasted by the same distal failure — but not catastrophically.
+    expect(derived.serumPotassiumEstimateMeqL).toBeLessThan(4.6);
+  });
+
+  it('proximal RTA self-limits at its reclaim threshold and CAN still acidify urine', () => {
+    const derived = settledLong('proximalRTA');
+
+    expect(derived.serumBicarbonateMeqL).toBeGreaterThan(10);
+    expect(derived.serumBicarbonateMeqL).toBeLessThan(16);
+    // The pump works: given the lower serum bicarbonate the urine can still be made acidic.
+    expect(derived.urinePH).toBeLessThan(6.0);
+    // Massive distal solute delivery wastes potassium despite normal aldosterone.
+    expect(derived.serumPotassiumEstimateMeqL).toBeLessThan(3.8);
+    expect(derived.urineAnionGapMeqL).toBeLessThan(-10);
+  });
+
+  it('type 4 RTA retains potassium with a positive anion gap yet an ACID urine', () => {
+    const derived = settledLong('type4RTA');
+
+    expect(derived.serumPotassiumEstimateMeqL).toBeGreaterThan(5.5);
+    expect(derived.serumBicarbonateMeqL).toBeGreaterThan(14);
+    expect(derived.serumBicarbonateMeqL).toBeLessThan(19);
+    // Starved ammonium supply: the lab fingerprint that the acidosis is the kidney's own.
+    expect(derived.urineAnionGapMeqL).toBeGreaterThan(0);
+    // The paradox: H+ secreted into an unbuffered lumen drops the pH below 5.5 anyway.
+    expect(derived.urinePH).toBeLessThan(5.5);
+  });
+
+  it('acetazolamide produces its classical alkaline urine alongside a falling bicarbonate', () => {
+    const derived = settledLong('acetazolamide');
+
+    expect(derived.serumBicarbonateMeqL).toBeLessThan(19);
+    expect(derived.urinePH).toBeGreaterThan(6.8);
+  });
+});
+
+// --- Clearance and the AKI differentiation ---
+
+describe('engine — clearance panel', () => {
+  it('reads creatinine clearance slightly above GFR, RPF near 600, FF near one fifth', () => {
+    const derived = settled('normal');
+
+    expect(derived.creatinineClearanceMLMin).toBeGreaterThan(derived.gfrAfterTGF);
+    expect(derived.creatinineClearanceMLMin).toBeLessThan(derived.gfrAfterTGF * 1.2);
+    expect(derived.renalPlasmaFlowMLMin).toBeGreaterThan(500);
+    expect(derived.renalPlasmaFlowMLMin).toBeLessThan(700);
+    expect(derived.filtrationFractionPct).toBeGreaterThan(15);
+    expect(derived.filtrationFractionPct).toBeLessThan(22);
+  });
+
+  it('a rising creatinine tracks a falling clearance across simulated hours, not instantly', () => {
+    const inputs = { ...DEFAULT_RENAL_TUBULAR_INPUTS, ...RENAL_TUBULAR_PRESETS.preRenalAzotaemia };
+    let state = createInitialState();
+    let early = computeDerived(state, inputs).serumCreatinineMgDl;
+    for (let t = 0; t < 40000; t += 1) state = step(state, inputs, 1).state;
+    const late = computeDerived(state, inputs).serumCreatinineMgDl;
+
+    // The lag is the clinical point: today's creatinine reflects yesterday's kidney.
+    expect(early).toBeCloseTo(1, 1);
+    expect(late).toBeGreaterThan(2);
+  });
+
+  it('prerenal azotaemia spares sodium (FENa < 1%) while creatinine climbs', () => {
+    const derived = settledLong('preRenalAzotaemia');
+
+    expect(derived.fractionalExcretionNaPct).toBeLessThan(1);
+    expect(derived.urineSodiumMeqL).toBeLessThan(20);
+    expect(derived.serumCreatinineMgDl).toBeGreaterThan(2);
+    // Intact tubules + high aldosterone = vigorously concentrated urine.
+    expect(derived.finalUrineOsmolality).toBeGreaterThan(450);
+  });
+
+  it('acute tubular necrosis wastes sodium and settles into isosthenuria', () => {
+    const prerenal = settledLong('preRenalAzotaemia');
+    const atn = settledLong('atn');
+
+    expect(atn.fractionalExcretionNaPct).toBeGreaterThan(2);
+    expect(atn.urineSodiumMeqL).toBeGreaterThan(prerenal.urineSodiumMeqL * 3);
+    // Dead concentrating machinery: the urine drifts toward plasma osmolality...
+    expect(atn.finalUrineOsmolality).toBeLessThan(330);
+    // ...while the creatinine rises just as it does prerenally — which is WHY the urine,
+    // not the creatinine, tells the two apart.
+    expect(atn.serumCreatinineMgDl).toBeGreaterThan(1.8);
+  });
+});
+
+// --- The rest of the diuretic map ---
+
+describe('engine — diuretic sites beyond the loop and the distal tubule', () => {
+  it('amiloride spares potassium-losing by blocking ENaC directly, without touching the medulla', () => {
+    const normal = settledLong('normal');
+    const amiloride = settledLong('amiloride');
+    const loop = settledLong('loopDiuretic');
+
+    // K+-sparing: serum potassium rises rather than falls...
+    expect(amiloride.serumPotassiumEstimateMeqL).toBeGreaterThan(normal.serumPotassiumEstimateMeqL + 1);
+    // ...the medullary gradient survives (uOsm can still concentrate)...
+    expect(amiloride.medullaryGradientStrength).toBeGreaterThan(loop.medullaryGradientStrength * 2);
+    // ...and a mild acidosis follows, because the same potential was secreting H+.
+    expect(amiloride.serumBicarbonateMeqL).toBeLessThan(normal.serumBicarbonateMeqL);
+  });
+
+  it('an SGLT2 inhibitor and mannitol both diurese osmotically without transporter blockade', () => {
+    const normal = settled('normal');
+    const sglt2 = settled('sglt2Inhibitor');
+    const mannitol = settled('mannitol');
+
+    expect(sglt2.urineFlowRateMLPerMin).toBeGreaterThan(normal.urineFlowRateMLPerMin * 1.05);
+    expect(mannitol.urineFlowRateMLPerMin).toBeGreaterThan(normal.urineFlowRateMLPerMin * 1.2);
+    // Neither washes out the medulla the way a loop diuretic's massive flow does.
+    const loop = settled('loopDiuretic');
+    expect(mannitol.medullaryGradientStrength).toBeGreaterThan(loop.medullaryGradientStrength * 1.5);
+  });
+
+  it('tolvaptan causes water diuresis that extra desmopressin cannot overcome', () => {
+    const blocked = settledLong('tolvaptan');
+    const blockedHarder = settledLong('tolvaptan', { exogenousADH: 150 });
+
+    // The V2 receptor is the bottleneck, so MORE hormone changes nothing — this is what
+    // distinguishes pharmacological receptor blockade from either type of DI.
+    expect(blocked.finalUrineOsmolality).toBeLessThan(250);
+    expect(blockedHarder.finalUrineOsmolality).toBeLessThan(blocked.finalUrineOsmolality * 1.1);
+    // And it is pure water loss: no natriuresis, unlike every diuretic above.
+    expect(blocked.fractionalExcretionNaPct).toBeLessThan(1);
+  });
+});

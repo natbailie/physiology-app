@@ -5,10 +5,23 @@ import { AuthGate } from '@/auth/AuthGate';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { Paywall } from '@/billing/Paywall';
 import { HomePage } from '@/home/HomePage';
+import { ThemePage } from '@/home/ThemePage';
+import { THEMES } from '@/home/moduleRegistry';
+import { MedicationsPage } from '@/medications/MedicationsPage';
 import styles from './App.module.css';
 
-/** Routes that are never a paid module: they must open whatever the subscription says. */
-const UNGATED_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>(['home', 'account', 'privacy', 'pricing']);
+/**
+ * Routes that are never a paid module: they must open whatever the subscription says. That
+ * includes every theme page — it is a browse page, and the module-level lock is rendered on
+ * its cards instead.
+ */
+const UNGATED_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>([
+  'home',
+  'account',
+  'privacy',
+  'pricing',
+  ...THEMES.map((theme) => `theme/${theme.id}` as RouteId),
+]);
 
 function App() {
   const route = useHashRoute();
@@ -41,6 +54,10 @@ function RoutedApp({ route }: { route: RouteId }) {
 
   return (
     <div className={styles.app}>
+      {route.startsWith('theme/') && route !== 'theme/medications' && (
+        <ThemePage themeId={route.slice('theme/'.length) as (typeof THEMES)[number]['id']} />
+      )}
+      {(route === 'theme/medications' || route.startsWith('medications/')) && <MedicationsPage />}
       {route === 'home' && <HomePage />}
       {Page && (
         <Suspense fallback={<div className={styles.loading} aria-busy="true" />}>

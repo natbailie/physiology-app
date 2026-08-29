@@ -81,4 +81,10 @@ export const SIMULATION = {
   // Applied to real elapsed time in the React loop (not inside the pure engine) so a
   // multi-minute RAAS response is watchable within roughly a real minute.
   TIME_SCALE: 6,
+  /** Simulated seconds of settling applied before the first frame — and, through `reset`, before
+   * a scenario button's first frame. A salt load reaches the blood volume only through the
+   * fluid-balance integrator, so without this the button changed nothing you could see for
+   * minutes of real time; 300s is enough to show the volume expansion without
+   * driving it to a place no patient would be in. */
+  SETTLE_SECONDS: 300,
 };

@@ -1,46 +1,18 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--s-1);
 }
 
 .options {
   display: flex;
-  gap: 0.35rem;
+  gap: var(--s-2);
   flex-wrap: wrap;
 }
 
+/* Selected state comes from `aria-checked` on the shared button, so the styling and the
+ * thing screen readers announce cannot drift apart. */
 .option {
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--text-dim);
-  background: var(--panel-raised);
-  border: 1px solid var(--panel-border);
-  border-radius: 6px;
-  padding: 0.4rem 0.7rem;
-  cursor: pointer;
+  composes: segment from '../../styles/button.module.css';
   flex: 1 1 auto;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-
-.option:hover {
-  color: var(--text);
-  border-color: var(--text-faint);
-}
-
-.option:focus-visible {
-  outline: 2px solid var(--toggle-color, var(--accent, var(--text-dim)));
-  outline-offset: 2px;
-}
-
-.optionActive {
-  composes: option;
-  color: var(--toggle-color, var(--accent, var(--text)));
-  border-color: var(--toggle-color, var(--accent, var(--text-faint)));
-  background: color-mix(in srgb, var(--toggle-color, var(--accent, var(--text))) 10%, var(--panel));
 }

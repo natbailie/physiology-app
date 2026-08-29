@@ -1,5 +1,9 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
+import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
+import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
+import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
@@ -19,13 +23,19 @@ import {
   PITUITARY_PRESET_LABELS,
   PITUITARY_PRESET_ORDER,
   DEFAULT_PITUITARY_INPUTS,
-  type PituitaryPresetName,
 } from './engine/presets';
 import type { PituitaryInputs } from './engine/types';
 
 export function AnteriorPituitaryPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<PituitaryInputs>('anteriorPituitary', DEFAULT_PITUITARY_INPUTS);
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, pituitaryLoopConfig);
+  const resetScenario = useScenarioReset({
+    setInputs,
+    defaults: DEFAULT_PITUITARY_INPUTS,
+    resetEngine: reset,
+    baseline,
+    transport,
+  });
 
   const { session, summary } = useModulePractice({
     moduleId: 'anteriorPituitary',
@@ -41,20 +51,21 @@ export function AnteriorPituitaryPage() {
     fastForwardEngine: fastForward,
   });
 
-  function handleChange<K extends keyof PituitaryInputs>(key: K, value: PituitaryInputs[K]) {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  }
+  const handleChange = useInputSetter(setInputs);
 
-  function handleApplyPreset(name: PituitaryPresetName) {
-    setInputs((prev) => ({ ...prev, ...PITUITARY_PRESETS[name] }));
-  }
+  const applyPreset = useScenarioPreset({
+    setInputs,
+    defaults: DEFAULT_PITUITARY_INPUTS,
+    presets: PITUITARY_PRESETS,
+    resetEngine: reset,
+  });
 
-  const ghHistory = history.map((h) => h.gh);
-  const ghBaseline = baseline.history?.map((h) => h.gh) ?? null;
-  const prlHistory = history.map((h) => h.prolactin);
-  const prlBaseline = baseline.history?.map((h) => h.prolactin) ?? null;
-  const igfHistory = history.map((h) => h.igf1);
-  const igfBaseline = baseline.history?.map((h) => h.igf1) ?? null;
+  const ghHistory = useSeries(history, (h) => h.gh);
+  const ghBaseline = useSeries(baseline.history, (h) => h.gh);
+  const prlHistory = useSeries(history, (h) => h.prolactin);
+  const prlBaseline = useSeries(baseline.history, (h) => h.prolactin);
+  const igfHistory = useSeries(history, (h) => h.igf1);
+  const igfBaseline = useSeries(baseline.history, (h) => h.igf1);
 
   return (
     <ModulePage
@@ -66,13 +77,13 @@ export function AnteriorPituitaryPage() {
         <PresetBar
           order={PITUITARY_PRESET_ORDER}
           labels={PITUITARY_PRESET_LABELS}
-          onApply={handleApplyPreset}
+          onApply={applyPreset}
           actions={[
             { label: 'Oral glucose load', onClick: () => perturb(perturbGlucoseLoad), variant: 'impulse' },
             { label: 'Bromocriptine dose', onClick: () => perturb(perturbBromocriptineDose), variant: 'impulse' },
           ]}
           onShare={shareLink}
-          onReset={reset}
+          onReset={resetScenario}
           disabled={session.blinded}
         />
       }

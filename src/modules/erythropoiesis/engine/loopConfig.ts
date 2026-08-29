@@ -14,6 +14,7 @@ export const erythroLoopConfig: EngineLoopConfig<ErythroState, ErythroInputs, Er
     reticulocyteIndex: snapshot.derived.reticulocyteIndex,
   }),
   maxDtSeconds: ERYTHRO_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: ERYTHRO_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: ERYTHRO_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: ERYTHRO_SIMULATION.HISTORY_CAPACITY,
   timeScale: ERYTHRO_SIMULATION.TIME_SCALE,

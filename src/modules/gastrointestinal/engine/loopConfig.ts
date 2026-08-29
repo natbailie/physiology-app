@@ -14,6 +14,7 @@ export const giLoopConfig: EngineLoopConfig<GiState, GiInputs, GiDerived, GiHist
     gastrinDrive: snapshot.derived.gastrinDrive,
   }),
   maxDtSeconds: GI_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: GI_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: GI_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: GI_SIMULATION.HISTORY_CAPACITY,
   timeScale: GI_SIMULATION.TIME_SCALE,

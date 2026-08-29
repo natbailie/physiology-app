@@ -1,0 +1,26 @@
+This product includes reference data generated with the Pulse Physiology Engine.
+
+  Pulse Physiology Engine
+  Copyright Kitware, Inc.
+  Licensed under the Apache License, Version 2.0
+  https://pulse.kitware.com/ — https://gitlab.kitware.com/physiology/engine
+
+Pulse is not distributed with, linked into, or executed by this application. It is run
+offline as a developer tool (see `tools/pulse-oracle/`) to produce the reference traces
+committed under `src/modules/*/engine/__oracle__/`, which the engine tests assert against.
+Those traces are simulation output, not Pulse source code.
+
+Where a physiological mechanism or a calibration target in this repository was derived from
+Pulse's published methodology documentation, the module's engine constants or its on-page
+footnote cite the relevant methodology page.
+
+This product bundles two typefaces, both under the SIL Open Font License 1.1. Latin subsets
+only, self-hosted under `public/fonts/`; neither is fetched from a third party at runtime.
+
+  Inter
+  Copyright The Inter Project Authors
+  https://github.com/rsms/inter
+
+  JetBrains Mono
+  Copyright The JetBrains Mono Project Authors
+  https://github.com/JetBrains/JetBrainsMono

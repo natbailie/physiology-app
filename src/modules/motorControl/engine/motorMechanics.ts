@@ -64,16 +64,31 @@ export function ballismAmp(subthalamicLesionPct: number, dbsActive: boolean): nu
   return amp * (dbsActive ? DBS.INVOLUNTARY_MULTIPLIER : 1);
 }
 
+/** Dystonic co-contraction: sustained involuntary activation of antagonist muscles.
+ * Produces abnormal posturing, not the flitting movements of chorea. */
+export function dystoniaAmp(severityPct: number): number {
+  return clamp(severityPct / 100, 0, 1) * 8;
+}
+
+/** Co-contraction index: how much the antagonist is activated alongside the agonist.
+ * In normal movement this is near zero; in dystonia it fills the agonist-antagonist
+ * space, producing the characteristic "overflow" of effort into wrong muscles. */
+export function cocontractionIndex(severityPct: number): number {
+  return clamp(severityPct / 100, 0, 1) * 0.85;
+}
+
 export function gaitClass(pattern: {
   parkinsonian: boolean;
   cerebellar: boolean;
   spastic: boolean;
   choreiform: boolean;
+  dystonic: boolean;
 }): string {
   if (pattern.parkinsonian) return 'shuffling, festinating, stooped';
   if (pattern.cerebellar) return 'broad-based, veering';
   if (pattern.spastic) return 'circumducting hemiplegic';
   if (pattern.choreiform) return 'dancing, interrupted by involuntary jerks';
+  if (pattern.dystonic) return 'twisting, effortful posturing';
   return 'normal heel-toe';
 }
 
@@ -84,6 +99,7 @@ export function classifyMotor(pattern: {
   cerebellarCalibrationPct: number;
   corticospinalIntegrityPct: number;
   essentialTremorDrivePct: number;
+  dystoniaSeverityPct: number;
 }): MotorState_Classification {
   if (pattern.subthalamicLesionPct >= 60) return 'hemiballismus';
   if (pattern.striatalOutputLossPct >= 50 && pattern.effectiveDopaminePct > 55)
@@ -92,6 +108,7 @@ export function classifyMotor(pattern: {
   if (pattern.effectiveDopaminePct <= 55) return 'early parkinsonism';
   if (pattern.cerebellarCalibrationPct <= 30) return 'cerebellar ataxia';
   if (pattern.corticospinalIntegrityPct <= 30) return 'spastic (UMN) hemiparesis';
+  if (pattern.dystoniaSeverityPct >= 40) return 'focal dystonia';
   if (pattern.essentialTremorDrivePct >= 50) return 'essential tremor';
   return 'normal motor control';
 }
@@ -104,6 +121,7 @@ export function patternSummary(pattern: {
   posturalTremorAmp: number;
   rigidityScore: number;
   spasticityScore: number;
+  cocontractionIndex: number;
 }): string {
   switch (pattern.classification) {
     case 'normal motor control':
@@ -122,5 +140,7 @@ export function patternSummary(pattern: {
       return `velocity-dependent spasticity ${pattern.spasticityScore.toFixed(1)} (clasp-knife) with brisk reflexes; no tremor at all`;
     case 'essential tremor':
       return `postural tremor ${pattern.posturalTremorAmp.toFixed(1)} with normal initiation and tone — better after alcohol, worse with caffeine`;
+    case 'focal dystonia':
+      return `sustained co-contraction ${pattern.cocontractionIndex.toFixed(2)} — the effort to move one muscle recruits its antagonist, producing abnormal posture rather than tremor`;
   }
 }

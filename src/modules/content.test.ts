@@ -1,89 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import { MODULES } from '@/home/moduleRegistry';
+import {
+  paragraphsOf,
+  type ExplainerContent,
+} from '@/shared/components/ExplainerPanel/ExplainerPanel';
 
-import { autonomicNervousContent } from './autonomicNervous/content';
-import { calciumHomeostasisContent } from './calciumHomeostasis/content';
-import { capillaryExchangeContent } from './capillaryExchange/content';
-import { cardiacElectroContent } from './cardiacElectro/content';
-import { cardiorenalContent } from './cardiorenal/content';
-import { coagulationContent } from './coagulation/content';
-import { ecgConductionContent } from './ecgConduction/content';
-import { electrolyteBalanceContent } from './electrolyteBalance/content';
-import { erythropoiesisContent } from './erythropoiesis/content';
-import { gastrointestinalContent } from './gastrointestinal/content';
-import { glucoseRegulationContent } from './glucoseRegulation/content';
-import { hpaAxisContent } from './hpaAxis/content';
-import { hpgAxisContent } from './hpgAxis/content';
-import { hptAxisContent } from './hptAxis/content';
-import { hypersensitivityContent } from './hypersensitivity/content';
-import { immuneResponseContent } from './immuneResponse/content';
-import { membranePotentialsContent } from './membranePotentials/content';
-import { muscleContractionContent } from './muscleContraction/content';
-import { renalTubularContent } from './renalTubular/content';
-import { respiratoryContent } from './respiratory/content';
-import { respiratoryMechanicsContent } from './respiratoryMechanics/content';
-import { fetalCirculationContent } from './fetalCirculation/content';
-import { cerebralPerfusionContent } from './cerebralPerfusion/content';
-import { neuromuscularJunctionContent } from './neuromuscularJunction/content';
-import { shockStatesContent } from './shockStates/content';
-import { venousReturnContent } from './venousReturn/content';
-import { visionContent } from './vision/content';
-import { hearingContent } from './hearing/content';
-import { vestibularContent } from './vestibular/content';
-import { somaticSensationContent } from './somaticSensation/content';
-import { motorControlContent } from './motorControl/content';
-import { liverPhysiologyContent } from './liverPhysiology/content';
-import { pregnancyContent } from './pregnancy/content';
-import { anteriorPituitaryContent } from './anteriorPituitary/content';
-import { adrenalCortexContent } from './adrenalCortex/content';
-import { adrenalMedullaContent } from './adrenalMedulla/content';
-import { bloodGroupsContent } from './bloodGroups/content';
-import { thermoregulationContent } from './thermoregulation/content';
-import { exercisePhysiologyContent } from './exercisePhysiology/content';
+/**
+ * Discovered, not listed. The hand-maintained array this replaced had drifted to 41 of the 45
+ * `content.ts` files, so coronaryCirculation, digestionAbsorption, inflammation and micturition
+ * were silently unverified — and its `toHaveLength(41)` meant adding them failed the test until
+ * the literal was bumped. `src/shared/verification/controls.test.tsx` globs for exactly this
+ * reason: a hand-maintained list of module ids is the one that under-reports.
+ */
+const contentModules = import.meta.glob<Record<string, unknown>>('./*/content.ts', { eager: true });
 
-const ALL: [string, ExplainerContent][] = [
-  ['autonomicNervous', autonomicNervousContent],
-  ['calciumHomeostasis', calciumHomeostasisContent],
-  ['capillaryExchange', capillaryExchangeContent],
-  ['cardiacElectro', cardiacElectroContent],
-  ['cardiorenal', cardiorenalContent],
-  ['coagulation', coagulationContent],
-  ['ecgConduction', ecgConductionContent],
-  ['electrolyteBalance', electrolyteBalanceContent],
-  ['erythropoiesis', erythropoiesisContent],
-  ['gastrointestinal', gastrointestinalContent],
-  ['glucoseRegulation', glucoseRegulationContent],
-  ['hpaAxis', hpaAxisContent],
-  ['hpgAxis', hpgAxisContent],
-  ['hptAxis', hptAxisContent],
-  ['hypersensitivity', hypersensitivityContent],
-  ['immuneResponse', immuneResponseContent],
-  ['membranePotentials', membranePotentialsContent],
-  ['muscleContraction', muscleContractionContent],
-  ['renalTubular', renalTubularContent],
-  ['respiratory', respiratoryContent],
-  ['respiratoryMechanics', respiratoryMechanicsContent],
-  ['shockStates', shockStatesContent],
-  ['fetalCirculation', fetalCirculationContent],
-  ['neuromuscularJunction', neuromuscularJunctionContent],
-  ['cerebralPerfusion', cerebralPerfusionContent],
-  ['venousReturn', venousReturnContent],
-  ['vision', visionContent],
-  ['hearing', hearingContent],
-  ['vestibular', vestibularContent],
-  ['somaticSensation', somaticSensationContent],
-  ['motorControl', motorControlContent],
-  ['liverPhysiology', liverPhysiologyContent],
-  ['pregnancy', pregnancyContent],
-  ['anteriorPituitary', anteriorPituitaryContent],
-  ['adrenalCortex', adrenalCortexContent],
-  ['adrenalMedulla', adrenalMedullaContent],
-  ['bloodGroups', bloodGroupsContent],
-  ['thermoregulation', thermoregulationContent],
-  ['exercisePhysiology', exercisePhysiologyContent],
-];
+const moduleIdOf = (path: string): string => path.match(/^\.\/([^/]+)\//)![1]!;
+
+function findContent(exports: Record<string, unknown>): ExplainerContent | null {
+  for (const value of Object.values(exports)) {
+    if (value && typeof value === 'object' && 'title' in value) return value as ExplainerContent;
+  }
+  return null;
+}
+
+const ALL: [string, ExplainerContent][] = Object.entries(contentModules)
+  .map(([path, exports]) => [moduleIdOf(path), findContent(exports)] as const)
+  .filter((entry): entry is [string, ExplainerContent] => entry[1] !== null)
+  .sort(([a], [b]) => a.localeCompare(b));
 
 const words = (text: string) => text.trim().split(/\s+/).length;
+
+/** Modules authored as titled sections. The rest are still flat prose and migrate over time. */
+const SECTIONED: [string, NonNullable<ExplainerContent['sections']>][] = ALL.flatMap(
+  ([id, content]) => (content.sections ? [[id, content.sections] as [string, NonNullable<ExplainerContent['sections']>]] : []),
+);
 
 /**
  * The explainer is the default first encounter with a module now that it opens by design, so
@@ -92,8 +42,12 @@ const words = (text: string) => text.trim().split(/\s+/).length;
  */
 describe('module explainer content', () => {
   it('covers every simulator module', () => {
-    // 33 simulators; the formula reference has no explainer.
-    expect(ALL).toHaveLength(39);
+    const simulators = MODULES.filter((m) => m.status === 'available' && m.kind !== 'reference').map(
+      (m) => m.id,
+    );
+    const covered = new Set(ALL.map(([id]) => id));
+    const missing = simulators.filter((id) => !covered.has(id));
+    expect(missing, `simulators with no content.ts: ${missing.join(', ')}`).toEqual([]);
     expect(new Set(ALL.map(([id]) => id)).size).toBe(ALL.length);
   });
 
@@ -107,13 +61,13 @@ describe('module explainer content', () => {
 
   it('carries at least five substantive paragraphs', () => {
     for (const [id, content] of ALL) {
-      expect(content.paragraphs.length, `${id} paragraph count`).toBeGreaterThanOrEqual(5);
+      expect(paragraphsOf(content).length, `${id} paragraph count`).toBeGreaterThanOrEqual(5);
     }
   });
 
   it('has no thin paragraphs', () => {
     const thin = ALL.flatMap(([id, content]) =>
-      content.paragraphs
+      paragraphsOf(content)
         .map((paragraph, index) => ({ id, index, count: words(paragraph) }))
         .filter(({ count }) => count < 40)
         .map(({ index, count }) => `  ${id}[${index}]: ${count} words`),
@@ -123,16 +77,47 @@ describe('module explainer content', () => {
 
   it('reaches a usable total length per module', () => {
     for (const [id, content] of ALL) {
-      const total = content.paragraphs.reduce((sum, p) => sum + words(p), 0);
+      const total = paragraphsOf(content).reduce((sum, p) => sum + words(p), 0);
       expect(total, `${id} total words`).toBeGreaterThan(300);
     }
   });
 
   it('never repeats a paragraph within a module', () => {
     for (const [id, content] of ALL) {
-      expect(new Set(content.paragraphs).size, `${id} duplicate paragraph`).toBe(
-        content.paragraphs.length,
-      );
+      const paragraphs = paragraphsOf(content);
+      expect(new Set(paragraphs).size, `${id} duplicate paragraph`).toBe(paragraphs.length);
+    }
+  });
+});
+
+/**
+ * Sections exist to give a reader landmarks in 600 words. A heading that restates the module
+ * name is not a landmark, and four is the fewest that reads as a structure rather than as one
+ * arbitrary fold.
+ */
+describe('sectioned explainer content', () => {
+  it('splits into enough sections to be worth splitting', () => {
+    for (const [id, sections] of SECTIONED) {
+      expect(sections.length, `${id} section count`).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('gives every section a heading that makes a claim', () => {
+    for (const [id, sections] of SECTIONED) {
+      sections.forEach((section, index) => {
+        expect(section.heading.length, `${id}[${index}] heading`).toBeGreaterThan(15);
+        expect(words(section.heading), `${id}[${index}] heading`).toBeGreaterThan(3);
+      });
+    }
+  });
+
+  it('never leaves a section without prose, or repeats a heading', () => {
+    for (const [id, sections] of SECTIONED) {
+      sections.forEach((section, index) => {
+        expect(section.paragraphs.length, `${id}[${index}] paragraphs`).toBeGreaterThan(0);
+      });
+      const headings = sections.map((s) => s.heading);
+      expect(new Set(headings).size, `${id} duplicate heading`).toBe(headings.length);
     }
   });
 });

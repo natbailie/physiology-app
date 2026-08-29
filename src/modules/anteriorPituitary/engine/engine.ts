@@ -51,6 +51,9 @@ export function computeDerived(state: PituitaryInternalState, inputs: PituitaryI
     effectiveDopamineFraction: dopamineEffective,
     stalkCompressionFraction: stalk,
     totalMassCc,
+    ghAdenomaCc,
+    prlAdenomaCc,
+    nonfunctioningCc: massCc,
     visualFieldDefectPct: visualFieldDefectPct(totalMassCc),
     heightVelocityCmPerYear: heightVelocityCmPerYear(state.igf1NgMl, inputs.epiphysesOpen > 0.5),
     acromegalicIndex: state.acromegalicIndex,
@@ -64,6 +67,10 @@ export function computeDerived(state: PituitaryInternalState, inputs: PituitaryI
         : 'not tested',
     classification: classifyPituitary(classificationPatternOf(state, inputs)),
     patternSummary: '',
+    dopamineTonePct: inputs.dopamineTonePct,
+    d2ReceptorBlockPct: inputs.d2ReceptorBlockPct,
+    trhStimulusUnits: inputs.trhStimulusUnits,
+    bromocriptineEffectPct: state.bromocriptineEffectPct,
   };
 }
 

@@ -1,0 +1,24 @@
+.card {
+  composes: card from '../../styles/card.module.css';
+}
+
+.nameRow {
+  composes: nameRow from '../../styles/card.module.css';
+}
+
+.name {
+  composes: name from '../../styles/card.module.css';
+}
+
+.blurb {
+  composes: blurb from '../../styles/card.module.css';
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}

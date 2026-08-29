@@ -1,0 +1,44 @@
+.wrap {
+  composes: wrap from '../../../shared/styles/chart.module.css';
+}
+
+.header {
+  composes: header from '../../../shared/styles/chart.module.css';
+}
+
+.current {
+  composes: current from '../../../shared/styles/chart.module.css';
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 84px;
+  overflow: visible;
+}
+
+.gridline {
+  stroke: var(--grid-line);
+  stroke-width: 1;
+}
+
+/* Air runs through the whole apparatus; bone bypasses the middle ear. The distance between
+   them is the conductive loss, which is why they share one axis. */
+.air {
+  fill: none;
+  stroke: var(--cochlea);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+}
+
+.airMark {
+  fill: var(--cochlea);
+}
+
+.bone {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}

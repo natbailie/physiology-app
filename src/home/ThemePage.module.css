@@ -1,0 +1,51 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0 3rem;
+  gap: 1.5rem;
+}
+
+.backRow {
+  display: flex;
+}
+
+.backLink {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: -0.5rem;
+}
+
+.title {
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+}
+
+.blurb {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 46ch;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.footnote {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}

@@ -77,3 +77,18 @@ export const CEREBRAL_SIMULATION = {
   /** CSF accumulates over hours; compressed so it is watchable. */
   TIME_SCALE: 25,
 } as const;
+
+/** Blood-brain barrier disruption drives vasogenic oedema — fluid and protein leaking into
+ * the interstitial space. The leak rate scales with permeability above the normal threshold
+ * and the hydrostatic gradient pushing fluid across the vessel wall. */
+export const BBB = {
+  /** Maximum leak rate, mL per minute, at maximum disruption (200%). */
+  MAX_LEAK_RATE_ML_PER_MIN: 0.06,
+  /** Permeability above which leak becomes significant, %. Normal BBB is 100;
+   * disruption begins above that. */
+  LEAK_THRESHOLD_PCT: 100,
+  /** Oedema volume at which significant additional mass effect develops, mL. */
+  SIGNIFICANT_OEDEMA_ML: 10,
+  /** Maximum oedema volume the model will track, mL. */
+  MAX_OEDEMA_ML: 80,
+} as const;

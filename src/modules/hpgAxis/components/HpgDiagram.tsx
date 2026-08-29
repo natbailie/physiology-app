@@ -1,132 +1,112 @@
-import type { CSSProperties } from 'react';
-import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
-import { HormoneArrow } from '@/shared/components/HormoneArrow/HormoneArrow';
-import { HYPOTHALAMUS_PATH, PITUITARY_PATH } from '@/shared/diagram/organShapes';
-import { clamp, scaleClamped } from '@/shared/lib/math';
-import styles from './Diagram.module.css';
+import { EndocrineAxis } from '@/shared/components/EndocrineAxis/EndocrineAxis';
+import { DiagramText } from '@/shared/components/DiagramText/DiagramText';
+import { clamp } from '@/shared/lib/math';
 import type { HpgDerived } from '../engine/types';
+import { GonadGland } from './GonadGland';
+import styles from './Diagram.module.css';
 
 interface HpgDiagramProps {
   derived: HpgDerived;
 }
 
-const OVARY_PATH = 'M-20,-4 C-20,-16 -8,-22 6,-19 C20,-16 24,-3 18,8 C12,19 -4,22 -14,14 C-19,10 -20,2 -20,-4 Z';
-const TESTIS_PATH = 'M-16,-8 C-16,-20 0,-24 12,-17 C22,-11 22,6 12,15 C2,23 -14,18 -16,4 C-17,0 -17,-4 -16,-8 Z';
+const PULSE_STRIP = { x: 196, y: 240, width: 150 };
 
-const GNRH_PATH = 'M110,84 C110,94 110,102 110,110';
-const GONADOTROPIN_PATH = 'M138,140 C210,166 290,192 334,206';
-const FEEDBACK_PATH = 'M346,192 C300,80 200,36 122,56';
-
+/**
+ * The HPG axis on the shared endocrine scaffold, plus the two things that are peculiar to it.
+ *
+ * GnRH has to arrive in PULSES. A steady infusion of the same hormone shuts the axis down
+ * instead of driving it, which is why a GnRH agonist is a treatment for prostate cancer rather
+ * than a stimulant — so the pulse train is drawn, and it visibly runs together into a continuous
+ * line as pulsatility is lost while the anterior lobe stops responding.
+ *
+ * And this is the one axis whose feedback changes sign. For most of the cycle oestrogen inhibits;
+ * above a threshold held for long enough it switches to driving, and that switch is the LH surge.
+ * The scaffold's feedback marker flips with it — crossbar to arrowhead.
+ */
 export function HpgDiagram({ derived }: HpgDiagramProps) {
   const isFemale = derived.sex === 'female';
-  const gonadalSteroid = isFemale ? derived.estrogenLevel : derived.testosteroneLevel;
+  const steroid = isFemale ? derived.estrogenLevel : derived.testosteroneLevel;
+  const positive = derived.feedbackMode === 'positive';
+  const pulse = clamp(derived.gnrhPulseFrequency, 0, 2);
 
-  const hypothalamusStyle = { '--gnrh-drive': clamp(derived.gnrhDrive, 0, 1) } as CSSProperties;
-  const pituitaryStyle = { '--lh-level': clamp(derived.lhLevel, 0, 1) } as CSSProperties;
-  const gonadStyle = {
-    '--steroid-level': clamp(gonadalSteroid, 0, 1),
-    '--gonad-color': isFemale ? 'var(--estrogen)' : 'var(--testosterone)',
-    '--cl-activity': clamp(derived.corpusLuteumActivity, 0, 1),
-  } as CSSProperties;
-
-  const inPositiveFeedback = derived.feedbackMode === 'positive';
-  const follicleRadius = scaleClamped(derived.follicleSize, 0, 1, 0, 9);
+  // Pulses run together as frequency rises; at zero the strip is one continuous line, which is
+  // exactly the state that silences the pituitary.
+  const pulseCount = Math.max(1, Math.round(pulse * 5));
+  const exogenous = isFemale ? derived.exogenousEstrogenProgesterone : derived.exogenousTestosterone;
 
   return (
-    <DiagramFrame
-      viewBox="0 0 480 300"
-      ariaLabel="Animated diagram of the hypothalamic-pituitary-gonadal axis: the hypothalamus releasing GnRH, the pituitary releasing LH and FSH, and the gonad releasing steroid hormones that feed back on the axis"
-      defs={
-        <>
-          <marker id="gnrh-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="var(--gnrh)" />
-          </marker>
-          <marker id="gonadotropin-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="var(--lh)" />
-          </marker>
-          <marker id="hpg-feedback-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill={isFemale ? 'var(--estrogen)' : 'var(--testosterone)'} />
-          </marker>
-        </>
-      }
-    >
-      <HormoneArrow
-        path={GNRH_PATH}
-        activation={derived.gnrhDrive}
-        colorVar="var(--gnrh)"
-        label="GnRH"
-        markerId="gnrh-arrow"
-        labelPos={{ x: 120, y: 102 }}
-      />
-      <HormoneArrow
-        path={GONADOTROPIN_PATH}
-        activation={derived.lhLevel}
-        colorVar="var(--lh)"
-        label="LH / FSH"
-        markerId="gonadotropin-arrow"
-        labelPos={{ x: 214, y: 162 }}
-      />
-      {/* The one arrow in the whole app that changes sign: `inhibitory` is bound to the live
-          feedback mode, so the switch to positive feedback is directly visible. */}
-      <HormoneArrow
-        path={FEEDBACK_PATH}
-        activation={clamp(gonadalSteroid, 0, 1)}
-        colorVar={isFemale ? 'var(--estrogen)' : 'var(--testosterone)'}
-        label={inPositiveFeedback ? 'Positive feedback' : 'Negative feedback'}
-        markerId="hpg-feedback-arrow"
-        labelPos={{ x: 186, y: 38 }}
-        inhibitory={!inPositiveFeedback}
-      />
-
-      <g transform="translate(110, 60)" style={hypothalamusStyle}>
-        <path className={styles.hypothalamusShape} d={HYPOTHALAMUS_PATH} />
-        <text className={styles.organLabel} y={-24}>
-          Hypothalamus
-        </text>
-      </g>
-
-      <g transform="translate(110, 128)" style={pituitaryStyle}>
-        <path className={styles.pituitaryShape} d={PITUITARY_PATH} />
-        <text className={styles.organLabel} y={24}>
-          Pituitary
-        </text>
-      </g>
-
-      <g transform="translate(356, 212)" style={gonadStyle}>
-        <path className={styles.gonadShape} d={isFemale ? OVARY_PATH : TESTIS_PATH} />
-        {isFemale && follicleRadius > 0.5 && <circle className={styles.follicle} cx={-4} cy={-2} r={follicleRadius} />}
-        {isFemale && derived.corpusLuteumActivity > 0.02 && <circle className={styles.corpusLuteum} cx={8} cy={4} r={7} />}
-        <text className={styles.organLabel} y={40}>
-          {isFemale ? 'Ovary' : 'Testis'}
-        </text>
-      </g>
-
-      <text className={inPositiveFeedback ? styles.feedbackPositive : styles.feedbackNegative} x={22} y={236}>
-        {inPositiveFeedback ? '▲ Positive feedback — LH surge' : 'Negative feedback'}
-      </text>
-
-      {isFemale ? (
-        <>
-          <text className={styles.valueLabel} x={22} y={256}>
-            Cycle day {derived.cycleDay} · {derived.cyclePhase}
-          </text>
-          <text className={styles.valueLabel} x={22} y={272}>
-            E2 {(derived.estrogenLevel * 100).toFixed(0)}% · P4 {(derived.progesteroneLevel * 100).toFixed(0)}%
-          </text>
-        </>
-      ) : (
-        <>
-          <text className={styles.valueLabel} x={22} y={256}>
-            Testosterone {(derived.testosteroneLevel * 100).toFixed(0)}%
-          </text>
-          <text className={styles.valueLabel} x={22} y={272}>
-            Inhibin {(derived.inhibinLevel * 100).toFixed(0)}%
-          </text>
-        </>
+    <EndocrineAxis
+      ariaLabel="The hypothalamic-pituitary-gonadal axis: pulsatile GnRH down the portal vessels, LH and FSH through the circulation to the gonad, and gonadal steroids feeding back on the axis — negatively for most of the cycle and positively at the surge"
+      releasing={{ label: 'GnRH', level: clamp(derived.gnrhDrive, 0, 1), colorVar: 'var(--gnrh)' }}
+      trophic={{ label: 'LH / FSH', level: clamp(derived.lhLevel, 0, 1), colorVar: 'var(--lh)' }}
+      product={{
+        label: isFemale ? 'Oestrogen' : 'Testosterone',
+        level: clamp(steroid, 0, 1),
+        colorVar: isFemale ? 'var(--estrogen)' : 'var(--testosterone)',
+      }}
+      pituitaryFunction={clamp(derived.pituitaryResponsiveness, 0, 1)}
+      glandFunction={clamp(derived.gonadalFunction, 0, 1)}
+      glandLabel={isFemale ? 'Ovary' : 'Testis'}
+      renderGland={(intensity) => (
+        <GonadGland
+          isFemale={isFemale}
+          intensity={intensity}
+          follicleSize={derived.follicleSize}
+          corpusLuteum={derived.corpusLuteumActivity}
+        />
       )}
-      <text className={styles.valueLabel} x={22} y={288}>
-        LH {(derived.lhLevel * 100).toFixed(0)}% · FSH {(derived.fshLevel * 100).toFixed(0)}%
+      exogenous={{
+        label: isFemale ? 'Oestrogen / progestin' : 'Exogenous testosterone',
+        level: clamp(exogenous / 100, 0, 1),
+      }}
+      feedbackPositive={positive}
+      targetTissue={{
+        label: isFemale ? 'Endometrium · breast · bone' : 'Muscle · bone · spermatogenesis',
+        detail: isFemale
+          ? 'proliferation then secretory change, and bone kept dense'
+          : 'anabolism, bone density, and sperm production alongside FSH',
+      }}
+    >
+      {/* GnRH pulsatility: the axis's own peculiarity, drawn as a pulse train. */}
+      <text className={styles.pulseLabel} x={PULSE_STRIP.x} y={PULSE_STRIP.y - 10}>
+        GnRH pulses
       </text>
-    </DiagramFrame>
+      <line
+        className={styles.pulseBaseline}
+        x1={PULSE_STRIP.x}
+        y1={PULSE_STRIP.y + 14}
+        x2={PULSE_STRIP.x + PULSE_STRIP.width}
+        y2={PULSE_STRIP.y + 14}
+      />
+      {pulse < 0.12 ? (
+        <line
+          className={styles.pulseContinuous}
+          x1={PULSE_STRIP.x}
+          y1={PULSE_STRIP.y + 2}
+          x2={PULSE_STRIP.x + PULSE_STRIP.width}
+          y2={PULSE_STRIP.y + 2}
+        />
+      ) : (
+        Array.from({ length: pulseCount }, (_, i) => {
+          const x = PULSE_STRIP.x + ((i + 0.5) / pulseCount) * PULSE_STRIP.width;
+          return <line key={i} className={styles.pulseSpike} x1={x} y1={PULSE_STRIP.y + 14} x2={x} y2={PULSE_STRIP.y} />;
+        })
+      )}
+      <text className={styles.pulseTick} x={PULSE_STRIP.x} y={PULSE_STRIP.y + 28}>
+        {pulse < 0.12
+          ? 'continuous — the pituitary stops responding'
+          : `×${pulse.toFixed(2)} · responsiveness ${(derived.pituitaryResponsiveness * 100).toFixed(0)}%`}
+      </text>
+
+      <text className={styles.label} x={20} y={410}>
+        LH {(derived.lhLevel * 100).toFixed(0)}% · FSH {(derived.fshLevel * 100).toFixed(0)}%
+        {isFemale ? ` · day ${derived.cycleDay} ${derived.cyclePhase}` : ''}
+      </text>
+      <DiagramText className={styles.caption} x={20} y={430} maxWidth={520}>
+        {isFemale
+          ? `E2 ${(derived.estrogenLevel * 100).toFixed(0)}% · P4 ${(derived.progesteroneLevel * 100).toFixed(0)}% · follicle ${(derived.follicleSize * 100).toFixed(0)}%`
+          : `testosterone ${(derived.testosteroneLevel * 100).toFixed(0)}% · inhibin ${(derived.inhibinLevel * 100).toFixed(0)}%`}
+      </DiagramText>
+    </EndocrineAxis>
   );
 }

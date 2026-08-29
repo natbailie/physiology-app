@@ -1,0 +1,4256 @@
+{
+  "$generatedBy": "tools/pulse-oracle/run.sh — do not edit by hand",
+  "pulseImage": "kitware/pulse:4.3.1",
+  "scenario": "/source/data/human/adult/scenarios/patient/Baroreceptors.json",
+  "description": "Left-heart pressure and volume through Kitware's baroreflex scenario, sampled at full 50 Hz resolution over two windows: a healthy baseline before the bleed, and the reduced-preload state 200 s after it. Two PV loops from one run.",
+  "durationSeconds": 260,
+  "sampleIntervalSeconds": 10,
+  "landmarks": {
+    "baselineWindowEnd": 29,
+    "hypovolaemicWindowEnd": 259
+  },
+  "denseWindows": [
+    [
+      24,
+      29
+    ],
+    [
+      254,
+      259
+    ]
+  ],
+  "samples": [
+    {
+      "t": 0,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 10,
+      "lvPressureMmHg": 121.57,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.02,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 20,
+      "lvPressureMmHg": 129.91,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24,
+      "lvPressureMmHg": 96.19,
+      "lvVolumeMl": 137.6,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.02,
+      "lvPressureMmHg": 113.2,
+      "lvVolumeMl": 130.5,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.04,
+      "lvPressureMmHg": 124.83,
+      "lvVolumeMl": 122.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.06,
+      "lvPressureMmHg": 131.87,
+      "lvVolumeMl": 113.39,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.08,
+      "lvPressureMmHg": 135.42,
+      "lvVolumeMl": 105.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.1,
+      "lvPressureMmHg": 136.58,
+      "lvVolumeMl": 97.52,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.12,
+      "lvPressureMmHg": 136.24,
+      "lvVolumeMl": 90.86,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.14,
+      "lvPressureMmHg": 135.06,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.16,
+      "lvPressureMmHg": 133.46,
+      "lvVolumeMl": 80.16,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.18,
+      "lvPressureMmHg": 131.69,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.2,
+      "lvPressureMmHg": 129.9,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.22,
+      "lvPressureMmHg": 128.13,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.24,
+      "lvPressureMmHg": 126.35,
+      "lvVolumeMl": 66.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.26,
+      "lvPressureMmHg": 124.36,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.28,
+      "lvPressureMmHg": 121.58,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.3,
+      "lvPressureMmHg": 116.44,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.32,
+      "lvPressureMmHg": 103.87,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.34,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.36,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.38,
+      "lvPressureMmHg": 24.06,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.4,
+      "lvPressureMmHg": 11.99,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.42,
+      "lvPressureMmHg": 6.85,
+      "lvVolumeMl": 64.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.44,
+      "lvPressureMmHg": 6.19,
+      "lvVolumeMl": 84.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.46,
+      "lvPressureMmHg": 5.97,
+      "lvVolumeMl": 104.13,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.48,
+      "lvPressureMmHg": 5.92,
+      "lvVolumeMl": 117.97,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.5,
+      "lvPressureMmHg": 5.94,
+      "lvVolumeMl": 126.56,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.52,
+      "lvPressureMmHg": 5.98,
+      "lvVolumeMl": 131.54,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.54,
+      "lvPressureMmHg": 6.02,
+      "lvVolumeMl": 134.41,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.56,
+      "lvPressureMmHg": 6.05,
+      "lvVolumeMl": 136.11,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.58,
+      "lvPressureMmHg": 6.08,
+      "lvVolumeMl": 137.23,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.6,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.03,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.62,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.68,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.64,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.25,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.66,
+      "lvPressureMmHg": 6.18,
+      "lvVolumeMl": 139.76,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.68,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.7,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.74,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.72,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.2,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.74,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.65,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.76,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.78,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.8,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.82,
+      "lvPressureMmHg": 73.94,
+      "lvVolumeMl": 142.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.84,
+      "lvPressureMmHg": 96.2,
+      "lvVolumeMl": 137.61,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.86,
+      "lvPressureMmHg": 113.21,
+      "lvVolumeMl": 130.51,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.88,
+      "lvPressureMmHg": 124.84,
+      "lvVolumeMl": 122.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.9,
+      "lvPressureMmHg": 131.88,
+      "lvVolumeMl": 113.39,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.92,
+      "lvPressureMmHg": 135.43,
+      "lvVolumeMl": 105.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.94,
+      "lvPressureMmHg": 136.59,
+      "lvVolumeMl": 97.52,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.96,
+      "lvPressureMmHg": 136.25,
+      "lvVolumeMl": 90.86,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 24.98,
+      "lvPressureMmHg": 135.07,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25,
+      "lvPressureMmHg": 133.47,
+      "lvVolumeMl": 80.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.02,
+      "lvPressureMmHg": 131.7,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.04,
+      "lvPressureMmHg": 129.91,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.06,
+      "lvPressureMmHg": 128.14,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.08,
+      "lvPressureMmHg": 126.36,
+      "lvVolumeMl": 66.63,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.1,
+      "lvPressureMmHg": 124.37,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.12,
+      "lvPressureMmHg": 121.58,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.14,
+      "lvPressureMmHg": 116.45,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.16,
+      "lvPressureMmHg": 103.88,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.18,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.2,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.22,
+      "lvPressureMmHg": 24.07,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.24,
+      "lvPressureMmHg": 12,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.26,
+      "lvPressureMmHg": 6.86,
+      "lvVolumeMl": 64.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.28,
+      "lvPressureMmHg": 6.21,
+      "lvVolumeMl": 85.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.3,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 104.46,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.32,
+      "lvPressureMmHg": 5.94,
+      "lvVolumeMl": 118.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.34,
+      "lvPressureMmHg": 5.95,
+      "lvVolumeMl": 126.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.36,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 131.68,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.38,
+      "lvPressureMmHg": 6.02,
+      "lvVolumeMl": 134.49,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.4,
+      "lvPressureMmHg": 6.05,
+      "lvVolumeMl": 136.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.42,
+      "lvPressureMmHg": 6.08,
+      "lvVolumeMl": 137.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.44,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.06,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.46,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.7,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.48,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.5,
+      "lvPressureMmHg": 6.18,
+      "lvVolumeMl": 139.78,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.52,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.27,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.54,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.74,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.56,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.2,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.58,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.65,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.6,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.62,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.64,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.66,
+      "lvPressureMmHg": 73.94,
+      "lvVolumeMl": 142.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.68,
+      "lvPressureMmHg": 96.2,
+      "lvVolumeMl": 137.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.7,
+      "lvPressureMmHg": 113.21,
+      "lvVolumeMl": 130.51,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.72,
+      "lvPressureMmHg": 124.85,
+      "lvVolumeMl": 122.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.74,
+      "lvPressureMmHg": 131.88,
+      "lvVolumeMl": 113.39,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.76,
+      "lvPressureMmHg": 135.43,
+      "lvVolumeMl": 105.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.78,
+      "lvPressureMmHg": 136.59,
+      "lvVolumeMl": 97.53,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.8,
+      "lvPressureMmHg": 136.25,
+      "lvVolumeMl": 90.86,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.82,
+      "lvPressureMmHg": 135.07,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.84,
+      "lvPressureMmHg": 133.47,
+      "lvVolumeMl": 80.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.86,
+      "lvPressureMmHg": 131.7,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.88,
+      "lvPressureMmHg": 129.91,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.9,
+      "lvPressureMmHg": 128.14,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.92,
+      "lvPressureMmHg": 126.36,
+      "lvVolumeMl": 66.63,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.94,
+      "lvPressureMmHg": 124.37,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.96,
+      "lvPressureMmHg": 121.59,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 25.98,
+      "lvPressureMmHg": 116.45,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26,
+      "lvPressureMmHg": 103.88,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.02,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.04,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.06,
+      "lvPressureMmHg": 24.07,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.08,
+      "lvPressureMmHg": 12,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.1,
+      "lvPressureMmHg": 6.86,
+      "lvVolumeMl": 64.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.12,
+      "lvPressureMmHg": 6.21,
+      "lvVolumeMl": 85.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.14,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 104.46,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.16,
+      "lvPressureMmHg": 5.94,
+      "lvVolumeMl": 118.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.18,
+      "lvPressureMmHg": 5.95,
+      "lvVolumeMl": 126.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.2,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 131.68,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.22,
+      "lvPressureMmHg": 6.02,
+      "lvVolumeMl": 134.49,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.24,
+      "lvPressureMmHg": 6.05,
+      "lvVolumeMl": 136.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.26,
+      "lvPressureMmHg": 6.08,
+      "lvVolumeMl": 137.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.28,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.06,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.3,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.7,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.32,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.34,
+      "lvPressureMmHg": 6.18,
+      "lvVolumeMl": 139.78,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.36,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.27,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.38,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.74,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.4,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.21,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.42,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.66,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.44,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.46,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.48,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.5,
+      "lvPressureMmHg": 73.94,
+      "lvVolumeMl": 142.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.52,
+      "lvPressureMmHg": 96.2,
+      "lvVolumeMl": 137.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.54,
+      "lvPressureMmHg": 113.21,
+      "lvVolumeMl": 130.51,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.56,
+      "lvPressureMmHg": 124.85,
+      "lvVolumeMl": 122.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.58,
+      "lvPressureMmHg": 131.88,
+      "lvVolumeMl": 113.4,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.6,
+      "lvPressureMmHg": 135.43,
+      "lvVolumeMl": 105.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.62,
+      "lvPressureMmHg": 136.59,
+      "lvVolumeMl": 97.53,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.64,
+      "lvPressureMmHg": 136.26,
+      "lvVolumeMl": 90.87,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.66,
+      "lvPressureMmHg": 135.07,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.68,
+      "lvPressureMmHg": 133.47,
+      "lvVolumeMl": 80.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.7,
+      "lvPressureMmHg": 131.71,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.72,
+      "lvPressureMmHg": 129.91,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.74,
+      "lvPressureMmHg": 128.14,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.76,
+      "lvPressureMmHg": 126.36,
+      "lvVolumeMl": 66.63,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.78,
+      "lvPressureMmHg": 124.37,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.8,
+      "lvPressureMmHg": 121.59,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.82,
+      "lvPressureMmHg": 116.45,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.84,
+      "lvPressureMmHg": 103.88,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.86,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.88,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.9,
+      "lvPressureMmHg": 24.07,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.92,
+      "lvPressureMmHg": 12,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.94,
+      "lvPressureMmHg": 6.86,
+      "lvVolumeMl": 64.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.96,
+      "lvPressureMmHg": 6.21,
+      "lvVolumeMl": 85.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 26.98,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 104.46,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27,
+      "lvPressureMmHg": 5.94,
+      "lvVolumeMl": 118.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.02,
+      "lvPressureMmHg": 5.95,
+      "lvVolumeMl": 126.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.04,
+      "lvPressureMmHg": 5.99,
+      "lvVolumeMl": 131.68,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.06,
+      "lvPressureMmHg": 6.02,
+      "lvVolumeMl": 134.49,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.08,
+      "lvPressureMmHg": 6.05,
+      "lvVolumeMl": 136.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.1,
+      "lvPressureMmHg": 6.08,
+      "lvVolumeMl": 137.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.12,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.06,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.14,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.7,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.16,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.18,
+      "lvPressureMmHg": 6.18,
+      "lvVolumeMl": 139.78,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.2,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.27,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.22,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.75,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.24,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.21,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.26,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.66,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.28,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.3,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.32,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.34,
+      "lvPressureMmHg": 73.94,
+      "lvVolumeMl": 142.02,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.36,
+      "lvPressureMmHg": 96.2,
+      "lvVolumeMl": 137.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.38,
+      "lvPressureMmHg": 113.21,
+      "lvVolumeMl": 130.51,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.4,
+      "lvPressureMmHg": 124.85,
+      "lvVolumeMl": 122.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.42,
+      "lvPressureMmHg": 131.88,
+      "lvVolumeMl": 113.4,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.44,
+      "lvPressureMmHg": 135.43,
+      "lvVolumeMl": 105.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.46,
+      "lvPressureMmHg": 136.59,
+      "lvVolumeMl": 97.53,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.48,
+      "lvPressureMmHg": 136.26,
+      "lvVolumeMl": 90.87,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.5,
+      "lvPressureMmHg": 135.07,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.52,
+      "lvPressureMmHg": 133.47,
+      "lvVolumeMl": 80.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.54,
+      "lvPressureMmHg": 131.71,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.56,
+      "lvPressureMmHg": 129.92,
+      "lvVolumeMl": 72.37,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.58,
+      "lvPressureMmHg": 128.15,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.6,
+      "lvPressureMmHg": 126.36,
+      "lvVolumeMl": 66.63,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.62,
+      "lvPressureMmHg": 124.37,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.64,
+      "lvPressureMmHg": 121.59,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.66,
+      "lvPressureMmHg": 116.45,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.68,
+      "lvPressureMmHg": 103.88,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.7,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.72,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.74,
+      "lvPressureMmHg": 24.07,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.76,
+      "lvPressureMmHg": 12,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.78,
+      "lvPressureMmHg": 6.84,
+      "lvVolumeMl": 64,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.8,
+      "lvPressureMmHg": 6.11,
+      "lvVolumeMl": 83.91,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.82,
+      "lvPressureMmHg": 5.9,
+      "lvVolumeMl": 103.11,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.84,
+      "lvPressureMmHg": 5.87,
+      "lvVolumeMl": 117.15,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.86,
+      "lvPressureMmHg": 5.91,
+      "lvVolumeMl": 126.04,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.88,
+      "lvPressureMmHg": 5.96,
+      "lvVolumeMl": 131.25,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.9,
+      "lvPressureMmHg": 6.01,
+      "lvVolumeMl": 134.25,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.92,
+      "lvPressureMmHg": 6.04,
+      "lvVolumeMl": 136.03,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.94,
+      "lvPressureMmHg": 6.07,
+      "lvVolumeMl": 137.18,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.96,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.01,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 27.98,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.66,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.23,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.02,
+      "lvPressureMmHg": 6.17,
+      "lvVolumeMl": 139.76,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.04,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.25,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.06,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.08,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.19,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.1,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.64,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.12,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.14,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.16,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.18,
+      "lvPressureMmHg": 73.93,
+      "lvVolumeMl": 142.01,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.2,
+      "lvPressureMmHg": 96.19,
+      "lvVolumeMl": 137.6,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.22,
+      "lvPressureMmHg": 113.2,
+      "lvVolumeMl": 130.5,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.24,
+      "lvPressureMmHg": 124.83,
+      "lvVolumeMl": 122.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.26,
+      "lvPressureMmHg": 131.87,
+      "lvVolumeMl": 113.39,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.28,
+      "lvPressureMmHg": 135.42,
+      "lvVolumeMl": 105.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.3,
+      "lvPressureMmHg": 136.58,
+      "lvVolumeMl": 97.52,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.32,
+      "lvPressureMmHg": 136.24,
+      "lvVolumeMl": 90.86,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.34,
+      "lvPressureMmHg": 135.06,
+      "lvVolumeMl": 85.1,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.36,
+      "lvPressureMmHg": 133.46,
+      "lvVolumeMl": 80.17,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.38,
+      "lvPressureMmHg": 131.7,
+      "lvVolumeMl": 75.96,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.4,
+      "lvPressureMmHg": 129.9,
+      "lvVolumeMl": 72.36,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.42,
+      "lvPressureMmHg": 128.13,
+      "lvVolumeMl": 69.28,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.44,
+      "lvPressureMmHg": 126.35,
+      "lvVolumeMl": 66.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.46,
+      "lvPressureMmHg": 124.36,
+      "lvVolumeMl": 64.38,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.48,
+      "lvPressureMmHg": 121.58,
+      "lvVolumeMl": 62.62,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.5,
+      "lvPressureMmHg": 116.44,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.52,
+      "lvPressureMmHg": 103.87,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.54,
+      "lvPressureMmHg": 77.96,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.56,
+      "lvPressureMmHg": 46.89,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.58,
+      "lvPressureMmHg": 24.06,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.6,
+      "lvPressureMmHg": 11.99,
+      "lvVolumeMl": 61.72,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.62,
+      "lvPressureMmHg": 6.85,
+      "lvVolumeMl": 64.08,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.64,
+      "lvPressureMmHg": 6.19,
+      "lvVolumeMl": 84.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.66,
+      "lvPressureMmHg": 5.97,
+      "lvVolumeMl": 104.13,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.68,
+      "lvPressureMmHg": 5.92,
+      "lvVolumeMl": 117.97,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.7,
+      "lvPressureMmHg": 5.94,
+      "lvVolumeMl": 126.56,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.72,
+      "lvPressureMmHg": 5.98,
+      "lvVolumeMl": 131.55,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.74,
+      "lvPressureMmHg": 6.02,
+      "lvVolumeMl": 134.41,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.76,
+      "lvPressureMmHg": 6.05,
+      "lvVolumeMl": 136.12,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.78,
+      "lvPressureMmHg": 6.08,
+      "lvVolumeMl": 137.23,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.8,
+      "lvPressureMmHg": 6.1,
+      "lvVolumeMl": 138.04,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.82,
+      "lvPressureMmHg": 6.13,
+      "lvVolumeMl": 138.68,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.84,
+      "lvPressureMmHg": 6.15,
+      "lvVolumeMl": 139.25,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.86,
+      "lvPressureMmHg": 6.18,
+      "lvVolumeMl": 139.77,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.88,
+      "lvPressureMmHg": 6.2,
+      "lvVolumeMl": 140.26,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.9,
+      "lvPressureMmHg": 6.22,
+      "lvVolumeMl": 140.73,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.92,
+      "lvPressureMmHg": 6.24,
+      "lvVolumeMl": 141.19,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.94,
+      "lvPressureMmHg": 6.27,
+      "lvVolumeMl": 141.64,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.96,
+      "lvPressureMmHg": 6.29,
+      "lvVolumeMl": 142.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 28.98,
+      "lvPressureMmHg": 23.91,
+      "lvVolumeMl": 142.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 29,
+      "lvPressureMmHg": 48.17,
+      "lvVolumeMl": 142.09,
+      "heartRateBpm": 72.03,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 30,
+      "lvPressureMmHg": 136.25,
+      "lvVolumeMl": 90.86,
+      "heartRateBpm": 72.02,
+      "strokeVolumeMl": 80.4,
+      "ejectionFraction": 0.57
+    },
+    {
+      "t": 40,
+      "lvPressureMmHg": 129.88,
+      "lvVolumeMl": 109.62,
+      "heartRateBpm": 72.44,
+      "strokeVolumeMl": 77,
+      "ejectionFraction": 0.56
+    },
+    {
+      "t": 50,
+      "lvPressureMmHg": 101.58,
+      "lvVolumeMl": 59.83,
+      "heartRateBpm": 75.63,
+      "strokeVolumeMl": 69.9,
+      "ejectionFraction": 0.54
+    },
+    {
+      "t": 60,
+      "lvPressureMmHg": 28.45,
+      "lvVolumeMl": 59.25,
+      "heartRateBpm": 81.06,
+      "strokeVolumeMl": 62,
+      "ejectionFraction": 0.51
+    },
+    {
+      "t": 70,
+      "lvPressureMmHg": 16.91,
+      "lvVolumeMl": 60.07,
+      "heartRateBpm": 86.98,
+      "strokeVolumeMl": 57.8,
+      "ejectionFraction": 0.49
+    },
+    {
+      "t": 80,
+      "lvPressureMmHg": 129.07,
+      "lvVolumeMl": 80.61,
+      "heartRateBpm": 88.88,
+      "strokeVolumeMl": 57.5,
+      "ejectionFraction": 0.49
+    },
+    {
+      "t": 90,
+      "lvPressureMmHg": 5.11,
+      "lvVolumeMl": 118.13,
+      "heartRateBpm": 88.61,
+      "strokeVolumeMl": 58.1,
+      "ejectionFraction": 0.49
+    },
+    {
+      "t": 100,
+      "lvPressureMmHg": 4.85,
+      "lvVolumeMl": 102.28,
+      "heartRateBpm": 87.62,
+      "strokeVolumeMl": 58.5,
+      "ejectionFraction": 0.49
+    },
+    {
+      "t": 110,
+      "lvPressureMmHg": 129.13,
+      "lvVolumeMl": 88.37,
+      "heartRateBpm": 86.71,
+      "strokeVolumeMl": 59.9,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 120,
+      "lvPressureMmHg": 57.58,
+      "lvVolumeMl": 60.19,
+      "heartRateBpm": 86.51,
+      "strokeVolumeMl": 60.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 130,
+      "lvPressureMmHg": 5.09,
+      "lvVolumeMl": 117.41,
+      "heartRateBpm": 85.97,
+      "strokeVolumeMl": 60.5,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 140,
+      "lvPressureMmHg": 75.36,
+      "lvVolumeMl": 120.94,
+      "heartRateBpm": 85.49,
+      "strokeVolumeMl": 60.7,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 150,
+      "lvPressureMmHg": 123.8,
+      "lvVolumeMl": 65.79,
+      "heartRateBpm": 85.15,
+      "strokeVolumeMl": 60.8,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 160,
+      "lvPressureMmHg": 4.94,
+      "lvVolumeMl": 96.48,
+      "heartRateBpm": 84.9,
+      "strokeVolumeMl": 60.9,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 170,
+      "lvPressureMmHg": 5.22,
+      "lvVolumeMl": 120.37,
+      "heartRateBpm": 84.71,
+      "strokeVolumeMl": 60.9,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 180,
+      "lvPressureMmHg": 130.13,
+      "lvVolumeMl": 89.05,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 190,
+      "lvPressureMmHg": 119.14,
+      "lvVolumeMl": 61.19,
+      "heartRateBpm": 84.57,
+      "strokeVolumeMl": 61.7,
+      "ejectionFraction": 0.51
+    },
+    {
+      "t": 200,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 109.35,
+      "heartRateBpm": 84.49,
+      "strokeVolumeMl": 61.1,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 210,
+      "lvPressureMmHg": 5.2,
+      "lvVolumeMl": 119.78,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.2,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 220,
+      "lvPressureMmHg": 24.12,
+      "lvVolumeMl": 121.67,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.2,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 230,
+      "lvPressureMmHg": 113.87,
+      "lvVolumeMl": 111.66,
+      "heartRateBpm": 84.71,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 240,
+      "lvPressureMmHg": 129.84,
+      "lvVolumeMl": 83.99,
+      "heartRateBpm": 84.5,
+      "strokeVolumeMl": 62.1,
+      "ejectionFraction": 0.51
+    },
+    {
+      "t": 250,
+      "lvPressureMmHg": 119.22,
+      "lvVolumeMl": 61.45,
+      "heartRateBpm": 84.37,
+      "strokeVolumeMl": 62,
+      "ejectionFraction": 0.51
+    },
+    {
+      "t": 254,
+      "lvPressureMmHg": 24.22,
+      "lvVolumeMl": 122.02,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.02,
+      "lvPressureMmHg": 49.72,
+      "lvVolumeMl": 122.02,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.04,
+      "lvPressureMmHg": 76.17,
+      "lvVolumeMl": 122.02,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.06,
+      "lvPressureMmHg": 98.2,
+      "lvVolumeMl": 118.17,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.08,
+      "lvPressureMmHg": 114,
+      "lvVolumeMl": 111.76,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.1,
+      "lvPressureMmHg": 123.92,
+      "lvVolumeMl": 104.26,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.12,
+      "lvPressureMmHg": 129.2,
+      "lvVolumeMl": 96.68,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.14,
+      "lvPressureMmHg": 131.25,
+      "lvVolumeMl": 89.62,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.16,
+      "lvPressureMmHg": 131.29,
+      "lvVolumeMl": 83.35,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.18,
+      "lvPressureMmHg": 130.22,
+      "lvVolumeMl": 77.94,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.2,
+      "lvPressureMmHg": 128.62,
+      "lvVolumeMl": 73.35,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.22,
+      "lvPressureMmHg": 126.82,
+      "lvVolumeMl": 69.48,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.24,
+      "lvPressureMmHg": 124.96,
+      "lvVolumeMl": 66.24,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.26,
+      "lvPressureMmHg": 122.91,
+      "lvVolumeMl": 63.54,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.28,
+      "lvPressureMmHg": 119.92,
+      "lvVolumeMl": 61.49,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.3,
+      "lvPressureMmHg": 113.41,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.32,
+      "lvPressureMmHg": 93.75,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.34,
+      "lvPressureMmHg": 58.15,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.36,
+      "lvPressureMmHg": 27.3,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.38,
+      "lvPressureMmHg": 11.82,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.4,
+      "lvPressureMmHg": 5.81,
+      "lvVolumeMl": 60.77,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.42,
+      "lvPressureMmHg": 5.13,
+      "lvVolumeMl": 80.49,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.44,
+      "lvPressureMmHg": 4.98,
+      "lvVolumeMl": 97.13,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.46,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 107.49,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.48,
+      "lvPressureMmHg": 5.04,
+      "lvVolumeMl": 113.11,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.5,
+      "lvPressureMmHg": 5.09,
+      "lvVolumeMl": 116.04,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.52,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.63,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.54,
+      "lvPressureMmHg": 5.15,
+      "lvVolumeMl": 118.59,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.56,
+      "lvPressureMmHg": 5.18,
+      "lvVolumeMl": 119.26,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.58,
+      "lvPressureMmHg": 5.2,
+      "lvVolumeMl": 119.81,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.6,
+      "lvPressureMmHg": 5.22,
+      "lvVolumeMl": 120.29,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.62,
+      "lvPressureMmHg": 5.24,
+      "lvVolumeMl": 120.73,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.64,
+      "lvPressureMmHg": 5.26,
+      "lvVolumeMl": 121.16,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.66,
+      "lvPressureMmHg": 5.28,
+      "lvVolumeMl": 121.58,
+      "heartRateBpm": 84.64,
+      "strokeVolumeMl": 61.6,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.68,
+      "lvPressureMmHg": 5.3,
+      "lvVolumeMl": 121.99,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.7,
+      "lvPressureMmHg": 24.21,
+      "lvVolumeMl": 121.99,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.72,
+      "lvPressureMmHg": 49.69,
+      "lvVolumeMl": 121.99,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.74,
+      "lvPressureMmHg": 76.13,
+      "lvVolumeMl": 121.99,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.76,
+      "lvPressureMmHg": 98.15,
+      "lvVolumeMl": 118.15,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.78,
+      "lvPressureMmHg": 113.96,
+      "lvVolumeMl": 111.75,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.8,
+      "lvPressureMmHg": 123.88,
+      "lvVolumeMl": 104.26,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.82,
+      "lvPressureMmHg": 129.16,
+      "lvVolumeMl": 96.69,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.84,
+      "lvPressureMmHg": 131.21,
+      "lvVolumeMl": 89.63,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.86,
+      "lvPressureMmHg": 131.26,
+      "lvVolumeMl": 83.35,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.88,
+      "lvPressureMmHg": 130.19,
+      "lvVolumeMl": 77.94,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.9,
+      "lvPressureMmHg": 128.59,
+      "lvVolumeMl": 73.36,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.92,
+      "lvPressureMmHg": 126.79,
+      "lvVolumeMl": 69.49,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.94,
+      "lvPressureMmHg": 124.92,
+      "lvVolumeMl": 66.24,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.96,
+      "lvPressureMmHg": 122.87,
+      "lvVolumeMl": 63.54,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 254.98,
+      "lvPressureMmHg": 119.87,
+      "lvVolumeMl": 61.49,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255,
+      "lvPressureMmHg": 113.36,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.02,
+      "lvPressureMmHg": 93.71,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.04,
+      "lvPressureMmHg": 58.12,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.06,
+      "lvPressureMmHg": 27.29,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.08,
+      "lvPressureMmHg": 11.81,
+      "lvVolumeMl": 60.64,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.1,
+      "lvPressureMmHg": 5.81,
+      "lvVolumeMl": 60.76,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.12,
+      "lvPressureMmHg": 5.13,
+      "lvVolumeMl": 80.48,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.14,
+      "lvPressureMmHg": 4.98,
+      "lvVolumeMl": 97.11,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.16,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 107.46,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.18,
+      "lvPressureMmHg": 5.04,
+      "lvVolumeMl": 113.08,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.2,
+      "lvPressureMmHg": 5.09,
+      "lvVolumeMl": 116.01,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.22,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.59,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.24,
+      "lvPressureMmHg": 5.15,
+      "lvVolumeMl": 118.55,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.26,
+      "lvPressureMmHg": 5.17,
+      "lvVolumeMl": 119.22,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.28,
+      "lvPressureMmHg": 5.2,
+      "lvVolumeMl": 119.77,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.3,
+      "lvPressureMmHg": 5.22,
+      "lvVolumeMl": 120.25,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.32,
+      "lvPressureMmHg": 5.24,
+      "lvVolumeMl": 120.69,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.34,
+      "lvPressureMmHg": 5.26,
+      "lvVolumeMl": 121.12,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.36,
+      "lvPressureMmHg": 5.28,
+      "lvVolumeMl": 121.54,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.38,
+      "lvPressureMmHg": 5.3,
+      "lvVolumeMl": 121.95,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.4,
+      "lvPressureMmHg": 24.2,
+      "lvVolumeMl": 121.95,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.42,
+      "lvPressureMmHg": 49.66,
+      "lvVolumeMl": 121.95,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.44,
+      "lvPressureMmHg": 76.07,
+      "lvVolumeMl": 121.95,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.46,
+      "lvPressureMmHg": 98.07,
+      "lvVolumeMl": 118.11,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.48,
+      "lvPressureMmHg": 113.86,
+      "lvVolumeMl": 111.71,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.5,
+      "lvPressureMmHg": 123.77,
+      "lvVolumeMl": 104.22,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.52,
+      "lvPressureMmHg": 129.04,
+      "lvVolumeMl": 96.65,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.54,
+      "lvPressureMmHg": 131.09,
+      "lvVolumeMl": 89.59,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.56,
+      "lvPressureMmHg": 131.14,
+      "lvVolumeMl": 83.32,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.58,
+      "lvPressureMmHg": 130.06,
+      "lvVolumeMl": 77.91,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.6,
+      "lvPressureMmHg": 128.46,
+      "lvVolumeMl": 73.32,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.62,
+      "lvPressureMmHg": 126.66,
+      "lvVolumeMl": 69.45,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.64,
+      "lvPressureMmHg": 124.79,
+      "lvVolumeMl": 66.2,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.66,
+      "lvPressureMmHg": 122.74,
+      "lvVolumeMl": 63.51,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.68,
+      "lvPressureMmHg": 119.74,
+      "lvVolumeMl": 61.46,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.7,
+      "lvPressureMmHg": 113.23,
+      "lvVolumeMl": 60.61,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.72,
+      "lvPressureMmHg": 93.6,
+      "lvVolumeMl": 60.61,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.74,
+      "lvPressureMmHg": 58.06,
+      "lvVolumeMl": 60.61,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.76,
+      "lvPressureMmHg": 27.26,
+      "lvVolumeMl": 60.61,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.78,
+      "lvPressureMmHg": 11.8,
+      "lvVolumeMl": 60.61,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.8,
+      "lvPressureMmHg": 5.8,
+      "lvVolumeMl": 60.75,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.82,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 80.72,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.84,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 97.4,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.86,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 107.67,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.88,
+      "lvPressureMmHg": 5.05,
+      "lvVolumeMl": 113.19,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.9,
+      "lvPressureMmHg": 5.09,
+      "lvVolumeMl": 116.05,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.92,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.6,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.94,
+      "lvPressureMmHg": 5.15,
+      "lvVolumeMl": 118.54,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.96,
+      "lvPressureMmHg": 5.17,
+      "lvVolumeMl": 119.2,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 255.98,
+      "lvPressureMmHg": 5.2,
+      "lvVolumeMl": 119.74,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256,
+      "lvPressureMmHg": 5.22,
+      "lvVolumeMl": 120.22,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.02,
+      "lvPressureMmHg": 5.24,
+      "lvVolumeMl": 120.67,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.04,
+      "lvPressureMmHg": 5.26,
+      "lvVolumeMl": 121.09,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.06,
+      "lvPressureMmHg": 5.28,
+      "lvVolumeMl": 121.51,
+      "heartRateBpm": 84.67,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.08,
+      "lvPressureMmHg": 5.3,
+      "lvVolumeMl": 121.92,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.1,
+      "lvPressureMmHg": 24.18,
+      "lvVolumeMl": 121.92,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.12,
+      "lvPressureMmHg": 49.63,
+      "lvVolumeMl": 121.92,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.14,
+      "lvPressureMmHg": 76.02,
+      "lvVolumeMl": 121.92,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.16,
+      "lvPressureMmHg": 97.99,
+      "lvVolumeMl": 118.07,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.18,
+      "lvPressureMmHg": 113.76,
+      "lvVolumeMl": 111.66,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.2,
+      "lvPressureMmHg": 123.65,
+      "lvVolumeMl": 104.16,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.22,
+      "lvPressureMmHg": 128.91,
+      "lvVolumeMl": 96.59,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.24,
+      "lvPressureMmHg": 130.95,
+      "lvVolumeMl": 89.53,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.26,
+      "lvPressureMmHg": 130.99,
+      "lvVolumeMl": 83.26,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.28,
+      "lvPressureMmHg": 129.91,
+      "lvVolumeMl": 77.86,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.3,
+      "lvPressureMmHg": 128.31,
+      "lvVolumeMl": 73.27,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.32,
+      "lvPressureMmHg": 126.5,
+      "lvVolumeMl": 69.41,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.34,
+      "lvPressureMmHg": 124.64,
+      "lvVolumeMl": 66.16,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.36,
+      "lvPressureMmHg": 122.58,
+      "lvVolumeMl": 63.47,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.38,
+      "lvPressureMmHg": 119.59,
+      "lvVolumeMl": 61.42,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.4,
+      "lvPressureMmHg": 113.08,
+      "lvVolumeMl": 60.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.42,
+      "lvPressureMmHg": 93.48,
+      "lvVolumeMl": 60.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.44,
+      "lvPressureMmHg": 57.98,
+      "lvVolumeMl": 60.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.46,
+      "lvPressureMmHg": 27.23,
+      "lvVolumeMl": 60.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.48,
+      "lvPressureMmHg": 11.79,
+      "lvVolumeMl": 60.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.5,
+      "lvPressureMmHg": 5.8,
+      "lvVolumeMl": 60.74,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.52,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 80.7,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.54,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 97.37,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.56,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 107.63,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.58,
+      "lvPressureMmHg": 5.05,
+      "lvVolumeMl": 113.15,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.6,
+      "lvPressureMmHg": 5.09,
+      "lvVolumeMl": 116.01,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.62,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.56,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.64,
+      "lvPressureMmHg": 5.15,
+      "lvVolumeMl": 118.5,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.66,
+      "lvPressureMmHg": 5.17,
+      "lvVolumeMl": 119.16,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.68,
+      "lvPressureMmHg": 5.19,
+      "lvVolumeMl": 119.7,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.7,
+      "lvPressureMmHg": 5.21,
+      "lvVolumeMl": 120.17,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.72,
+      "lvPressureMmHg": 5.24,
+      "lvVolumeMl": 120.62,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.74,
+      "lvPressureMmHg": 5.26,
+      "lvVolumeMl": 121.05,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.76,
+      "lvPressureMmHg": 5.28,
+      "lvVolumeMl": 121.47,
+      "heartRateBpm": 84.66,
+      "strokeVolumeMl": 61.3,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.78,
+      "lvPressureMmHg": 5.3,
+      "lvVolumeMl": 121.88,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.8,
+      "lvPressureMmHg": 24.16,
+      "lvVolumeMl": 121.88,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.82,
+      "lvPressureMmHg": 49.59,
+      "lvVolumeMl": 121.88,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.84,
+      "lvPressureMmHg": 75.97,
+      "lvVolumeMl": 121.88,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.86,
+      "lvPressureMmHg": 97.91,
+      "lvVolumeMl": 118.01,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.88,
+      "lvPressureMmHg": 113.65,
+      "lvVolumeMl": 111.59,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.9,
+      "lvPressureMmHg": 123.52,
+      "lvVolumeMl": 104.1,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.92,
+      "lvPressureMmHg": 128.77,
+      "lvVolumeMl": 96.52,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.94,
+      "lvPressureMmHg": 130.8,
+      "lvVolumeMl": 89.47,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.96,
+      "lvPressureMmHg": 130.83,
+      "lvVolumeMl": 83.2,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 256.98,
+      "lvPressureMmHg": 129.76,
+      "lvVolumeMl": 77.8,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257,
+      "lvPressureMmHg": 128.15,
+      "lvVolumeMl": 73.22,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.02,
+      "lvPressureMmHg": 126.34,
+      "lvVolumeMl": 69.35,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.04,
+      "lvPressureMmHg": 124.48,
+      "lvVolumeMl": 66.11,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.06,
+      "lvPressureMmHg": 122.42,
+      "lvVolumeMl": 63.41,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.08,
+      "lvPressureMmHg": 119.43,
+      "lvVolumeMl": 61.37,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.1,
+      "lvPressureMmHg": 112.93,
+      "lvVolumeMl": 60.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.12,
+      "lvPressureMmHg": 93.35,
+      "lvVolumeMl": 60.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.14,
+      "lvPressureMmHg": 57.9,
+      "lvVolumeMl": 60.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.16,
+      "lvPressureMmHg": 27.19,
+      "lvVolumeMl": 60.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.18,
+      "lvPressureMmHg": 11.77,
+      "lvVolumeMl": 60.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.2,
+      "lvPressureMmHg": 5.8,
+      "lvVolumeMl": 60.72,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.22,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 80.67,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.24,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 97.33,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.26,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 107.59,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.28,
+      "lvPressureMmHg": 5.04,
+      "lvVolumeMl": 113.11,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.3,
+      "lvPressureMmHg": 5.08,
+      "lvVolumeMl": 115.96,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.32,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.51,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.34,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 118.45,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.36,
+      "lvPressureMmHg": 5.17,
+      "lvVolumeMl": 119.11,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.38,
+      "lvPressureMmHg": 5.19,
+      "lvVolumeMl": 119.65,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.4,
+      "lvPressureMmHg": 5.21,
+      "lvVolumeMl": 120.12,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.42,
+      "lvPressureMmHg": 5.23,
+      "lvVolumeMl": 120.57,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.44,
+      "lvPressureMmHg": 5.25,
+      "lvVolumeMl": 121,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.46,
+      "lvPressureMmHg": 5.27,
+      "lvVolumeMl": 121.42,
+      "heartRateBpm": 84.62,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.48,
+      "lvPressureMmHg": 5.29,
+      "lvVolumeMl": 121.83,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.5,
+      "lvPressureMmHg": 24.15,
+      "lvVolumeMl": 121.83,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.52,
+      "lvPressureMmHg": 49.56,
+      "lvVolumeMl": 121.83,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.54,
+      "lvPressureMmHg": 75.91,
+      "lvVolumeMl": 121.83,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.56,
+      "lvPressureMmHg": 97.83,
+      "lvVolumeMl": 117.95,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.58,
+      "lvPressureMmHg": 113.55,
+      "lvVolumeMl": 111.53,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.6,
+      "lvPressureMmHg": 123.4,
+      "lvVolumeMl": 104.03,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.62,
+      "lvPressureMmHg": 128.64,
+      "lvVolumeMl": 96.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.64,
+      "lvPressureMmHg": 130.66,
+      "lvVolumeMl": 89.4,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.66,
+      "lvPressureMmHg": 130.69,
+      "lvVolumeMl": 83.14,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.68,
+      "lvPressureMmHg": 129.61,
+      "lvVolumeMl": 77.74,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.7,
+      "lvPressureMmHg": 128,
+      "lvVolumeMl": 73.16,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.72,
+      "lvPressureMmHg": 126.2,
+      "lvVolumeMl": 69.3,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.74,
+      "lvPressureMmHg": 124.33,
+      "lvVolumeMl": 66.06,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.76,
+      "lvPressureMmHg": 122.28,
+      "lvVolumeMl": 63.37,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.78,
+      "lvPressureMmHg": 119.28,
+      "lvVolumeMl": 61.32,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.8,
+      "lvPressureMmHg": 112.79,
+      "lvVolumeMl": 60.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.82,
+      "lvPressureMmHg": 93.24,
+      "lvVolumeMl": 60.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.84,
+      "lvPressureMmHg": 57.83,
+      "lvVolumeMl": 60.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.86,
+      "lvPressureMmHg": 27.16,
+      "lvVolumeMl": 60.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.88,
+      "lvPressureMmHg": 11.76,
+      "lvVolumeMl": 60.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.9,
+      "lvPressureMmHg": 5.79,
+      "lvVolumeMl": 60.7,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.92,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 80.64,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.94,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 97.3,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.96,
+      "lvPressureMmHg": 5,
+      "lvVolumeMl": 107.55,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 257.98,
+      "lvPressureMmHg": 5.04,
+      "lvVolumeMl": 113.06,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258,
+      "lvPressureMmHg": 5.08,
+      "lvVolumeMl": 115.92,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.02,
+      "lvPressureMmHg": 5.12,
+      "lvVolumeMl": 117.46,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.04,
+      "lvPressureMmHg": 5.14,
+      "lvVolumeMl": 118.4,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.06,
+      "lvPressureMmHg": 5.17,
+      "lvVolumeMl": 119.06,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.08,
+      "lvPressureMmHg": 5.19,
+      "lvVolumeMl": 119.6,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.1,
+      "lvPressureMmHg": 5.21,
+      "lvVolumeMl": 120.08,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.12,
+      "lvPressureMmHg": 5.23,
+      "lvVolumeMl": 120.52,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.14,
+      "lvPressureMmHg": 5.25,
+      "lvVolumeMl": 120.95,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.16,
+      "lvPressureMmHg": 5.27,
+      "lvVolumeMl": 121.37,
+      "heartRateBpm": 84.58,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.18,
+      "lvPressureMmHg": 5.29,
+      "lvVolumeMl": 121.78,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.2,
+      "lvPressureMmHg": 24.14,
+      "lvVolumeMl": 121.78,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.22,
+      "lvPressureMmHg": 49.53,
+      "lvVolumeMl": 121.78,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.24,
+      "lvPressureMmHg": 75.87,
+      "lvVolumeMl": 121.78,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.26,
+      "lvPressureMmHg": 97.76,
+      "lvVolumeMl": 117.89,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.28,
+      "lvPressureMmHg": 113.46,
+      "lvVolumeMl": 111.46,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.3,
+      "lvPressureMmHg": 123.3,
+      "lvVolumeMl": 103.97,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.32,
+      "lvPressureMmHg": 128.52,
+      "lvVolumeMl": 96.4,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.34,
+      "lvPressureMmHg": 130.54,
+      "lvVolumeMl": 89.35,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.36,
+      "lvPressureMmHg": 130.57,
+      "lvVolumeMl": 83.09,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.38,
+      "lvPressureMmHg": 129.48,
+      "lvVolumeMl": 77.69,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.4,
+      "lvPressureMmHg": 127.87,
+      "lvVolumeMl": 73.11,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.42,
+      "lvPressureMmHg": 126.07,
+      "lvVolumeMl": 69.25,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.44,
+      "lvPressureMmHg": 124.2,
+      "lvVolumeMl": 66.01,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.46,
+      "lvPressureMmHg": 122.15,
+      "lvVolumeMl": 63.32,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.48,
+      "lvPressureMmHg": 119.16,
+      "lvVolumeMl": 61.28,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.5,
+      "lvPressureMmHg": 112.67,
+      "lvVolumeMl": 60.42,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.52,
+      "lvPressureMmHg": 93.14,
+      "lvVolumeMl": 60.42,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.54,
+      "lvPressureMmHg": 57.77,
+      "lvVolumeMl": 60.42,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.56,
+      "lvPressureMmHg": 27.13,
+      "lvVolumeMl": 60.42,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.58,
+      "lvPressureMmHg": 11.75,
+      "lvVolumeMl": 60.42,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.6,
+      "lvPressureMmHg": 5.79,
+      "lvVolumeMl": 60.67,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.62,
+      "lvPressureMmHg": 5.05,
+      "lvVolumeMl": 79.49,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.64,
+      "lvPressureMmHg": 4.89,
+      "lvVolumeMl": 95.71,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.66,
+      "lvPressureMmHg": 4.92,
+      "lvVolumeMl": 106.13,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.68,
+      "lvPressureMmHg": 4.99,
+      "lvVolumeMl": 112.03,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.7,
+      "lvPressureMmHg": 5.05,
+      "lvVolumeMl": 115.23,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.72,
+      "lvPressureMmHg": 5.1,
+      "lvVolumeMl": 117.05,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.74,
+      "lvPressureMmHg": 5.13,
+      "lvVolumeMl": 118.15,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.76,
+      "lvPressureMmHg": 5.16,
+      "lvVolumeMl": 118.89,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.78,
+      "lvPressureMmHg": 5.18,
+      "lvVolumeMl": 119.47,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.8,
+      "lvPressureMmHg": 5.2,
+      "lvVolumeMl": 119.97,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.82,
+      "lvPressureMmHg": 5.23,
+      "lvVolumeMl": 120.43,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.84,
+      "lvPressureMmHg": 5.25,
+      "lvVolumeMl": 120.86,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.86,
+      "lvPressureMmHg": 5.27,
+      "lvVolumeMl": 121.28,
+      "heartRateBpm": 84.53,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.88,
+      "lvPressureMmHg": 5.29,
+      "lvVolumeMl": 121.7,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.9,
+      "lvPressureMmHg": 23.46,
+      "lvVolumeMl": 121.7,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.92,
+      "lvPressureMmHg": 48.03,
+      "lvVolumeMl": 121.7,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.94,
+      "lvPressureMmHg": 73.63,
+      "lvVolumeMl": 121.7,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.96,
+      "lvPressureMmHg": 95.39,
+      "lvVolumeMl": 118.23,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 258.98,
+      "lvPressureMmHg": 111.28,
+      "lvVolumeMl": 112.13,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 259,
+      "lvPressureMmHg": 121.47,
+      "lvVolumeMl": 104.84,
+      "heartRateBpm": 84.47,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.5
+    },
+    {
+      "t": 260,
+      "lvPressureMmHg": 18.49,
+      "lvVolumeMl": 60.06,
+      "heartRateBpm": 84.41,
+      "strokeVolumeMl": 61.4,
+      "ejectionFraction": 0.51
+    }
+  ]
+}

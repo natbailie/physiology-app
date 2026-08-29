@@ -23,6 +23,17 @@ export interface ErythroInputs {
   /** Inspired oxygen, % of sea-level normal (40-150) — low models altitude, the physiological
    * stimulus to erythropoiesis */
   inspiredOxygen: number;
+  /** Inflammation (IL-6 drive), % (0-100). Multiplies hepcidin several-fold and drops
+   * transferrin — the whole anaemia-of-chronic-disease pattern from one lever. */
+  inflammationLevelPct: number;
+  /** Liver synthetic function, % (0-100). Caps BOTH hepcidin and transferrin production. */
+  liverSyntheticFunctionPct: number;
+  /** Erythropoietic drive beyond supply, multiple of normal (0.5-3) — erythroferrone-like
+   * suppression of hepcidin in ineffective erythropoiesis. */
+  erythropoieticDriveMultiplier: number;
+  /** Iron-sensing integrity, % (0-100). Low models HFE haemochromatosis: hepcidin
+   * inappropriately low however full the stores. */
+  ironSensingIntegrityPct: number;
 }
 
 export interface ErythroState {
@@ -40,6 +51,8 @@ export interface ErythroState {
   producedMcv: number;
   /** Circulating mean corpuscular volume, fL — lags the produced value as the population turns over */
   circulatingMcv: number;
+  /** Smoothed hepcidin level, fraction of normal (1 = healthy baseline). */
+  hepcidinFraction: number;
 }
 
 export interface ErythroDerived {
@@ -56,6 +69,15 @@ export interface ErythroDerived {
   epoLevel: number;
   marrowOutput: number;
   ferritinNgMl: number;
+
+  // The iron studies panel — every row downstream of one hormone.
+  /** Hepcidin, fraction of normal (1 = healthy baseline). */
+  hepcidinFraction: number;
+  serumIronUgDl: number;
+  tibcUgDl: number;
+  transferrinSaturationPct: number;
+  /** Ferroportin abundance relative to normal — how open the iron export door is. */
+  ferroportinGateFraction: number;
   /** Oxygen delivery, mL/min — Hb × 1.34 × SaO2 × cardiac output */
   oxygenDeliveryMlPerMin: number;
   /** How hypoxic the renal sensor currently is, 0..1 */
@@ -70,6 +92,10 @@ export interface ErythroDerived {
   bloodLossRate: number;
   hemolysisRate: number;
   inspiredOxygen: number;
+  inflammationLevelPct: number;
+  liverSyntheticFunctionPct: number;
+  erythropoieticDriveMultiplier: number;
+  ironSensingIntegrityPct: number;
 }
 
 export interface ErythroSnapshot {

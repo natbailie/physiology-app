@@ -20,6 +20,7 @@ export const venousReturnLoopConfig: EngineLoopConfig<
     meanSystemicFillingPressure: snapshot.derived.meanSystemicFillingPressureMmHg,
   }),
   maxDtSeconds: VENOUS_RETURN_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: VENOUS_RETURN_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: VENOUS_RETURN_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: VENOUS_RETURN_SIMULATION.HISTORY_CAPACITY,
   timeScale: VENOUS_RETURN_SIMULATION.TIME_SCALE,

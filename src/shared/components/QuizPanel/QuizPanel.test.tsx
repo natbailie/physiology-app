@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QuizPanel } from './QuizPanel';
 import type { QuizSession } from '@/shared/assessment/useQuizSession';
 import type { ModuleSummary } from '@/shared/assessment/progressStore';
@@ -86,7 +86,8 @@ describe('QuizPanel', () => {
 
     expect(screen.getByText(QUESTION.stem)).toBeTruthy();
     expect(screen.getByText(/What happens to the marker/)).toBeTruthy();
-    expect(screen.getByText('Question 1 of 3')).toBeTruthy();
+    // Progress is a dot row now; the count it used to spell out is the row's accessible name.
+    expect(screen.getByLabelText('Question 1 of 3')).toBeTruthy();
   });
 
   it('does NOT reveal the answer or explanation before commitment', () => {
@@ -265,5 +266,56 @@ describe('explain-the-miss', () => {
       />,
     );
     expect(screen.queryByText(/dashed trace/)).toBeNull();
+  });
+
+  describe('answering from the keyboard', () => {
+    // A learner working through a set of eight should not have to reach for the pointer
+    // between every question.
+    it('commits the nth choice for the nth number key', () => {
+      const session = makeSession();
+      render(<QuizPanel session={session} summary={NO_HISTORY} />);
+
+      fireEvent.keyDown(window, { key: '2' });
+
+      // DIRECTION_CHOICES order: rises, falls, unchanged.
+      expect(session.commit).toHaveBeenCalledWith('falls');
+    });
+
+    it('commits by letter, matching the key shown on each choice', () => {
+      const session = makeSession();
+      render(<QuizPanel session={session} summary={NO_HISTORY} />);
+
+      fireEvent.keyDown(window, { key: 'c' });
+
+      expect(session.commit).toHaveBeenCalledWith('unchanged');
+    });
+
+    it('ignores keys past the end of the choices', () => {
+      const session = makeSession();
+      render(<QuizPanel session={session} summary={NO_HISTORY} />);
+
+      fireEvent.keyDown(window, { key: '7' });
+      fireEvent.keyDown(window, { key: 'z' });
+
+      expect(session.commit).not.toHaveBeenCalled();
+    });
+
+    it('leaves modified keystrokes alone, so browser shortcuts still work', () => {
+      const session = makeSession();
+      render(<QuizPanel session={session} summary={NO_HISTORY} />);
+
+      fireEvent.keyDown(window, { key: '1', metaKey: true });
+
+      expect(session.commit).not.toHaveBeenCalled();
+    });
+
+    it('stops listening once the answer is revealed', () => {
+      const session = makeSession({ phase: 'revealed', answer: 'rises', correct: true });
+      render(<QuizPanel session={session} summary={NO_HISTORY} />);
+
+      fireEvent.keyDown(window, { key: '1' });
+
+      expect(session.commit).not.toHaveBeenCalled();
+    });
   });
 });

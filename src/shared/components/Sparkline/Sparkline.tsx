@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { memo, useMemo, type CSSProperties } from 'react';
 import styles from './Sparkline.module.css';
 
 interface SparklineProps {
@@ -16,6 +16,9 @@ interface SparklineProps {
   /** Frozen earlier run of THIS series, drawn faint behind the live trace so a
    * changed scenario can be read against the one it replaced. */
   baselineData?: number[] | null;
+  /** The same, for the secondary series. Without it, freezing a baseline on a two-series
+   * chart silently compares only half of the comparison the chart exists to make. */
+  secondaryBaselineData?: number[] | null;
   width?: number;
   height?: number;
 }
@@ -36,7 +39,7 @@ function buildPath(data: number[], domainMin: number, domainMax: number, width: 
 /** Fixed-domain SVG line chart. Domains are physiologically-anchored, not auto-scaled to
  * the visible data, so a small clinically-meaningful deviation doesn't get exaggerated
  * (or a large one hidden) by rescaling the axis. */
-export function Sparkline({
+function SparklineBase({
   label,
   unit,
   data,
@@ -47,6 +50,7 @@ export function Sparkline({
   secondaryLabel,
   secondaryColorVar,
   baselineData,
+  secondaryBaselineData,
   width = 220,
   height = 46,
 }: SparklineProps) {
@@ -58,6 +62,13 @@ export function Sparkline({
   const baselinePath = useMemo(
     () => (baselineData && baselineData.length > 1 ? buildPath(baselineData, domainMin, domainMax, width, height) : ''),
     [baselineData, domainMin, domainMax, width, height],
+  );
+  const secondaryBaselinePath = useMemo(
+    () =>
+      secondaryBaselineData && secondaryBaselineData.length > 1
+        ? buildPath(secondaryBaselineData, domainMin, domainMax, width, height)
+        : '',
+    [secondaryBaselineData, domainMin, domainMax, width, height],
   );
   const areaPath = linePath ? `${linePath} L${width},${height} L0,${height} Z` : '';
   const current = data.at(-1);
@@ -85,6 +96,7 @@ export function Sparkline({
       <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         {areaPath && <path className={styles.area} d={areaPath} />}
         {baselinePath && <path className={styles.baselineLine} d={baselinePath} />}
+        {secondaryBaselinePath && <path className={styles.baselineLine} d={secondaryBaselinePath} />}
         {secondaryPath && <path className={styles.secondaryLine} d={secondaryPath} />}
         {linePath && <path className={styles.line} d={linePath} />}
         {current !== undefined && <circle className={styles.dot} cx={lastX} cy={lastY} r={2.25} />}
@@ -92,3 +104,5 @@ export function Sparkline({
     </div>
   );
 }
+
+export const Sparkline = memo(SparklineBase);

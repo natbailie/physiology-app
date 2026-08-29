@@ -166,4 +166,8 @@ export const RESP_SIMULATION = {
   // Applied to real elapsed time in the React loop so multi-minute chemoreceptor/renal
   // compensation responses are watchable within roughly a minute, matching the cardiorenal module.
   TIME_SCALE: 6,
+  /** Simulated seconds of settling applied before the first frame, so the module opens on
+   * normal physiology instead of relaxing into it while the learner watches. Measured as
+   * the time this module's opening transient takes to decay. */
+  SETTLE_SECONDS: 750,
 };

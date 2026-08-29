@@ -14,6 +14,7 @@ export const muscleLoopConfig: EngineLoopConfig<MuscleState, MuscleInputs, Muscl
     length: snapshot.derived.sarcomereLengthUm,
   }),
   maxDtSeconds: MUSCLE_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: MUSCLE_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: MUSCLE_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: MUSCLE_SIMULATION.HISTORY_CAPACITY,
   timeScale: MUSCLE_SIMULATION.TIME_SCALE,

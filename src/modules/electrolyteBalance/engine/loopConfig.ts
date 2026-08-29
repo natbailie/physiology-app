@@ -23,6 +23,7 @@ export const electrolyteLoopConfig: EngineLoopConfig<
     ecfVolume: snapshot.derived.ecfVolumeL,
   }),
   maxDtSeconds: ELECTROLYTE_SIMULATION.MAX_DT_SECONDS,
+  settleSeconds: ELECTROLYTE_SIMULATION.SETTLE_SECONDS,
   renderIntervalMs: ELECTROLYTE_SIMULATION.RENDER_INTERVAL_MS,
   historyCapacity: ELECTROLYTE_SIMULATION.HISTORY_CAPACITY,
   timeScale: ELECTROLYTE_SIMULATION.TIME_SCALE,
