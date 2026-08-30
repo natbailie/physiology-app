@@ -56,6 +56,16 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user ();
 
+-- This is a TRIGGER function, but PostgREST exposes every function in the `public` schema as
+-- an RPC regardless — /rest/v1/rpc/handle_new_user — and this one is `security definer`. The
+-- trigger fires as the table owner and does not consult these grants, so revoking them costs
+-- nothing and closes a callable SECURITY DEFINER endpoint.
+--
+-- It has to be PUBLIC. Postgres grants EXECUTE to PUBLIC on every function it creates, and
+-- `anon` / `authenticated` inherit it from there — so revoking from those two by name looks
+-- right, changes the ACL not at all, and leaves the linter warning exactly where it was.
+revoke execute on function public.handle_new_user () from public;
+
 alter table public.profiles enable row level security;
 alter table public.question_attempts enable row level security;
 
