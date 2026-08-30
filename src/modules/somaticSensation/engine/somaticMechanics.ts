@@ -129,7 +129,7 @@ export function patternSummary(pattern: {
     case 'neuropathic: allodynia and wind-up':
       return 'touch now opens the sensitised gate: pain from stimuli that should be silent';
     case 'Brown-Séquard: hemicord syndrome':
-      return `ipsilateral touch/proprioception lost (${pattern.map.touchLeftPct.toFixed(0)}/${pattern.map.touchRightPct.toFixed(0)}%) with CONTRALATERAL pain/temp loss (${pattern.map.painTempLeftPct.toFixed(0)}/${pattern.map.painTempRightPct.toFixed(0)}%) — dissociated by decussation`;
+      return `ipsilateral touch/proprioception lost (${pattern.map.touchLeftPct.toFixed(0)}/${pattern.map.touchRightPct.toFixed(0)}%) with contralateral pain/temp loss (${pattern.map.painTempLeftPct.toFixed(0)}/${pattern.map.painTempRightPct.toFixed(0)}%) — dissociated by decussation`;
     case 'anterior cord syndrome':
       return `both spinothalamics gone (${pattern.map.painTempLeftPct.toFixed(0)}/${pattern.map.painTempRightPct.toFixed(0)}%) while dorsal columns survive — the corticospinal tracts travel with them`;
     case 'syringomyelia: segmental dissociation':

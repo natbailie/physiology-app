@@ -1,12 +1,50 @@
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import type { HearingPresetName } from './engine/presets';
 
-export const hearingContent: ExplainerContent = {
+export const hearingContent: ExplainerContent<HearingPresetName> = {
   title: 'Two tuning forks tell you where the ear failed, and loudness tells you how',
-  paragraphs: [
-    'Sound reaches the cochlea by two routes. Air conduction rides the eardrum and ossicles; bone conduction bypasses all of that and shakes the skull straight into the cochlea. This is why a single tuning fork can localise a fault before any audiogram exists. If the middle ear is blocked — fluid, otosclerosis, a dislocated chain — bone conduction survives untouched while air conduction fails, producing an air-bone gap. Load the otosclerosis preset and read it off: a forty-decibel gap, bone thresholds normal, Weber lateralising TOWARD the affected ear because the blocked cochlea hears the fork without air-borne competition. Lateralisation toward the deaf ear is the counterintuitive signature of conductive loss.',
-    'The cochlea then does two jobs at once with one piece of machinery. The outer hair cells are an active amplifier: they add energy near threshold so the healthy ear hears whispers, and they compress gracefully as sound grows, buying a hundred-decibel dynamic range inside neurons that saturate over perhaps twenty. Damage them and both behaviours fail together — thresholds rise AND the compression disappears. That double failure is recruitment: the recruited ear is deaf to quiet sounds yet intolerant of loud ones, because its loudness now grows almost linearly from a raised floor. A conductive ear is simply quieter throughout; a cochlear ear has lost its volume control.',
-    'Inner hair cells are different in kind: they ARE the transducers, the cells whose firing the auditory nerve reads. Destroy them and no amount of amplification helps, because there is nothing left to drive cleanly — which is why discrimination falls even when audibility is restored by a hearing aid. Watch speech discrimination fall on the severe cochlear loss preset while the audiogram alone might suggest amplification should work. The distinction matters clinically: outer hair cell loss gives recruitment with preserved discrimination; inner hair cell loss adds distortion on top.',
-    'The frequency map along the basilar membrane is ordered — apex for lows, base for highs — so patterns of loss name their causes. Presbycusis slopes downward through the decades, sparing the lows first. Noise damage notches sharply at 4 kHz, the resonance of the external canal concentrating energy there, often with a normal pure-tone average hiding it. Ménière disease floods the apex and takes the low frequencies instead. Read the audiogram shape before the numbers: where the loss sits is half the diagnosis.',
-    'Two dynamic behaviours complete the picture. The stapedius reflex contracts above about 85 dB HL, stiffening the ossicular chain and buying a few decibels — the ear\'s own limiter, absent when the middle ear cannot move. And after a loud exposure the ear shows temporary threshold shift: a reversible rise in thresholds that recovers over hours, the physiology behind "everything sounds muffled" after a concert. It is also a warning, because repeated shifts accumulate into the permanent notch. Run the noise exposure action and watch thresholds climb and then decay — recovery, but never free.',
+  sections: [
+    {
+      heading: 'Two routes to the cochlea, and one fork localises the fault',
+      paragraphs: [
+        'Sound reaches the cochlea by two routes. Air conduction rides the eardrum and ossicles; bone conduction bypasses all of that and shakes the skull straight into the cochlea. This is why a single tuning fork can localise a fault before any audiogram exists. If the middle ear is blocked — fluid, otosclerosis, a dislocated chain — bone conduction survives untouched while air conduction fails, producing an air-bone gap. Load the otosclerosis preset and read it off: a forty-decibel gap, bone thresholds normal, Weber lateralising toward the affected ear because the blocked cochlea hears the fork without air-borne competition. Lateralisation toward the deaf ear is the counterintuitive signature of conductive loss.',
+      ],
+      demos: [
+        { preset: 'normal', watch: 'air-bone gap' },
+        { preset: 'otosclerosis', watch: 'air-bone gap' },
+      ],
+    },
+    {
+      heading: 'Outer hair cells are an amplifier and a compressor at once',
+      paragraphs: [
+        'The cochlea then does two jobs at once with one piece of machinery. The outer hair cells are an active amplifier: they add energy near threshold so the healthy ear hears whispers, and they compress gracefully as sound grows, buying a hundred-decibel dynamic range inside neurons that saturate over perhaps twenty. Damage them and both behaviours fail together — thresholds rise and the compression disappears. That double failure is recruitment: the recruited ear is deaf to quiet sounds yet intolerant of loud ones, because its loudness now grows almost linearly from a raised floor. A conductive ear is simply quieter throughout; a cochlear ear has lost its volume control.',
+      ],
+    },
+    {
+      heading: 'Inner hair cells are transducers, and no amplifier replaces them',
+      paragraphs: [
+        'Inner hair cells are different in kind: they are the transducers, the cells whose firing the auditory nerve reads. Destroy them and no amount of amplification helps, because there is nothing left to drive cleanly — which is why discrimination falls even when audibility is restored by a hearing aid. Watch speech discrimination fall on the severe cochlear loss preset while the audiogram alone might suggest amplification should work. The distinction matters clinically: outer hair cell loss gives recruitment with preserved discrimination; inner hair cell loss adds distortion on top.',
+      ],
+      demos: [
+        { preset: 'severeCochlearLoss', watch: 'discrimination' },
+      ],
+    },
+    {
+      heading: 'The frequency map is ordered, so loss patterns name their causes',
+      paragraphs: [
+        'The frequency map along the basilar membrane is ordered — apex for lows, base for highs — so patterns of loss name their causes. Presbycusis slopes downward through the decades, sparing the lows first. Noise damage notches sharply at 4 kHz, the resonance of the external canal concentrating energy there, often with a normal pure-tone average hiding it. Ménière disease floods the apex and takes the low frequencies instead. Read the audiogram shape before the numbers: where the loss sits is half the diagnosis.',
+      ],
+      demos: [
+        { preset: 'presbycusis', watch: 'high frequencies' },
+        { preset: 'noiseNotch', watch: '4 kHz threshold' },
+        { preset: 'menieres', watch: 'low frequencies' },
+      ],
+    },
+    {
+      heading: 'Two dynamic behaviours complete the picture',
+      paragraphs: [
+        'Two dynamic behaviours complete the picture. The stapedius reflex contracts above about 85 dB HL, stiffening the ossicular chain and buying a few decibels — the ear\'s own limiter, absent when the middle ear cannot move. And after a loud exposure the ear shows temporary threshold shift: a reversible rise in thresholds that recovers over hours, the physiology behind "everything sounds muffled" after a concert. It is also a warning, because repeated shifts accumulate into the permanent notch. Run the noise exposure action and watch thresholds climb and then decay — recovery, but never free.',
+      ],
+    },
   ],
 };

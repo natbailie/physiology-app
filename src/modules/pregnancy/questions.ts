@@ -38,7 +38,7 @@ export const PREGNANCY_QUESTIONS: readonly PregnancyQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Plasma volume expands faster than red cell mass — up to forty-five per cent versus twenty-five — so the CONCENTRATION of haemoglobin falls even as total red cells increase by a quarter. The trough near 30 weeks is physiological, and normal indices here confirm dilution rather than deficiency. Treating it reflexively risks the opposite error: missing true anaemia hiding behind a number that looks acceptable only against non-pregnant ranges.',
+      'Plasma volume expands faster than red cell mass — up to forty-five per cent versus twenty-five — so the concentration of haemoglobin falls even as total red cells increase by a quarter. The trough near 30 weeks is physiological, and normal indices here confirm dilution rather than deficiency. Treating it reflexively risks the opposite error: missing true anaemia hiding behind a number that looks acceptable only against non-pregnant ranges.',
   },
   {
     id: 'term-gas-looks-abnormal',
@@ -48,7 +48,7 @@ export const PREGNANCY_QUESTIONS: readonly PregnancyQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'That is the normal term picture: progesterone drives ventilation up from the first trimester, dropping PaCO2 toward 30, and the kidney excretes bicarbonate to match — pH stays barely alkalaemic near 7.44. A low CO2 with the bicarbonate falling ALONGSIDE it is compensation; a low CO2 with normal bicarbonate would be the pathological pattern. Pregnancy quietly rewrites every reference range she will ever be judged against.',
+      'That is the normal term picture: progesterone drives ventilation up from the first trimester, dropping PaCO2 toward 30, and the kidney excretes bicarbonate to match — pH stays barely alkalaemic near 7.44. A low CO2 with the bicarbonate falling alongside it is compensation; a low CO2 with normal bicarbonate would be the pathological pattern. Pregnancy quietly rewrites every reference range she will ever be judged against.',
   },
   {
     id: 'placental-failure-syndrome',
@@ -86,7 +86,7 @@ export const PREGNANCY_QUESTIONS: readonly PregnancyQuestion[] = [
     observeSeconds: 520000,
     tolerance: 0.03,
     explanation:
-      'It rises after a delay — prolactin has been priming the breast for months, but progesterone BLOCKED secretory activation until the placenta departed. Once progesterone collapses, the primed gland switches on: lactogenesis II, clinically milk coming in on day two or three. The fullness she felt antenatally was preparation under hormonal brake, not supply waiting to be released.',
+      'It rises after a delay — prolactin has been priming the breast for months, but progesterone blocked secretory activation until the placenta departed. Once progesterone collapses, the primed gland switches on: lactogenesis II, clinically milk coming in on day two or three. The fullness she felt antenatally was preparation under hormonal brake, not supply waiting to be released.',
     metric: (s) => s.state.milkSupplyMlPerDay,
   },
   {
@@ -101,7 +101,7 @@ export const PREGNANCY_QUESTIONS: readonly PregnancyQuestion[] = [
     observeSeconds: 250000,
     tolerance: 0.02,
     explanation:
-      'It falls away over days — supply is not stored, it is MAINTAINED by suckling-driven prolactin. Remove the nipple stimulus and prolactin decays back toward baseline while the gland involutes. Demand matching supply is the whole logic of breastfeeding management: frequency and effective attachment ARE the intervention, because nothing given to the mother raises production once the signal is gone.',
+      'It falls away over days — supply is not stored, it is MAINTAINED by suckling-driven prolactin. Remove the nipple stimulus and prolactin decays back toward baseline while the gland involutes. Demand matching supply is the whole logic of breastfeeding management: frequency and effective attachment are the intervention, because nothing given to the mother raises production once the signal is gone.',
     metric: (s) => s.state.milkSupplyMlPerDay,
   },
   {
@@ -116,7 +116,7 @@ export const PREGNANCY_QUESTIONS: readonly PregnancyQuestion[] = [
     observeSeconds: 400,
     tolerance: 0.02,
     explanation:
-      'It spikes — let-down is an OXYTOCIN event, contracting myoepithelial cells to eject milk that has already been made, quite distinct from the slower prolactin pathway that produces it. The conditioned trigger (the cry, not just the suckle) shows how far upstream the reflex runs. This division of labour is why some drugs suppress ejection while production continues, and why stress inhibits let-down long before it touches supply.',
+      'It spikes — let-down is an oxytocin event, contracting myoepithelial cells to eject milk that has already been made, quite distinct from the slower prolactin pathway that produces it. The conditioned trigger (the cry, not just the suckle) shows how far upstream the reflex runs. This division of labour is why some drugs suppress ejection while production continues, and why stress inhibits let-down long before it touches supply.',
     metric: (s) => s.derived.oxytocinRelative,
   },
 ];

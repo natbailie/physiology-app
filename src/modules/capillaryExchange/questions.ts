@@ -27,7 +27,7 @@ export const CAPILLARY_QUESTIONS: readonly CapillaryQuestion[] = [
     watch: 'plasma oncotic pressure',
     correctDirection: 'falls',
     explanation:
-      'It falls, but note that it falls by MORE than half even though albumin fell by slightly less than half. Oncotic pressure follows the Landis-Pappenheimer relation, which is markedly non-linear — protein contributes disproportionately at higher concentrations. That non-linearity is why modest hypoalbuminaemia is tolerated and why severe hypoalbuminaemia produces oedema so abruptly. It also explains why albumin infusion helps more than the arithmetic suggests it should.',
+      'It falls, but note that it falls by more than half even though albumin fell by slightly less than half. Oncotic pressure follows the Landis-Pappenheimer relation, which is markedly non-linear — protein contributes disproportionately at higher concentrations. That non-linearity is why modest hypoalbuminaemia is tolerated and why severe hypoalbuminaemia produces oedema so abruptly. It also explains why albumin infusion helps more than the arithmetic suggests it should.',
     metric: (s) => s.derived.plasmaOncoticMmHg,
   },
   {
@@ -55,7 +55,7 @@ export const CAPILLARY_QUESTIONS: readonly CapillaryQuestion[] = [
     settleSeconds: 2400,
     observeSeconds: 900,
     explanation:
-      'It falls — but by roughly half what the same infusion would achieve through an intact capillary wall, and not nearly enough to stop the oedema. The reason is the reflection coefficient: it multiplies the ENTIRE oncotic term, so when sepsis makes the wall leaky to protein, every milligram of albumin given buys only a fraction of the pull it should. Compare the nephrotic preset, where the wall is intact and the patient is simply short of protein — there the identical infusion reverses filtration outright. Same drug, same dose, opposite verdicts, and the difference is a coefficient rather than a pressure.',
+      'It falls — but by roughly half what the same infusion would achieve through an intact capillary wall, and not nearly enough to stop the oedema. The reason is the reflection coefficient: it multiplies the entire oncotic term, so when sepsis makes the wall leaky to protein, every milligram of albumin given buys only a fraction of the pull it should. Compare the nephrotic preset, where the wall is intact and the patient is simply short of protein — there the identical infusion reverses filtration outright. Same drug, same dose, opposite verdicts, and the difference is a coefficient rather than a pressure.',
     metric: (s) => s.derived.netFiltrationPressure,
   },
   {
@@ -67,7 +67,7 @@ export const CAPILLARY_QUESTIONS: readonly CapillaryQuestion[] = [
     watch: 'the capillary pressure',
     correctDirection: 'falls',
     explanation:
-      'It falls, because the arteriole is upstream of the capillary and constricting it drops more of the pressure before the exchange vessels are reached. This is why capillary pressure is far closer to venous pressure than arterial: the precapillary sphincter is a pressure-reducing valve, and it is what protects the interstitium when arterial pressure swings. It is also why a VENOUS pressure rise causes oedema so much more readily than an arterial one — there is nothing downstream to absorb it.',
+      'It falls, because the arteriole is upstream of the capillary and constricting it drops more of the pressure before the exchange vessels are reached. This is why capillary pressure is far closer to venous pressure than arterial: the precapillary sphincter is a pressure-reducing valve, and it is what protects the interstitium when arterial pressure swings. It is also why a venous pressure rise causes oedema so much more readily than an arterial one — there is nothing downstream to absorb it.',
     metric: (s) => s.derived.capillaryPressureMmHg,
   },
   {

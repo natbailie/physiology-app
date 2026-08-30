@@ -148,7 +148,7 @@ export function weberCode(ptaAirDb: number, conductiveDb: number): number {
 
 export function weberResult(code: number): string {
   if (code === 1) return 'lateralises TO tested ear';
-  if (code === -1) return 'lateralises AWAY from tested ear';
+  if (code === -1) return 'lateralises away from tested ear';
   return 'central';
 }
 
@@ -189,6 +189,6 @@ export function patternSummary(pattern: {
     case 'sensorineural loss':
       return `cochlea at fault${pattern.recruitmentIndex > 1.3 ? ', recruitment present' : ''}, Weber away, discrimination ${pattern.discriminationPct < CLINICAL.NORMAL_DISCRIMINATION_PCT ? 'degraded' : 'preserved'}`;
     case 'mixed loss':
-      return `${pattern.gapDb.toFixed(0)} dB gap ON TOP OF sensorineural loss — both components must be read separately`;
+      return `${pattern.gapDb.toFixed(0)} dB gap ON top OF sensorineural loss — both components must be read separately`;
   }
 }

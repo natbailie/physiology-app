@@ -15,7 +15,7 @@ export const RESP_MECH_QUESTIONS: readonly RespMechQuestion[] = [
     watch: 'the FEV1/FVC ratio',
     correctDirection: 'unchanged',
     explanation:
-      'The ratio is preserved, and sometimes even rises — which is exactly why it is the useful number. Restriction reduces the volume available but leaves the airways alone, so a smaller vital capacity empties at a normal proportional rate. A low FVC therefore means nothing on its own; it is the RATIO that says whether the problem is getting air out or getting it in. Obstruction drops the ratio, restriction preserves it, and that single comparison sorts most spirometry.',
+      'The ratio is preserved, and sometimes even rises — which is exactly why it is the useful number. Restriction reduces the volume available but leaves the airways alone, so a smaller vital capacity empties at a normal proportional rate. A low FVC therefore means nothing on its own; it is the ratio that says whether the problem is getting air out or getting it in. Obstruction drops the ratio, restriction preserves it, and that single comparison sorts most spirometry.',
     metric: (s) => s.derived.fev1RatioPercent,
   },
   {
@@ -27,7 +27,7 @@ export const RESP_MECH_QUESTIONS: readonly RespMechQuestion[] = [
     watch: 'the time constant',
     correctDirection: 'rises',
     explanation:
-      'The time constant is resistance multiplied by compliance, so raising resistance lengthens it directly. Expiration is passive and exponential, needing roughly three time constants to empty — so a lengthened constant means the lung may not finish emptying before the next breath begins. That is air trapping, and it carries a nasty corollary: breathing FASTER shortens expiration further and traps more air each breath, so the patient who is working harder is making it worse.',
+      'The time constant is resistance multiplied by compliance, so raising resistance lengthens it directly. Expiration is passive and exponential, needing roughly three time constants to empty — so a lengthened constant means the lung may not finish emptying before the next breath begins. That is air trapping, and it carries a nasty corollary: breathing faster shortens expiration further and traps more air each breath, so the patient who is working harder is making it worse.',
     metric: (s) => s.derived.timeConstantSeconds,
   },
   {
@@ -64,7 +64,7 @@ export const RESP_MECH_QUESTIONS: readonly RespMechQuestion[] = [
     watch: 'the alveolar ventilation',
     correctDirection: 'falls',
     explanation:
-      'Alveolar ventilation falls even though minute ventilation has not changed at all, because a larger share of every breath is now going to lung that is ventilated but not perfused. This is why an embolism raises CO2 despite the patient breathing hard, and why the arterial CO2 can be normal while the END-TIDAL value is low — the gap between the two is dead space made measurable, and it is the basis for capnography in suspected embolism.',
+      'Alveolar ventilation falls even though minute ventilation has not changed at all, because a larger share of every breath is now going to lung that is ventilated but not perfused. This is why an embolism raises CO2 despite the patient breathing hard, and why the arterial CO2 can be normal while the end-tidal value is low — the gap between the two is dead space made measurable, and it is the basis for capnography in suspected embolism.',
     metric: (s) => s.derived.alveolarVentilationMLPerMin,
   },
   {
@@ -76,7 +76,7 @@ export const RESP_MECH_QUESTIONS: readonly RespMechQuestion[] = [
     watch: 'the total lung capacity',
     correctDirection: 'falls',
     explanation:
-      'Every volume shrinks, because total lung capacity is where the inward elastic recoil of the lung balances the outward pull of the chest wall — and a stiffer lung pulls harder, so the balance is struck at a smaller volume. This is the defining feature of a restrictive defect. What does NOT change is the FEV1/FVC ratio, because both numerator and denominator shrink together, which is precisely how spirometry separates restriction from obstruction.',
+      'Every volume shrinks, because total lung capacity is where the inward elastic recoil of the lung balances the outward pull of the chest wall — and a stiffer lung pulls harder, so the balance is struck at a smaller volume. This is the defining feature of a restrictive defect. What does not change is the FEV1/FVC ratio, because both numerator and denominator shrink together, which is precisely how spirometry separates restriction from obstruction.',
     metric: (s) => s.derived.totalLungCapacityML,
   }
 ];

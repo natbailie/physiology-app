@@ -55,7 +55,7 @@ export const IMMUNE_QUESTIONS: readonly ImmuneQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 20,
     explanation:
-      'Memory forms with no infection at all, and that is the whole trick. The adaptive arm responds to ANTIGEN, not to damage, so antigen delivered without a replicating organism drives the same presentation, the same helper T licensing, the same class switching and the same memory. The host pays the cost of a primary response at a moment of its choosing, when nothing is dividing exponentially in the background. Memory then ratchets — it is never erased here, which is why the protection persists.',
+      'Memory forms with no infection at all, and that is the whole trick. The adaptive arm responds to antigen, not to damage, so antigen delivered without a replicating organism drives the same presentation, the same helper T licensing, the same class switching and the same memory. The host pays the cost of a primary response at a moment of its choosing, when nothing is dividing exponentially in the background. Memory then ratchets — it is never erased here, which is why the protection persists.',
     metric: (s) => s.derived.memoryLevel,
   },
 
@@ -70,7 +70,7 @@ export const IMMUNE_QUESTIONS: readonly ImmuneQuestion[] = [
     setup: { perturb: INFECT },
     settleSeconds: SETTLE,
     explanation:
-      'BOTH effector arms are flat — no cytotoxic T activity and no antibody — and the organism is still there. Only one lesion does that, because helper T cells are the hub: they license cytotoxic T cells AND supply the second signal B cells need to class switch. Lose them and cellular and humoral immunity fail together. Compare the B-cell option, where the cytotoxic arm is working perfectly. That difference is why CD4 count predicts opportunistic infection so well, and why losing this one cell type is so much worse than losing either arm alone.',
+      'Both effector arms are flat — no cytotoxic T activity and no antibody — and the organism is still there. Only one lesion does that, because helper T cells are the hub: they license cytotoxic T cells and supply the second signal B cells need to class switch. Lose them and cellular and humoral immunity fail together. Compare the B-cell option, where the cytotoxic arm is working perfectly. That difference is why CD4 count predicts opportunistic infection so well, and why losing this one cell type is so much worse than losing either arm alone.',
   },
   {
     id: 'pattern-b-cell-deficiency',

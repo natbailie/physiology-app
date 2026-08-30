@@ -4,6 +4,7 @@ import { useAuth } from '@/auth/AuthContext';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { StudyStrip } from './StudyStrip';
+import { StudyReport } from './StudyReport';
 import { MODULES, THEMES, type ThemeId } from './moduleRegistry';
 import { MEDICATIONS } from '@/medications/drugs';
 import { useModuleProgress } from './useModuleProgress';
@@ -14,7 +15,7 @@ export function HomePage() {
   const { user, initialising } = useAuth();
   const { isUnlocked } = useEntitlement();
   const store = useProgressStore();
-  const { totals } = useModuleProgress();
+  const { totals, weakSpots } = useModuleProgress();
 
   const reference = MODULES.find((module) => module.kind === 'reference');
 
@@ -54,6 +55,8 @@ export function HomePage() {
         reviewModuleId={totals.reviewModuleId}
         reviewModuleName={totals.reviewModuleName}
       />
+
+      <StudyReport weakSpots={weakSpots} />
 
       <div className={styles.themeGrid}>
         {THEMES.map((theme) => (

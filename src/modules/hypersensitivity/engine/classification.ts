@@ -61,7 +61,7 @@ const NON_IMMUNE_SUMMARY: Record<NonNullable<NonImmuneCause>, string> = {
   'volume overload':
     'Not a hypersensitivity type — circulatory overload · BNP high, because the ventricle is stretched',
   'capillary leak':
-    'Not a hypersensitivity type — donor antibody against recipient neutrophils · BNP NORMAL, the lung leaks rather than fills',
+    'Not a hypersensitivity type — donor antibody against recipient neutrophils · BNP normal, the lung leaks rather than fills',
   'stored cytokines':
     'Not a hypersensitivity type — cytokines from stored donor leukocytes · fever and nothing else',
 };

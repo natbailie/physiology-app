@@ -38,13 +38,13 @@ const SETTLE = 5000;
 export const SOMATIC_QUESTIONS: readonly SomaticQuestion[] = [
   {
     id: 'hemicord-dissociation',
-    stem: 'After a stab wound to the back, a patient cannot feel light touch or tell the position of his LEFT leg below the injury, yet has lost pinprick sensation on the RIGHT.',
+    stem: 'After a stab wound to the back, a patient cannot feel light touch or tell the position of his left leg below the injury, yet has lost pinprick sensation on the right.',
     answer: 'brownSequardLeft',
     options: ['brownSequardLeft', 'anteriorCord', 'completeTransection', 'syringomyelia'],
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The dissociation IS the localisation. Dorsal columns ascend ipsilaterally to the medulla, so left-sided touch and joint-position loss means the lesion is on the LEFT; spinothalamic fibres crossed within a segment of entry, so right-sided pinprick loss is ALSO the left hemi-cord. One side injured, two modalities lost on opposite sides — Brown-Séquard. A complete transection would lose everything bilaterally; anterior cord syndrome would spare the touch.',
+      'The dissociation IS the localisation. Dorsal columns ascend ipsilaterally to the medulla, so left-sided touch and joint-position loss means the lesion is on the left; spinothalamic fibres crossed within a segment of entry, so right-sided pinprick loss is also the left hemi-cord. One side injured, two modalities lost on opposite sides — Brown-Séquard. A complete transection would lose everything bilaterally; anterior cord syndrome would spare the touch.',
   },
   {
     id: 'anterior-cord-spared-columns',
@@ -64,7 +64,7 @@ export const SOMATIC_QUESTIONS: readonly SomaticQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Spinothalamic fibres cross the cord IN FRONT OF the central canal, so an expanding syrinx picks them off segmentally where they decussate — a cape-like loss of pain and temperature at those levels while everything ascending in columns passes untouched. Hands that burn unnoticed are the classic presentation. The dissociation here is by LEVEL rather than by side, which separates it from every tract-level pattern.',
+      'Spinothalamic fibres cross the cord IN front OF the central canal, so an expanding syrinx picks them off segmentally where they decussate — a cape-like loss of pain and temperature at those levels while everything ascending in columns passes untouched. Hands that burn unnoticed are the classic presentation. The dissociation here is by level rather than by side, which separates it from every tract-level pattern.',
   },
   {
     id: 'rubbing-closes-gate',
@@ -105,7 +105,7 @@ export const SOMATIC_QUESTIONS: readonly SomaticQuestion[] = [
     settleSeconds: 6000,
     observeSeconds: 3000,
     explanation:
-      'It RISES from light touch — the defining paradox of allodynia. Inflammatory and neuropathic mediators have lowered peripheral thresholds so far that Aβ fibres now drive pain pathways directly, and central wind-up amplifies what arrives. The nociceptors are nearly silent; the machinery behind them answers instead. This is why neuropathic pain responds to gabapentinoids and tricyclics acting on the sensitised machinery rather than to analgesia aimed at the injury.',
+      'It rises from light touch — the defining paradox of allodynia. Inflammatory and neuropathic mediators have lowered peripheral thresholds so far that Aβ fibres now drive pain pathways directly, and central wind-up amplifies what arrives. The nociceptors are nearly silent; the machinery behind them answers instead. This is why neuropathic pain responds to gabapentinoids and tricyclics acting on the sensitised machinery rather than to analgesia aimed at the injury.',
     metric: (s) => s.state.painRating,
   },
   {

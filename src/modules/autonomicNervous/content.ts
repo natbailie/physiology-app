@@ -1,13 +1,58 @@
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import type { AnsPresetName } from './engine/presets';
 
-export const autonomicNervousContent: ExplainerContent = {
+export const autonomicNervousContent: ExplainerContent<AnsPresetName> = {
   title: 'Why "sympathetic" does not mean "more" in every organ',
-  paragraphs: [
-    'Most organs receive both sympathetic and parasympathetic innervation, and the two branches usually oppose each other — but the DIRECTION of that opposition is set per organ, not globally. Sympathetic activity speeds the heart and slows the gut; parasympathetic activity does the reverse. Watch the heart and gut tiles move in opposite directions under the same autonomic state: that sign flip is the single most commonly missed point in autonomic physiology, and it is why these effects have to be learned organ by organ.',
-    'What a transmitter does depends on which receptor subtype the target tissue expresses. Alpha-1 dilates the pupil and constricts vessels; beta-1 drives the heart; beta-2 relaxes bronchial smooth muscle; muscarinic receptors slow the heart, constrict the pupil, stimulate the gut and drive glandular secretion. Beta receptors couple through Gs to cAMP, while alpha-1 and muscarinic M1/M3 both couple through Gq to IP3/calcium — so sympathetic and parasympathetic signals can converge on the same second messenger in different tissues.',
-    'Neural and hormonal sympathetic signals are not interchangeable. Sympathetic nerves reach alpha-1 and beta-1 receptors strongly but innervate beta-2-rich tissue only sparsely, whereas circulating epinephrine from the adrenal medulla is a potent beta-2 agonist. That is why a pheochromocytoma produces effects a purely neural sympathetic surge does not, and why beta-2 agonists are given as drugs rather than recruited by stress.',
-    'At rest the vagus is winning, and the proof is what atropine does. The sinus node left entirely alone depolarises at about 100 beats per minute; a resting rate of 70 is that intrinsic rhythm held down by continuous parasympathetic tone. So blocking muscarinic receptors does not produce "no effect" — it releases the brake and the rate climbs toward 100. Any organ under continuous tone behaves this way, which is why blocking a pathway can produce a dramatic change in someone who was, by definition, at rest.',
-    'The sign of an autonomic effect is a property of the organ, not of the transmitter, and this is the part that resists memorisation as a rule. Sympathetic activity speeds the heart but INHIBITS gut motility, while muscarinic activity does the reverse — the same two transmitters acting through the same receptor families, producing opposite signs in different tissues. The pupil makes the point differently again: alpha-1 contracts the radial dilator and muscarinic contracts the circular sphincter, so mydriasis and miosis are two different muscles being contracted, not one muscle being pushed both ways.',
-    'Pharmacology here is just receptor manipulation, not new physiology. Beta-blockade blunts sympathetic tachycardia — and, by removing the adrenergic warning symptoms, masks hypoglycemia. Muscarinic blockade produces the anticholinergic toxidrome: tachycardia, dilated pupils, dry secretions, ileus. Cholinesterase inhibition does the opposite, amplifying whatever vagal outflow already exists into the SLUDGE picture of bradycardia, miosis, hypersecretion and bronchoconstriction. Note that it amplifies rather than creates: with no parasympathetic tone there is nothing for it to potentiate.',
+  sections: [
+    {
+      heading: 'The direction of opposition is set per organ, not globally',
+      paragraphs: [
+        'Most organs receive both sympathetic and parasympathetic innervation, and the two branches usually oppose each other — but the direction of that opposition is set per organ, not globally. Sympathetic activity speeds the heart and slows the gut; parasympathetic activity does the reverse. Watch the heart and gut tiles move in opposite directions under the same autonomic state: that sign flip is the single most commonly missed point in autonomic physiology, and it is why these effects have to be learned organ by organ.',
+      ],
+      demos: [
+        { preset: 'restAndDigest', watch: 'heart rate' },
+        { preset: 'fightOrFlight', watch: 'heart rate' },
+      ],
+    },
+    {
+      heading: 'What a transmitter does depends on the receptor subtype it meets',
+      paragraphs: [
+        'What a transmitter does depends on which receptor subtype the target tissue expresses. Alpha-1 dilates the pupil and constricts vessels; beta-1 drives the heart; beta-2 relaxes bronchial smooth muscle; muscarinic receptors slow the heart, constrict the pupil, stimulate the gut and drive glandular secretion. Beta receptors couple through Gs to cAMP, while alpha-1 and muscarinic M1/M3 both couple through Gq to IP3/calcium — so sympathetic and parasympathetic signals can converge on the same second messenger in different tissues.',
+      ],
+    },
+    {
+      heading: 'Neural and hormonal sympathetic signals are not interchangeable',
+      paragraphs: [
+        'Neural and hormonal sympathetic signals are not interchangeable. Sympathetic nerves reach alpha-1 and beta-1 receptors strongly but innervate beta-2-rich tissue only sparsely, whereas circulating epinephrine from the adrenal medulla is a potent beta-2 agonist. That is why a pheochromocytoma produces effects a purely neural sympathetic surge does not, and why beta-2 agonists are given as drugs rather than recruited by stress.',
+      ],
+      demos: [
+        { preset: 'pheochromocytoma', watch: 'blood pressure' },
+      ],
+    },
+    {
+      heading: 'At rest the vagus is winning, and atropine is the proof',
+      paragraphs: [
+        'At rest the vagus is winning, and the proof is what atropine does. The sinus node left entirely alone depolarises at about 100 beats per minute; a resting rate of 70 is that intrinsic rhythm held down by continuous parasympathetic tone. So blocking muscarinic receptors does not produce "no effect" — it releases the brake and the rate climbs toward 100. Any organ under continuous tone behaves this way, which is why blocking a pathway can produce a dramatic change in someone who was, by definition, at rest.',
+      ],
+      demos: [
+        { preset: 'atropine', watch: 'heart rate' },
+      ],
+    },
+    {
+      heading: 'The sign of the effect belongs to the organ, not to the transmitter',
+      paragraphs: [
+        'The sign of an autonomic effect is a property of the organ, not of the transmitter, and this is the part that resists memorisation as a rule. Sympathetic activity speeds the heart but inhibits gut motility, while muscarinic activity does the reverse — the same two transmitters acting through the same receptor families, producing opposite signs in different tissues. The pupil makes the point differently again: alpha-1 contracts the radial dilator and muscarinic contracts the circular sphincter, so mydriasis and miosis are two different muscles being contracted, not one muscle being pushed both ways.',
+      ],
+    },
+    {
+      heading: 'The pharmacology here is receptor manipulation, not new physiology',
+      paragraphs: [
+        'Pharmacology here is just receptor manipulation, not new physiology. Beta-blockade blunts sympathetic tachycardia — and, by removing the adrenergic warning symptoms, masks hypoglycemia. Muscarinic blockade produces the anticholinergic toxidrome: tachycardia, dilated pupils, dry secretions, ileus. Cholinesterase inhibition does the opposite, amplifying whatever vagal outflow already exists into the sludge picture of bradycardia, miosis, hypersecretion and bronchoconstriction. Note that it amplifies rather than creates: with no parasympathetic tone there is nothing for it to potentiate.',
+      ],
+      demos: [
+        { preset: 'betaBlocker', watch: 'heart rate' },
+        { preset: 'organophosphate', watch: 'secretions' },
+      ],
+    },
   ],
 };

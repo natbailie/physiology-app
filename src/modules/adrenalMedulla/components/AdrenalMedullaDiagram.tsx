@@ -26,7 +26,7 @@ export function AdrenalMedullaDiagram({ derived, inputs }: MedullaDiagramProps) 
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="Receptor blockade meters and catecholamine-driven haemodynamics">
       {/* Catecholamine levels as vertical bars. */}
       <text className={styles.label} x={44} y={44}>
-        PLASMA CATECHOLAMINES
+        Plasma catecholamines
       </text>
       {[
         { label: 'NA', value: naPct, text: derived.plasmaNa.toFixed(0), color: 'var(--adrenal-medulla)' },
@@ -54,7 +54,7 @@ export function AdrenalMedullaDiagram({ derived, inputs }: MedullaDiagramProps) 
 
       {/* Blockade meters. */}
       <text className={styles.label} x={320} y={44}>
-        RECEPTOR BLOCKADE
+        Receptor blockade
       </text>
       <text className={styles.caption} x={320} y={76}>
         α-blockade {inputs.alphaBlockadePct.toFixed(0)}%
@@ -68,13 +68,13 @@ export function AdrenalMedullaDiagram({ derived, inputs }: MedullaDiagramProps) 
       <rect className={styles.receptorBar} x={320} y={132} width={200 * betaPct} height={18} fill="var(--o2)" opacity={0.8} />
       {unopposedDanger && (
         <text className={styles.alarm} x={320} y={170}>
-          UNOPPOSED ALPHA — pressure rising
+          Unopposed alpha — pressure rising
         </text>
       )}
 
       {/* Haemodynamics strip. */}
       <text className={styles.label} x={44} y={228}>
-        HAEMODYNAMICS
+        Haemodynamics
       </text>
       <rect className={styles.receptorFrame} x={44} y={236} width={476} height={16} rx={4} />
       <rect

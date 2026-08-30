@@ -14,8 +14,9 @@
   letter-spacing: 0.06em;
 }
 
-/* An anatomical structure's name. Sans and sentence case, against the mono-and-uppercase used
- * for readings, so a reader can tell a STRUCTURE from a MEASUREMENT without reading either. */
+/* An anatomical structure's name. Sans, against the tabular mono used for readings, so a
+ * reader can tell a structure from a measurement without reading either. Uppercase used to
+ * carry half of that split; everything is sentence case now, and the family carries it alone. */
 .anatomy {
   font-family: var(--sans);
   font-size: 11px;
@@ -36,7 +37,6 @@
   font-size: 9px;
   letter-spacing: 0.04em;
   fill: var(--text-dim);
-  text-transform: uppercase;
 }
 
 .caption {
@@ -99,7 +99,6 @@
   font-size: 15px;
   fill: var(--text);
   letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 :global([data-blinded='true']) .verdict {

@@ -84,6 +84,7 @@
 }
 
 .stem {
+  font-family: var(--serif);
   font-size: var(--fs-base);
   line-height: var(--lh-prose);
   color: var(--text);
@@ -183,8 +184,7 @@
 .verdictTag {
   font-size: var(--fs-micro);
   font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   padding: 0.2rem var(--s-3);
   border-radius: var(--r-pill);
   color: var(--danger);
@@ -214,6 +214,7 @@
 /* The 60-100 word payoff. This is the thing the learner is here for, so it is set as prose
  * rather than as the fine print it used to be at 0.82rem. */
 .explanation {
+  font-family: var(--serif);
   font-size: var(--fs-base);
   line-height: var(--lh-prose);
   color: var(--text);

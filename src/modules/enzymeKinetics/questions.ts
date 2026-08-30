@@ -27,7 +27,7 @@ export const KINETICS_QUESTIONS: readonly KineticsQuestion[] = [
     watch: 'apparent Km',
     correctDirection: 'rises',
     explanation:
-      'It rises roughly eleven-fold, because the competitive inhibitor and the substrate are fighting for the same site — the enzyme now behaves as if it holds its substrate far more weakly, which is precisely what apparent Km measures. Note what did NOT move: Vmax is untouched, because with enough substrate every inhibitor molecule can still be displaced from every site. That surmountability is why competitive inhibition is treated by dose escalation, and why the treatment works until it does not.',
+      'It rises roughly eleven-fold, because the competitive inhibitor and the substrate are fighting for the same site — the enzyme now behaves as if it holds its substrate far more weakly, which is precisely what apparent Km measures. Note what did not move: Vmax is untouched, because with enough substrate every inhibitor molecule can still be displaced from every site. That surmountability is why competitive inhibition is treated by dose escalation, and why the treatment works until it does not.',
     metric: (s) => s.derived.apparentKmMm,
   },
   {
@@ -81,7 +81,7 @@ export const KINETICS_QUESTIONS: readonly KineticsQuestion[] = [
     watch: 'residual activity',
     correctDirection: 'falls',
     explanation:
-      'It falls to well under half, because the charged amino-acid residues that bind substrates and stabilise transition states only carry the right charges near physiological pH. Nothing dramatic happens to any single enzyme — each just runs a little slower — but EVERYTHING runs slower at once, which is why severe acidaemia produces global depression of consciousness, contractility and respiration rather than one failing organ. The blood gas reports one number; the patient experiences this graph applied to every reaction they own.',
+      'It falls to well under half, because the charged amino-acid residues that bind substrates and stabilise transition states only carry the right charges near physiological pH. Nothing dramatic happens to any single enzyme — each just runs a little slower — but everything runs slower at once, which is why severe acidaemia produces global depression of consciousness, contractility and respiration rather than one failing organ. The blood gas reports one number; the patient experiences this graph applied to every reaction they own.',
     metric: (s) => s.derived.residualActivityPct,
     settleSeconds: 8,
     observeSeconds: 8,
@@ -102,6 +102,6 @@ export const KINETICS_QUESTIONS: readonly KineticsQuestion[] = [
     ] as readonly PanelField<Snapshot>[],
     settleSeconds: 5,
     explanation:
-      'Km inflated, Vmax untouched, and the double-reciprocal line steeper through the same y-intercept: competitive. The noncompetitive option fails on Km — it leaves it alone while cutting Vmax — and the uncompetitive option fails on BOTH plus the signature it cannot hide: Vmax/Km stays constant, so its Lineweaver-Burk line shifts sideways without changing slope. In practice this discrimination is done exactly this way, from apparent constants measured across substrate concentrations — never from watching one reaction run once.',
+      'Km inflated, Vmax untouched, and the double-reciprocal line steeper through the same y-intercept: competitive. The noncompetitive option fails on Km — it leaves it alone while cutting Vmax — and the uncompetitive option fails on both plus the signature it cannot hide: Vmax/Km stays constant, so its Lineweaver-Burk line shifts sideways without changing slope. In practice this discrimination is done exactly this way, from apparent constants measured across substrate concentrations — never from watching one reaction run once.',
   },
 ];

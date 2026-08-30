@@ -51,7 +51,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
       />
       <ReadoutItem
         label="Osmotic gap"
-        value={derived.stoolOsmoticGapHigh ? 'HIGH' : 'low'}
+        value={derived.stoolOsmoticGapHigh ? 'high' : 'low'}
         secondary={derived.stoolOsmoticGapHigh ? 'unabsorbed solute — stop the food' : 'electrolyte-driven or quiet'}
         colorVar="var(--text)"
       />

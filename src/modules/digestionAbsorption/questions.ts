@@ -164,7 +164,7 @@ export const DIGESTION_QUESTIONS: readonly DigestionQuestion[] = [
     observeSeconds: 30000,
     tolerance: 0.03,
     explanation:
-      'Unchanged, because the pancreas secretes roughly ten times what a meal requires. Health carries enormous reserve precisely so that ordinary variation — a big fatty meal, a marginal day — never threatens uptake. It follows that steatorrhoea is a LATE sign of pancreatic disease: by the time fat appears in the stool, the gland has lost almost everything, which is why faecal elastase detects failure long before the stool does.',
+      'Unchanged, because the pancreas secretes roughly ten times what a meal requires. Health carries enormous reserve precisely so that ordinary variation — a big fatty meal, a marginal day — never threatens uptake. It follows that steatorrhoea is a late sign of pancreatic disease: by the time fat appears in the stool, the gland has lost almost everything, which is why faecal elastase detects failure long before the stool does.',
     metric: (s) => s.derived.currentMealFatAbsorptionPct,
   },
   {

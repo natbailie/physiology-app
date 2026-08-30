@@ -97,7 +97,7 @@ export function patternSummary(pattern: {
     case 'adrenergic crisis (uncontrolled)':
       return `MAP ${pattern.mapMmHg.toFixed(0)} with ${pattern.triadCount}/3 of the triad — treat before anything else is done`;
     case 'unopposed-alpha crisis: beta given first':
-      return `beta-blockade removed β2 vasodilatation: MAP ${pattern.mapMmHg.toFixed(0)} WORSE than untreated — always block alpha first`;
+      return `beta-blockade removed β2 vasodilatation: MAP ${pattern.mapMmHg.toFixed(0)} worse than untreated — always block alpha first`;
     case 'phaeochromocytoma adequately blocked':
       return `pressure controlled (${pattern.mapMmHg.toFixed(0)}) on sequential alpha-then-beta blockade — safe for surgery`;
   }

@@ -51,7 +51,7 @@ export const HEARING_QUESTIONS: readonly HearingQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Low-frequency sensorineural loss is the audiometric signature of Ménière disease — endolymphatic hydrops distending the apical part of the membranous labyrinth. Noise damage sits at 4 kHz and presbycusis takes the highs first, so the SHAPE of the threshold curve discriminates between them before any other test is ordered. Combined with episodic vertigo and fluctuating low-tone hearing, the pattern is characteristic.',
+      'Low-frequency sensorineural loss is the audiometric signature of Ménière disease — endolymphatic hydrops distending the apical part of the membranous labyrinth. Noise damage sits at 4 kHz and presbycusis takes the highs first, so the shape of the threshold curve discriminates between them before any other test is ordered. Combined with episodic vertigo and fluctuating low-tone hearing, the pattern is characteristic.',
   },
   {
     id: 'conductive-drops-audibility-not-clarity',
@@ -64,7 +64,7 @@ export const HEARING_QUESTIONS: readonly HearingQuestion[] = [
     settleSeconds: 1500,
     observeSeconds: 1000,
     explanation:
-      'It falls — but only because the words have become INAUDIBLE, not garbled: the cochlea never receives them. Turn the volume up past the gap and discrimination returns to normal, which is why conductive loss is the best candidate for surgical or mechanical correction. Contrast this with inner hair cell failure, where even amplified speech stays distorted because the transducer itself is gone.',
+      'It falls — but only because the words have become inaudible, not garbled: the cochlea never receives them. Turn the volume up past the gap and discrimination returns to normal, which is why conductive loss is the best candidate for surgical or mechanical correction. Contrast this with inner hair cell failure, where even amplified speech stays distorted because the transducer itself is gone.',
     metric: (s) => s.derived.speechDiscriminationPct,
   },
   {

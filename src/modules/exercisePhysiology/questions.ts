@@ -39,7 +39,7 @@ export const EXERCISE_QUESTIONS: readonly ExerciseQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'At identical ABSOLUTE load, training shows up as a smaller fraction of the personal ceiling: lower heart rate, right-shifted lactate threshold, comfortable ventilation for the trained subject. The unfit one is above their threshold and paying anaerobically at the same watts. Absolute workloads mean nothing without knowing whose ceiling you compare against — percentage of VO2max is what the body actually senses.',
+      'At identical absolute load, training shows up as a smaller fraction of the personal ceiling: lower heart rate, right-shifted lactate threshold, comfortable ventilation for the trained subject. The unfit one is above their threshold and paying anaerobically at the same watts. Absolute workloads mean nothing without knowing whose ceiling you compare against — percentage of VO2max is what the body actually senses.',
   },
   {
     id: 'athlete-resting-bradycardia',
@@ -62,7 +62,7 @@ export const EXERCISE_QUESTIONS: readonly ExerciseQuestion[] = [
     settleSeconds: 10000,
     observeSeconds: 15000,
     explanation:
-      'It rises toward the age-predicted maximum — the circulation raises output fastest through RATE before stroke volume finishes its smaller rise. Below the lactate threshold it then settles at a steady value proportional to the workload, which is why heart rate works so well as a proxy for intensity in training zones and stress testing alike.',
+      'It rises toward the age-predicted maximum — the circulation raises output fastest through rate before stroke volume finishes its smaller rise. Below the lactate threshold it then settles at a steady value proportional to the workload, which is why heart rate works so well as a proxy for intensity in training zones and stress testing alike.',
     metric: (s) => s.derived.heartRateBpm,
   },
   {
@@ -77,7 +77,7 @@ export const EXERCISE_QUESTIONS: readonly ExerciseQuestion[] = [
     observeSeconds: 40000,
     tolerance: 0.02,
     explanation:
-      'Barely changes — VO2 is PINNED at the ceiling. Whatever the workload asks beyond VO2max cannot be paid oxidatively; the deficit runs through anaerobic metabolism, lactate climbs sharply and exhaustion follows within minutes. The plateau is the most important measurement in exercise testing: it separates working hard from working at the absolute limit.',
+      'Barely changes — VO2 is pinned at the ceiling. Whatever the workload asks beyond VO2max cannot be paid oxidatively; the deficit runs through anaerobic metabolism, lactate climbs sharply and exhaustion follows within minutes. The plateau is the most important measurement in exercise testing: it separates working hard from working at the absolute limit.',
     metric: (s) => s.derived.vo2MlMin,
   },
   {
@@ -91,7 +91,7 @@ export const EXERCISE_QUESTIONS: readonly ExerciseQuestion[] = [
     settleSeconds: 30000,
     observeSeconds: 60000,
     explanation:
-      'It falls — the lactate threshold has been RIGHT-SHIFTED, so a workload that sat above threshold and climbing now sits below it, sustainable for hours. Mitochondrial density, capillary growth and oxidative enzymes all improve extraction, meaning less reliance on anaerobic glycolysis at any given pace. This single curve explains most of what endurance training accomplishes.',
+      'It falls — the lactate threshold has been right-SHIFTED, so a workload that sat above threshold and climbing now sits below it, sustainable for hours. Mitochondrial density, capillary growth and oxidative enzymes all improve extraction, meaning less reliance on anaerobic glycolysis at any given pace. This single curve explains most of what endurance training accomplishes.',
     metric: (s) => s.state.lactateMmolL,
   },
   {
@@ -106,7 +106,7 @@ export const EXERCISE_QUESTIONS: readonly ExerciseQuestion[] = [
     observeSeconds: 200000,
     tolerance: 0.005,
     explanation:
-      'It climbs higher at the SAME workload — reduced plasma volume compromises sweating and skin flow, so heat from working muscle can no longer be dumped efficiently. Cardiovascular strain compounds it: volume loss raises heart rate for the same output. This is why fluid status decides long events, and why core temperature, not pace, is the variable to watch in the heat.',
+      'It climbs higher at the same workload — reduced plasma volume compromises sweating and skin flow, so heat from working muscle can no longer be dumped efficiently. Cardiovascular strain compounds it: volume loss raises heart rate for the same output. This is why fluid status decides long events, and why core temperature, not pace, is the variable to watch in the heat.',
     metric: (s) => s.state.coreTempC,
   },
 ];

@@ -59,7 +59,7 @@ export const ELECTROLYTE_QUESTIONS: readonly ElectrolyteQuestion[] = [
     stem: 'A patient arrives with a glucose of 550 mg/dL. Their kidneys are working, they have been drinking, and nothing has been done to their salt or water balance: not a milliequivalent of sodium has been lost, and total body water has not moved.',
     setup: { preset: 'normal' },
     intervention: { label: 'Serum glucose climbs from 90 to 550 mg/dL.', inputs: { serumGlucoseMgDl: 550 } },
-    prompt: 'What happens to the MEASURED serum sodium?',
+    prompt: 'What happens to the measured serum sodium?',
     watch: 'serum sodium',
     correctDirection: 'falls',
     // Sodium is defended within a few mEq/L, so the 5% default would be a catastrophe rather
@@ -74,7 +74,7 @@ export const ELECTROLYTE_QUESTIONS: readonly ElectrolyteQuestion[] = [
     stem: 'The same patient, the same glucose of 550 mg/dL. The laboratory reports a serum sodium around 132 and the house officer is reaching for hypertonic saline.',
     setup: { preset: 'normal' },
     intervention: { label: 'Serum glucose climbs from 90 to 550 mg/dL.', inputs: { serumGlucoseMgDl: 550 } },
-    prompt: 'What happens to the CORRECTED sodium — the sodium adjusted for the glucose?',
+    prompt: 'What happens to the corrected sodium — the sodium adjusted for the glucose?',
     watch: 'corrected sodium',
     correctDirection: 'unchanged',
     // Wider than the sodium question above on purpose: the bedside rule adds a flat 1.6 mEq/L
@@ -82,7 +82,7 @@ export const ELECTROLYTE_QUESTIONS: readonly ElectrolyteQuestion[] = [
     // a milliequivalent here. Anything inside 2% is inside the rule's own error.
     tolerance: 0.02,
     explanation:
-      'It barely moves — which is the whole point of calculating it. The measured sodium fell because water moved, not because sodium was lost, so adding back the ~1.6 mEq/L per 100 mg/dL of glucose above normal recovers the sodium the patient would have had all along. A corrected sodium near 140 says this is not a sodium disorder and needs no sodium treatment; correct the glucose and the water goes back into the cells on its own. Had the corrected value come back LOW, there would be a genuine hypotonic hyponatraemia hiding underneath the hyperglycaemia — a different patient with a different treatment. Read the two readouts together; either one alone will mislead you.',
+      'It barely moves — which is the whole point of calculating it. The measured sodium fell because water moved, not because sodium was lost, so adding back the ~1.6 mEq/L per 100 mg/dL of glucose above normal recovers the sodium the patient would have had all along. A corrected sodium near 140 says this is not a sodium disorder and needs no sodium treatment; correct the glucose and the water goes back into the cells on its own. Had the corrected value come back low, there would be a genuine hypotonic hyponatraemia hiding underneath the hyperglycaemia — a different patient with a different treatment. Read the two readouts together; either one alone will mislead you.',
     metric: (s) => s.derived.correctedSodiumMeqL,
   },
   {

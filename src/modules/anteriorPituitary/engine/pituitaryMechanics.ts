@@ -90,7 +90,7 @@ export function patternSummary(pattern: {
     case 'normal anterior pituitary':
       return `GH ${pattern.ghNgMl.toFixed(1)} suppressible with glucose · prolactin ${pattern.prolactinNgMl.toFixed(0)} under dopamine brake`;
     case 'acromegaly (GH adenoma)':
-      return `GH ${pattern.ghNgMl.toFixed(1)} AUTONOMOUS and IGF-1 ${pattern.igf1NgMl.toFixed(0)} — acral growth, sweating, glucose that fails to suppress`;
+      return `GH ${pattern.ghNgMl.toFixed(1)} autonomous and IGF-1 ${pattern.igf1NgMl.toFixed(0)} — acral growth, sweating, glucose that fails to suppress`;
     case 'gigantism: GH excess, open epiphyses':
       return `same adenoma before fusion: linear growth ${pattern.igf1NgMl.toFixed(0)}-driven instead of acral`;
     case 'microprolactinoma':
@@ -100,7 +100,7 @@ export function patternSummary(pattern: {
     case 'drug-induced hyperprolactinaemia':
       return 'D2 blockade removes the brake with NO mass on imaging — check the drug list first';
     case 'stalk-effect hyperprolactinaemia':
-      return 'any sellar mass cutting dopamine delivery lifts prolactin MODERATELY — never to prolactinoma levels';
+      return 'any sellar mass cutting dopamine delivery lifts prolactin moderately — never to prolactinoma levels';
     case 'TRH-driven hyperprolactinaemia (hypothyroid)':
       return 'TRH is a prolactin secretagogue: treat the thyroid and the prolactin follows down';
     case 'non-functioning macroadenoma':

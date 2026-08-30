@@ -41,7 +41,7 @@ export function CoxDiagram() {
           <ReadoutItem label="Gastric protection" value={r.gastricProtection.toFixed(0)} unit="%" colorVar="var(--ok)" />
           <ReadoutItem
             label="Ulcer risk"
-            value={r.gastricProtection < 50 ? 'HIGH' : r.gastricProtection < 75 ? 'MODERATE' : 'LOW'}
+            value={r.gastricProtection < 50 ? 'High' : r.gastricProtection < 75 ? 'Moderate' : 'Low'}
             colorVar={r.gastricProtection < 50 ? 'var(--danger)' : 'var(--ok)'}
             wide
           />
@@ -95,7 +95,7 @@ export function CoxDiagram() {
 
           {r.gastricProtection < 50 && (
             <text className={text.alarm} x={C.RIGHT_X + C.BAR_W / 2} y={C.AXIS_Y - C.BAR_MAX_H - 8} textAnchor="middle">
-              ULCER
+              Ulcer
             </text>
           )}
         </g>

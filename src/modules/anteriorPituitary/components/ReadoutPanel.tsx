@@ -32,7 +32,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
           derived.prolactinNgMl >= PROLACTIN_AXIS.MACROADENOMA_LIKELY_NG_ML
             ? 'macroadenoma range'
             : derived.prolactinNgMl > PROLACTIN_AXIS.UPPER_LIMIT_NG_ML
-              ? 'raised — ask WHY before scanning'
+              ? 'Raised — ask why before scanning'
               : 'under dopamine brake'
         }
         colorVar="var(--ige)"

@@ -127,11 +127,11 @@ export function patternSummary(pattern: {
     case 'normal motor control':
       return `initiates in ${pattern.initiationLatencyMs.toFixed(0)} ms, no tremor or tone change on either side`;
     case 'early parkinsonism':
-      return `slowed initiation (${pattern.initiationLatencyMs.toFixed(0)} ms) with resting tremor ${pattern.restingTremorAmp.toFixed(1)} and cogwheel rigidity — TRAP: tremor, rigidity, akinesia, postural change`;
+      return `slowed initiation (${pattern.initiationLatencyMs.toFixed(0)} ms) with resting tremor ${pattern.restingTremorAmp.toFixed(1)} and cogwheel rigidity — trap: tremor, rigidity, akinesia, postural change`;
     case 'advanced parkinsonism':
       return `latency ${pattern.initiationLatencyMs.toFixed(0)} ms, amplitude collapsed, rest tremor ${pattern.restingTremorAmp.toFixed(1)} — the negative signs dominate`;
     case 'choreiform syndrome (Huntington-type)':
-      return 'initiation NORMAL but the thalamus is released: random involuntary movement without weakness';
+      return 'initiation normal but the thalamus is released: random involuntary movement without weakness';
     case 'hemiballismus':
       return 'violent proximal flinging from loss of subthalamic braking on the thalamus';
     case 'cerebellar ataxia':

@@ -23,7 +23,7 @@ export function AdrenalCortexReadoutPanel({ derived, inputs }: ReadoutPanelProps
         unit="% of normal"
         secondary={
           derived.saltWasting
-            ? 'SALT-WASTING'
+            ? 'Salt-wasting'
             : derived.hypertensionFromDoc
               ? 'DOC-driven hypertension'
               : 'aldosterone carrying the zone'

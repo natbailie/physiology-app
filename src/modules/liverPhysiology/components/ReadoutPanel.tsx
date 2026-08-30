@@ -53,9 +53,9 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         value={`${derived.urineUrobilinogenIndex.toFixed(0)}%`}
         secondary={
           derived.urineUrobilinogenIndex > 180
-            ? 'HIGH — haemolytic load'
+            ? 'High — haemolytic load'
             : derived.urineUrobilinogenIndex < 30
-              ? 'ABSENT — bile never reached gut'
+              ? 'Absent — bile never reached gut'
               : 'normal'
         }
         colorVar="var(--o2)"

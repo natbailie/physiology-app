@@ -4,8 +4,14 @@ import {
   FAMILIES,
   FAMILY_SLUGS,
   MEDICATIONS,
+  MICRO_GROUPS,
+  MOA_GROUPS,
   getDrugClass,
   getFamily,
+  getMoaClasses,
+  getMicroGroupClasses,
+  MEDICATION_INVALID,
+  resolveMedicationRoute,
 } from './drugs';
 import { MODULES } from '@/home/moduleRegistry';
 import { VALID_ROUTES } from '@/shared/hooks/useHashRoute';
@@ -209,6 +215,133 @@ describe('medications antimicrobial breadth', () => {
         `expected a class for “${expected}”`,
       ).toBe(true);
     }
+  });
+});
+
+describe('medications antimicrobial branches (Infection tiers)', () => {
+  const infection = MEDICATIONS.filter((c) => c.family === 'Infection');
+
+  it('tags every Infection class with exactly one of the four antimicrobial branches', () => {
+    const branches = new Set<unknown>(MICRO_GROUPS.map((g) => g.id));
+    for (const drug of infection) {
+      expect(branches.has(drug.microGroup), drug.className).toBe(true);
+    }
+  });
+
+  it('only Infection classes carry a microGroup', () => {
+    for (const drug of MEDICATIONS) {
+      if (drug.family !== 'Infection') {
+        expect(drug.microGroup, drug.className).toBeUndefined();
+      }
+    }
+  });
+
+  it('gives every branch a non-empty tile of classes', () => {
+    expect(MICRO_GROUPS).toHaveLength(4);
+    for (const micro of MICRO_GROUPS) {
+      expect(micro.classCount, micro.name).toBeGreaterThan(0);
+    }
+    expect(MICRO_GROUPS.reduce((sum, g) => sum + g.classCount, 0)).toBe(infection.length);
+  });
+
+  it('covers the four expected branch names', () => {
+    const names = MICRO_GROUPS.map((g) => g.name);
+    expect(names).toEqual([
+      'Antibiotics',
+      'Antivirals',
+      'Antifungals',
+      'Antiparasitics',
+    ]);
+  });
+
+  it('getMicroGroupClasses lists exactly the classes of that branch', () => {
+    for (const micro of MICRO_GROUPS) {
+      const members = getMicroGroupClasses(micro.id);
+      expect(members.length).toBe(micro.classCount);
+      for (const drug of members) expect(drug.microGroup).toBe(micro.id);
+    }
+  });
+});
+
+describe('medications antibiotic mechanisms of action', () => {
+  const antibiotics = MEDICATIONS.filter(
+    (c) => c.microGroup === 'antibiotics',
+  );
+
+  it('gives every antibiotic class a mechanism-of-action group', () => {
+    const moas = new Set<unknown>(MOA_GROUPS.map((m) => m.id));
+    for (const drug of antibiotics) {
+      expect(moas.has(drug.moa), drug.className).toBe(true);
+    }
+  });
+
+  it('only antibiotic classes carry a moa', () => {
+    for (const drug of MEDICATIONS) {
+      if (drug.microGroup !== 'antibiotics') {
+        expect(drug.moa, drug.className).toBeUndefined();
+      }
+    }
+  });
+
+  it('covers the classic mechanism-of-action buckets, each with classes', () => {
+    // "Inhibit cell wall synthesis" is the example tier the learner meets; it must hold the
+    // penicillins, cephalosporins, carbapenems and glycopeptides.
+    expect(MOA_GROUPS.length).toBeGreaterThanOrEqual(5);
+    for (const moa of MOA_GROUPS) {
+      expect(moa.classCount, moa.name).toBeGreaterThan(0);
+    }
+    expect(MOA_GROUPS.reduce((sum, m) => sum + m.classCount, 0)).toBe(antibiotics.length);
+
+    const cellWall = MOA_GROUPS.find((m) => m.id === 'cell-wall')!;
+    const cellWallClasses = cellWall ? getMoaClasses(cellWall.id) : [];
+    for (const expected of ['Penicillins', 'Cephalosporins', 'Carbapenems', 'Glycopeptide']) {
+      expect(
+        cellWallClasses.some((c) => c.className.includes(expected)),
+        `expected “${expected}” under cell-wall synthesis`,
+      ).toBe(true);
+    }
+  });
+});
+
+describe('medications infection route resolution', () => {
+  it('resolves the deeper Infection branches, and only them', () => {
+    expect(resolveMedicationRoute(['infection'])).toEqual({ kind: 'family', familyId: 'infection' });
+    expect(resolveMedicationRoute(['infection', 'antibiotics'])).toEqual({
+      kind: 'subfamily',
+      familyId: 'infection',
+      microGroup: 'antibiotics',
+    });
+    expect(resolveMedicationRoute(['infection', 'antivirals'])).toEqual({
+      kind: 'subfamily',
+      familyId: 'infection',
+      microGroup: 'antivirals',
+    });
+    expect(resolveMedicationRoute(['infection', 'antibiotics', 'cell-wall'])).toEqual({
+      kind: 'moa',
+      familyId: 'infection',
+      microGroup: 'antibiotics',
+      moa: 'cell-wall',
+    });
+  });
+
+  it('rejects non-Infection families with extra tiers', () => {
+    const family = FAMILIES.find((f) => f.name !== 'Infection')!;
+    expect(resolveMedicationRoute([family.id, 'antiviral'])).toBe(MEDICATION_INVALID);
+    expect(resolveMedicationRoute([family.id, 'antiviral', 'cell-wall'])).toBe(MEDICATION_INVALID);
+  });
+
+  it('only routes non-antibiotic branches to three segments via a mechanism', () => {
+    // A mechanism tier beneath a non-antibiotic branch names nothing real.
+    expect(resolveMedicationRoute(['infection', 'antivirals', 'cell-wall'])).toBe(
+      MEDICATION_INVALID,
+    );
+    expect(resolveMedicationRoute(['infection', 'antibiotics', 'cell-wall'])).not.toBe(
+      MEDICATION_INVALID,
+    );
+    expect(resolveMedicationRoute(['infection', 'missing'])).toBe(MEDICATION_INVALID);
+    expect(resolveMedicationRoute(['infection', 'antibiotics', 'missing'])).toBe(
+      MEDICATION_INVALID,
+    );
   });
 });
 

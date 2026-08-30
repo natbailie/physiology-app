@@ -52,7 +52,7 @@ export const SHOCK_REFERENCE_RANGES = {
       trace: 'hemorrhage-class3',
       observed: 6.46,
       note:
-        'NOTE: Pulse settles just BELOW our lower bound of 7. Both sit inside the conventional 6-12 ' +
+        'Note: Pulse settles just below our lower bound of 7. Both sit inside the conventional 6-12 ' +
         'mmHg range for PCWP, so neither is wrong, but our lower bound is the one value here that the ' +
         'oracle does not corroborate. Worth deciding whether the band should start at 6.',
     },
@@ -79,7 +79,7 @@ export const SHOCK_REFERENCE_RANGES = {
       kind: 'unsourced',
       needs:
         'Pulse now records it, and the answer is unhelpful in two ways. Its resting lactate is 1.60 ' +
-        'mmol/L, which is ABOVE our upper bound of 1.5 — so this band currently excludes an ' +
+        'mmol/L, which is above our upper bound of 1.5 — so this band currently excludes an ' +
         'independently validated healthy patient, and is tighter than the conventional 0.5-2.2 ' +
         'mmol/L. And Pulse cannot adjudicate the interesting question, because its own lactate is ' +
         'flat at every severity (1.60 -> 1.66 even at cardiovascular collapse). Settling this needs ' +

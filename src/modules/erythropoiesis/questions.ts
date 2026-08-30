@@ -85,7 +85,7 @@ export const ERYTHROPOIESIS_QUESTIONS: readonly ErythroQuestion[] = [
     panel: PANEL,
     settleSeconds: 90000,
     explanation:
-      'Interleukin-6 drives hepcidin up several-fold, and hepcidin destroys ferroportin — the only exit door for iron from enterocytes and macrophages. So iron is neither absorbed nor released: the marrow starves while the stores sit untouched, ferritin climbs as an acute-phase reactant, and transferrin falls as a negative one. Contrast the iron-deficiency row: there the TIBC is HIGH and the stores are GONE. Treating means silencing the inflammation or out-shouting hepcidin with intravenous iron.',
+      'Interleukin-6 drives hepcidin up several-fold, and hepcidin destroys ferroportin — the only exit door for iron from enterocytes and macrophages. So iron is neither absorbed nor released: the marrow starves while the stores sit untouched, ferritin climbs as an acute-phase reactant, and transferrin falls as a negative one. Contrast the iron-deficiency row: there the TIBC is high and the stores are gone. Treating means silencing the inflammation or out-shouting hepcidin with intravenous iron.',
   },
   {
     id: 'saturated-and-overloading',
@@ -95,6 +95,6 @@ export const ERYTHROPOIESIS_QUESTIONS: readonly ErythroQuestion[] = [
     panel: PANEL,
     settleSeconds: 90000,
     explanation:
-      'Hepcidin is the brake on iron entry, and HFE mutations break the sensor that applies it. Stores pile up, yet hepcidin stays low BECAUSE the sensing is what failed — the hormone answers a signal the body can no longer read. The erythropoietic-drive preset reaches a similar place by a different road (erythroferrone suppressing hepcidin from a marauding marrow), but its drive row and anaemic picture separate the two. Venesection works because it re-creates the demand the sensor can no longer manufacture.',
+      'Hepcidin is the brake on iron entry, and HFE mutations break the sensor that applies it. Stores pile up, yet hepcidin stays low because the sensing is what failed — the hormone answers a signal the body can no longer read. The erythropoietic-drive preset reaches a similar place by a different road (erythroferrone suppressing hepcidin from a marauding marrow), but its drive row and anaemic picture separate the two. Venesection works because it re-creates the demand the sensor can no longer manufacture.',
   },
 ];

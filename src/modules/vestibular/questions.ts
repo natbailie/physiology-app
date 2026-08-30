@@ -36,7 +36,7 @@ export const VESTIBULAR_QUESTIONS: readonly VestibularQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Continuous spontaneous nystagmus with severe vertigo means an uncompensated FIRING imbalance — one nerve has gone quiet and the other\'s resting tone is being read as acceleration. Nystagmus beating left says the RIGHT nerve is the silent one. No hearing loss separates neuritis from labyrinthitis; the duration (days, not seconds) separates it from BPPV; the single episode with recovery ahead separates it from Ménière disease.',
+      'Continuous spontaneous nystagmus with severe vertigo means an uncompensated firing imbalance — one nerve has gone quiet and the other\'s resting tone is being read as acceleration. Nystagmus beating left says the right nerve is the silent one. No hearing loss separates neuritis from labyrinthitis; the duration (days, not seconds) separates it from BPPV; the single episode with recovery ahead separates it from Ménière disease.',
   },
   {
     id: 'compensated-quiet-but-deficient',
@@ -46,7 +46,7 @@ export const VESTIBULAR_QUESTIONS: readonly VestibularQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Central compensation has suppressed the firing mismatch — no vertigo, no visible nystagmus — but it cannot rebuild the dead nerve: the VOR gain remains low, so quick head turns outrun the eye movement and the world smears. This dissociation between how the patient FEELS and what the MECHANICS do is why a head impulse belongs in every follow-up, and why vestibular rehabilitation rather than reassurance is the treatment.',
+      'Central compensation has suppressed the firing mismatch — no vertigo, no visible nystagmus — but it cannot rebuild the dead nerve: the VOR gain remains low, so quick head turns outrun the eye movement and the world smears. This dissociation between how the patient feels and what the mechanics do is why a head impulse belongs in every follow-up, and why vestibular rehabilitation rather than reassurance is the treatment.',
   },
   {
     id: 'bilateral-silent-disability',
@@ -69,7 +69,7 @@ export const VESTIBULAR_QUESTIONS: readonly VestibularQuestion[] = [
     settleSeconds: 8,
     observeSeconds: 25,
     explanation:
-      'It decays toward centre — the endolymph catches up with the canal wall through inertia, and the deflection that signalled the ACCELERATION disappears even though velocity continues. The canals report change, not steady state, which is why skaters spot their turns in stages rather than feeling them continuously. It also predicts the opposite effect on stopping: post-rotatory nystagmus from a deflection now reversed.',
+      'It decays toward centre — the endolymph catches up with the canal wall through inertia, and the deflection that signalled the acceleration disappears even though velocity continues. The canals report change, not steady state, which is why skaters spot their turns in stages rather than feeling them continuously. It also predicts the opposite effect on stopping: post-rotatory nystagmus from a deflection now reversed.',
     metric: (s) => Math.abs(s.derived.cupulaDeflection),
   },
   {
@@ -97,7 +97,7 @@ export const VESTIBULAR_QUESTIONS: readonly VestibularQuestion[] = [
     settleSeconds: 10,
     observeSeconds: 8,
     explanation:
-      'It falls steeply — compensation rebalances the tonic mismatch the brain had been misreading as acceleration, which is the whole of the symptom. What it does NOT do is restore the VOR gain, which stays low until (if ever) the nerve recovers; that residual shows up as oscillopsia on quick turns and a positive head impulse. Rehabilitation works by accelerating exactly this process, not by healing the nerve.',
+      'It falls steeply — compensation rebalances the tonic mismatch the brain had been misreading as acceleration, which is the whole of the symptom. What it does not do is restore the VOR gain, which stays low until (if ever) the nerve recovers; that residual shows up as oscillopsia on quick turns and a positive head impulse. Rehabilitation works by accelerating exactly this process, not by healing the nerve.',
     metric: (s) => s.derived.vertigoIntensityPct,
   },
   {

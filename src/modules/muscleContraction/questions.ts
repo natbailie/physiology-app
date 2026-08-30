@@ -34,7 +34,7 @@ export const MUSCLE_QUESTIONS: readonly MuscleQuestion[] = [
     watch: 'attached cross-bridges',
     correctDirection: 'rises',
     explanation:
-      'Cross-bridges accumulate in the attached state, and the muscle stiffens rather than relaxing. ATP is required to DETACH myosin from actin, not to attach it — so removing ATP leaves bridges locked where they are. Relaxation is an active process in two separate ways: SERCA needs ATP to clear calcium, and myosin needs ATP to let go. Rigor mortis is the same mechanism running to completion, and it is why rigor emerges from this model rather than being scripted into it.',
+      'Cross-bridges accumulate in the attached state, and the muscle stiffens rather than relaxing. ATP is required to detach myosin from actin, not to attach it — so removing ATP leaves bridges locked where they are. Relaxation is an active process in two separate ways: SERCA needs ATP to clear calcium, and myosin needs ATP to let go. Rigor mortis is the same mechanism running to completion, and it is why rigor emerges from this model rather than being scripted into it.',
     metric: (s) => s.derived.activeCrossBridgeFraction,
   },
   {
@@ -71,7 +71,7 @@ export const MUSCLE_QUESTIONS: readonly MuscleQuestion[] = [
     watch: 'the cytosolic calcium',
     correctDirection: 'rises',
     explanation:
-      'Cytosolic calcium rises, because SERCA is the pump that clears it back into the store and RELAXATION is an active, ATP-consuming process rather than something that happens when contraction stops. That asymmetry is worth holding on to: releasing calcium is passive and down a gradient, removing it costs energy. It is why relaxation fails before contraction does when ATP runs short, why rigor is a state of sustained binding, and why impaired relaxation is the earliest abnormality in several muscle diseases.',
+      'Cytosolic calcium rises, because SERCA is the pump that clears it back into the store and relaxation is an active, ATP-consuming process rather than something that happens when contraction stops. That asymmetry is worth holding on to: releasing calcium is passive and down a gradient, removing it costs energy. It is why relaxation fails before contraction does when ATP runs short, why rigor is a state of sustained binding, and why impaired relaxation is the earliest abnormality in several muscle diseases.',
     metric: (s) => s.derived.cytosolicCalciumUM,
   },
 ];

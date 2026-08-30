@@ -102,7 +102,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultLabel: 'Clearance',
     resultUnit: 'mL/min',
     explanation:
-      'Clearance is the volume of plasma a substance is completely removed from per minute. Inulin (freely filtered, neither reabsorbed nor secreted) gives the gold-standard GFR; PAH (filtered and almost completely secreted) approximates renal plasma flow instead. Creatinine clearance sits between the two, running slightly high because of a small amount of tubular secretion.',
+      'Clearance is the volume of plasma a substance is completely removed from per minute. Inulin (freely filtered, neither reabsorbed nor secreted) gives the gold-standard GFR; pah (filtered and almost completely secreted) approximates renal plasma flow instead. Creatinine clearance sits between the two, running slightly high because of a small amount of tubular secretion.',
   },
   {
     id: 'anionGap',
@@ -185,7 +185,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultUnit: '',
     moduleId: 'respiratory',
     explanation:
-      'It is the RATIO that sets the pH, not either number alone, and that single fact explains most acid-base interpretation. A patient can have a grossly abnormal bicarbonate and a grossly abnormal PaCO2 and a pH close to normal, because the two moved together — which is exactly what compensation is. Try it: halve both and the pH barely moves. That is why reading only the pH hides the disorder while reading only the components hides the severity.',
+      'It is the ratio that sets the pH, not either number alone, and that single fact explains most acid-base interpretation. A patient can have a grossly abnormal bicarbonate and a grossly abnormal PaCO2 and a pH close to normal, because the two moved together — which is exactly what compensation is. Try it: halve both and the pH barely moves. That is why reading only the pH hides the disorder while reading only the components hides the severity.',
   },
   {
     id: 'wintersFormulaExpected',
@@ -198,7 +198,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultUnit: 'mmHg',
     moduleId: 'respiratory',
     explanation:
-      'How far a patient with a metabolic acidosis SHOULD have blown their CO2 down. Compensation never overshoots, so a measured PaCO2 within about 2 mmHg of this is appropriate and needs no further explanation. Above it, respiratory compensation is failing and a second disorder is present — often exhaustion in a patient who has been hyperventilating for hours. Below it, they are hyperventilating for a reason of their own, which is how salicylate poisoning declares itself.',
+      'How far a patient with a metabolic acidosis should have blown their CO2 down. Compensation never overshoots, so a measured PaCO2 within about 2 mmHg of this is appropriate and needs no further explanation. Above it, respiratory compensation is failing and a second disorder is present — often exhaustion in a patient who has been hyperventilating for hours. Below it, they are hyperventilating for a reason of their own, which is how salicylate poisoning declares itself.',
   },
   {
     id: 'deltaRatio',
@@ -282,7 +282,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultUnit: '%',
     moduleId: 'cardiacElectro',
     explanation:
-      'Ejection fraction is a RATIO, which is why it can mislead. A dilated failing ventricle with an end-diastolic volume of 250 mL and a stroke volume of 75 mL has an EF of 30% and a perfectly adequate output; a small stiff ventricle can have an EF of 65% and be in florid heart failure because it never fills. The fraction says how well the ventricle empties, not how much blood it moves — and heart failure with preserved ejection fraction is the whole clinical consequence of that distinction.',
+      'Ejection fraction is a ratio, which is why it can mislead. A dilated failing ventricle with an end-diastolic volume of 250 mL and a stroke volume of 75 mL has an EF of 30% and a perfectly adequate output; a small stiff ventricle can have an EF of 65% and be in florid heart failure because it never fills. The fraction says how well the ventricle empties, not how much blood it moves — and heart failure with preserved ejection fraction is the whole clinical consequence of that distinction.',
   },
   {
     id: 'cardiacOutputHrSv',
@@ -353,7 +353,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultUnit: '',
     moduleId: 'renalTubular',
     explanation:
-      'An estimate of how hard aldosterone is driving potassium secretion in the collecting duct, correcting the urine potassium for how much water has been reabsorbed downstream. In hyperkalaemia a TTKG below about 5 says the kidney is NOT excreting potassium as it should, which points at hypoaldosteronism or a tubule that cannot respond to it. Above 7 in hypokalaemia says renal wasting rather than gut losses. The osmolality term is what makes it interpretable: without it a concentrated urine looks like potassium wasting.',
+      'An estimate of how hard aldosterone is driving potassium secretion in the collecting duct, correcting the urine potassium for how much water has been reabsorbed downstream. In hyperkalaemia a TTKG below about 5 says the kidney is not excreting potassium as it should, which points at hypoaldosteronism or a tubule that cannot respond to it. Above 7 in hypokalaemia says renal wasting rather than gut losses. The osmolality term is what makes it interpretable: without it a concentrated urine looks like potassium wasting.',
   },
   {
     id: 'osmolarGap',
@@ -388,7 +388,7 @@ export const FORMULAS: FormulaDefinition[] = [
     resultUnit: '',
     moduleId: 'erythropoiesis',
     explanation:
-      'The single most useful number in working up an anaemia, because it splits every cause in two. Above about 2 the marrow is responding vigorously and the problem is downstream — destruction or bleeding. Below 2 the marrow is not responding, which points at deficiency, renal failure or marrow disease. The corrections matter: a raw reticulocyte PERCENTAGE rises in anaemia simply because its denominator shrank, and immature cells released early survive longer in the blood, so both are divided out before the number means anything.',
+      'The single most useful number in working up an anaemia, because it splits every cause in two. Above about 2 the marrow is responding vigorously and the problem is downstream — destruction or bleeding. Below 2 the marrow is not responding, which points at deficiency, renal failure or marrow disease. The corrections matter: a raw reticulocyte percentage rises in anaemia simply because its denominator shrank, and immature cells released early survive longer in the blood, so both are divided out before the number means anything.',
   },
   {
     id: 'oxygenContent',
@@ -448,13 +448,13 @@ export const FORMULAS: FormulaDefinition[] = [
     inputs: [
       { key: 'volume', label: 'Tidal volume', unit: 'mL', default: 500, min: 50, max: 1200, step: 10 },
       { key: 'plateau', label: 'Plateau pressure', unit: 'cmH2O', default: 15, min: 2, max: 60, step: 1 },
-      { key: 'peep', label: 'PEEP', unit: 'cmH2O', default: 5, min: 0, max: 25, step: 1 },
+      { key: 'peep', label: 'Peep', unit: 'cmH2O', default: 5, min: 0, max: 25, step: 1 },
     ],
     compute: (v) => (v.volume ?? 500) / Math.max((v.plateau ?? 15) - (v.peep ?? 5), 1e-9),
     resultLabel: 'Compliance',
     resultUnit: 'mL/cmH2O',
     moduleId: 'respiratoryMechanics',
     explanation:
-      'How much volume a given distending pressure buys. Normal is around 50-100 mL/cmH2O; below about 30 the lung is stiff, as in fibrosis or ARDS. It must be measured against the PLATEAU pressure, not the peak — the peak includes the pressure spent overcoming airway resistance during flow, so using it would report a stiff lung in a patient who simply has narrow airways. That distinction is how the two are told apart at the bedside: a high peak with a normal plateau is obstruction, both high is stiffness.',
+      'How much volume a given distending pressure buys. Normal is around 50-100 mL/cmH2O; below about 30 the lung is stiff, as in fibrosis or ARDS. It must be measured against the plateau pressure, not the peak — the peak includes the pressure spent overcoming airway resistance during flow, so using it would report a stiff lung in a patient who simply has narrow airways. That distinction is how the two are told apart at the bedside: a high peak with a normal plateau is obstruction, both high is stiffness.',
   },
 ];

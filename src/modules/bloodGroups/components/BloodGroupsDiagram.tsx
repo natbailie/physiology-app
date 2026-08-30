@@ -26,7 +26,7 @@ export function BloodGroupsDiagram({ derived, inputs }: BloodDiagramProps) {
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="ABO compatibility matrix and reaction timelines">
       {/* Compatibility matrix. */}
       <text className={styles.label} x={GRID.x} y={GRID.y - 12}>
-        DONOR (columns) → RECIPIENT (rows)
+        Donor (columns) → recipient (rows)
       </text>
       {ABO.NAMES.map((donor, di) => (
         <text key={`h-${donor}`} className={styles.matrixLabel} x={GRID.x + di * GRID.cell + 20} y={GRID.y + 12}>
@@ -76,7 +76,7 @@ export function BloodGroupsDiagram({ derived, inputs }: BloodDiagramProps) {
       />
       {/* One line by construction: the caption under the axis already says "after infusion". */}
       <DiagramText className={styles.label} x={PLOT.x} y={PLOT.y - 12} maxWidth={560 - PLOT.x - 16}>
-        HAEMOLYSIS vs TIME
+        Haemolysis vs time
       </DiagramText>
       <text className={styles.caption} x={PLOT.x} y={PLOT.y + PLOT.height + 16}>
         minutes (IgM) · days (IgG) →

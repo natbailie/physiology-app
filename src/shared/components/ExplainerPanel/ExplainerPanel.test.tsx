@@ -90,7 +90,7 @@ describe('ExplainerPanel', () => {
 });
 
 describe('ExplainerPanel sections', () => {
-  it('renders every heading and paragraph, each in its own open card', () => {
+  it('renders every heading and paragraph', () => {
     render(<Harness content={SECTIONED} />);
     for (const section of SECTIONED.sections!) {
       expect(screen.getByText(section.heading)).toBeTruthy();
@@ -98,11 +98,22 @@ describe('ExplainerPanel sections', () => {
         expect(screen.getByText(paragraph)).toBeTruthy();
       }
     }
+  });
+
+  it('opens folded, so the headings read as a contents page', () => {
+    render(<Harness content={SECTIONED} />);
     // `details[class*=...]` rather than `[class*="card"]`: the latter also matches
     // `.cardSummary` and `.cardBody`, and would pass vacuously at three times the count.
     const cards = document.querySelectorAll('details[class*="card"]');
     expect(cards.length).toBe(SECTIONED.sections!.length);
-    for (const card of cards) expect((card as HTMLDetailsElement).open).toBe(true);
+    for (const card of cards) expect((card as HTMLDetailsElement).open).toBe(false);
+  });
+
+  it('opens one card without disturbing the others', () => {
+    render(<Harness content={SECTIONED} />);
+    const cards = [...document.querySelectorAll('details[class*="card"]')] as HTMLDetailsElement[];
+    fireEvent.click(cards[1]!.querySelector('summary')!);
+    expect(cards.map((c) => c.open)).toEqual([false, true, false]);
   });
 
   it('loads the scenario a section names', () => {

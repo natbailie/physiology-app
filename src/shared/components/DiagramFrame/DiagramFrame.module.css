@@ -17,6 +17,10 @@
   width: 100%;
   height: auto;
   /* preserveAspectRatio defaults to `meet`, so the drawing scales down and centres rather
-   * than being cropped. With no grid behind it the letterboxing is invisible. */
-  max-height: min(52svh, 520px);
+   * than being cropped — which is fine, except that a cap tight enough to bite on every
+   * desktop turns the letterboxing into the point. At 520px a 560x440 drawing rendered
+   * ~660px wide inside a ~1024px card, leaving 180px of empty panel either side and shrinking
+   * the labels that are the reason the diagram exists. The cap is now high enough that the
+   * drawing fills the card's width on a desktop and only bites on a short window. */
+  max-height: min(72svh, 760px);
 }

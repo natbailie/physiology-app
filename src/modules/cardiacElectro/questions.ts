@@ -27,7 +27,7 @@ export const CARDIAC_QUESTIONS: readonly CardiacQuestion[] = [
     watch: 'ejection fraction',
     correctDirection: 'falls',
     explanation:
-      'Ejection fraction falls even while stroke volume holds up, and confusing the two is a common and consequential error. Stroke volume is what actually left the ventricle; ejection fraction is that amount as a FRACTION of what was in there to begin with. A dilated chamber can hold so much that it maintains a respectable output while ejecting a small proportion of its contents — normal output, poor fraction. Watch the two readouts diverge and the distinction stops being a definition.',
+      'Ejection fraction falls even while stroke volume holds up, and confusing the two is a common and consequential error. Stroke volume is what actually left the ventricle; ejection fraction is that amount as a fraction of what was in there to begin with. A dilated chamber can hold so much that it maintains a respectable output while ejecting a small proportion of its contents — normal output, poor fraction. Watch the two readouts diverge and the distinction stops being a definition.',
     metric: (s) => s.derived.ejectionFractionPercent,
   },
   {
@@ -76,7 +76,7 @@ export const CARDIAC_QUESTIONS: readonly CardiacQuestion[] = [
     watch: 'the end-systolic volume',
     correctDirection: 'rises',
     explanation:
-      'The ventricle cannot empty as far, so more blood is left behind at the end of systole. On the pressure-volume loop this is the end-systolic pressure-volume relationship — the line the loop closes against — rotating clockwise, and it is the cleanest load-independent measure of contractility there is. Note what happens on the NEXT beat: the residual volume adds to the incoming filling, so end-diastolic volume rises too, which is how a failing ventricle ends up dilated as well as weak.',
+      'The ventricle cannot empty as far, so more blood is left behind at the end of systole. On the pressure-volume loop this is the end-systolic pressure-volume relationship — the line the loop closes against — rotating clockwise, and it is the cleanest load-independent measure of contractility there is. Note what happens on the next beat: the residual volume adds to the incoming filling, so end-diastolic volume rises too, which is how a failing ventricle ends up dilated as well as weak.',
     metric: (s) => s.derived.endSystolicVolumeML,
   },
 ];

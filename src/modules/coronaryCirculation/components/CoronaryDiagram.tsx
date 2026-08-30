@@ -140,7 +140,7 @@ export function CoronaryDiagram({ derived }: CoronaryDiagramProps) {
 
       {/* ---- The diastolic window. Perfusion of the wall happens here and nowhere else. ---- */}
       <text className={styles.label} x={CYCLE.x} y={CYCLE.y - 12}>
-        ONE CARDIAC CYCLE
+        One cardiac cycle
       </text>
       <rect className={styles.systoleBlock} x={CYCLE.x} y={CYCLE.y} width={systoleWidth} height={CYCLE.height} rx={3} />
       <rect
@@ -167,7 +167,7 @@ export function CoronaryDiagram({ derived }: CoronaryDiagramProps) {
 
       {/* ---- The subtraction that sets the driving head ---- */}
       <text className={styles.label} x={CYCLE.x} y={214}>
-        PERFUSION HEAD
+        Perfusion head
       </text>
       <text className={styles.caption} x={CYCLE.x} y={234}>
         aortic diastolic {derived.effectiveDiastolicPressureMmHg.toFixed(0)}

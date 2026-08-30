@@ -29,8 +29,7 @@
   font-family: var(--mono);
   font-size: var(--fs-micro);
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--text-faint);
   padding-right: 0.1rem;
   white-space: nowrap;

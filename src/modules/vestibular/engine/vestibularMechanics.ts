@@ -103,7 +103,7 @@ export function patternSummary(pattern: {
     case 'normal':
       return 'no nystagmus at rest, VOR intact, no vertigo or unsteadiness';
     case 'acute unilateral vestibulopathy':
-      return `one nerve silent below resting rate: nystagmus beats toward the INTACT ear while the brain reads the mismatch as acceleration — vertigo ${pattern.vertigoIntensityPct.toFixed(0)}%`;
+      return `one nerve silent below resting rate: nystagmus beats toward the intact ear while the brain reads the mismatch as acceleration — vertigo ${pattern.vertigoIntensityPct.toFixed(0)}%`;
     case 'compensated unilateral loss':
       return `vertigo gone but VOR gain ${pattern.vorGain.toFixed(2)} — compensation hides the lesion, it does not fix the mechanics`;
     case 'bilateral vestibular loss':
@@ -111,6 +111,6 @@ export function patternSummary(pattern: {
     case 'BPPV: positional nystagmus':
       return 'transient geotropic torsional nystagmus after latency, fatiguing — mechanical, not metabolic';
     case 'irritative lesion: nystagmus toward ear':
-      return `firing ABOVE rest drives nystagmus toward the affected ear, vertigo ${pattern.vertigoIntensityPct.toFixed(0)}%`;
+      return `firing above rest drives nystagmus toward the affected ear, vertigo ${pattern.vertigoIntensityPct.toFixed(0)}%`;
   }
 }

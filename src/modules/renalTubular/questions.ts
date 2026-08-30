@@ -95,7 +95,7 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 7200,
     explanation:
-      'It rises ABOVE 5.5 — inappropriately alkaline for an acidemic patient, and that contradiction IS the diagnosis. Every other acidotic kidney pushes urine pH toward 4.5; a distal RTA cannot, because the alpha-intercalated cell\'s pump is what creates the hydrogen ion gradient in the first place. The stones follow mechanically: alkaline urine precipitates calcium phosphate, and chronic citrate loss leaves nothing to hold the calcium in solution. Compare with proximal RTA, where the pump works and the urine can still be acidified.',
+      'It rises above 5.5 — inappropriately alkaline for an acidemic patient, and that contradiction IS the diagnosis. Every other acidotic kidney pushes urine pH toward 4.5; a distal RTA cannot, because the alpha-intercalated cell\'s pump is what creates the hydrogen ion gradient in the first place. The stones follow mechanically: alkaline urine precipitates calcium phosphate, and chronic citrate loss leaves nothing to hold the calcium in solution. Compare with proximal RTA, where the pump works and the urine can still be acidified.',
     metric: (s) => s.derived.urinePH,
   },
   {
@@ -121,7 +121,7 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     correctDirection: 'falls',
     observeSeconds: 7200,
     explanation:
-      'It falls by several points, because blocking carbonic anhydrase paralyzes the reaction the proximal tubule uses to reclaim filtered bicarbonate. What cannot be reclaimed is lost, taking water with it — an osmotic-style diuresis of alkaline fluid, which is why the drug produces both a metabolic acidosis and an ALKALINE urine, a combination no other common agent causes. The acidosis is exactly why it helps at altitude: it mimics acclimatisation by ventilatory drive, compensating for the bicarbonate the kidney has been made to waste.',
+      'It falls by several points, because blocking carbonic anhydrase paralyzes the reaction the proximal tubule uses to reclaim filtered bicarbonate. What cannot be reclaimed is lost, taking water with it — an osmotic-style diuresis of alkaline fluid, which is why the drug produces both a metabolic acidosis and an alkaline urine, a combination no other common agent causes. The acidosis is exactly why it helps at altitude: it mimics acclimatisation by ventilatory drive, compensating for the bicarbonate the kidney has been made to waste.',
     metric: (s) => s.derived.serumBicarbonateMeqL,
   },
   {
@@ -134,7 +134,7 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 2400,
     explanation:
-      'It rises sharply, and no transporter was blocked to make it happen. Mannitol stays in the tubular lumen purely by being un-reclaimable, and the water that would have followed solute out of the nephron instead follows the mannitol OUT — osmotic diuresis is hydraulics, not pharmacology. This is also why any uncontrolled solute does the same thing: glucose above threshold in diabetes produces precisely this pattern, which is the polyuria that first brings those patients to medical attention.',
+      'It rises sharply, and no transporter was blocked to make it happen. Mannitol stays in the tubular lumen purely by being un-reclaimable, and the water that would have followed solute out of the nephron instead follows the mannitol out — osmotic diuresis is hydraulics, not pharmacology. This is also why any uncontrolled solute does the same thing: glucose above threshold in diabetes produces precisely this pattern, which is the polyuria that first brings those patients to medical attention.',
     metric: (s) => s.derived.urineFlowRateMLPerMin,
   },
   {
@@ -147,7 +147,7 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     correctDirection: 'falls',
     observeSeconds: 2400,
     explanation:
-      'It falls toward dilute, even though the ADH level itself never dropped — because tolvaptan does not argue with the hormone, it deafens the receptor. SIADH is the one sodium-water disorder treated by promoting water EXCRETION rather than by replacing or removing hormone, and this is the mechanism: aquaporin-2 never inserts, the duct stays water-tight, and free water that would have been retained leaves as dilute urine. Watch electrolyte-free water clearance rise while sodium handling is untouched — aquaretic, not diuretic, in the strict sense.',
+      'It falls toward dilute, even though the ADH level itself never dropped — because tolvaptan does not argue with the hormone, it deafens the receptor. SIADH is the one sodium-water disorder treated by promoting water excretion rather than by replacing or removing hormone, and this is the mechanism: aquaporin-2 never inserts, the duct stays water-tight, and free water that would have been retained leaves as dilute urine. Watch electrolyte-free water clearance rise while sodium handling is untouched — aquaretic, not diuretic, in the strict sense.',
     metric: (s) => s.derived.finalUrineOsmolality,
   },
   {

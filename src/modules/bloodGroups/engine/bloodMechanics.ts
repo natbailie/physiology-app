@@ -31,7 +31,7 @@ export function reactionSeverity(recipientIndex: number, donorIndex: number, vol
 }
 
 export function crossmatchVerdict(inputs: BloodInputs): string {
-  if (aboMajorIncompatible(inputs.recipientAboIndex, inputs.donorAboIndex)) return 'MAJOR MISMATCH — do not transfuse';
+  if (aboMajorIncompatible(inputs.recipientAboIndex, inputs.donorAboIndex)) return 'Major mismatch — do not transfuse';
   if (!inputs.recipientRhPositive && inputs.donorRhPositive > 0.5)
     return inputs.rhSensitised > 0.5
       ? 'Rh mismatch in sensitised recipient — delayed risk'
@@ -71,7 +71,7 @@ export function patternSummary(pattern: {
     case 'ABO-incompatible: acute haemolytic reaction':
       return `preformed IgM fixes complement within minutes: free Hb ${pattern.freeHb.toFixed(0)}, complement ${pattern.complementPct.toFixed(0)}% consumed`;
     case 'Rh-incompatible: delayed haemolytic reaction':
-      return 'IgG clears cells extravascularly over DAYS — no free Hb surge, a falling Hb next week instead';
+      return 'IgG clears cells extravascularly over days — no free Hb surge, a falling Hb next week instead';
     case 'massive ABO mismatch: DIC and renal failure':
       return `DIC ${pattern.dicRisk.toFixed(0)}% and renal injury ${pattern.renalRisk.toFixed(0)}% — the acute haemolytic crisis fully expressed`;
     case 'HDN: fetal haemolysis from maternal IgG':

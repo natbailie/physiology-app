@@ -175,23 +175,17 @@ export function PituitaryDiagram({ derived }: PituitaryDiagramProps) {
         Sphenoid sinus
       </text>
 
-      {[110, 344].map((x, i) => (
+      {/* The sinus either side, with the carotid running through it. The six cranial-nerve dots
+          and their `ICA · III IV V VI` key used to sit here too: four glyphs and a dense mono
+          label that no control moves, crowding the one structure in this drawing a mass can
+          actually be seen to press on. Both sides now carry the same single name. */}
+      {[110, 344].map((x) => (
         <g key={x}>
           <rect className={styles.cavernousSinus} x={x} y={186} width={52} height={64} rx={10} />
           <circle className={styles.carotid} cx={x + 26} cy={214} r={10} />
-          {[196, 232, 242].map((cy) => (
-            <circle key={cy} className={styles.cranialNerve} cx={x + (cy === 196 ? 12 : 40)} cy={cy} r={2.6} />
-          ))}
-          {i === 0 && (
-            <text className={styles.anatomy} x={x + 26} y={272} textAnchor="middle">
-              Cavernous sinus
-            </text>
-          )}
-          {i === 1 && (
-            <text className={styles.anatomy} x={x + 26} y={272} textAnchor="middle">
-              ICA · III IV V VI
-            </text>
-          )}
+          <text className={styles.anatomy} x={x + 26} y={272} textAnchor="middle">
+            Cavernous sinus
+          </text>
         </g>
       ))}
 
@@ -225,7 +219,7 @@ export function PituitaryDiagram({ derived }: PituitaryDiagramProps) {
 
       {/* --- Legend: the colour is doing real work, so it has to be keyed --- */}
       <text className={styles.label} x={LEGEND.x} y={LEGEND.top - 14}>
-        CELL LINES
+        Cell lines
       </text>
       {CELLS.map((cell, i) => (
         <g key={cell.key} style={{ '--cell-color': cell.colorVar } as React.CSSProperties}>

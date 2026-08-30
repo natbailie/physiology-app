@@ -23,7 +23,7 @@ export function LiverDiagram({ derived }: LiverDiagramProps) {
       <rect x={50} y={90} width={70} height={120} fill="none" stroke="var(--text-dim)" rx={8} />
       <rect className={styles.bloodPool} x={54} y={206 - uncHeight} width={62} height={uncHeight} rx={6} />
       <text className={styles.label} x={46} y={78}>
-        BLOOD · UNCONJUGATED
+        Blood · unconjugated
       </text>
       <text className={styles.caption} x={52} y={228}>
         {derived.unconjugatedUmolL.toFixed(0)} µmol/L
@@ -39,12 +39,12 @@ export function LiverDiagram({ derived }: LiverDiagramProps) {
       <ellipse cx={230} cy={150} rx={58} ry={44} className={styles.organOutline} />
       <rect className={styles.bilePool} x={196} y={162 - conjHeight / 2.2} width={68} height={conjHeight / 1.1} rx={6} opacity={0.85} />
       <text className={styles.label} x={192} y={96}>
-        LIVER · UGT {(derived.albuminGPerL > 0 ? '' : '')}
+        Liver · UGT
       </text>
       <text className={styles.caption} x={188} y={210}>
         conj {derived.conjugatedUmolL.toFixed(0)} µmol/L
       </text>
-      <text className={styles.caption} x={186} y={224}>
+      <text className={styles.caption} x={186} y={228}>
         ALT ×{derived.altXUlN.toFixed(1)} · ALP ×{derived.alpXUlN.toFixed(1)} · R{' '}
         {derived.rFactor >= 60 ? '≥60' : derived.rFactor.toFixed(1)}
       </text>
@@ -58,7 +58,7 @@ export function LiverDiagram({ derived }: LiverDiagramProps) {
         <>
           <line className={styles.blockedDuct} x1={312} y1={136} x2={332} y2={164} />
           <text className={styles.alarm} x={300} y={126}>
-            OBSTRUCTED {derived.effectiveObstructionPct.toFixed(0)}%
+            Obstructed {derived.effectiveObstructionPct.toFixed(0)}%
           </text>
         </>
       )}
@@ -91,11 +91,11 @@ export function LiverDiagram({ derived }: LiverDiagramProps) {
 
       <DiagramText className={styles.caption} x={40} y={262} maxWidth={504}>
         {`total ${derived.totalBilirubinUmolL.toFixed(0)} µmol/L (${derived.fractionConjugatedPct.toFixed(0)}% conjugated)${
-          derived.jaundiceVisible ? ' · JAUNDICE VISIBLE' : ''
+          derived.jaundiceVisible ? ' · jaundice visible' : ''
         }`}
       </DiagramText>
       <DiagramText className={styles.caption} x={40} y={296} maxWidth={504}>
-        {`urine: bilirubin ${derived.urineBilirubinPresent ? 'PRESENT' : 'absent'} · ammonia ${derived.ammoniaUmolL.toFixed(0)} µmol/L${
+        {`urine: bilirubin ${derived.urineBilirubinPresent ? 'present' : 'absent'} · ammonia ${derived.ammoniaUmolL.toFixed(0)} µmol/L${
           derived.encephalopathyGrade > 0 ? ` · encephalopathy grade ${derived.encephalopathyGrade}` : ''
         }`}
       </DiagramText>

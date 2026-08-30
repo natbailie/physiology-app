@@ -82,7 +82,7 @@ export function patternSummary(pattern: {
     case 'thermoneutral':
       return `production balances loss at ${pattern.netStorageW >= 0 ? '+' : ''}${pattern.netStorageW.toFixed(0)} W storage`;
     case 'cold defence: shivering':
-      return `core ${pattern.coreTempC.toFixed(1)} BELOW the defended point: shivering ${pattern.shiveringW.toFixed(0)} W of extra production`;
+      return `core ${pattern.coreTempC.toFixed(1)} below the defended point: shivering ${pattern.shiveringW.toFixed(0)} W of extra production`;
     case 'heat defence: sweating':
       return `sweating ${pattern.sweatW.toFixed(0)} W against a ${pattern.netStorageW >= 0 ? 'rising' : 'falling'} heat load`;
     case 'fever: set point elevated':
@@ -94,6 +94,6 @@ export function patternSummary(pattern: {
     case 'mild hypothermia':
       return `core ${pattern.coreTempC.toFixed(1)} with maximal shivering still fighting`;
     case 'moderate hypothermia: shivering fading':
-      return 'shivering SILENT below 32 C — defences gone, rewarming is now the treatment';
+      return 'shivering silent below 32 C — defences gone, rewarming is now the treatment';
   }
 }

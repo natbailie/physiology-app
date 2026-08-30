@@ -28,7 +28,7 @@ export const SHOCK_QUESTIONS: readonly ShockQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Both filling pressures are empty and the resistance is up — there is simply not enough blood in the circuit, and the circulation has clamped down to compensate. Note the mixed venous saturation: it is low because extraction is INTACT and the tissue is taking everything it can from a reduced delivery. That is the opposite of the septic pattern. Note also the blood pressure, which is close to acceptable while the cardiac index is not. Compensation is hiding the severity, and it will keep hiding it until it fails.',
+      'Both filling pressures are empty and the resistance is up — there is simply not enough blood in the circuit, and the circulation has clamped down to compensate. Note the mixed venous saturation: it is low because extraction is intact and the tissue is taking everything it can from a reduced delivery. That is the opposite of the septic pattern. Note also the blood pressure, which is close to acceptable while the cardiac index is not. Compensation is hiding the severity, and it will keep hiding it until it fails.',
   },
   {
     id: 'full-on-both-sides',
@@ -38,7 +38,7 @@ export const SHOCK_QUESTIONS: readonly ShockQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Low output with BOTH filling pressures raised is a pump that cannot clear what reaches it. The high wedge is the blood damming back into the lungs, which is what is making the patient breathless, and the raised CVP follows because a congested pulmonary circulation loads the right heart in turn. This is the state where a fluid bolus makes matters worse: filling was never the problem, and adding volume simply pushes the wedge higher.',
+      'Low output with both filling pressures raised is a pump that cannot clear what reaches it. The high wedge is the blood damming back into the lungs, which is what is making the patient breathless, and the raised CVP follows because a congested pulmonary circulation loads the right heart in turn. This is the state where a fluid bolus makes matters worse: filling was never the problem, and adding volume simply pushes the wedge higher.',
   },
   {
     id: 'high-svo2-with-lactate',
@@ -48,7 +48,7 @@ export const SHOCK_QUESTIONS: readonly ShockQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Output is high, resistance is on the floor, and the mixed venous saturation is HIGH — alongside a markedly raised lactate. That combination only makes sense one way: oxygen is being delivered in abundance and returned unused, because the tissue cannot extract it. The team should not be reassured. A high SvO₂ is reassuring only next to a normal lactate, and here the lactate is doing the talking. Treatment is vasopressors and source control, not more inotropy.',
+      'Output is high, resistance is on the floor, and the mixed venous saturation is high — alongside a markedly raised lactate. That combination only makes sense one way: oxygen is being delivered in abundance and returned unused, because the tissue cannot extract it. The team should not be reassured. A high SvO₂ is reassuring only next to a normal lactate, and here the lactate is doing the talking. Treatment is vasopressors and source control, not more inotropy.',
   },
   {
     id: 'wedge-separates-obstruction',
@@ -58,7 +58,7 @@ export const SHOCK_QUESTIONS: readonly ShockQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The CVP is high and the output is low, exactly as in cardiogenic shock — and then the wedge is LOW, which settles it. The obstruction sits between the two measurements: blood is dammed on the right because it cannot cross the lungs, so very little reaches the left heart to raise the wedge. One number separates two states that look the same at the bedside and are treated in opposite ways.',
+      'The CVP is high and the output is low, exactly as in cardiogenic shock — and then the wedge is low, which settles it. The obstruction sits between the two measurements: blood is dammed on the right because it cannot cross the lungs, so very little reaches the left heart to raise the wedge. One number separates two states that look the same at the bedside and are treated in opposite ways.',
   },
   {
     id: 'fluid-in-cardiogenic',
@@ -85,7 +85,7 @@ export const SHOCK_QUESTIONS: readonly ShockQuestion[] = [
     settleSeconds: 2400,
     observeSeconds: 2400,
     explanation:
-      'The pressure falls at once, because the reflex — not the circulating volume — was what had been holding it up. Sympathetic outflow was raising the resistance, the heart rate and the filling pressure simultaneously, and all three vanish together. This is why hypotension in haemorrhage is a LATE sign: by the time the pressure falls, the compensation has already been exhausted, and a great deal of blood has already gone.',
+      'The pressure falls at once, because the reflex — not the circulating volume — was what had been holding it up. Sympathetic outflow was raising the resistance, the heart rate and the filling pressure simultaneously, and all three vanish together. This is why hypotension in haemorrhage is a late sign: by the time the pressure falls, the compensation has already been exhausted, and a great deal of blood has already gone.',
     metric: (s) => s.derived.meanArterialPressureMmHg,
   },
 ];

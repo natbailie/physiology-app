@@ -32,7 +32,7 @@ export function ThermoDiagram({ derived }: ThermoDiagramProps) {
         style={{ '--heat': (coreHeat * 100).toFixed(0) } as React.CSSProperties}
       />
       <text className={styles.label} x={92} y={52}>
-        CORE {derived.coreTempC.toFixed(2)} °C · SKIN {derived.skinTempC.toFixed(1)} °C
+        Core {derived.coreTempC.toFixed(2)} °C · skin {derived.skinTempC.toFixed(1)} °C
       </text>
 
       {/* Heat flow arrows: production inside, losses out. */}
@@ -60,7 +60,7 @@ export function ThermoDiagram({ derived }: ThermoDiagramProps) {
 
       {/* Set point vs core gauge. */}
       <text className={styles.label} x={330} y={64}>
-        SET POINT {derived.setPointC.toFixed(1)} °C
+        Set point {derived.setPointC.toFixed(1)} °C
       </text>
       <rect
         className={styles.setpointBand}
@@ -76,13 +76,13 @@ export function ThermoDiagram({ derived }: ThermoDiagramProps) {
 
       {/* Effectors. */}
       <text className={styles.label} x={330} y={232}>
-        SHIVERING {derived.shiveringW.toFixed(0)} W
+        Shivering {derived.shiveringW.toFixed(0)} W
       </text>
       <rect className={styles.effectorFrame} {...BAR(240)} rx={4} />
       <rect className={styles.effectorBar} x={330} y={240} width={(BAR(0).width * shiverPct)} height={16} fill="var(--sympathetic)" opacity={0.85} />
 
       <text className={styles.label} x={330} y={286}>
-        SWEATING {derived.sweatW.toFixed(0)} W
+        Sweating {derived.sweatW.toFixed(0)} W
       </text>
       <rect className={styles.effectorFrame} {...BAR(294)} rx={4} />
       <rect className={styles.effectorBar} x={330} y={294} width={(BAR(0).width * sweatPct)} height={16} fill="var(--o2)" opacity={0.85} />
@@ -95,8 +95,8 @@ export function ThermoDiagram({ derived }: ThermoDiagramProps) {
       {(derived.feverRising || derived.classification.startsWith('hyperthermia') || derived.classification.startsWith('heat stroke')) && (
         <text className={styles.alarm} x={44} y={338}>
           {derived.feverRising
-            ? 'RIGORS — the body is heating itself to a defended point'
-            : 'HEAT EMERGENCY — cooling now, not antipyretics'}
+            ? 'Rigors — the body is heating itself to a defended point'
+            : 'Heat emergency — cooling now, not antipyretics'}
         </text>
       )}
 

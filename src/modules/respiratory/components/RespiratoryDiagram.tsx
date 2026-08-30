@@ -54,7 +54,7 @@ export function RespiratoryDiagram({ derived }: RespiratoryDiagramProps) {
         colorVar="var(--bicarb)"
         label="Renal HCO3-"
         markerId="renal-comp-arrow"
-        labelPos={{ x: 300, y: 285 }}
+        labelPos={{ x: 300, y: 252 }}
       />
 
       <Lungs x={240} y={100} breathRate={breathRate} ventDepth={ventDepth} />

@@ -34,12 +34,11 @@
   width: max-content;
   max-width: min(24rem, calc(100vw - 1rem));
   padding: 0.55rem 0.7rem;
-  font-family: var(--sans);
-  font-size: 0.75rem;
+  font-family: var(--serif);
+  font-size: var(--fs-xs);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: normal;
-  text-transform: none;
   color: var(--text);
   background: var(--panel);
   border: 1px solid var(--panel-border);

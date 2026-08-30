@@ -28,7 +28,7 @@ export function AdrenalCortexDiagram({ derived, inputs }: AdrenalCortexDiagramPr
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="Steroidogenesis pathway with enzyme blocks and zone output fluxes">
       {/* Pathway spine with enzyme nodes. */}
       <text className={styles.label} x={40} y={44}>
-        STEROIDOGENIC PATHWAY · ACTH ×{(derived.acthEffectivePct / 100).toFixed(1)}
+        Steroidogenic pathway · ACTH ×{(derived.acthEffectivePct / 100).toFixed(1)}
       </text>
       <path className={styles.pathwayLine} d="M 52 84 H 428" />
       {enzymes.map((e) => (
@@ -48,14 +48,14 @@ export function AdrenalCortexDiagram({ derived, inputs }: AdrenalCortexDiagramPr
       ))}
 
       {/* Branch outputs. */}
-      <text className={styles.label} x={44} y={140}>
-        ZONE OUTPUTS (relative to normal)
+      <text className={styles.label} x={44} y={132}>
+        Zone outputs (relative to normal)
       </text>
 
       {[
-        { label: 'CORTISOL (ZF)', value: cortisolPct, text: derived.effectiveCortisol.toFixed(0), y: 158, color: 'var(--cortisol)' },
-        { label: 'ALDOSTERONE + DOC (ZG)', value: mcPct, text: derived.mineralocorticoidActivity.toFixed(0), y: 196, color: 'var(--raas)' },
-        { label: 'ADROGENS (ZR)', value: androPct, text: derived.androgens.toFixed(0), y: 234, color: 'var(--lh)' },
+        { label: 'Cortisol (ZF)', value: cortisolPct, text: derived.effectiveCortisol.toFixed(0), y: 158, color: 'var(--cortisol)' },
+        { label: 'Aldosterone + DOC (ZG)', value: mcPct, text: derived.mineralocorticoidActivity.toFixed(0), y: 196, color: 'var(--raas)' },
+        { label: 'Androgens (ZR)', value: androPct, text: derived.androgens.toFixed(0), y: 234, color: 'var(--lh)' },
       ].map((row) => (
         <g key={row.label}>
           <text className={styles.caption} x={44} y={row.y - 4}>
@@ -72,10 +72,10 @@ export function AdrenalCortexDiagram({ derived, inputs }: AdrenalCortexDiagramPr
       {(derived.saltWasting || derived.hypertensionFromDoc || derived.addisonianCrisisRiskPct > 50) && (
         <text className={styles.alarm} x={44} y={312}>
           {derived.saltWasting
-            ? 'SALT-WASTING — mineralocorticoid collapse'
+            ? 'Salt-wasting — mineralocorticoid collapse'
             : derived.addisonianCrisisRiskPct > 50
-              ? `CRISIS RISK ${derived.addisonianCrisisRiskPct.toFixed(0)}% — cortisol insufficient`
-              : 'DOC-driven HYPERTENSION'}
+              ? `Crisis risk ${derived.addisonianCrisisRiskPct.toFixed(0)}% — cortisol insufficient`
+              : 'DOC-driven hypertension'}
         </text>
       )}
 

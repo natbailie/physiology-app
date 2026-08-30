@@ -43,7 +43,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the QRS duration',
     correctDirection: 'rises',
     explanation:
-      'The QRS widens, because that territory can no longer be activated through the fast conducting system and must instead be depolarised slowly, muscle cell to muscle cell, from the other ventricle. Note what does NOT change: the PR interval is unaffected, because the block is below the AV node. Width without PR prolongation localises the problem to the bundle branches, which is exactly how the two levels of block are told apart.',
+      'The QRS widens, because that territory can no longer be activated through the fast conducting system and must instead be depolarised slowly, muscle cell to muscle cell, from the other ventricle. Note what does not change: the PR interval is unaffected, because the block is below the AV node. Width without PR prolongation localises the problem to the bundle branches, which is exactly how the two levels of block are told apart.',
     metric: (s) => s.derived.qrsDurationMs,
   },
   {
@@ -55,7 +55,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the PR interval',
     correctDirection: 'rises',
     explanation:
-      'The PR interval lengthens, since it measures the time from atrial activation to ventricular activation and the AV node is what occupies most of it. Note the PR SEGMENT stays flat throughout — not because nothing is happening, but because the AV node holds far too little tissue to register at the body surface. A flat line means no net vector, never no activity, and that distinction is what makes the ECG readable at all.',
+      'The PR interval lengthens, since it measures the time from atrial activation to ventricular activation and the AV node is what occupies most of it. Note the PR segment stays flat throughout — not because nothing is happening, but because the AV node holds far too little tissue to register at the body surface. A flat line means no net vector, never no activity, and that distinction is what makes the ECG readable at all.',
     metric: (s) => s.derived.prIntervalMs,
   },
   {
@@ -67,7 +67,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the QT interval',
     correctDirection: 'falls',
     explanation:
-      'The raw QT shortens, and for a real physiological reason rather than a measurement artefact: action potential duration genuinely shortens as rate rises, because the tissue repolarises faster when driven harder. That is exactly what Bazett\'s correction exists to undo, which is why the CORRECTED value is the one that carries meaning. Watch the QTc stay comparatively stable while the raw QT moves — that is the correction doing its job.',
+      'The raw QT shortens, and for a real physiological reason rather than a measurement artefact: action potential duration genuinely shortens as rate rises, because the tissue repolarises faster when driven harder. That is exactly what Bazett\'s correction exists to undo, which is why the corrected value is the one that carries meaning. Watch the QTc stay comparatively stable while the raw QT moves — that is the correction doing its job.',
     metric: (s) => s.derived.qtIntervalMs,
   },
 
@@ -82,7 +82,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the R/S transition (V1 = 1, V6 = 6)',
     correctDirection: 'rises',
     explanation:
-      'The transition moves LATER across the precordium — toward V5 and V6 — which on a report is written up as poor R-wave progression. The reason is purely one of sequence: the left ventricle is the large posterior mass whose vector normally swings round to face the lateral chest leads early in the complex, and blocking its bundle means it is now activated last, slowly, cell to cell from the right. So the anterior and rightward forces dominate for longer and it takes more electrodes before the net vector is finally pointing at the recording one. Nothing about the muscle changed, only the order it was switched on in.',
+      'The transition moves later across the precordium — toward V5 and V6 — which on a report is written up as poor R-wave progression. The reason is purely one of sequence: the left ventricle is the large posterior mass whose vector normally swings round to face the lateral chest leads early in the complex, and blocking its bundle means it is now activated last, slowly, cell to cell from the right. So the anterior and rightward forces dominate for longer and it takes more electrodes before the net vector is finally pointing at the recording one. Nothing about the muscle changed, only the order it was switched on in.',
     metric: transitionIndex,
   },
   {
@@ -157,7 +157,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the ventricular rate',
     correctDirection: 'rises',
     explanation:
-      'It settles at almost exactly 150 — half the atrial rate — and that number is worth knowing cold. The AV node cannot conduct 300 impulses a minute; its long refractory period turns it into a filter, letting every second wave through. So flutter is one of the few tachycardias whose rate diagnoses it: a REGULAR narrow-complex tachycardia at very nearly 150 should be treated as flutter until proven otherwise. Watch the sawtooth baseline appear between QRS complexes while the ventricular rhythm stays perfectly disciplined.',
+      'It settles at almost exactly 150 — half the atrial rate — and that number is worth knowing cold. The AV node cannot conduct 300 impulses a minute; its long refractory period turns it into a filter, letting every second wave through. So flutter is one of the few tachycardias whose rate diagnoses it: a regular narrow-complex tachycardia at very nearly 150 should be treated as flutter until proven otherwise. Watch the sawtooth baseline appear between QRS complexes while the ventricular rhythm stays perfectly disciplined.',
     metric: (s) => s.derived.ventricularRateBpm,
     settleSeconds: 12,
     observeSeconds: 12,
@@ -171,7 +171,7 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     watch: 'the QRS duration',
     correctDirection: 'rises',
     explanation:
-      'It widens well past 120 ms, because a ventricular focus has no access to the His-Purkinje motorway: depolarisation spreads from myocyte to myocyte, which is several times slower than specialised conduction. The result is a REGULAR wide-complex tachycardia with the sinus-ridden atria marching independently behind it — AV dissociation, the signature that separates VT from any supraventricular rhythm with aberrant conduction. Treat every regular broad-complex tachycardia in an older patient as VT: the wrong assumption kills faster than the right one embarrasses.',
+      'It widens well past 120 ms, because a ventricular focus has no access to the His-Purkinje motorway: depolarisation spreads from myocyte to myocyte, which is several times slower than specialised conduction. The result is a regular wide-complex tachycardia with the sinus-ridden atria marching independently behind it — AV dissociation, the signature that separates VT from any supraventricular rhythm with aberrant conduction. Treat every regular broad-complex tachycardia in an older patient as VT: the wrong assumption kills faster than the right one embarrasses.',
     metric: (s) => s.derived.qrsDurationMs,
     settleSeconds: 8,
     observeSeconds: 8,
@@ -235,6 +235,6 @@ export const ECG_QUESTIONS: readonly EcgQuestion[] = [
     ],
     settleSeconds: 10,
     explanation:
-      'Regular, 180 a minute, QRS near 170 ms with no measurable PR: a ventricular focus driving dissociated ventricles — ventricular tachycardia. The distractors all widen the QRS too, which is exactly what makes this decision hard at the bedside: bundle branch block and hyperkalaemia produce broad complexes at SINUS rates with an intact PR, and none of them triples the rate. In a hypotensive 70-year-old with chest pain, broad complex plus tachycardia is VT until conclusively proven otherwise — the survival-cost of assuming "aberrancy" is measured in defibrillation minutes.',
+      'Regular, 180 a minute, QRS near 170 ms with no measurable PR: a ventricular focus driving dissociated ventricles — ventricular tachycardia. The distractors all widen the QRS too, which is exactly what makes this decision hard at the bedside: bundle branch block and hyperkalaemia produce broad complexes at sinus rates with an intact PR, and none of them triples the rate. In a hypotensive 70-year-old with chest pain, broad complex plus tachycardia is VT until conclusively proven otherwise — the survival-cost of assuming "aberrancy" is measured in defibrillation minutes.',
   },
 ];

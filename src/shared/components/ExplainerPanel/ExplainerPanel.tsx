@@ -77,11 +77,11 @@ function DemoButton<TPreset extends string>({ demo }: { demo: ExplainerDemo<TPre
   );
 }
 
-/** One titled, individually collapsible claim. Open by default — see the panel's note. */
+/** One titled, individually collapsible claim. Closed by default — see the panel's note. */
 function SectionCard({ section, index }: { section: ExplainerSection; index: number }) {
   return (
     <li>
-      <details className={styles.card} open>
+      <details className={styles.card}>
         <summary className={styles.cardSummary}>
           <span className={styles.ordinal} aria-hidden="true">
             {index + 1}
@@ -113,9 +113,11 @@ function SectionCard({ section, index }: { section: ExplainerSection; index: num
  * a mechanism, and the panel sits below the readouts and charts so it displaces nothing.
  *
  * A module authored as `sections` renders as a run of titled cards, each collapsible on its own.
- * They open by default for the same reason the panel does — the headings are there to give a
- * reader landmarks in 600 words, not to hide the prose behind six more clicks. Collapsing is for
- * a learner coming back to check one thing.
+ * The cards are CLOSED by default, so what a learner meets is a contents page: five or ten
+ * headings, each a claim about the mechanism, that can be read in a glance and opened one at a
+ * time. Opening them all by default was the earlier behaviour and it reproduced the wall of
+ * prose the headings exist to break up — the landmarks are only useful if you can see them all
+ * at once.
  *
  * A module still authored as flat `paragraphs` renders exactly as it always has. */
 function ExplainerPanelBase({ content, startCollapsed = false }: ExplainerPanelProps) {

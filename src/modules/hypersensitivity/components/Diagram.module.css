@@ -148,7 +148,6 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   fill: var(--text);
-  text-transform: uppercase;
   text-anchor: middle;
 }
 

@@ -1,16 +1,9 @@
-.diagram {
-  width: 100%;
-  height: auto;
-  max-height: 280px;
-}
-
 .label {
   composes: label from '../../../shared/styles/diagramText.module.css';
-  font-family: var(--font-mono);
   fill-opacity: 0.8;
 }
 
 .value {
-  font-family: var(--font-mono);
+  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
   font-weight: 600;
 }

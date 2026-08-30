@@ -36,14 +36,12 @@
 .family {
   font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .drugsLabel {
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.01em;
   color: var(--text-dim);
 }
 
@@ -63,8 +61,7 @@
 
 .mechanism h2 {
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.01em;
   color: var(--text-dim);
   margin: 0 0 0.5rem;
 }

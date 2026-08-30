@@ -31,7 +31,7 @@ export const THERMO_QUESTIONS: readonly ThermoQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The set point has been RAISED by pyrogen-driven prostaglandins, so a core of 39 is still BELOW where the hypothalamus wants it — the patient experiences genuine cold and generates heat to reach it. Shivering under blankets with a high reading is the signature of DEFENDED temperature. Exertional heat stroke shows hot dry skin and a NORMAL set point; the treatments are entirely different because the mechanisms are.',
+      'The set point has been raised by pyrogen-driven prostaglandins, so a core of 39 is still below where the hypothalamus wants it — the patient experiences genuine cold and generates heat to reach it. Shivering under blankets with a high reading is the signature of DEFENDED temperature. Exertional heat stroke shows hot dry skin and a normal set point; the treatments are entirely different because the mechanisms are.',
   },
   {
     id: 'collapsed-runner-hot-dry',
@@ -41,7 +41,7 @@ export const THERMO_QUESTIONS: readonly ThermoQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Nine-fold metabolic production in humid air with impaired sweating overwhelms the same defences that handle fever — the set point never moved. Hot DRY skin past 40 C means evaporation has failed completely, which is the emergency inside the emergency: cooling must be immediate and external (ice water immersion), because nothing physiological will fix a ledger this far out of balance.',
+      'Nine-fold metabolic production in humid air with impaired sweating overwhelms the same defences that handle fever — the set point never moved. Hot dry skin past 40 C means evaporation has failed completely, which is the emergency inside the emergency: cooling must be immediate and external (ice water immersion), because nothing physiological will fix a ledger this far out of balance.',
   },
   {
     id: 'antipyretic-lowers-point',
@@ -54,7 +54,7 @@ export const THERMO_QUESTIONS: readonly ThermoQuestion[] = [
     settleSeconds: 500000,
     observeSeconds: 900,
     explanation:
-      'It begins — often profusely. Antipyretics block prostaglandin synthesis in the hypothalamus, releasing the raised point back toward 37 while every pyrogen remains; the core is suddenly ABOVE the defended target, so the body answers with vasodilatation and sweat. This visible swing from rigors to drenching sweats is the fever "breaking", and it is pure pharmacology: the infection was never touched.',
+      'It begins — often profusely. Antipyretics block prostaglandin synthesis in the hypothalamus, releasing the raised point back toward 37 while every pyrogen remains; the core is suddenly above the defended target, so the body answers with vasodilatation and sweat. This visible swing from rigors to drenching sweats is the fever "breaking", and it is pure pharmacology: the infection was never touched.',
     metric: (s) => s.derived.sweatW,
   },
   {
@@ -83,7 +83,7 @@ export const THERMO_QUESTIONS: readonly ThermoQuestion[] = [
     observeSeconds: 30000,
     tolerance: 0.02,
     explanation:
-      'Storage falls — external cooling adds hundreds of watts to the loss side of the ledger, finally out-running metabolic production. Note what this does NOT require: sweating, which has failed, or a changed set point, which was never wrong. In hyperthermia the treatment replaces the environment; in fever it would be pointless, because a defended point simply re-asserts itself through vasoconstriction.',
+      'Storage falls — external cooling adds hundreds of watts to the loss side of the ledger, finally out-running metabolic production. Note what this does not require: sweating, which has failed, or a changed set point, which was never wrong. In hyperthermia the treatment replaces the environment; in fever it would be pointless, because a defended point simply re-asserts itself through vasoconstriction.',
     metric: (s) => s.derived.netStorageW,
   },
 ];

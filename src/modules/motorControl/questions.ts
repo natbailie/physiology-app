@@ -32,7 +32,7 @@ export const MOTOR_QUESTIONS: readonly MotorQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Slowed initiation with shrunken amplitude and a tremor that appears AT REST and quiets on action is parkinsonism — dopamine-depleted gating of movement. Cerebellar tremor is the opposite timing (worse as the target approaches), essential tremor is postural with normal initiation, and chorea invades a normally-initiating system. Micrographia is this module\'s amplitude arithmetic in everyday form.',
+      'Slowed initiation with shrunken amplitude and a tremor that appears AT rest and quiets on action is parkinsonism — dopamine-depleted gating of movement. Cerebellar tremor is the opposite timing (worse as the target approaches), essential tremor is postural with normal initiation, and chorea invades a normally-initiating system. Micrographia is this module\'s amplitude arithmetic in everyday form.',
   },
   {
     id: 'worse-as-target-nears',
@@ -42,7 +42,7 @@ export const MOTOR_QUESTIONS: readonly MotorQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Tremor that GROWS during the reach with overshoot is the cerebellum\'s failed calibration — intention tremor with dysmetria. Initiation latency stays normal because starting a movement is the basal ganglia\'s job; executing it accurately is hers. Rigidity is absent — cerebellar lesions cause hypotonia if they change tone at all — which separates her from any extrapyramidal syndrome.',
+      'Tremor that grows during the reach with overshoot is the cerebellum\'s failed calibration — intention tremor with dysmetria. Initiation latency stays normal because starting a movement is the basal ganglia\'s job; executing it accurately is hers. Rigidity is absent — cerebellar lesions cause hypotonia if they change tone at all — which separates her from any extrapyramidal syndrome.',
   },
   {
     id: 'random-jerks-normal-power',
@@ -52,7 +52,7 @@ export const MOTOR_QUESTIONS: readonly MotorQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Random involuntary movement invading an otherwise normal motor system means RELEASE, not failure: degeneration of indirect-pathway striatal neurons lifts the thalamic brake. The normal initiation latency and tone exclude parkinsonism; the random, multi-focal quality excludes the single violent pattern of hemiballismus, whose lesion sits in the subthalamic nucleus these neurons normally drive.',
+      'Random involuntary movement invading an otherwise normal motor system means release, not failure: degeneration of indirect-pathway striatal neurons lifts the thalamic brake. The normal initiation latency and tone exclude parkinsonism; the random, multi-focal quality excludes the single violent pattern of hemiballismus, whose lesion sits in the subthalamic nucleus these neurons normally drive.',
   },
   {
     id: 'levodopa-wears-off',
@@ -93,7 +93,7 @@ export const MOTOR_QUESTIONS: readonly MotorQuestion[] = [
     settleSeconds: 800,
     observeSeconds: 600,
     explanation:
-      'It explodes upward into hemiballismus — violent proximal flinging of the opposite arm and leg. The STN is the indirect pathway\'s powerful brake on the thalamus, and losing it releases contralateral movement generation entirely unopposed. The lesion is tiny and the deficit is dramatic: the clearest demonstration in neurology that movement is actively SUPPRESSED as much as produced.',
+      'It explodes upward into hemiballismus — violent proximal flinging of the opposite arm and leg. The STN is the indirect pathway\'s powerful brake on the thalamus, and losing it releases contralateral movement generation entirely unopposed. The lesion is tiny and the deficit is dramatic: the clearest demonstration in neurology that movement is actively suppressed as much as produced.',
     metric: (s) => s.derived.ballismAmp,
   },
   {

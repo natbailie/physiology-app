@@ -1,13 +1,63 @@
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import type { MusclePresetName } from './engine/presets';
 
-export const muscleContractionContent: ExplainerContent = {
+export const muscleContractionContent: ExplainerContent<MusclePresetName> = {
   title: 'Why excitation is not the same thing as contraction',
-  paragraphs: [
-    'An action potential does not make a muscle contract. It opens a calcium release channel, and calcium makes the muscle contract — two separate events joined by a messenger, which is why the calcium transient in this model peaks within a few milliseconds while the tension it causes does not peak for another twenty. Watch the two traces: the calcium spike is already falling before tension has finished rising. Everything a drug or a disease does to muscle, it does by acting somewhere along that chain.',
-    'Calcium works by removing an inhibition rather than by activating anything. At rest, tropomyosin covers the myosin binding sites on actin. Calcium binds troponin-C, tropomyosin shifts, and the myosin heads — already cocked and waiting — attach and pull. Because troponin binds calcium cooperatively, a small rise in calcium produces a large rise in activation, so the muscle behaves as a switch rather than a dial. Smooth muscle has no troponin at all: calcium binds calmodulin, which activates myosin light chain kinase, which phosphorylates the head. Different molecules, same position in the causal chain.',
-    'ATP is needed to let go, not to hold on. The myosin head detaches only when ATP binds it, so as ATP falls the muscle relaxes more and more slowly, and at zero ATP the heads never release — rigor mortis. The same molecule is also what SERCA burns pumping calcium back into the store, which is why relaxation is an active, energy-consuming process rather than the passive absence of contraction. Set ATP to zero here and watch both failures happen at once: calcium climbs because the pump has stopped, and the bridges lock because they cannot detach.',
-    'A single action potential produces only about a third of the force the muscle can make. The reason is a timing mismatch: calcium is re-sequestered before the cross-bridges have finished attaching. Stimulate again before relaxation is complete and tension summates; stimulate fast enough and calcium never falls back at all, giving a smooth fused tetanus at maximal force. This is one of the two ways the nervous system grades force. The other is recruitment — bringing in more motor units, smallest and weakest first, which is why fine control is possible at low effort and impossible near maximum.',
-    'Cardiac muscle cannot do this, and the reason is a single number. Its refractory period lasts longer than its own twitch, so a second stimulus can never arrive in time to summate — a heart that could tetanize would be a heart that stopped ejecting. Cardiac muscle also depends on calcium entering from outside to trigger release (calcium-induced calcium release), which is why extracellular calcium changes cardiac force but barely touches skeletal muscle, where the voltage sensor pulls the release channel open mechanically.',
-    'Finally, force depends on geometry. The length-tension curve is the clearest structural evidence for the sliding filament theory: tension tracks the number of cross-bridges that can physically form, which is set by filament overlap. Too short and the thin filaments collide; too long and there is nothing to grip. And once the muscle is shortening, the force-velocity relation takes over — a fast-moving muscle has fewer heads attached at any instant, so it generates less force. Power is zero at both ends and peaks at about a third of maximal load.',
+  sections: [
+    {
+      heading: 'An action potential does not make a muscle contract',
+      paragraphs: [
+        'An action potential does not make a muscle contract. It opens a calcium release channel, and calcium makes the muscle contract — two separate events joined by a messenger, which is why the calcium transient in this model peaks within a few milliseconds while the tension it causes does not peak for another twenty. Watch the two traces: the calcium spike is already falling before tension has finished rising. Everything a drug or a disease does to muscle, it does by acting somewhere along that chain.',
+      ],
+      demos: [
+        { preset: 'singleTwitch', watch: 'calcium' },
+      ],
+    },
+    {
+      heading: 'Calcium removes an inhibition rather than activating anything',
+      paragraphs: [
+        'Calcium works by removing an inhibition rather than by activating anything. At rest, tropomyosin covers the myosin binding sites on actin. Calcium binds troponin-C, tropomyosin shifts, and the myosin heads — already cocked and waiting — attach and pull. Because troponin binds calcium cooperatively, a small rise in calcium produces a large rise in activation, so the muscle behaves as a switch rather than a dial. Smooth muscle has no troponin at all: calcium binds calmodulin, which activates myosin light chain kinase, which phosphorylates the head. Different molecules, same position in the causal chain.',
+      ],
+    },
+    {
+      heading: 'ATP is needed to let go, not to hold on',
+      paragraphs: [
+        'ATP is needed to let go, not to hold on. The myosin head detaches only when ATP binds it, so as ATP falls the muscle relaxes more and more slowly, and at zero ATP the heads never release — rigor mortis. The same molecule is also what SERCA burns pumping calcium back into the store, which is why relaxation is an active, energy-consuming process rather than the passive absence of contraction. Set ATP to zero here and watch both failures happen at once: calcium climbs because the pump has stopped, and the bridges lock because they cannot detach.',
+      ],
+      demos: [
+        { preset: 'rigorMortis', watch: 'tension' },
+        { preset: 'malignantHyperthermia', watch: 'calcium' },
+      ],
+    },
+    {
+      heading: 'One twitch makes a third of the force the muscle can',
+      paragraphs: [
+        'A single action potential produces only about a third of the force the muscle can make. The reason is a timing mismatch: calcium is re-sequestered before the cross-bridges have finished attaching. Stimulate again before relaxation is complete and tension summates; stimulate fast enough and calcium never falls back at all, giving a smooth fused tetanus at maximal force. This is one of the two ways the nervous system grades force. The other is recruitment — bringing in more motor units, smallest and weakest first, which is why fine control is possible at low effort and impossible near maximum.',
+      ],
+      demos: [
+        { preset: 'unfusedTetanus', watch: 'fusion' },
+        { preset: 'fusedTetanus', watch: 'fusion' },
+      ],
+    },
+    {
+      heading: 'Cardiac muscle cannot summate, and one number is why',
+      paragraphs: [
+        'Cardiac muscle cannot do this, and the reason is a single number. Its refractory period lasts longer than its own twitch, so a second stimulus can never arrive in time to summate — a heart that could tetanize would be a heart that stopped ejecting. Cardiac muscle also depends on calcium entering from outside to trigger release (calcium-induced calcium release), which is why extracellular calcium changes cardiac force but barely touches skeletal muscle, where the voltage sensor pulls the release channel open mechanically.',
+      ],
+      demos: [
+        { preset: 'cardiacMuscle', watch: 'fusion' },
+        { preset: 'smoothLatch', watch: 'tension' },
+      ],
+    },
+    {
+      heading: 'Force depends on geometry, and overlap is the evidence',
+      paragraphs: [
+        'Finally, force depends on geometry. The length-tension curve is the clearest structural evidence for the sliding filament theory: tension tracks the number of cross-bridges that can physically form, which is set by filament overlap. Too short and the thin filaments collide; too long and there is nothing to grip. And once the muscle is shortening, the force-velocity relation takes over — a fast-moving muscle has fewer heads attached at any instant, so it generates less force. Power is zero at both ends and peaks at about a third of maximal load.',
+      ],
+      demos: [
+        { preset: 'isotonicLift', watch: 'tension' },
+        { preset: 'overstretched', watch: 'tension' },
+      ],
+    },
   ],
 };

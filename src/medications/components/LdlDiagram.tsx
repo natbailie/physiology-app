@@ -45,7 +45,7 @@ export function LdlDiagram() {
       <DiagramFrame viewBox="0 0 560 340" ariaLabel="Plasma LDL bar that shortens as the statin blocks cholesterol synthesis, with the liver receptor shown pulling LDL out">
         <g>
           <text className={text.tickLabel} x={B.BAR_X + B.BAR_MAX_W / 2} y={64}>
-            PLASMA LDL (mmol/L)
+            Plasma LDL (mmol/L)
           </text>
 
           {/* Plasma LDL bar */}

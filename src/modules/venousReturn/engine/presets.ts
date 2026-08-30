@@ -69,7 +69,7 @@ export const VENOUS_RETURN_PRESET_LABELS: Record<VenousReturnPresetName, string>
   venoconstriction: 'Venoconstriction',
   exercise: 'Exercise',
   avFistula: 'AV fistula',
-  positivePressureVentilation: 'PEEP / IPPV',
+  positivePressureVentilation: 'Peep / IPPV',
   venodilation: 'Venodilation',
 };
 

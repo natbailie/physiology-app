@@ -90,7 +90,7 @@ export function patternSummary(pattern: {
     case 'normal bile pigment handling':
       return 'pigment cleared at the rate it is made; no bilirubinuria, stool coloured';
     case 'pre-hepatic (haemolytic) jaundice':
-      return `unconjugated ${pattern.unconjugatedUmolL.toFixed(0)} with urobilinogen HIGH and NO bilirubinuria — the liver was never the problem`;
+      return `unconjugated ${pattern.unconjugatedUmolL.toFixed(0)} with urobilinogen high and NO bilirubinuria — the liver was never the problem`;
     case 'Gilbert-type: isolated unconjugated':
       return `mild unconjugated ${pattern.unconjugatedUmolL.toFixed(0)} µmol/L, normal enzymes, well during fasting or illness`;
     case 'Crigler-Najjar type I':
@@ -98,9 +98,9 @@ export function patternSummary(pattern: {
     case 'neonatal physiological jaundice':
       return `immature UGT meeting a haemolytic load: unconjugated ${pattern.unconjugatedUmolL.toFixed(0)}, albumin-limited binding`;
     case 'hepatocellular jaundice':
-      return `ALT-dominant injury regurgitating BOTH pigments — bilirubinuria present because conjugated reaches plasma directly`;
+      return `ALT-dominant injury regurgitating both pigments — bilirubinuria present because conjugated reaches plasma directly`;
     case 'cholestatic / obstructive jaundice':
-      return `conjugated ${pattern.conjugatedUmolL.toFixed(0)} with dark urine, ABSENT urobilinogen and pale stools — bile cannot leave`;
+      return `conjugated ${pattern.conjugatedUmolL.toFixed(0)} with dark urine, absent urobilinogen and pale stools — bile cannot leave`;
     case 'mixed hepatocellular-cholestatic':
       return 'both patterns on one chart: necrosis plus blocked outflow must be read separately';
     case 'decompensated cirrhosis with encephalopathy':

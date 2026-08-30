@@ -54,7 +54,7 @@ export const NMJ_QUESTIONS: readonly NmjQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The quanta released have collapsed, and unlike Lambert-Eaton no amount of stimulation recruits more. The toxin cleaves the SNARE proteins that dock vesicles to the membrane, so release fails at the very first step and calcium accumulating in the terminal has nothing to act on. That is the distinction from a channel lesion, where the machinery is intact and simply under-triggered — and it is why recovery requires the terminal to grow new endings rather than merely to be driven harder.',
+      'The quanta released have collapsed, and unlike Lambert-Eaton no amount of stimulation recruits more. The toxin cleaves the snare proteins that dock vesicles to the membrane, so release fails at the very first step and calcium accumulating in the terminal has nothing to act on. That is the distinction from a channel lesion, where the machinery is intact and simply under-triggered — and it is why recovery requires the terminal to grow new endings rather than merely to be driven harder.',
   },
   {
     id: 'anticholinesterase-treats-mg',
@@ -81,7 +81,7 @@ export const NMJ_QUESTIONS: readonly NmjQuestion[] = [
     settleSeconds: 60,
     observeSeconds: 120,
     explanation:
-      'Force falls, which is the reverse of what a therapeutic dose does and is the point of the question. Transmitter accumulates until the end plate is persistently depolarised, and a persistently depolarised end plate cannot fire the fibre — the sodium channels around it sit inactivated. Too MUCH agonist produces a block of exactly the same kind as a depolarising relaxant. Fasciculation comes first, then paralysis, and more anticholinesterase deepens it rather than reversing it.',
+      'Force falls, which is the reverse of what a therapeutic dose does and is the point of the question. Transmitter accumulates until the end plate is persistently depolarised, and a persistently depolarised end plate cannot fire the fibre — the sodium channels around it sit inactivated. Too much agonist produces a block of exactly the same kind as a depolarising relaxant. Fasciculation comes first, then paralysis, and more anticholinesterase deepens it rather than reversing it.',
     metric: (s) => s.derived.muscleForcePercent,
   },
 ];

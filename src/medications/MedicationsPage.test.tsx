@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { MedicationsPage } from './MedicationsPage';
-import { FAMILIES, MEDICATIONS } from './drugs';
+import { FAMILIES, MEDICATIONS, MICRO_GROUPS, MOA_GROUPS, getMoaClasses } from './drugs';
 
 afterEach(cleanup);
 
@@ -27,6 +27,51 @@ describe('MedicationsPage family hub', () => {
     const family = FAMILIES[0]!;
     const link = screen.getByRole('link', { name: new RegExp(family.name, 'i') });
     expect(link.textContent).toContain(`${family.classCount}`);
+  });
+});
+
+describe('MedicationsPage infection tiers', () => {
+  it('shows the four antimicrobial branch tiles on the infection family page (not classes)', () => {
+    navigateTo('#medications/infection');
+    render(<MedicationsPage />);
+    for (const micro of MICRO_GROUPS) {
+      const link = screen.getByRole('link', { name: new RegExp(`^\\s*${micro.name}`, 'i') });
+      expect(link.getAttribute('href')).toBe(`#medications/infection/${micro.id}`);
+    }
+    // An Infection class should not be reachable directly from the family page.
+    const anInfectionClass = MEDICATIONS.find((d) => d.family === 'Infection')!;
+    expect(
+      screen.queryByRole('link', { name: new RegExp(anInfectionClass.className, 'i') }),
+    ).toBeNull();
+  });
+
+  it('shows the mechanism-of-action tiles on the antibiotics branch', () => {
+    navigateTo('#medications/infection/antibiotics');
+    render(<MedicationsPage />);
+    for (const moa of MOA_GROUPS) {
+      const link = screen.getByRole('link', { name: new RegExp(moa.name, 'i') });
+      expect(link.getAttribute('href')).toBe(`#medications/infection/antibiotics/${moa.id}`);
+    }
+  });
+
+  it('shows the classes under a chosen mechanism of action', () => {
+    navigateTo('#medications/infection/antibiotics/cell-wall');
+    render(<MedicationsPage />);
+    for (const drug of getMoaClasses('cell-wall')) {
+      const link = screen.getByRole('link', { name: new RegExp(drug.className, 'i') });
+      expect(link.getAttribute('href')).toBe(`#medications/${drug.id}`);
+    }
+  });
+
+  it('shows the non-antibiotic branch classes without a further tier', () => {
+    const branch = MICRO_GROUPS.find((g) => g.id === 'antivirals')!;
+    navigateTo(`#medications/infection/${branch.id}`);
+    render(<MedicationsPage />);
+    const classes = MEDICATIONS.filter((d) => d.microGroup === branch.id);
+    const links = screen.getAllByRole('link').map((l) => l.getAttribute('href'));
+    for (const drug of classes.slice(0, 3)) {
+      expect(links).toContain(`#medications/${drug.id}`);
+    }
   });
 });
 

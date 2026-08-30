@@ -43,7 +43,7 @@ export function PregnancyDiagram({ derived }: PregnancyDiagramProps) {
       <path className={styles.hbCurve} d={hbCurve} />
       <circle className={styles.operatingPoint} cx={toX(derived.pregnancyProgressFraction * 38 + 4)} cy={toY(derived.haemoglobinGPerDl)} r={5} />
       <text className={styles.label} x={PLOT.x} y={PLOT.y - 12}>
-        MATERNAL Hb vs GESTATION
+        Maternal Hb vs gestation
       </text>
       <text className={styles.caption} x={PLOT.x + 6} y={PLOT.y + 16}>
         {derived.haemoglobinGPerDl.toFixed(1)} g/dL — dilutional trough
@@ -56,7 +56,7 @@ export function PregnancyDiagram({ derived }: PregnancyDiagramProps) {
       <ellipse cx={140} cy={130} rx={78} ry={92} className={styles.wombOutline} />
       <circle className={styles.fetusCircle} cx={140} cy={126} r={fetusRadius} />
       <text className={styles.label} x={86} y={24}>
-        FETUS · {derived.fetalWeightG.toFixed(0)} g
+        Fetus · {derived.fetalWeightG.toFixed(0)} g
       </text>
       <text className={styles.caption} x={80} y={238}>
         placental flow {derived.uteroplacentalFlowSharePct.toFixed(0)}% of CO
@@ -65,7 +65,7 @@ export function PregnancyDiagram({ derived }: PregnancyDiagramProps) {
       {/* Contraction trace during labour. */}
       <line className={styles.axis} x1={40} x2={280} y1={300} y2={300} />
       <text className={styles.label} x={40} y={282}>
-        CONTRACTIONS
+        Contractions
       </text>
       {derived.cervicalDilationCm > 0 ? (
         <path

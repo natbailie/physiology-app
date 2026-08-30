@@ -56,13 +56,13 @@ export function ExerciseDiagram({ derived }: ExerciseDiagramProps) {
       </DiagramText>
       {derived.aboveVo2Max && (
         <DiagramText className={styles.alarm} x={PLOT.x + 4} y={PLOT.y + 30} maxWidth={560 - PLOT.x - 20} fontSize={12}>
-          ABOVE CEILING — deficit paid anaerobically
+          Above ceiling — deficit paid anaerobically
         </DiagramText>
       )}
 
       {/* Flow redistribution. */}
       <text className={styles.label} x={44} y={150}>
-        BLOOD FLOW REDISTRIBUTION
+        Blood flow redistribution
       </text>
       {[
         { label: 'muscle', value: musclePct, color: 'var(--sarcomere)', text: `${derived.muscleFlowSharePct.toFixed(0)}%` },
@@ -104,7 +104,7 @@ export function ExerciseDiagram({ derived }: ExerciseDiagramProps) {
       {(derived.aboveThreshold || derived.aboveVo2Max) && (
         <DiagramText className={styles.alarm} x={44} y={316} maxWidth={500} fontSize={12}>
           {derived.aboveVo2Max
-            ? `EXHAUSTION — fatigue ${derived.fatiguePct.toFixed(0)}% and climbing`
+            ? `Exhaustion — fatigue ${derived.fatiguePct.toFixed(0)}% and climbing`
             : `above lactate threshold (${(derived.lactateThresholdFraction * 100).toFixed(0)}% of ceiling)`}
         </DiagramText>
       )}

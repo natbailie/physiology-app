@@ -9,7 +9,7 @@ interface InflammationDiagramProps {
 }
 
 const TISSUE = { x: 40, y: 80, w: 200, h: 160 };
-const BAR = { x: 300, y: 90, width: 70, height: 160 };
+const BAR = { x: 300, y: 90, width: 104, height: 160 };
 const BAR_MAX = 2;
 
 /**
@@ -38,7 +38,7 @@ export function InflammationDiagram({ derived }: InflammationDiagramProps) {
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="Inflammatory site and immune cell populations">
       {/* Tissue cross-section */}
       <text className={styles.label} x={TISSUE.x} y={TISSUE.y - 12}>
-        TISSUE SITE
+        Tissue site
       </text>
       <rect
         className={styles.tissue}
@@ -126,7 +126,7 @@ export function InflammationDiagram({ derived }: InflammationDiagramProps) {
 
       {/* Immune cell bar chart */}
       <text className={styles.label} x={BAR.x - 10} y={BAR.y - 24}>
-        CELLS & PUS
+        Cells & pus
       </text>
       <rect className={styles.neutBar} x={BAR.x} y={BAR.y + BAR.height - neutH} width={BAR.width * 0.3} height={neutH} />
       <rect className={styles.monoBar} x={BAR.x + BAR.width * 0.35} y={BAR.y + BAR.height - monoH} width={BAR.width * 0.3} height={monoH} />

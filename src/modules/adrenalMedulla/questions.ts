@@ -31,7 +31,7 @@ export const MEDULLA_QUESTIONS: readonly MedullaQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Palpitations and panic dominate when the tumour secretes ADRENALINE — the beta-heavy mix acts on the heart while adding only modest alpha vasoconstriction. Compare with the noradrenaline pattern: sustained pallor and pressure with a comparatively quiet pulse. The secretion MIX is the phenotype, which is why the ten-percent rule told surgeons where the adrenaline-making tumours would sit.',
+      'Palpitations and panic dominate when the tumour secretes adrenaline — the beta-heavy mix acts on the heart while adding only modest alpha vasoconstriction. Compare with the noradrenaline pattern: sustained pallor and pressure with a comparatively quiet pulse. The secretion mix is the phenotype, which is why the ten-percent rule told surgeons where the adrenaline-making tumours would sit.',
   },
   {
     id: 'sustained-pressure-orthostatic',
@@ -41,7 +41,7 @@ export const MEDULLA_QUESTIONS: readonly MedullaQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Noradrenaline works on alpha: weeks of vasoconstriction hold MAP high AND leak plasma volume down until standing produces a marked drop. Orthostatic hypotension inside a hypertensive patient is close to pathognomonic here. The triad — headache, sweating, palpitations — counts its way through this preset, but the volume sign is the one examiners hide in the vignette.',
+      'Noradrenaline works on alpha: weeks of vasoconstriction hold MAP high and leak plasma volume down until standing produces a marked drop. Orthostatic hypotension inside a hypertensive patient is close to pathognomonic here. The triad — headache, sweating, palpitations — counts its way through this preset, but the volume sign is the one examiners hide in the vignette.',
   },
   {
     id: 'beta-first-worse-than-nothing',
@@ -51,7 +51,7 @@ export const MEDULLA_QUESTIONS: readonly MedullaQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Beta-blockade removed beta2 vasodilatation and left alpha vasoconstriction UNOPPOSED — so the same tumour now generates a higher MAP than no treatment at all. This is why phaeochromocytoma management is strictly sequential: alpha first (phenoxybenzamine), volume re-expanded, THEN beta for reflex tachycardia. The order of two drugs is the difference between preparation and catastrophe.',
+      'Beta-blockade removed beta2 vasodilatation and left alpha vasoconstriction unopposed — so the same tumour now generates a higher MAP than no treatment at all. This is why phaeochromocytoma management is strictly sequential: alpha first (phenoxybenzamine), volume re-expanded, then beta for reflex tachycardia. The order of two drugs is the difference between preparation and catastrophe.',
   },
   {
     id: 'alpha-covers-the-paroxysm',
@@ -79,7 +79,7 @@ export const MEDULLA_QUESTIONS: readonly MedullaQuestion[] = [
     observeSeconds: 1500,
     tolerance: 0.02,
     explanation:
-      'It spikes within seconds — paroxysms are EVENTS, bursts of secretion clearing with a half-life of minutes, which is why patients describe attacks rather than constant illness. This is also why random catecholamine sampling misses the diagnosis while metanephrines catch it: COMT methylates continuously, integrating the spikes. Trigger the same event on an alpha-covered patient and the surge flattens.',
+      'It spikes within seconds — paroxysms are events, bursts of secretion clearing with a half-life of minutes, which is why patients describe attacks rather than constant illness. This is also why random catecholamine sampling misses the diagnosis while metanephrines catch it: COMT methylates continuously, integrating the spikes. Trigger the same event on an alpha-covered patient and the surge flattens.',
     metric: (s) => s.derived.mapMmHg,
   },
 ];

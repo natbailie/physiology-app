@@ -36,7 +36,7 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Collapse DURING the infusion with dark urine means preformed antibodies have met antigen on the transfused cells — ABO incompatibility at meaningful volume. IgM fixes complement immediately: free haemoglobin, haemoglobinuria, shock, then DIC and renal injury if the volume was large. Stop the unit, run fluids for the kidney, support the pressure. The delayed Rh reaction looks nothing like this today — it presents next week.',
+      'Collapse during the infusion with dark urine means preformed antibodies have met antigen on the transfused cells — ABO incompatibility at meaningful volume. IgM fixes complement immediately: free haemoglobin, haemoglobinuria, shock, then DIC and renal injury if the volume was large. Stop the unit, run fluids for the kidney, support the pressure. The delayed Rh reaction looks nothing like this today — it presents next week.',
   },
   {
     id: 'falling-hb-next-week',
@@ -56,7 +56,7 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Nothing happens immunologically — O red cells carry neither A nor B antigen, so there is nothing for the recipient\'s antibodies (and an AB recipient has none anyway) to meet. The universal-donor trick works because red-cell units contain almost none of the DONOR\'s plasma; it is about absent antigens on the cells given, not absent antibodies in the patient.',
+      'Nothing happens immunologically — O red cells carry neither A nor B antigen, so there is nothing for the recipient\'s antibodies (and an AB recipient has none anyway) to meet. The universal-donor trick works because red-cell units contain almost none of the donor\'s plasma; it is about absent antigens on the cells given, not absent antibodies in the patient.',
   },
   {
     id: 'volume-drives-severity',
@@ -69,7 +69,7 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
     settleSeconds: 30000,
     observeSeconds: 30000,
     explanation:
-      'It collapses toward zero — severity scales with the VOLUME of incompatible cells infused, which is why stopping at the first few millilitres aborts the entire syndrome before free haemoglobin reaches the kidney or thrombin generation begins. The fifteen-minute supervised start of every transfusion is not ceremony; it is the single most effective safety intervention in transfusion medicine.',
+      'It collapses toward zero — severity scales with the volume of incompatible cells infused, which is why stopping at the first few millilitres aborts the entire syndrome before free haemoglobin reaches the kidney or thrombin generation begins. The fifteen-minute supervised start of every transfusion is not ceremony; it is the single most effective safety intervention in transfusion medicine.',
     metric: (s) => s.derived.dicRiskPct,
   },
 
@@ -97,12 +97,12 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
     stem: 'A Rh-negative mother has just delivered her first Rh-positive baby. She was not previously sensitised, and no anti-D has been given yet.',
     setup: { preset: 'hdnMissedProphylaxis' },
     intervention: { label: 'Anti-D immunoglobulin is given at this delivery.', inputs: { antiDProtectionPct: 95 } },
-    prompt: 'What happens to the sensitisation risk for her NEXT pregnancy?',
+    prompt: 'What happens to the sensitisation risk for her next pregnancy?',
     watch: 'next-pregnancy risk',
     correctDirection: 'falls',
     observeSeconds: 30000,
     explanation:
-      'It collapses from near-certain to almost nil, and that is the entire point of anti-D: it destroys any fetal cells that crossed into the maternal circulation at THIS delivery before her immune system can learn them. Note what it did not do — it did not treat this baby, because this baby never needed treating; sensitisation happens around delivery, too late for significant harm the first time. The disease anti-D prevents belongs to the next child, which is why the dose is audited with the same rigour as a blood product, because that is what it is.',
+      'It collapses from near-certain to almost nil, and that is the entire point of anti-D: it destroys any fetal cells that crossed into the maternal circulation at this delivery before her immune system can learn them. Note what it did not do — it did not treat this baby, because this baby never needed treating; sensitisation happens around delivery, too late for significant harm the first time. The disease anti-D prevents belongs to the next child, which is why the dose is audited with the same rigour as a blood product, because that is what it is.',
     metric: (s) => s.derived.nextPregnancySensitisationRiskPct,
   },
 
@@ -121,6 +121,6 @@ export const BLOOD_QUESTIONS: readonly BloodQuestion[] = [
     ] as readonly PanelField<Snapshot>[],
     settleSeconds: 900000,
     explanation:
-      'Only the sensitised mother threatens THIS fetus: falling Hb, rising bilirubin, hydrops on the horizon — the antibody already exists and the placenta is a highway for IgG. The other two fetuses are both healthy today, and the panel separates them by exactly one row: whether anti-D was given when it could still work. Missed prophylaxis leaves this pregnancy unscathed while writing a blank cheque against the next one. That asymmetry is why anti-D is counted, signed for, and given within seventy-two hours of every qualifying delivery.',
+      'Only the sensitised mother threatens this fetus: falling Hb, rising bilirubin, hydrops on the horizon — the antibody already exists and the placenta is a highway for IgG. The other two fetuses are both healthy today, and the panel separates them by exactly one row: whether anti-D was given when it could still work. Missed prophylaxis leaves this pregnancy unscathed while writing a blank cheque against the next one. That asymmetry is why anti-D is counted, signed for, and given within seventy-two hours of every qualifying delivery.',
   },
 ];

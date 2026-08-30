@@ -22,8 +22,13 @@
   border-radius: 4px;
 }
 
+/* The panel's own claim, in the reading face with the headings and prose it opens onto — the
+ * whole explainer is one editorial block, and the sans belongs to the instrument around it.
+ * A size step above `.heading` is what keeps the two levels apart; the weight is the same 600
+ * every h1-h3 gets from index.css. */
 .title {
-  font-size: 0.95rem;
+  font-family: var(--serif);
+  font-size: var(--fs-base);
 }
 
 .chevron {
@@ -51,11 +56,14 @@
   border-top: 1px solid var(--panel-border);
 }
 
+/* Set in the reading face. This is the one place a learner reads continuously rather than
+ * scanning, and a serif at 14px holds a 78-character measure better than the sans did. */
 .paragraph {
-  font-size: 0.82rem;
-  line-height: 1.6;
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
   color: var(--text-dim);
-  max-width: 78ch;
+  max-width: 72ch;
 }
 
 /* --- Sectioned prose --- */
@@ -104,10 +112,14 @@
   min-width: 1ch;
 }
 
+/* Set in the reading face with its paragraphs. These headings are claims in the same voice as
+ * the prose beneath them — "Two hormones under opposite architectures" is a sentence, not a
+ * control label — so they belong to the text, not to the instrument chrome around it. */
 .heading {
-  font-size: 0.85rem;
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--lh-snug);
   color: var(--text);
   flex: 1;
 }

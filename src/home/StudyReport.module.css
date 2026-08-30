@@ -1,0 +1,99 @@
+.report {
+  composes: panel from '../shared/styles/panel.module.css';
+  padding: var(--s-4) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+/* Capped rather than full-bleed: at 1400px the meter ends up half a screen from the reason it
+ * belongs to, and the row stops reading as one line about one module. */
+.list {
+  margin: 0;
+  padding: 0;
+  max-width: 52rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* Name, reason, meter, due badge on one line; the reason takes the slack so the meter and
+ * badge stay in a column down the right. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr 4rem auto;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.name:hover {
+  color: var(--accent, var(--artery));
+  text-decoration: underline;
+}
+
+.name:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.reason {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.meter {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--panel-border);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--text-dim);
+}
+
+.due {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--artery);
+  white-space: nowrap;
+}
+
+/* Stacked below the theme grid's breakpoint: the four-column row cannot survive a narrow
+ * viewport, and the meter is the first thing worth dropping. */
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr auto;
+    row-gap: var(--s-1);
+  }
+
+  .reason {
+    grid-column: 1 / -1;
+  }
+
+  .meter {
+    display: none;
+  }
+}

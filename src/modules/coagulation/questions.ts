@@ -46,7 +46,7 @@ export const COAGULATION_QUESTIONS: readonly CoagQuestion[] = [
     options: ['dic', 'liverDisease', 'warfarin', 'thrombocytopenia'],
     panel: FULL,
     explanation:
-      'Liver disease and DIC both prolong PT and APTT, because a failing liver makes fewer of the same factors that DIC consumes. The D-dimer is what separates them: DIC is active clotting AND active lysis throughout the circulation, so fibrin degradation products are high, while a liver that is merely underproducing has nothing extra to break down. The falling fibrinogen and platelets point the same way — they are being consumed, not just under-made.',
+      'Liver disease and DIC both prolong PT and APTT, because a failing liver makes fewer of the same factors that DIC consumes. The D-dimer is what separates them: DIC is active clotting and active lysis throughout the circulation, so fibrin degradation products are high, while a liver that is merely underproducing has nothing extra to break down. The falling fibrinogen and platelets point the same way — they are being consumed, not just under-made.',
   },
   {
     id: 'isolated-pt',

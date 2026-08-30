@@ -1,13 +1,65 @@
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
+import type { VenousReturnPresetName } from './engine/presets';
 
-export const venousReturnContent: ExplainerContent = {
+export const venousReturnContent: ExplainerContent<VenousReturnPresetName> = {
   title: 'The heart can only pump what it receives',
-  paragraphs: [
-    'Cardiac output is not decided by the heart. It is decided by where two independent relationships cross. The cardiac function curve says how much the heart will pump at a given filling pressure — the Frank-Starling relationship, drawn with right atrial pressure on the x-axis. The venous return curve says how much blood the circulation will deliver at that same pressure. Both are functions of one shared variable, so there is exactly one pressure at which they agree, and that is where the circulation sits.',
-    'The two curves run in opposite directions, and that is the whole point. Raising right atrial pressure makes the heart pump MORE, by stretching it. But it makes venous return LESS, because venous return is driven by the difference between the mean systemic filling pressure upstream and the atrial pressure downstream. A heart that cannot empty its atrium is a heart that stops being filled. This is why a failing heart presents with a high venous pressure and a low output simultaneously: those are not two problems, they are two coordinates of one intersection.',
-    'The mean systemic filling pressure is the pressure that would exist everywhere if the heart stopped and everything equalised — about 7 mmHg. It is set entirely by the vessels: by how much blood is stretching them, divided by how compliant they are. The heart contributes nothing to it. It is also where the venous return curve meets the axis, because that is the pressure at which there is no longer any gradient to drive flow, which is exactly how it is measured during cardiac arrest.',
-    'Only stressed volume counts. About 86% of blood volume simply fills the vessels without stretching them and generates no pressure at all; the remaining 700 mL or so is what produces the filling pressure. Venoconstriction converts unstressed volume into stressed volume, so sympathetic activity raises the filling pressure, shifts the venous return curve to the right, and raises cardiac output — with the blood volume completely unchanged and the heart doing nothing different. That is how output rises within seconds of standing up or losing blood, long before any fluid could be given.',
-    'Resistance behaves in a way that catches people out. Resistance to venous return is dominated by the VEINS, not the arterioles — not because arteriolar resistance is small, but because what matters is the resistance weighted by the compliance downstream of it, and almost all the compliance is venous. Doubling systemic vascular resistance therefore moves the venous return curve much less than it moves arterial pressure. An arteriovenous fistula, which bypasses the arterioles entirely, collapses that resistance and produces a high cardiac output from a completely normal heart.',
-    'Finally, the heart is a pump inside a pressure chamber, and what distends it is the transmural pressure — inside minus outside. Raising the pressure around it shifts the whole cardiac function curve to the right, so the same measured right atrial pressure now fills it less. That is the mechanism behind the fall in output during a Valsalva strain and under positive-pressure ventilation, and it is why a high central venous pressure in a ventilated patient does not mean what it would in a breathing one.',
+  sections: [
+    {
+      heading: 'Output is decided by where two curves cross',
+      paragraphs: [
+        'Cardiac output is not decided by the heart. It is decided by where two independent relationships cross. The cardiac function curve says how much the heart will pump at a given filling pressure — the Frank-Starling relationship, drawn with right atrial pressure on the x-axis. The venous return curve says how much blood the circulation will deliver at that same pressure. Both are functions of one shared variable, so there is exactly one pressure at which they agree, and that is where the circulation sits.',
+      ],
+      demos: [
+        { preset: 'normal', watch: 'operating point' },
+      ],
+    },
+    {
+      heading: 'The two curves run in opposite directions, and that is the point',
+      paragraphs: [
+        'The two curves run in opposite directions, and that is the whole point. Raising right atrial pressure makes the heart pump more, by stretching it. But it makes venous return less, because venous return is driven by the difference between the mean systemic filling pressure upstream and the atrial pressure downstream. A heart that cannot empty its atrium is a heart that stops being filled. This is why a failing heart presents with a high venous pressure and a low output simultaneously: those are not two problems, they are two coordinates of one intersection.',
+      ],
+      demos: [
+        { preset: 'heartFailure', watch: 'operating point' },
+      ],
+    },
+    {
+      heading: 'Mean systemic filling pressure is set entirely by the vessels',
+      paragraphs: [
+        'The mean systemic filling pressure is the pressure that would exist everywhere if the heart stopped and everything equalised — about 7 mmHg. It is set entirely by the vessels: by how much blood is stretching them, divided by how compliant they are. The heart contributes nothing to it. It is also where the venous return curve meets the axis, because that is the pressure at which there is no longer any gradient to drive flow, which is exactly how it is measured during cardiac arrest.',
+      ],
+      demos: [
+        { preset: 'haemorrhage', watch: 'filling pressure' },
+        { preset: 'volumeOverload', watch: 'filling pressure' },
+      ],
+    },
+    {
+      heading: 'Only stressed volume counts toward that pressure',
+      paragraphs: [
+        'Only stressed volume counts. About 86% of blood volume simply fills the vessels without stretching them and generates no pressure at all; the remaining 700 mL or so is what produces the filling pressure. Venoconstriction converts unstressed volume into stressed volume, so sympathetic activity raises the filling pressure, shifts the venous return curve to the right, and raises cardiac output — with the blood volume completely unchanged and the heart doing nothing different. That is how output rises within seconds of standing up or losing blood, long before any fluid could be given.',
+      ],
+      demos: [
+        { preset: 'venoconstriction', watch: 'filling pressure' },
+        { preset: 'venodilation', watch: 'filling pressure' },
+      ],
+    },
+    {
+      heading: 'Resistance to venous return is dominated by the veins',
+      paragraphs: [
+        'Resistance behaves in a way that catches people out. Resistance to venous return is dominated by the veins, not the arterioles — not because arteriolar resistance is small, but because what matters is the resistance weighted by the compliance downstream of it, and almost all the compliance is venous. Doubling systemic vascular resistance therefore moves the venous return curve much less than it moves arterial pressure. An arteriovenous fistula, which bypasses the arterioles entirely, collapses that resistance and produces a high cardiac output from a completely normal heart.',
+      ],
+      demos: [
+        { preset: 'avFistula', watch: 'venous return' },
+        { preset: 'exercise', watch: 'cardiac output' },
+      ],
+    },
+    {
+      heading: 'The heart is a pump inside a pressure chamber',
+      paragraphs: [
+        'Finally, the heart is a pump inside a pressure chamber, and what distends it is the transmural pressure — inside minus outside. Raising the pressure around it shifts the whole cardiac function curve to the right, so the same measured right atrial pressure now fills it less. That is the mechanism behind the fall in output during a Valsalva strain and under positive-pressure ventilation, and it is why a high central venous pressure in a ventilated patient does not mean what it would in a breathing one.',
+      ],
+      demos: [
+        { preset: 'positivePressureVentilation', watch: 'transmural pressure' },
+      ],
+    },
   ],
 };

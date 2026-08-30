@@ -15,7 +15,7 @@ export const ANS_QUESTIONS: readonly AnsQuestion[] = [
     watch: 'heart rate',
     correctDirection: 'rises',
     explanation:
-      'The rate climbs toward about 100, which is the sinus node\'s own intrinsic rhythm. A resting rate of 70 is that intrinsic rate held DOWN by continuous vagal tone, so blocking muscarinic receptors does not produce "no effect" — it releases a brake that was always applied. This is the general lesson about any tissue under continuous tone: blocking a pathway produces a dramatic change precisely because something was being actively restrained.',
+      'The rate climbs toward about 100, which is the sinus node\'s own intrinsic rhythm. A resting rate of 70 is that intrinsic rate held down by continuous vagal tone, so blocking muscarinic receptors does not produce "no effect" — it releases a brake that was always applied. This is the general lesson about any tissue under continuous tone: blocking a pathway produces a dramatic change precisely because something was being actively restrained.',
     metric: (s) => s.derived.heartRateBpm,
   },
   {
@@ -27,7 +27,7 @@ export const ANS_QUESTIONS: readonly AnsQuestion[] = [
     watch: 'gut motility',
     correctDirection: 'falls',
     explanation:
-      'Motility falls, which is the OPPOSITE direction to what the same drug did to the heart. Muscarinic activity slows the heart but stimulates the gut, so blocking it speeds one and slows the other. The sign of an autonomic effect is a property of the organ, not of the transmitter — which is why these effects have to be learned per organ rather than as a single rule, and why an anticholinergic causes tachycardia and constipation at the same time.',
+      'Motility falls, which is the opposite direction to what the same drug did to the heart. Muscarinic activity slows the heart but stimulates the gut, so blocking it speeds one and slows the other. The sign of an autonomic effect is a property of the organ, not of the transmitter — which is why these effects have to be learned per organ rather than as a single rule, and why an anticholinergic causes tachycardia and constipation at the same time.',
     metric: (s) => s.derived.giMotilityIndex,
   },
   {
@@ -76,7 +76,7 @@ export const ANS_QUESTIONS: readonly AnsQuestion[] = [
     watch: 'the pupil diameter',
     correctDirection: 'rises',
     explanation:
-      'The pupil dilates, and note that no sympathetic drive was added to do it. Pupil size is a balance between circular muscle under muscarinic control and radial muscle under alpha control, so removing one side lets the other act unopposed — the dilatation is the ABSENCE of constriction rather than the presence of anything new. That is the general shape of every antimuscarinic effect, and it is why the side effects are so predictable once you know which organ the parasympathetic was doing the work in.',
+      'The pupil dilates, and note that no sympathetic drive was added to do it. Pupil size is a balance between circular muscle under muscarinic control and radial muscle under alpha control, so removing one side lets the other act unopposed — the dilatation is the absence of constriction rather than the presence of anything new. That is the general shape of every antimuscarinic effect, and it is why the side effects are so predictable once you know which organ the parasympathetic was doing the work in.',
     metric: (s) => s.derived.pupilDiameterMm,
   }
 ];

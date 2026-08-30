@@ -181,7 +181,7 @@ export function patternSummary(pattern: {
     case 'first trimester':
     case 'second trimester':
     case 'third trimester':
-      return `Hb ${pattern.haemoglobinGPerDl.toFixed(1)} g/dL falling with dilution · PaCO2 ${pattern.paCO2MmHg.toFixed(0)} · creatinine ${pattern.creatinineMgDl.toFixed(2)} — all normal FOR pregnancy`;
+      return `Hb ${pattern.haemoglobinGPerDl.toFixed(1)} g/dL falling with dilution · PaCO2 ${pattern.paCO2MmHg.toFixed(0)} · creatinine ${pattern.creatinineMgDl.toFixed(2)} — all normal for pregnancy`;
     case 'term singleton pregnancy':
       return `Hb ${pattern.haemoglobinGPerDl.toFixed(1)}, CO maximally raised, fetal weight ${pattern.fetalWeightG.toFixed(0)} g`;
     case 'twin gestation':

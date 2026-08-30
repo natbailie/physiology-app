@@ -47,7 +47,7 @@ export const PITUITARY_QUESTIONS: readonly PituitaryQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Acral growth plus new snoring is the acromegaly story, and the numbers confirm an autonomous somatotroph adenoma: GH massively elevated WITH IGF-1 high. The glucose suppression result is the diagnostic clincher — a normal axis shuts GH down under a glucose load, while the adenoma ignores hypothalamic control entirely. IGF-1 is the better screening value because it integrates days of pulsatile secretion.',
+      'Acral growth plus new snoring is the acromegaly story, and the numbers confirm an autonomous somatotroph adenoma: GH massively elevated with IGF-1 high. The glucose suppression result is the diagnostic clincher — a normal axis shuts GH down under a glucose load, while the adenoma ignores hypothalamic control entirely. IGF-1 is the better screening value because it integrates days of pulsatile secretion.',
   },
   {
     id: 'amenorrhoea-galactorrhoea',
@@ -57,7 +57,7 @@ export const PITUITARY_QUESTIONS: readonly PituitaryQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Prolactin above roughly 250 in the presence of a mass means the MASS is the secretor — a macroprolactinoma. Prolactin suppresses GnRH, which is why periods stop before anything else happens. Contrast the stalk-effect pattern: a non-functioning mass lifts prolactin only moderately, never into these ranges. The treatment follows the mechanism: dopamine agonists restore the brake AND shrink the tumour.',
+      'Prolactin above roughly 250 in the presence of a mass means the mass is the secretor — a macroprolactinoma. Prolactin suppresses GnRH, which is why periods stop before anything else happens. Contrast the stalk-effect pattern: a non-functioning mass lifts prolactin only moderately, never into these ranges. The treatment follows the mechanism: dopamine agonists restore the brake and shrink the tumour.',
   },
   {
     id: 'drug-before-scan',
@@ -67,7 +67,7 @@ export const PITUITARY_QUESTIONS: readonly PituitaryQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Moderate hyperprolactinaemia with an EMPTY fossa is the signature of D2 receptor blockade — the brake is removed at the receptor, so no structural cause needs to exist. This is why the medication list is read before the MRI in hyperprolactinaemia. Stalk effect would need a mass; a microprolactinoma usually pushes higher; and the moderate band here matches drugs or TRH drive rather than autonomous secretion.',
+      'Moderate hyperprolactinaemia with an empty fossa is the signature of D2 receptor blockade — the brake is removed at the receptor, so no structural cause needs to exist. This is why the medication list is read before the MRI in hyperprolactinaemia. Stalk effect would need a mass; a microprolactinoma usually pushes higher; and the moderate band here matches drugs or TRH drive rather than autonomous secretion.',
   },
   {
     id: 'glucose-normal-axis',
@@ -80,7 +80,7 @@ export const PITUITARY_QUESTIONS: readonly PituitaryQuestion[] = [
     settleSeconds: 20000,
     observeSeconds: 4000,
     explanation:
-      'It suppresses below 1 ng/mL — the normal hypothalamic-pituitary response, mediated through somatostatin release and GHRH withdrawal. The same manoeuvre is the standard screening test for acromegaly precisely BECAUSE the regulated component obeys while the adenoma does not. One test, two possible results, and the difference between them localises autonomy.',
+      'It suppresses below 1 ng/mL — the normal hypothalamic-pituitary response, mediated through somatostatin release and GHRH withdrawal. The same manoeuvre is the standard screening test for acromegaly precisely because the regulated component obeys while the adenoma does not. One test, two possible results, and the difference between them localises autonomy.',
     metric: (s) => s.derived.ghNgMl,
   },
   {
@@ -95,7 +95,7 @@ export const PITUITARY_QUESTIONS: readonly PituitaryQuestion[] = [
     observeSeconds: 300000,
     tolerance: 0.02,
     explanation:
-      'It falls steeply — the agonist replaces the missing dopamine signal, closing the brake that prolactinoma secretion had overridden, and over subsequent weeks the drug actually SHRINKS adenoma tissue. A tumour treated medically into remission is rare elsewhere in oncology and routine here, which is why dopamine agonists are first-line even for large prolactinomas threatening the chiasm.',
+      'It falls steeply — the agonist replaces the missing dopamine signal, closing the brake that prolactinoma secretion had overridden, and over subsequent weeks the drug actually shrinks adenoma tissue. A tumour treated medically into remission is rare elsewhere in oncology and routine here, which is why dopamine agonists are first-line even for large prolactinomas threatening the chiasm.',
     metric: (s) => s.state.prolactinNgMl,
   },
   {

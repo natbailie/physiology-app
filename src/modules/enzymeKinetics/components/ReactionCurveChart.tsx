@@ -1,3 +1,4 @@
+import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import { phFactor, rateAt, temperatureFactor } from '../engine/kinetics';
 import type { KineticsDerived, KineticsInputs } from '../engine/types';
 import styles from './Diagram.module.css';
@@ -8,8 +9,8 @@ interface ReactionCurveChartProps {
 }
 
 const WIDTH = 460;
-const HEIGHT = 240;
-const PAD = { left: 46, right: 14, top: 16, bottom: 34 };
+const HEIGHT = 276;
+const PAD = { left: 46, right: 14, top: 16, bottom: 70 };
 const MAX_S = 8; // mmol/L shown on the curve
 const MAX_V_FRACTION = 1.15; // y axis as a fraction of uninhibited Vmax
 
@@ -42,11 +43,14 @@ export function ReactionCurveChart({ inputs, derived }: ReactionCurveChartProps)
   const halfV = rateAt(1000, derived.apparentVmaxUmPerMin, km) / 2;
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className={styles.chart} role="img" aria-label="Velocity against substrate concentration">
+    <DiagramFrame
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      ariaLabel="Velocity against substrate concentration, with the uninhibited reference curve and the apparent Km and Vmax marked"
+    >
       {/* axes */}
       <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={HEIGHT - PAD.bottom} className={styles.axis} />
       <line x1={PAD.left} y1={HEIGHT - PAD.bottom} x2={WIDTH - PAD.right} y2={HEIGHT - PAD.bottom} className={styles.axis} />
-      <text x={WIDTH / 2} y={HEIGHT - 6} textAnchor="middle" className={styles.axisLabel}>
+      <text x={WIDTH / 2} y={HEIGHT - 42} textAnchor="middle" className={styles.axisLabel}>
         substrate [S] (log scale, mmol/L)
       </text>
       <text x={12} y={PAD.top + 40} className={styles.axisLabel} transform={`rotate(-90 12 ${PAD.top + 40})`} textAnchor="middle">
@@ -71,27 +75,15 @@ export function ReactionCurveChart({ inputs, derived }: ReactionCurveChartProps)
       {/* current operating point */}
       <line x1={x(derived.substrateMm)} y1={y(derived.reactionRateUmPerMin)} x2={x(derived.substrateMm)} y2={HEIGHT - PAD.bottom} className={styles.operatingGuide} />
       <circle cx={x(derived.substrateMm)} cy={y(derived.reactionRateUmPerMin)} r={4.5} className={styles.operatingPoint} />
-    </svg>
-  );
-}
 
-/** Apparent-constant summary strip under the curve. */
-export function KineticsConstants({ inputs, derived }: { inputs: KineticsInputs; derived: KineticsDerived }) {
-  void inputs;
-  return (
-    <div className={styles.constantsRow}>
-      <span>
-        Km′ <strong>{derived.apparentKmMm < 0.1 ? derived.apparentKmMm.toFixed(3) : derived.apparentKmMm.toFixed(2)}</strong> mmol/L
-      </span>
-      <span>
-        Vmax′ <strong>{derived.apparentVmaxUmPerMin.toFixed(0)}</strong> µmol/min
-      </span>
-      <span>
-        saturation <strong>{derived.saturationPct.toFixed(0)}%</strong>
-      </span>
-      <span>
-        residual activity <strong>{derived.residualActivityPct.toFixed(0)}%</strong>
-      </span>
-    </div>
+      {/* The apparent constants, which used to be an HTML strip sitting outside the card. */}
+      <line x1={PAD.left} y1={HEIGHT - 30} x2={WIDTH - PAD.right} y2={HEIGHT - 30} className={styles.axis} />
+      <text x={PAD.left} y={HEIGHT - 12} className={styles.constants}>
+        {`Km′ ${derived.apparentKmMm < 0.1 ? derived.apparentKmMm.toFixed(3) : derived.apparentKmMm.toFixed(2)} mmol/L`}
+        {`  ·  Vmax′ ${derived.apparentVmaxUmPerMin.toFixed(0)} µmol/min`}
+        {`  ·  saturation ${derived.saturationPct.toFixed(0)}%`}
+        {`  ·  residual activity ${derived.residualActivityPct.toFixed(0)}%`}
+      </text>
+    </DiagramFrame>
   );
 }

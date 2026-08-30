@@ -16,7 +16,7 @@ export const GLUCOSE_QUESTIONS: readonly GlucoseQuestion[] = [
     watch: 'blood glucose',
     correctDirection: 'rises',
     explanation:
-      'Glucose climbs and keeps climbing, because the signal that would drive it into tissue is entirely absent. Note how little happens in the fasting state by comparison — a model with no insulin at all still holds a nearly normal fasting glucose, because hepatic output and basal uptake balance. It is the MEAL that separates a working pancreas from a failed one, which is why post-prandial glucose is the sensitive test and why insulin is dosed to carbohydrate rather than to a fasting number.',
+      'Glucose climbs and keeps climbing, because the signal that would drive it into tissue is entirely absent. Note how little happens in the fasting state by comparison — a model with no insulin at all still holds a nearly normal fasting glucose, because hepatic output and basal uptake balance. It is the meal that separates a working pancreas from a failed one, which is why post-prandial glucose is the sensitive test and why insulin is dosed to carbohydrate rather than to a fasting number.',
     metric: (s) => s.derived.bloodGlucoseMgDl,
   },
   {
@@ -67,7 +67,7 @@ export const GLUCOSE_QUESTIONS: readonly GlucoseQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 200,
     explanation:
-      'Insulin rises, and the speed of it is the point: the beta cell responds to the glucose itself rather than to anything anticipatory, so the signal follows the substrate within minutes. Watch what it then does to hepatic glucose output, which is switched OFF at the same time — insulin does not merely push glucose into tissue, it simultaneously stops the liver adding more. Losing one arm of that is why a fasting glucose and a post-meal glucose can fail independently.',
+      'Insulin rises, and the speed of it is the point: the beta cell responds to the glucose itself rather than to anything anticipatory, so the signal follows the substrate within minutes. Watch what it then does to hepatic glucose output, which is switched off at the same time — insulin does not merely push glucose into tissue, it simultaneously stops the liver adding more. Losing one arm of that is why a fasting glucose and a post-meal glucose can fail independently.',
     metric: (s) => s.derived.insulinLevel,
   },
   {
@@ -80,6 +80,6 @@ export const GLUCOSE_QUESTIONS: readonly GlucoseQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 300,
     explanation:
-      'It rises hard, because falling glucose is one of the most strongly defended signals in the body — glucagon first, then adrenaline, cortisol and growth hormone behind it. The brain cannot store or make glucose, so a defence with this much redundancy is proportionate. Two clinical consequences follow: the adrenergic symptoms a patient learns to recognise ARE the counter-regulation rather than the hypoglycaemia, and in someone whose response has been blunted by repeated episodes those warnings disappear while the danger does not.',
+      'It rises hard, because falling glucose is one of the most strongly defended signals in the body — glucagon first, then adrenaline, cortisol and growth hormone behind it. The brain cannot store or make glucose, so a defence with this much redundancy is proportionate. Two clinical consequences follow: the adrenergic symptoms a patient learns to recognise are the counter-regulation rather than the hypoglycaemia, and in someone whose response has been blunted by repeated episodes those warnings disappear while the danger does not.',
     metric: (s) => s.derived.counterRegulatoryDrive,
   },];

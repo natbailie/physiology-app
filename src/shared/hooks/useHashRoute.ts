@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { THEMES } from '@/home/moduleRegistry';
-import { CLASS_IDS, FAMILY_SLUGS } from '@/medications/drugs';
+import { MEDICATION_INVALID, resolveMedicationRoute } from '@/medications/drugs';
 import { routeIdFromHash } from './scenarioUrl';
 
 /** `#theme/<id>` — one browse route per theme, generated so THEMES stays the single source
  * of truth. The prefix also keeps them distinct from module routes that share a name. */
 export type ThemeRouteId = `theme/${(typeof THEMES)[number]['id']}`;
 
-/** `#medications/<familyOrClassId>` — one route per drug family and per class in the formulary. */
+/** `#medications/<...>` — one route per family/class, plus the deeper Infection branches
+ * (antimicrobial subfamily and, for antibiotics, mechanism-of-action tier). */
 export type MedicationRouteId = `medications/${string}`;
 
 export type RouteId =
@@ -125,12 +126,15 @@ function resolveHash(): RouteId {
   // before the query, so an unrecognised payload can never send a learner to the home page.
   const id = routeIdFromHash(window.location.hash);
 
-  // `#medications/<familyOrClassId>` is a valid sub-route when the family or class exists.
-  // Validated against the formulary so a stale or hand-edited link to a removed family or class
-  // falls back to the hub rather than rendering a blank page.
+  // `#medications/<...>` is a valid sub-route when the remaining path names a real family, class,
+  // antimicrobial branch or (for antibiotics) mechanism-of-action group. Validated against the
+  // formulary so a stale or hand-edited link to a removed entry falls back to the hub rather than
+  // rendering a blank page.
   if (id.startsWith('medications/')) {
-    const subId = id.slice('medications/'.length);
-    return CLASS_IDS.has(subId) || FAMILY_SLUGS.has(subId) ? (id as RouteId) : 'medications';
+    const segments = id.slice('medications/'.length).split('/');
+    return resolveMedicationRoute(segments) !== MEDICATION_INVALID
+      ? (id as RouteId)
+      : 'medications';
   }
 
   return VALID_ROUTES.includes(id as RouteId) ? (id as RouteId) : 'home';

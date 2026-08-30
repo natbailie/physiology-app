@@ -20,7 +20,7 @@ export function ThermoReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Set point"
         value={derived.setPointC.toFixed(1)}
         unit="°C"
-        secondary={derived.setPointC >= 37.8 ? 'RAISED — fever is defended' : 'normal defence target'}
+        secondary={derived.setPointC >= 37.8 ? 'Raised — fever is defended' : 'normal defence target'}
         colorVar="var(--warn)"
       />
       <ReadoutItem
@@ -48,7 +48,7 @@ export function ThermoReadoutPanel({ derived }: ReadoutPanelProps) {
         label="Net storage"
         value={`${derived.netStorageW >= 0 ? '+' : ''}${derived.netStorageW.toFixed(0)}`}
         unit="W"
-        secondary={Math.abs(derived.netStorageW) < 10 ? 'in balance' : derived.netStorageW > 0 ? 'core is RISING' : 'core is falling'}
+        secondary={Math.abs(derived.netStorageW) < 10 ? 'in balance' : derived.netStorageW > 0 ? 'Core is rising' : 'core is falling'}
         colorVar="var(--co2)"
       />
       <ReadoutItem

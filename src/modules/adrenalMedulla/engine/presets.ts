@@ -45,7 +45,7 @@ export const MEDULLA_PRESET_LABELS: Record<MedullaPresetName, string> = {
   naPhaeochromocytoma: 'Phaeo: NA-predominant',
   adPhaeochromocytoma: 'Phaeo: adrenaline-predominant',
   crisisUncontrolled: 'Adrenergic crisis',
-  betaFirstError: 'Beta-blocker given FIRST',
+  betaFirstError: 'Beta-blocker given first',
   properlyBlocked: 'Alpha then beta (correct)',
 };
 

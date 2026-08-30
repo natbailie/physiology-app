@@ -62,10 +62,10 @@ function BodyMap({
       <rect className={styles.lossWash} x={0} y={0} width={32} height={120} clipPath={`url(#${clipId})`} opacity={lossFill(rightPct)} />
       <rect className={styles.lossWash} x={32} y={0} width={32} height={120} clipPath={`url(#${clipId})`} opacity={lossFill(leftPct)} />
       <path className={styles.bodyOutline} d={BODY} />
-      <text className={styles.sideTick} x={14} y={132}>
+      <text className={styles.sideTick} x={8} y={132}>
         R {rightPct.toFixed(0)}%
       </text>
-      <text className={styles.sideTick} x={50} y={132}>
+      <text className={styles.sideTick} x={56} y={132}>
         L {leftPct.toFixed(0)}%
       </text>
     </g>
@@ -199,7 +199,7 @@ export function SomaticDiagram({ derived }: SomaticDiagramProps) {
 
       {/* ---- Readouts ---- */}
       <text className={styles.label} x={20} y={286}>
-        DORSAL HORN GATE {Math.round(gate * 100)}% OPEN
+        Dorsal horn gate {Math.round(gate * 100)}% open
       </text>
       <DiagramText className={styles.caption} x={20} y={304} maxWidth={230}>
         C-fibre {derived.cFibreTraffic.toFixed(0)} · Aδ {derived.adDeltaTraffic.toFixed(0)} · Aβ{' '}

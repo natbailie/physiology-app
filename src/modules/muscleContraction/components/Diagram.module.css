@@ -13,7 +13,6 @@
   letter-spacing: 0.06em;
   fill: var(--text-faint);
   text-anchor: middle;
-  text-transform: uppercase;
 }
 
 /* Thin (actin) filaments are anchored to the Z-discs and slide inward as the muscle shortens. */
@@ -99,9 +98,8 @@
   font-family: var(--mono);
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.01em;
   fill: var(--danger);
-  text-transform: uppercase;
   text-anchor: middle;
   opacity: var(--rigor, 0);
   transition: opacity 0.2s linear;
@@ -111,9 +109,8 @@
   font-family: var(--mono);
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.01em;
   fill: var(--ok);
-  text-transform: uppercase;
   text-anchor: middle;
   opacity: var(--latched, 0);
   transition: opacity 0.2s linear;

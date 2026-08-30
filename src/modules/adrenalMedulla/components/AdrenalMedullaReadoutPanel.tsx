@@ -51,7 +51,7 @@ export function AdrenalMedullaReadoutPanel({ derived }: ReadoutPanelProps) {
       />
       <ReadoutItem
         label="Paroxysm"
-        value={derived.paroxysmActive ? 'ACTIVE' : 'quiet'}
+        value={derived.paroxysmActive ? 'active' : 'quiet'}
         secondary="events, not states — metanephrines integrate them"
         colorVar="var(--nociception)"
       />

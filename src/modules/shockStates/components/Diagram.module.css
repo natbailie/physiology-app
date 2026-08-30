@@ -151,8 +151,7 @@
 .caption {
   composes: caption from '../../../shared/styles/diagramText.module.css';
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 .alarm {

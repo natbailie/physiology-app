@@ -111,15 +111,15 @@ export function patternSummary(pattern: {
     case 'normal steroidogenesis':
       return `cortisol ${pattern.cortisol.toFixed(0)}, aldosterone ${pattern.mcActivity.toFixed(0)}, androgens ${pattern.androgens.toFixed(0)} — flux balanced`;
     case '21-hydroxylase deficiency: salt-wasting':
-      return `cortisol AND aldosterone lost while androgens soar (${pattern.androgens.toFixed(0)}) with 17-OHP ${pattern.marker17ohp.toFixed(0)} — crisis plus virilisation`;
+      return `cortisol and aldosterone lost while androgens soar (${pattern.androgens.toFixed(0)}) with 17-OHP ${pattern.marker17ohp.toFixed(0)} — crisis plus virilisation`;
     case '21-hydroxylase deficiency: simple virilising':
       return `enough residual enzyme to avoid salt loss, not enough to stop androgen excess (${pattern.androgens.toFixed(0)})`;
     case '11β-hydroxylase deficiency':
-      return `DOC piles up (${pattern.docExcess.toFixed(0)}) driving HYPERTENSION while androgens rise — salt-wasting absent`;
+      return `DOC piles up (${pattern.docExcess.toFixed(0)}) driving hypertension while androgens rise — salt-wasting absent`;
     case '17α-hydroxylase deficiency':
-      return `androgens ABSENT (${pattern.androgens.toFixed(0)}) with DOC-driven hypertension — the opposite sexual phenotype to 21-OH`;
+      return `androgens absent (${pattern.androgens.toFixed(0)}) with DOC-driven hypertension — the opposite sexual phenotype to 21-OH`;
     case '3β-HSD deficiency':
-      return `everything downstream falls including androgens (${pattern.androgens.toFixed(0)}) — salt-wasting with UNDER-virilisation, 17-OHP LOW`;
+      return `everything downstream falls including androgens (${pattern.androgens.toFixed(0)}) — salt-wasting with under-virilisation, 17-OHP low`;
     case 'CAH on adequate replacement':
       return 'replacement covers the deficits — the biochemistry is managed even though the blocks remain';
   }

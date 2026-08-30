@@ -57,7 +57,7 @@ export const GI_QUESTIONS: readonly GiQuestion[] = [
     settleSeconds: 60,
     observeSeconds: 60,
     explanation:
-      'Emptying slows markedly, and it is fat in the DUODENUM rather than in the stomach that does it — CCK is released when fat reaches the small bowel and feeds back to slow the stomach behind it. The logic is that the duodenum can only digest and absorb fat at a certain rate, so the stomach is held back to match. That single loop explains the fullness after a fatty meal, why fat is the strongest of the three macronutrients at delaying a drug given by mouth, and why CCK is also what empties the gallbladder at the same moment.',
+      'Emptying slows markedly, and it is fat in the duodenum rather than in the stomach that does it — CCK is released when fat reaches the small bowel and feeds back to slow the stomach behind it. The logic is that the duodenum can only digest and absorb fat at a certain rate, so the stomach is held back to match. That single loop explains the fullness after a fatty meal, why fat is the strongest of the three macronutrients at delaying a drug given by mouth, and why CCK is also what empties the gallbladder at the same moment.',
     metric: (s) => s.derived.gastricEmptyingRate,
   },
   {

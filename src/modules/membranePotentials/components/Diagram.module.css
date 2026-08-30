@@ -70,9 +70,8 @@
   font-family: var(--mono);
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.01em;
   fill: var(--danger);
-  text-transform: uppercase;
   text-anchor: middle;
   opacity: var(--refractory, 0);
   transition: opacity 0.15s linear;

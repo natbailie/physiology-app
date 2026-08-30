@@ -106,7 +106,7 @@ export function VestibularDiagram({ derived }: VestibularDiagramProps) {
     >
       {/* ---- The push-pull, as a beam that tilts toward the stronger side ---- */}
       <text className={styles.label} x={280} y={40} textAnchor="middle">
-        PUSH-PULL BETWEEN THE TWO SIDES
+        Push-pull between the two sides
       </text>
       <line className={styles.beamPivot} x1={280} y1={58} x2={280} y2={94} />
       <g transform={`rotate(${(imbalance * 12).toFixed(2)} 280 68)`}>
@@ -139,7 +139,7 @@ export function VestibularDiagram({ derived }: VestibularDiagramProps) {
 
       {/* ---- What the imbalance produces ---- */}
       <text className={styles.label} x={20} y={318}>
-        NYSTAGMUS
+        Nystagmus
       </text>
       <line className={styles.slipTrack} x1={20} y1={336} x2={240} y2={336} />
       {Math.abs(slip) > 0.02 && (

@@ -104,7 +104,7 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The left optic nerve delivers a weak afferent signal, so illuminating THAT eye drives both Edinger-Westphal nuclei poorly and neither pupil constricts properly. Illuminating the healthy right eye still works bilaterally. The pupils being equal at rest matters: anisocoria would point instead at an efferent lesion such as a third-nerve palsy, where consensual constriction of the other eye is preserved. A relative afferent defect localises to the retina or optic nerve.',
+      'The left optic nerve delivers a weak afferent signal, so illuminating that eye drives both Edinger-Westphal nuclei poorly and neither pupil constricts properly. Illuminating the healthy right eye still works bilaterally. The pupils being equal at rest matters: anisocoria would point instead at an efferent lesion such as a third-nerve palsy, where consensual constriction of the other eye is preserved. A relative afferent defect localises to the retina or optic nerve.',
   },
   {
     id: 'lights-out-dilates',
@@ -125,14 +125,14 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     stem: 'A patient presents with a blown right pupil that does not react to light. A torch is shone directly into that right eye.',
     setup: { preset: 'fixedDilatedRight' },
     intervention: { label: 'The torch shines in the unreactive right eye.', perturb: (state) => perturbShineTorch(state, 1) },
-    prompt: 'What happens to the LEFT pupil?',
+    prompt: 'What happens to the left pupil?',
     watch: 'left pupil',
     correctDirection: 'falls',
     settleSeconds: 1500,
     observeSeconds: 1200,
     tolerance: 0.02,
     explanation:
-      'It constricts consensually, because the afferent limb is intact and the LEFT efferent limb is intact — only the right efferent supply has failed. This is what separates a fixed dilated pupil from an afferent defect: light in the affected eye still moves the healthy eye. Clinically it is also why the finding matters — a pupil that is large because its outgoing parasympathetic supply is cut says nothing about where the light got in.',
+      'It constricts consensually, because the afferent limb is intact and the left efferent limb is intact — only the right efferent supply has failed. This is what separates a fixed dilated pupil from an afferent defect: light in the affected eye still moves the healthy eye. Clinically it is also why the finding matters — a pupil that is large because its outgoing parasympathetic supply is cut says nothing about where the light got in.',
     metric: (s) => s.derived.pupilLeftMm,
   },
   {
@@ -140,7 +140,7 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     stem: 'The same patient with a blown right pupil. The torch remains shining in the right eye.',
     setup: { preset: 'fixedDilatedRight' },
     intervention: { label: 'The torch shines in the right eye.', perturb: (state) => perturbShineTorch(state, 1) },
-    prompt: 'What happens to the RIGHT pupil?',
+    prompt: 'What happens to the right pupil?',
     watch: 'right pupil',
     correctDirection: 'unchanged',
     settleSeconds: 1500,
@@ -206,7 +206,7 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     panel: FIELD_PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The entire left field of BOTH eyes has fallen, yet reading survives — central vision is spared because the occipital pole has a dual arterial supply. A chiasmal lesion would take both temporal fields instead, and Meyer\'s loop would claim only a superior quadrant. Homonymous means the same side of each eye; sparing the macula puts the lesion confidently in the posterior cortex, not the eye or the nerve.',
+      'The entire left field of both eyes has fallen, yet reading survives — central vision is spared because the occipital pole has a dual arterial supply. A chiasmal lesion would take both temporal fields instead, and Meyer\'s loop would claim only a superior quadrant. Homonymous means the same side of each eye; sparing the macula puts the lesion confidently in the posterior cortex, not the eye or the nerve.',
   },
   {
     id: 'pie-in-the-sky',
@@ -216,7 +216,7 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     panel: FIELD_PANEL,
     settleSeconds: SETTLE,
     explanation:
-      "Meyer's loop fans through the temporal lobe carrying fibres from the contralateral SUPERIOR retina, so surgery there leaves a pie in the sky — loss of the upper quadrant of the opposite field in both eyes. The inferior quadrants survive intact, which separates this cleanly from a hemianopia, and both eyes are affected equally, which separates it from anything monocular.",
+      "Meyer's loop fans through the temporal lobe carrying fibres from the contralateral superior retina, so surgery there leaves a pie in the sky — loss of the upper quadrant of the opposite field in both eyes. The inferior quadrants survive intact, which separates this cleanly from a hemianopia, and both eyes are affected equally, which separates it from anything monocular.",
   },
   {
     id: 'acetazolamide-lowers-pressure',
@@ -243,7 +243,7 @@ export const VISION_QUESTIONS: readonly VisionQuestion[] = [
     settleSeconds: 9000,
     observeSeconds: 8000,
     explanation:
-      'It falls steeply — but not because pilocarpine drains fluid past the blockage. The miotic contracts the ciliary muscle, which pulls the peripheral iris physically OUT of the angle and tensions the meshwork open behind it; facility returns and the pressure follows. Acetazolamide buys time by slowing the tap, but reopening the angle is what actually ends the crisis — which is why the definitive treatment is a hole in the iris, not another infusion.',
+      'It falls steeply — but not because pilocarpine drains fluid past the blockage. The miotic contracts the ciliary muscle, which pulls the peripheral iris physically out of the angle and tensions the meshwork open behind it; facility returns and the pressure follows. Acetazolamide buys time by slowing the tap, but reopening the angle is what actually ends the crisis — which is why the definitive treatment is a hole in the iris, not another infusion.',
     metric: (s) => s.derived.intraocularPressureMmHg,
   },
   {

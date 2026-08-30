@@ -1,0 +1,228 @@
+/* Fixed bottom-right column above 1024px, full-width bottom sheet below it — the same shape
+ * and breakpoint as ModulePage's control dock, which is the app's one existing precedent for a
+ * panel that hovers over the page. z-index 6 puts it just above that dock (5) and below the
+ * glossary bubble (20), which should still be readable over it. */
+.panel {
+  composes: lifted from '../styles/panel.module.css';
+  position: fixed;
+  right: var(--s-4);
+  bottom: var(--s-4);
+  z-index: 6;
+  width: min(24rem, calc(100vw - 2 * var(--s-4)));
+  max-height: min(34rem, calc(100vh - var(--topbar-h, 0px) - 2 * var(--s-4)));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.ghostButton {
+  composes: ghost from '../styles/button.module.css';
+  padding: var(--s-1) var(--s-2);
+}
+
+.transcript {
+  flex: 1;
+  min-height: 8rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--s-4);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.paragraph {
+  margin: 0 0 var(--s-2);
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text);
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* The learner's own turn, set apart by surface rather than by alignment — a right-aligned
+ * bubble reads as a text message, and this is a study tool. */
+.fromLearner {
+  background: var(--panel-raised);
+  border-radius: var(--r-md);
+  padding: var(--s-2) var(--s-3);
+}
+
+.fromLearner .paragraph {
+  font-family: var(--sans);
+  color: var(--text-dim);
+}
+
+.fromTutor {
+  border-left: 2px solid color-mix(in srgb, var(--accent, var(--text-faint)) 45%, var(--panel-border));
+  padding-left: var(--s-3);
+}
+
+/* Visibly not a generated answer: a dashed rule rather than the tutor's solid one, so the two
+ * cannot be confused at a glance even before the label is read. */
+.fromCorpus {
+  border-left: 2px dashed var(--text-faint);
+  padding-left: var(--s-3);
+}
+
+.provenance {
+  margin: 0 0 var(--s-2);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+
+.citations {
+  margin: var(--s-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.citation {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+a.citation:hover {
+  color: var(--accent, var(--text));
+  text-decoration: underline;
+}
+
+a.citation:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.intro .paragraph {
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.openers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+
+.opener {
+  composes: dashed from '../styles/button.module.css';
+  white-space: normal;
+  text-align: left;
+}
+
+.working {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.dots {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--text-faint);
+  animation: pulse 1.2s var(--ease) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.error {
+  margin: 0;
+  padding: var(--s-2) var(--s-4);
+  font-size: var(--fs-xs);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 7%, var(--panel));
+  border-top: 1px solid color-mix(in srgb, var(--danger) 35%, var(--panel-border));
+}
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-top: 1px solid var(--panel-border);
+}
+
+.input {
+  flex: 1;
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2);
+  resize: none;
+}
+
+.input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.sendButton {
+  composes: accent from '../styles/button.module.css';
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .panel {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 70vh;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+  }
+}

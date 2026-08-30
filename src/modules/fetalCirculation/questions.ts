@@ -24,7 +24,7 @@ export const FETAL_QUESTIONS: readonly FetalQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The right hand is in the nineties and the foot is far below it — differential cyanosis, and it localises the problem precisely. The shunt enters the aorta BELOW the vessels supplying the head and right arm, so only the lower body receives it. Pulmonary resistance has failed to fall after birth, the fetal gradient has survived the delivery, and the duct is still shunting right to left. Note the duct has stayed open, because it responds to the oxygen tension of the blood flowing through it and that blood is desaturated.',
+      'The right hand is in the nineties and the foot is far below it — differential cyanosis, and it localises the problem precisely. The shunt enters the aorta below the vessels supplying the head and right arm, so only the lower body receives it. Pulmonary resistance has failed to fall after birth, the fetal gradient has survived the delivery, and the duct is still shunting right to left. Note the duct has stayed open, because it responds to the oxygen tension of the blood flowing through it and that blood is desaturated.',
   },
   {
     id: 'left-to-right-duct',

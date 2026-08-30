@@ -72,7 +72,7 @@ export function CardiacDiagram({ derived }: CardiacDiagramProps) {
       ariaLabel="The cardiac cycle: the SA and AV nodes firing in sequence, the left ventricle filling and ejecting, and the mitral and aortic valves opening and shutting through the four phases"
     >
       {/* ---- Conduction, ending ON the ventricle it activates ---- */}
-      <text className={styles.pathLabel} x={20} y={26}>
+      <text className={styles.pathLabel} x={20} y={19}>
         Conduction
       </text>
       <path className={styles.conductionPath} d="M 100 62 C 132 78 152 90 166 106" />

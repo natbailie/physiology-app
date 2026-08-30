@@ -90,7 +90,7 @@ export function NephronDiagram({ derived }: NephronDiagramProps) {
         urine {derived.urineFlowRateMLPerMin.toFixed(1)} mL/min
       </text>
 
-      <text className={styles.pathLabel} x={330} y={64} fill="var(--adh)">
+      <text className={styles.pathLabel} x={330} y={50} fill="var(--adh)">
         ADH {(derived.effectiveADHAction * 100).toFixed(0)}%
       </text>
 

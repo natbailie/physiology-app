@@ -17,7 +17,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     settleSeconds: 1800,
     observeSeconds: 2400,
     explanation:
-      'Phosphate falls while calcium rises, and that divergence is the fastest way to read these labs. Bone resorption releases both ions together and calcitriol raises gut absorption of both — but PTH separately blocks proximal-tubule phosphate reabsorption, dumping phosphate into the urine. Being phosphaturic is what lets PTH raise one ion while lowering the other. High calcium with LOW phosphate is primary hyperparathyroidism; hypoparathyroidism is the exact mirror image.',
+      'Phosphate falls while calcium rises, and that divergence is the fastest way to read these labs. Bone resorption releases both ions together and calcitriol raises gut absorption of both — but PTH separately blocks proximal-tubule phosphate reabsorption, dumping phosphate into the urine. Being phosphaturic is what lets PTH raise one ion while lowering the other. High calcium with low phosphate is primary hyperparathyroidism; hypoparathyroidism is the exact mirror image.',
     metric: (s) => s.derived.serumPhosphateMgDl,
   },
   {
@@ -45,7 +45,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     settleSeconds: 1800,
     observeSeconds: 2400,
     explanation:
-      'PTH falls, which is the wrong direction for a low calcium and is exactly what makes this presentation so confusing. Magnesium is permissive both for PTH secretion and for PTH action at bone and kidney, so severe depletion produces hypocalcaemia with an inappropriately LOW PTH — the only hypocalcaemia that does. It also explains why the calcium stays stubbornly refractory to replacement: until the magnesium is corrected, neither the gland nor its target tissue can respond.',
+      'PTH falls, which is the wrong direction for a low calcium and is exactly what makes this presentation so confusing. Magnesium is permissive both for PTH secretion and for PTH action at bone and kidney, so severe depletion produces hypocalcaemia with an inappropriately low PTH — the only hypocalcaemia that does. It also explains why the calcium stays stubbornly refractory to replacement: until the magnesium is corrected, neither the gland nor its target tissue can respond.',
     metric: (s) => s.derived.pthLevel,
   },
 
@@ -59,7 +59,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 1200,
     explanation:
-      'PTH rises, because without calcitriol the gut cannot absorb calcium and the parathyroid responds to the falling serum level exactly as it should. This is SECONDARY hyperparathyroidism — a normal gland reacting normally to an abnormal stimulus — and it is why the calcium can look almost normal while the PTH is grossly raised. Distinguishing it from a primary adenoma matters because the treatment is vitamin D rather than surgery, and the discriminator is the calcium: high in the primary form, low or low-normal here.',
+      'PTH rises, because without calcitriol the gut cannot absorb calcium and the parathyroid responds to the falling serum level exactly as it should. This is secondary hyperparathyroidism — a normal gland reacting normally to an abnormal stimulus — and it is why the calcium can look almost normal while the PTH is grossly raised. Distinguishing it from a primary adenoma matters because the treatment is vitamin D rather than surgery, and the discriminator is the calcium: high in the primary form, low or low-normal here.',
     metric: (s) => s.derived.pthLevel,
   },
   {
@@ -72,7 +72,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     correctDirection: 'rises',
     observeSeconds: 1200,
     explanation:
-      'Phosphate RISES while calcium falls, and the opposite directions are the whole diagnosis. PTH does two things at the kidney — it retains calcium and it dumps phosphate — so losing it costs calcium and retains phosphate at the same time. That pairing separates hypoparathyroidism from vitamin D deficiency, where both fall together because the problem is absorption of both from the gut rather than renal handling.',
+      'Phosphate rises while calcium falls, and the opposite directions are the whole diagnosis. PTH does two things at the kidney — it retains calcium and it dumps phosphate — so losing it costs calcium and retains phosphate at the same time. That pairing separates hypoparathyroidism from vitamin D deficiency, where both fall together because the problem is absorption of both from the gut rather than renal handling.',
     metric: (s) => s.derived.serumPhosphateMgDl,
   },
   {

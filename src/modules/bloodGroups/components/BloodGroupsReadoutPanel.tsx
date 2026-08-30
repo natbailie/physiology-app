@@ -11,9 +11,9 @@ export function BloodGroupsReadoutPanel({ derived }: ReadoutPanelProps) {
     <div className={styles.grid}>
       <ReadoutItem
         label="Crossmatch"
-        value={derived.crossmatchVerdict.startsWith('MAJOR') ? 'MAJOR MISMATCH' : derived.crossmatchVerdict.startsWith('Rh') ? 'Rh mismatch' : 'compatible'}
+        value={derived.crossmatchVerdict.startsWith('Major') ? 'Major mismatch' : derived.crossmatchVerdict.startsWith('Rh') ? 'Rh mismatch' : 'compatible'}
         secondary={`${derived.donorType} unit into ${derived.recipientType} recipient`}
-        colorVar={derived.crossmatchVerdict.startsWith('MAJOR') ? 'var(--danger)' : 'var(--ok)'}
+        colorVar={derived.crossmatchVerdict.startsWith('Major') ? 'var(--danger)' : 'var(--ok)'}
       />
       <ReadoutItem
         label="Reaction arm"

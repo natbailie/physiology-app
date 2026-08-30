@@ -1,0 +1,20 @@
+/* Sits where the panel will open, so pressing it does not move the eye. Same z-index band as
+ * the panel — above ModulePage's control dock (5), below the glossary bubble (20). */
+.launcher {
+  composes: accent from '../styles/button.module.css';
+  position: fixed;
+  right: var(--s-4);
+  bottom: var(--s-4);
+  z-index: 6;
+  box-shadow: var(--shadow-2);
+  padding: var(--s-2) var(--s-4);
+}
+
+/* Below 1024px the control dock owns the bottom edge, so the launcher moves clear of it rather
+ * than sitting on top of the sliders a learner is trying to reach. */
+@media (max-width: 1024px) {
+  .launcher {
+    bottom: auto;
+    top: calc(var(--topbar-h, 0px) + var(--s-2));
+  }
+}

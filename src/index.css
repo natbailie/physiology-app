@@ -21,6 +21,21 @@
   src: url('/fonts/jetbrains-mono-latin-var.woff2') format('woff2');
 }
 
+/* The reading face. Only the running prose a learner actually reads uses it — explainer
+ * paragraphs, question stems, answer explanations, glossary definitions — while every piece
+ * of instrument chrome stays in the sans. Literata carries an optical-size axis and the
+ * three prose sizes differ (12px glossary, 13px explainer, 15px quiz), so the axis is left to
+ * `font-optical-sizing: auto` — pinning one `opsz` would be wrong for two of the three. Not
+ * preloaded: it is wanted by the explainer, which is its own lazy chunk below the fold, and
+ * `swap` covers the gap. */
+@font-face {
+  font-family: 'Literata var';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/literata-latin-var.woff2') format('woff2');
+}
+
 :root {
   /* Surfaces — clinical/laboratory light: paper panels on a cool bench grey */
   --bg: #f2f5f8;
@@ -162,6 +177,7 @@
 
   --sans: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mono: 'JetBrains Mono var', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --serif: 'Literata var', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
 
 
   /* --- Scales ---------------------------------------------------------------
@@ -420,12 +436,15 @@ button {
   }
 }
 
-/* Utility: clinical instrument label treatment — tracked, uppercase, muted */
+/* Utility: clinical instrument label treatment — small, muted, lightly tracked.
+ * Sentence case: these labels are read, not shouted, and an app of nothing but capitals is
+ * slower to scan. The tracking that made caps legible (0.09em) reads as broken spacing on
+ * lowercase, so it drops to a hair; the size steps up one, because lowercase carries less
+ * ink than caps at the same nominal size. */
 .label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--text-dim);
 }
 

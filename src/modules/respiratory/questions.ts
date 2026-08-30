@@ -127,6 +127,6 @@ export const RESPIRATORY_QUESTIONS: readonly RespQuestion[] = [
     panel: ABG_PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Both arms have failed at once and neither is compensating anything. Ventilation has stopped so CO2 accumulates, and perfusion has stopped so the tissues pour out lactate — a respiratory acidosis and a wide-gap metabolic acidosis together, which is why the pH is so much worse than either alone would explain. The distinction from the COPD option matters: there the high PaCO2 comes with a HIGH bicarbonate because the kidney had days to answer it. Here there is no compensation in either direction, and the treatment is circulation and ventilation, not bicarbonate.',
+      'Both arms have failed at once and neither is compensating anything. Ventilation has stopped so CO2 accumulates, and perfusion has stopped so the tissues pour out lactate — a respiratory acidosis and a wide-gap metabolic acidosis together, which is why the pH is so much worse than either alone would explain. The distinction from the COPD option matters: there the high PaCO2 comes with a high bicarbonate because the kidney had days to answer it. Here there is no compensation in either direction, and the treatment is circulation and ventilation, not bicarbonate.',
   },
 ];

@@ -91,7 +91,7 @@ export const HYPERSENSITIVITY_QUESTIONS: readonly HypersensitivityQuestion[] = [
     setup: { perturb: CHALLENGE },
     settleSeconds: SETTLE,
     explanation:
-      'Complement is consumed, so an antibody arm is at work — and yet the Coombs is negative and the haptoglobin is untouched, so nothing is being destroyed on a cell surface. That combination places the antigen in the PLASMA rather than on a cell: antibody and soluble antigen meeting in the circulation, forming complexes, and depositing wherever vessels filter, which is why the joints, the skin and the glomerulus are all involved at once. Same antibody and same complement as type II; the location of the antigen is the entire difference.',
+      'Complement is consumed, so an antibody arm is at work — and yet the Coombs is negative and the haptoglobin is untouched, so nothing is being destroyed on a cell surface. That combination places the antigen in the plasma rather than on a cell: antibody and soluble antigen meeting in the circulation, forming complexes, and depositing wherever vessels filter, which is why the joints, the skin and the glomerulus are all involved at once. Same antibody and same complement as type II; the location of the antigen is the entire difference.',
   },
   {
     id: 'pattern-type-iv',
@@ -116,7 +116,7 @@ export const HYPERSENSITIVITY_QUESTIONS: readonly HypersensitivityQuestion[] = [
     correctDirection: 'unchanged',
     observeSeconds: 24,
     explanation:
-      'Nothing happens, and that is the correct answer rather than a trick. A type I reaction requires antigen to cross-link IgE that is ALREADY bound to mast cells, and a host who has never met the antigen has none. Sensitisation is what a previous exposure leaves behind, so the first exposure can only create it, never act on it. This is why a first sting is usually a non-event and the second can be fatal on an identical dose — and why "they have had it before without trouble" is reassurance about the wrong thing.',
+      'Nothing happens, and that is the correct answer rather than a trick. A type I reaction requires antigen to cross-link IgE that is already bound to mast cells, and a host who has never met the antigen has none. Sensitisation is what a previous exposure leaves behind, so the first exposure can only create it, never act on it. This is why a first sting is usually a non-event and the second can be fatal on an identical dose — and why "they have had it before without trouble" is reassurance about the wrong thing.',
     metric: (s) => s.derived.tissueInjury,
   },
   {
@@ -129,7 +129,7 @@ export const HYPERSENSITIVITY_QUESTIONS: readonly HypersensitivityQuestion[] = [
     correctDirection: 'falls',
     observeSeconds: 1,
     explanation:
-      'It collapses within minutes, because anaphylaxis is a distributive shock: histamine dilates the arterioles and makes the capillaries leak, so the circulation loses both its resistance and its volume at once. Note the speed, which is the diagnostic point — the mediators were already made and waiting, so nothing had to be synthesised. Note also what is NOT happening: no fever, and normal complement. Of the four mechanisms this is the only one that drops the blood pressure, which is what makes it the one you have minutes rather than days to treat.',
+      'It collapses within minutes, because anaphylaxis is a distributive shock: histamine dilates the arterioles and makes the capillaries leak, so the circulation loses both its resistance and its volume at once. Note the speed, which is the diagnostic point — the mediators were already made and waiting, so nothing had to be synthesised. Note also what is not happening: no fever, and normal complement. Of the four mechanisms this is the only one that drops the blood pressure, which is what makes it the one you have minutes rather than days to treat.',
     metric: (s) => s.derived.meanArterialPressureMmHg,
   },
   {
@@ -186,7 +186,7 @@ export const HYPERSENSITIVITY_QUESTIONS: readonly HypersensitivityQuestion[] = [
     setup: { perturb: TRANSFUSE },
     settleSeconds: 20,
     explanation:
-      'The haemoglobin has FALLEN after a transfusion, which should stop anyone in their tracks, and the positive Coombs with a collapsed haptoglobin and consumed complement says the transfused cells are being destroyed. Note what makes this one different from everything else in the module: it needed no prior exposure at all. Anti-A and anti-B are naturally occurring, present from infancy without ever having met foreign blood, so "they have never been transfused" is not the reassurance it sounds like. Mechanistically this is a type II reaction, using exactly the same arm as an autoimmune haemolysis.',
+      'The haemoglobin has fallen after a transfusion, which should stop anyone in their tracks, and the positive Coombs with a collapsed haptoglobin and consumed complement says the transfused cells are being destroyed. Note what makes this one different from everything else in the module: it needed no prior exposure at all. Anti-A and anti-B are naturally occurring, present from infancy without ever having met foreign blood, so "they have never been transfused" is not the reassurance it sounds like. Mechanistically this is a type II reaction, using exactly the same arm as an autoimmune haemolysis.',
   },
   {
     id: 'transfusion-febrile-non-haemolytic',
@@ -256,7 +256,7 @@ export const HYPERSENSITIVITY_QUESTIONS: readonly HypersensitivityQuestion[] = [
     correctDirection: 'falls',
     observeSeconds: 24,
     explanation:
-      'It collapses, because the transfused cells are being destroyed and haptoglobin is consumed mopping up the free haemoglobin they release. The important part is that this happened on a FIRST exposure. Everywhere else in this module a naive host is safe, because sensitisation is what a previous exposure leaves behind — but anti-A and anti-B are naturally occurring and present from infancy. Blood is the exception to the rule the rest of the module teaches, and it is the exception that kills people.',
+      'It collapses, because the transfused cells are being destroyed and haptoglobin is consumed mopping up the free haemoglobin they release. The important part is that this happened on a first exposure. Everywhere else in this module a naive host is safe, because sensitisation is what a previous exposure leaves behind — but anti-A and anti-B are naturally occurring and present from infancy. Blood is the exception to the rule the rest of the module teaches, and it is the exception that kills people.',
     metric: (s) => s.derived.haptoglobinMgDl,
   },
 ];

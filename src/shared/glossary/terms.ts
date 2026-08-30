@@ -77,7 +77,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   'svo₂': {
     expansion: 'Mixed venous oxygen saturation',
     definition:
-      'How much oxygen comes back unused. Low when extraction is working hard against poor delivery; paradoxically HIGH in sepsis, where the tissue cannot extract what it is given.',
+      'How much oxygen comes back unused. Low when extraction is working hard against poor delivery; paradoxically high in sepsis, where the tissue cannot extract what it is given.',
   },
   lactate: {
     definition:
@@ -102,7 +102,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   ph: {
     definition:
-      'Set by the RATIO of bicarbonate to dissolved CO2, not by either alone. A near-normal pH with two grossly abnormal components is compensation, not health.',
+      'Set by the ratio of bicarbonate to dissolved CO2, not by either alone. A near-normal pH with two grossly abnormal components is compensation, not health.',
   },
   'hco3-': {
     expansion: 'Bicarbonate',
@@ -215,7 +215,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   haptoglobin: {
     definition:
-      'Binds free haemoglobin and is cleared with it, so it FALLS in haemolysis. The most specific routine marker that red cells are being destroyed rather than underproduced.',
+      'Binds free haemoglobin and is cleared with it, so it falls in haemolysis. The most specific routine marker that red cells are being destroyed rather than underproduced.',
   },
   tryptase: {
     definition:
@@ -267,11 +267,11 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'glutamate release': {
     definition:
-      'Transmitter output of the photoreceptors. LIGHT REDUCES it (hyperpolarisation), and it is the fall that ON-bipolar cells read as light — the sign inversion at the heart of retinal processing.',
+      'Transmitter output of the photoreceptors. Light reduces it (hyperpolarisation), and it is the fall that ON-bipolar cells read as light — the sign inversion at the heart of retinal processing.',
   },
   'rod drive': {
     definition:
-      'Fraction of the retinal signal carried by rods. Zero above daylight because rods SATURATE, not because they are absent; near-total below moonlight, where cones cannot follow.',
+      'Fraction of the retinal signal carried by rods. Zero above daylight because rods saturate, not because they are absent; near-total below moonlight, where cones cannot follow.',
   },
   'cone drive': {
     definition:
@@ -279,7 +279,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'swinging torch': {
     definition:
-      'Constriction achieved by whichever eye is currently illuminated, as a percentage. A weak score from ONE eye with a normal score from the other is a relative afferent pupillary defect.',
+      'Constriction achieved by whichever eye is currently illuminated, as a percentage. A weak score from one eye with a normal score from the other is a relative afferent pupillary defect.',
   },
   pta: {
     expansion: 'Pure-tone average',
@@ -288,7 +288,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'air-bone gap': {
     definition:
-      'How much worse air conduction is than bone conduction. Present only when sound is blocked BEFORE the cochlea — effusion, otosclerosis, ossicular disruption.',
+      'How much worse air conduction is than bone conduction. Present only when sound is blocked before the cochlea — effusion, otosclerosis, ossicular disruption.',
   },
   'speech discrimination': {
     definition:
@@ -300,7 +300,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   weber: {
     definition:
-      'Tuning fork on the vertex. Heard LOUDER in the blocked ear = conductive; heard better in the BETTER ear = sensorineural; central = normal or equal loss.',
+      'Tuning fork on the vertex. Heard LOUDER in the blocked ear = conductive; heard better in the better ear = sensorineural; central = normal or equal loss.',
   },
   rinne: {
     definition:
@@ -308,7 +308,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'spontaneous nystagmus': {
     definition:
-      'Nystagmus with no provocation, driven by firing imbalance between the two vestibular nerves. Beats AWAY from a destructive lesion, TOWARD an irritative one, and vanishes with compensation.',
+      'Nystagmus with no provocation, driven by firing imbalance between the two vestibular nerves. Beats away from a destructive lesion, toward an irritative one, and vanishes with compensation.',
   },
   vertigo: {
     definition:
@@ -333,7 +333,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'pain score': {
     definition:
-      'Perceived pain on a 0-10 scale — an OUTPUT of dorsal-horn transmission cells after gating, not a measure of tissue damage. Rubbing, descending modulation and opioids lower it without touching the injury.',
+      'Perceived pain on a 0-10 scale — an output of dorsal-horn transmission cells after gating, not a measure of tissue damage. Rubbing, descending modulation and opioids lower it without touching the injury.',
   },
   gate: {
     definition:
@@ -341,11 +341,11 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'touch below': {
     definition:
-      'Light touch preserved BELOW the cord lesion, per side. Travels in the dorsal columns IPSILATERALLY to the cortex, so loss here marks the same side as the lesion.',
+      'Light touch preserved below the cord lesion, per side. Travels in the dorsal columns IPSILATERALLY to the cortex, so loss here marks the same side as the lesion.',
   },
   'pain/temp below': {
     definition:
-      'Pinprick and temperature preserved below the lesion, per side. Spinothalamic fibres crossed already at entry, so loss here marks the OPPOSITE side — the Brown-Séquard dissociation.',
+      'Pinprick and temperature preserved below the lesion, per side. Spinothalamic fibres crossed already at entry, so loss here marks the opposite side — the Brown-Séquard dissociation.',
   },
   'segmental pain/temp': {
     definition:
@@ -361,7 +361,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'intention tremor': {
     definition:
-      'Tremor appearing ONLY during voluntary action, worsening as the target nears, with dysmetria. Cerebellar, with initiation and tone normal.',
+      'Tremor appearing only during voluntary action, worsening as the target nears, with dysmetria. Cerebellar, with initiation and tone normal.',
   },
   'postural tremor': {
     definition:
@@ -375,7 +375,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   // --- Liver ---
   'total bilirubin': {
     definition:
-      'Sum of both pigment pools in plasma. Visible jaundice past roughly 40 µmol/L; the total alone never tells you WHERE it is failing — the split does.',
+      'Sum of both pigment pools in plasma. Visible jaundice past roughly 40 µmol/L; the total alone never tells you where it is failing — the split does.',
   },
   unconjugated: {
     definition:
@@ -391,11 +391,11 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'urine bilirubin': {
     definition:
-      'Dipstick for conjugated pigment. ABSENT in deep UNCONJUGATED jaundice (it cannot cross into urine) — a negative strip in a yellow patient is itself localising information.',
+      'Dipstick for conjugated pigment. Absent in deep unconjugated jaundice (it cannot cross into urine) — a negative strip in a yellow patient is itself localising information.',
   },
   'urine urobilinogen': {
     definition:
-      'Flora convert gut bilirubin to urobilinogen; some reabsorbs and reaches urine. HIGH when haemolysis floods an open pathway; ABSENT when obstruction stops bile reaching the gut at all.',
+      'Flora convert gut bilirubin to urobilinogen; some reabsorbs and reaches urine. High when haemolysis floods an open pathway; absent when obstruction stops bile reaching the gut at all.',
   },
   'stool colour': {
     definition:
@@ -421,7 +421,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'maternal map': {
     definition:
-      'Mean arterial pressure dips in mid-pregnancy under low SVR. A RISE after mid-gestation signals a placental problem, not a cardiovascular triumph.',
+      'Mean arterial pressure dips in mid-pregnancy under low SVR. A rise after mid-gestation signals a placental problem, not a cardiovascular triumph.',
   },
   'maternal creatinine': {
     definition:
@@ -429,11 +429,11 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   progesterone: {
     definition:
-      'Drives the hyperventilation of pregnancy, smooth-muscle relaxation everywhere, and BLOCKS milk secretion until it withdraws after delivery.',
+      'Drives the hyperventilation of pregnancy, smooth-muscle relaxation everywhere, and blocks milk secretion until it withdraws after delivery.',
   },
   prolactin: {
     definition:
-      'Primed through pregnancy, unopposed after the placenta leaves, then sustained ONLY by suckling. Supply follows demand because production follows this signal.',
+      'Primed through pregnancy, unopposed after the placenta leaves, then sustained only by suckling. Supply follows demand because production follows this signal.',
   },
   oxytocin: {
     definition:
@@ -453,7 +453,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'pituitary prolactin': {
     definition:
-      'The one anterior hormone under tonic INHIBITION (dopamine). Rises moderately with stalk compression, drugs or TRH drive; into the hundreds only with a secretoma.',
+      'The one anterior hormone under tonic inhibition (dopamine). Rises moderately with stalk compression, drugs or TRH drive; into the hundreds only with a secretoma.',
   },
   'glucose suppression test': {
     definition:
@@ -479,7 +479,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   // --- Adrenal cortex ---
   cortisol: {
     definition:
-      'The glucocorticoid output of the fasciculata. Needs every enzyme on the line, so ANY block lowers it — and the resulting ACTH surge drives precursor pile-up behind the block.',
+      'The glucocorticoid output of the fasciculata. Needs every enzyme on the line, so any block lowers it — and the resulting ACTH surge drives precursor pile-up behind the block.',
   },
   mineralocorticoid: {
     definition:
@@ -492,12 +492,12 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   '17-ohp marker': {
     expansion: '17-hydroxyprogesterone',
     definition:
-      'The substrate trapped immediately before 21-hydroxylase. High ONLY in 21-OH deficiency — which is why newborn screening measures it.',
+      'The substrate trapped immediately before 21-hydroxylase. High only in 21-OH deficiency — which is why newborn screening measures it.',
   },
   'doc excess': {
     expansion: '11-deoxycorticosterone',
     definition:
-      'Weak mineralocorticoid that accumulates when 11β or 17α is blocked. Enough of it causes hypertension WITHOUT salt-wasting.',
+      'Weak mineralocorticoid that accumulates when 11β or 17α is blocked. Enough of it causes hypertension without salt-wasting.',
   },
   'acth drive': {
     definition:
@@ -511,7 +511,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   // --- Adrenal medulla ---
   'catecholamine map': {
     definition:
-      'Driven here by alpha-mediated vasoconstriction. Beta-blockade without alpha cover REMOVES beta2 dilatation and sends MAP higher than no treatment at all.',
+      'Driven here by alpha-mediated vasoconstriction. Beta-blockade without alpha cover removes beta2 dilatation and sends MAP higher than no treatment at all.',
   },
   'heart rate': {
     definition:
@@ -519,7 +519,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   'orthostatic drop': {
     definition:
-      'Fall in pressure on standing from contracted plasma volume — weeks of vasoconstriction leak volume away. Hypertension WITH postural hypotension smells like phaeochromocytoma.',
+      'Fall in pressure on standing from contracted plasma volume — weeks of vasoconstriction leak volume away. Hypertension with postural hypotension smells like phaeochromocytoma.',
   },
   'arrhythmia risk': {
     definition:
@@ -545,7 +545,7 @@ const ENTRIES: Record<string, GlossaryEntry> = {
   },
   haemolysis: {
     definition:
-      'Destruction of the transfused cells. Severity scales with incompatible VOLUME infused — stopping at ten millilitres aborts the entire syndrome.',
+      'Destruction of the transfused cells. Severity scales with incompatible volume infused — stopping at ten millilitres aborts the entire syndrome.',
   },
   'free haemoglobin': {
     definition:

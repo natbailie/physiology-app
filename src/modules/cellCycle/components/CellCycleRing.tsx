@@ -1,3 +1,4 @@
+import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import type { CellCycleDerived } from '../engine/types';
 import styles from './Diagram.module.css';
 
@@ -5,10 +6,11 @@ interface CellCycleRingProps {
   derived: CellCycleDerived;
 }
 
-const SIZE = 260;
-const CENTER = SIZE / 2;
-const RADIUS = 96;
-const STROKE = 26;
+/** Laid out on the house 560x440 canvas so this module sits on the same card, at the same
+ * size, as the other forty-five. */
+const CENTER = { x: 280, y: 196 };
+const RADIUS = 132;
+const STROKE = 34;
 
 /** Arc geometry for each phase, drawn clockwise from the top. G1 dominates the circle the
  * way it dominates real time. */
@@ -21,7 +23,7 @@ const SEGMENTS: { phase: string; fraction: number; colorVar: string }[] = [
 
 function polar(angleDeg: number): { x: number; y: number } {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return { x: CENTER + RADIUS * Math.cos(rad), y: CENTER + RADIUS * Math.sin(rad) };
+  return { x: CENTER.x + RADIUS * Math.cos(rad), y: CENTER.y + RADIUS * Math.sin(rad) };
 }
 
 function arcPath(startFrac: number, endFrac: number): string {
@@ -32,11 +34,9 @@ function arcPath(startFrac: number, endFrac: number): string {
 }
 
 /** The four-phase ring with a live marker at the cohort's current position, and the active
- * checkpoint badge lit. Everything is read off the same state the engine advances. */
+ * checkpoint named beneath it. Everything is read off the same state the engine advances. */
 export function CellCycleRing({ derived }: CellCycleRingProps) {
   let acc = 0;
-  const markerAngle = SEGMENTS.slice(0, SEGMENTS.findIndex((s) => s.phase === derived.phase)).reduce((sum, s) => sum + s.fraction, 0);
-  void markerAngle;
 
   // Marker angle: walk cumulative fractions to find where progress sits.
   let walked = 0;
@@ -53,31 +53,54 @@ export function CellCycleRing({ derived }: CellCycleRingProps) {
   const arrested = derived.arrestCause !== 'none';
 
   return (
-    <div className={styles.wrap}>
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className={styles.ring} role="img" aria-label="Cell cycle position">
-        {SEGMENTS.map((segment) => {
-          const start = acc;
-          acc += segment.fraction;
+    <DiagramFrame
+      viewBox="0 0 560 440"
+      ariaLabel="Cell cycle ring showing the four phases, the cohort's current position and the active checkpoint"
+    >
+      {SEGMENTS.map((segment) => {
+        const start = acc;
+        acc += segment.fraction;
+        return (
+          <path
+            key={segment.phase}
+            d={arcPath(start, acc)}
+            stroke={segment.colorVar}
+            strokeWidth={derived.phase === segment.phase ? STROKE + 8 : STROKE}
+            fill="none"
+            opacity={derived.phase === segment.phase ? 1 : 0.35}
+          />
+        );
+      })}
+
+      {/* Phase names ride on their own arc, so the ring reads without a legend. */}
+      {(() => {
+        let walk = 0;
+        return SEGMENTS.map((segment) => {
+          const mid = polar((walk + segment.fraction / 2) * 360);
+          walk += segment.fraction;
+          const label = {
+            x: CENTER.x + (mid.x - CENTER.x) * 1.34,
+            y: CENTER.y + (mid.y - CENTER.y) * 1.34,
+          };
           return (
-            <path
-              key={segment.phase}
-              d={arcPath(start, acc)}
-              stroke={segment.colorVar}
-              strokeWidth={derived.phase === segment.phase ? STROKE + 6 : STROKE}
-              fill="none"
-              opacity={derived.phase === segment.phase ? 1 : 0.35}
-            />
+            <text key={segment.phase} x={label.x} y={label.y + 4} className={styles.arcLabel}>
+              {segment.phase}
+            </text>
           );
-        })}
-        <circle cx={marker.x} cy={marker.y} r={7} className={styles.marker} />
-        <text x={CENTER} y={CENTER - 8} textAnchor="middle" className={styles.phaseLabel}>
-          {derived.phase}
-        </text>
-        <text x={CENTER} y={CENTER + 14} textAnchor="middle" className={styles.subLabel}>
-          {arrested ? 'ARRESTED' : `${derived.doublingTimeH < 9998 ? `${derived.doublingTimeH.toFixed(0)} h doubling` : ''}`}
-        </text>
-      </svg>
-      <div className={arrested ? styles.badgeActive : styles.badge}>{derived.arrestCause}</div>
-    </div>
+        });
+      })()}
+
+      <circle cx={marker.x} cy={marker.y} r={9} className={styles.marker} />
+      <text x={CENTER.x} y={CENTER.y - 6} textAnchor="middle" className={styles.phaseLabel}>
+        {derived.phase}
+      </text>
+      <text x={CENTER.x} y={CENTER.y + 26} textAnchor="middle" className={styles.subLabel}>
+        {derived.doublingTimeH < 9998 ? `${derived.doublingTimeH.toFixed(0)} h doubling` : 'not cycling'}
+      </text>
+
+      <text x={CENTER.x} y={396} textAnchor="middle" className={styles.verdict}>
+        {arrested ? `Arrested — ${derived.arrestCause}` : 'Cycling'}
+      </text>
+    </DiagramFrame>
   );
 }

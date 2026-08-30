@@ -35,7 +35,7 @@ export const ADRENAL_QUESTIONS: readonly AdrenalCortexQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Salt-losing crisis PLUS virilisation is the classic 21-hydroxylase presentation: the block hits cortisol and aldosterone together while diverted flux floods androgens. The 17-OHP marker is enormous because the substrate piles up immediately before the blocked step. Contrast 3β-HSD, which also wastes salt but UNDER-virilises with a LOW 17-OHP — same crisis, opposite genital finding, different enzyme.',
+      'Salt-losing crisis plus virilisation is the classic 21-hydroxylase presentation: the block hits cortisol and aldosterone together while diverted flux floods androgens. The 17-OHP marker is enormous because the substrate piles up immediately before the blocked step. Contrast 3β-HSD, which also wastes salt but under-virilises with a low 17-OHP — same crisis, opposite genital finding, different enzyme.',
   },
   {
     id: 'hypertensive-cah',
@@ -45,7 +45,7 @@ export const ADRENAL_QUESTIONS: readonly AdrenalCortexQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Virilisation WITH hypertension means DOC — trapped when 11β-hydroxylase fails — provides mineralocorticoid activity that prevents salt-wasing while driving pressure up. Androgens rise exactly as in 21-OH because flux diverts around the block. The pair "high androgens + hypertensive" has only one enzymatic answer; 21-OH gives high androgens with a crashing pressure instead.',
+      'Virilisation with hypertension means DOC — trapped when 11β-hydroxylase fails — provides mineralocorticoid activity that prevents salt-wasing while driving pressure up. Androgens rise exactly as in 21-OH because flux diverts around the block. The pair "high androgens + hypertensive" has only one enzymatic answer; 21-OH gives high androgens with a crashing pressure instead.',
   },
   {
     id: 'undervirilised-hypertensive',
@@ -55,7 +55,7 @@ export const ADRENAL_QUESTIONS: readonly AdrenalCortexQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      '17α-hydroxylase failure removes BOTH cortisol and the whole androgen pathway: an XY child cannot virilise at all, while substrate floods the mineralocorticoid arm and causes DOC-driven hypertension. Every other CAH block either virilises or wastes salt — this is the one that does neither, which is why the combination of sexual infantilism WITH hypertension points here.',
+      '17α-hydroxylase failure removes both cortisol and the whole androgen pathway: an XY child cannot virilise at all, while substrate floods the mineralocorticoid arm and causes DOC-driven hypertension. Every other CAH block either virilises or wastes salt — this is the one that does neither, which is why the combination of sexual infantilism with hypertension points here.',
   },
   {
     id: 'acth-flogs-the-blocked-gland',
@@ -68,7 +68,7 @@ export const ADRENAL_QUESTIONS: readonly AdrenalCortexQuestion[] = [
     settleSeconds: 20000,
     observeSeconds: 30000,
     explanation:
-      'It climbs further — the blocked gland cannot make cortisol, so ACTH rises unchecked and drives MORE substrate into the diverted androgen pathway. Illness therefore worsens both the crisis and the virilisation simultaneously. This feedback loop is also why treatment works twice over: replacing cortisol suppresses ACTH, collapsing the drive behind the androgen excess as well as fixing the deficiency.',
+      'It climbs further — the blocked gland cannot make cortisol, so ACTH rises unchecked and drives more substrate into the diverted androgen pathway. Illness therefore worsens both the crisis and the virilisation simultaneously. This feedback loop is also why treatment works twice over: replacing cortisol suppresses ACTH, collapsing the drive behind the androgen excess as well as fixing the deficiency.',
     metric: (s) => s.derived.androgens,
   },
   {
@@ -82,7 +82,7 @@ export const ADRENAL_QUESTIONS: readonly AdrenalCortexQuestion[] = [
     settleSeconds: 20000,
     observeSeconds: 20000,
     explanation:
-      'It falls sharply — replacement supplies what the block destroys and, just as importantly, suppresses the ACTH drive that had been amplifying precursor pile-up. Note what does NOT change: the endogenous enzymatic block remains, which is why lifelong therapy and stress-dosing during illness are non-negotiable rather than a cure.',
+      'It falls sharply — replacement supplies what the block destroys and, just as importantly, suppresses the ACTH drive that had been amplifying precursor pile-up. Note what does not change: the endogenous enzymatic block remains, which is why lifelong therapy and stress-dosing during illness are non-negotiable rather than a cure.',
     metric: (s) => s.derived.addisonianCrisisRiskPct,
   },
 ];

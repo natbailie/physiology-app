@@ -27,7 +27,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         label="SVR"
         value={`${derived.svrChangePct >= 0 ? '+' : ''}${derived.svrChangePct.toFixed(0)}`}
         unit="%"
-        secondary={derived.svrChangePct > 5 ? 'gestational vasodilatation REVERSED' : 'physiological fall'}
+        secondary={derived.svrChangePct > 5 ? 'Gestational vasodilatation reversed' : 'physiological fall'}
         colorVar="var(--danger)"
       />
       <ReadoutItem

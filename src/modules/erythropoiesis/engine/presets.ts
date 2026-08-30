@@ -80,7 +80,7 @@ export const ERYTHRO_PRESET_LABELS: Record<ErythroPresetName, string> = {
   highAltitude: 'High altitude',
   aplasticAnemia: 'Aplastic anemia',
   anaemiaChronicDisease: 'Anemia of chronic disease',
-  ironDeficientAndInflamed: 'Iron deficient AND inflamed',
+  ironDeficientAndInflamed: 'Iron deficient and inflamed',
   haemochromatosis: 'Haemochromatosis',
   erythropoieticDriveHigh: 'High erythropoietic drive',
 };

@@ -1,47 +1,29 @@
-.wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.ring {
-  width: 100%;
-  max-width: 300px;
-  height: auto;
-}
-
 .marker {
-  fill: var(--text, #fff);
+  fill: var(--panel);
   stroke: var(--danger, #c33);
   stroke-width: 2;
 }
 
 .phaseLabel {
-  fill: var(--text, #ddd);
-  font-size: 30px;
+  fill: var(--text);
+  font-size: 56px;
   font-weight: 600;
 }
 
 .subLabel {
-  fill: var(--text-faint);
-  font-size: 12px;
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+  text-anchor: middle;
 }
 
-.badge,
-.badgeActive {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+/* The phase's own name, sitting outside its arc — sans and sentence case, because G1 and S
+   are structures in the cycle rather than readings off it. */
+.arcLabel {
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
 }
 
-.badge {
-  color: var(--text-faint);
-  border-color: var(--panel-border);
+/* Names the pattern, so it composes `verdict` and DiagramFrame withholds it during practice. */
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+  text-anchor: middle;
 }
 
-.badgeActive {
-  color: var(--warn, #da5);
-  border-color: currentColor;
-}

@@ -39,7 +39,7 @@ export function HpaDiagram({ derived }: HpaDiagramProps) {
       }}
     >
       <text className={styles.label} x={20} y={410}>
-        CORTISOL {derived.cortisolLevel.toFixed(1)} µg/dL · ACTH {(derived.acthLevel * 100).toFixed(0)}%
+        Cortisol {derived.cortisolLevel.toFixed(1)} µg/dL · ACTH {(derived.acthLevel * 100).toFixed(0)}%
       </text>
       <DiagramText className={styles.caption} x={20} y={430} maxWidth={520}>
         adrenal reserve {(derived.adrenalReserve * 100).toFixed(0)}% · CRH drive{' '}

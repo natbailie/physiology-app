@@ -27,7 +27,7 @@ export const MEMBRANE_QUESTIONS: readonly MembraneQuestion[] = [
     watch: 'excitability',
     correctDirection: 'falls',
     explanation:
-      'This is the trap. The cell is closer to threshold, so it ought to be easier to fire — and yet it becomes harder. Sodium inactivation (the h gate) is CLOSED by depolarisation, so a chronically depolarised cell sits with much of its sodium current already unavailable. There is not enough inward current left to mount an upstroke. That is why hyperkalaemia causes weakness and asystole rather than excitation, and why the resting potential and excitability move in opposite directions.',
+      'This is the trap. The cell is closer to threshold, so it ought to be easier to fire — and yet it becomes harder. Sodium inactivation (the h gate) is closed by depolarisation, so a chronically depolarised cell sits with much of its sodium current already unavailable. There is not enough inward current left to mount an upstroke. That is why hyperkalaemia causes weakness and asystole rather than excitation, and why the resting potential and excitability move in opposite directions.',
     metric: (s) => s.derived.excitability,
   },
   {
@@ -39,7 +39,7 @@ export const MEMBRANE_QUESTIONS: readonly MembraneQuestion[] = [
     watch: 'conduction velocity',
     correctDirection: 'falls',
     explanation:
-      'Velocity collapses while the ability to fire at all is preserved, and separating those two ideas explains a great deal of neurology. Myelin allows saltatory conduction between nodes of Ranvier, making a myelinated fibre roughly an order of magnitude faster than an unmyelinated one of the same diameter. Strip it and the impulse must propagate continuously instead. Demyelination is therefore a CONDUCTION problem, not an excitability one — which is why nerve conduction studies, rather than the presence or absence of a response, are what make the diagnosis.',
+      'Velocity collapses while the ability to fire at all is preserved, and separating those two ideas explains a great deal of neurology. Myelin allows saltatory conduction between nodes of Ranvier, making a myelinated fibre roughly an order of magnitude faster than an unmyelinated one of the same diameter. Strip it and the impulse must propagate continuously instead. Demyelination is therefore a conduction problem, not an excitability one — which is why nerve conduction studies, rather than the presence or absence of a response, are what make the diagnosis.',
     metric: (s) => s.derived.conductionVelocityMPerS,
   },
 
@@ -76,7 +76,7 @@ export const MEMBRANE_QUESTIONS: readonly MembraneQuestion[] = [
     watch: 'the sodium equilibrium potential',
     correctDirection: 'falls',
     explanation:
-      'E_Na falls toward zero, because it is set by the ratio of extracellular to intracellular sodium and reducing the outside term shrinks the gradient. The action potential overshoots toward E_Na, so a lower value means a smaller overshoot and a weaker upstroke. Note the contrast with potassium: hyperkalaemia is dangerous because it moves the RESTING potential, where hyponatraemia moves the ceiling the spike reaches. Both are electrical, they act on opposite ends of the action potential, and their clinical pictures are nothing alike.',
+      'E_Na falls toward zero, because it is set by the ratio of extracellular to intracellular sodium and reducing the outside term shrinks the gradient. The action potential overshoots toward E_Na, so a lower value means a smaller overshoot and a weaker upstroke. Note the contrast with potassium: hyperkalaemia is dangerous because it moves the resting potential, where hyponatraemia moves the ceiling the spike reaches. Both are electrical, they act on opposite ends of the action potential, and their clinical pictures are nothing alike.',
     metric: (s) => s.derived.eNa,
   },
 ];

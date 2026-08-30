@@ -40,7 +40,7 @@ export const CARDIORENAL_QUESTIONS: readonly CardiorenalQuestion[] = [
     watch: 'renal blood flow',
     correctDirection: 'falls',
     explanation:
-      'It falls, and it falls precisely BECAUSE the reflex is working. Vasoconstriction defends the mean arterial pressure by raising resistance, and the kidney is one of the beds being constricted to do it — perfusion pressure is preserved at the cost of perfusion. This is the mechanism behind pre-renal acute kidney injury, and it is why a normal blood pressure in a bleeding patient is not reassurance about their kidneys. The compensation is buying time for the brain and heart, and the kidney is paying for it.',
+      'It falls, and it falls precisely because the reflex is working. Vasoconstriction defends the mean arterial pressure by raising resistance, and the kidney is one of the beds being constricted to do it — perfusion pressure is preserved at the cost of perfusion. This is the mechanism behind pre-renal acute kidney injury, and it is why a normal blood pressure in a bleeding patient is not reassurance about their kidneys. The compensation is buying time for the brain and heart, and the kidney is paying for it.',
     metric: (s) => s.derived.renalBloodFlow,
   },
   {

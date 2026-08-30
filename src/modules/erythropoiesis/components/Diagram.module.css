@@ -70,7 +70,6 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   fill: var(--hemoglobin);
 }
 
@@ -79,7 +78,6 @@
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
   fill: var(--ok);
 }
 

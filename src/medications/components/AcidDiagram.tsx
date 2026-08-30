@@ -42,7 +42,7 @@ export function AcidDiagram() {
           <ReadoutItem label="Acid output" value={r.acidOutput.toFixed(0)} unit="%" />
           <ReadoutItem
             label="Result"
-            value={r.gastricPH >= 4 ? 'SUPPRESSED' : r.gastricPH < 2 ? 'SECRETING' : 'RAISED'}
+            value={r.gastricPH >= 4 ? 'Suppressed' : r.gastricPH < 2 ? 'Secreting' : 'Raised'}
             wide
           />
         </>
@@ -111,7 +111,7 @@ export function AcidDiagram() {
 
           {/* Acid readout bar */}
           <text className={text.tickLabel} x={A.BAR.x + A.BAR.w / 2} y={A.BAR.y - 8}>
-            ACID
+            Acid
           </text>
           <rect x={A.BAR.x} y={A.BAR.y} width={A.BAR.w} height={A.BAR.h} rx="6" fill="none" stroke="var(--panel-border)" strokeWidth="1" />
           <rect

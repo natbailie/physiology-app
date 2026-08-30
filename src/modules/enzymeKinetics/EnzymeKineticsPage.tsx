@@ -10,7 +10,7 @@ import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { ReactionCurveChart, KineticsConstants } from './components/ReactionCurveChart';
+import { ReactionCurveChart } from './components/ReactionCurveChart';
 import { KineticsReadoutPanel } from './components/KineticsReadoutPanel';
 import { KineticsControlPanel } from './components/KineticsControlPanel';
 import { KINETICS_QUESTIONS } from './questions';
@@ -80,12 +80,7 @@ export function EnzymeKineticsPage() {
           disabled={session.blinded}
         />
       }
-      diagram={
-        <>
-          <ReactionCurveChart inputs={inputs} derived={snapshot.derived} />
-          <KineticsConstants inputs={inputs} derived={snapshot.derived} />
-        </>
-      }
+      diagram={<ReactionCurveChart inputs={inputs} derived={snapshot.derived} />}
       readouts={<KineticsReadoutPanel derived={snapshot.derived} />}
       practice={<QuizPanel session={session} summary={summary} presetLabels={KINETICS_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}

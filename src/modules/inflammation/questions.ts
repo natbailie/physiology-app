@@ -63,7 +63,7 @@ export const INFLAMMATION_QUESTIONS: readonly InflammationQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Abscess formation is the giveaway: pus has collected faster than the immune response can drain it. The pus readout is well above the threshold and the classification confirms it. Cellulitis would show high load without a significant pus collection; immunosuppressed smoulder requires blunted immunity on both the neutrophil and steroid axes; severe load would push SIRS without the localised collection.',
+      'Abscess formation is the giveaway: pus has collected faster than the immune response can drain it. The pus readout is well above the threshold and the classification confirms it. Cellulitis would show high load without a significant pus collection; immunosuppressed smoulder requires blunted immunity on both the neutrophil and steroid axes; severe load would push sirs without the localised collection.',
   },
   {
     id: 'gout-mimics-infection',
@@ -74,7 +74,7 @@ export const INFLAMMATION_QUESTIONS: readonly InflammationQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The load is driven by sterile crystals, not bacteria — and that distinction is everything. Adding antibiotics does nothing to a crystal burden; the trajectory is identical with or without them. In cellulitis the load would fall faster with antibiotics; an abscess would show pus; severe bacterial load would show SIRS with a much higher CRP. The crystal type is the teaching point: fever and a raised CRP do not always mean infection.',
+      'The load is driven by sterile crystals, not bacteria — and that distinction is everything. Adding antibiotics does nothing to a crystal burden; the trajectory is identical with or without them. In cellulitis the load would fall faster with antibiotics; an abscess would show pus; severe bacterial load would show sirs with a much higher CRP. The crystal type is the teaching point: fever and a raised CRP do not always mean infection.',
   },
   {
     id: 'the-masked-infection',

@@ -35,7 +35,41 @@ export interface DrugClass {
    * mechanism rather than read about it. Absent classes get no fabricated diagram.
    */
   moduleId?: string;
+  /**
+   * For the Infection family only: which of the four antimicrobial branches this class belongs to.
+   * It drives the extra navigation tier under `#medications/infection`. Absent for every other
+   * family, and for no class that lives outside Infection (enforced by the test suite).
+   */
+  microGroup?: MicroGroup;
+  /**
+   * For antibiotic classes only (a `microGroup` of 'antibiotic'): the mechanism-of-action group
+   * the class is taught under, so antibiotics are reached via `#medications/infection/antibiotics/
+   * <moa>`. Marked with the mechanism the class acts through, not the drug's own name — the tier
+   * is the classification students learn (cell wall, protein, nucleic acid, folate, membrane).
+   */
+  moa?: MoAId;
 }
+
+/**
+ * The four antimicrobial branches of the Infection family. Each is a navigation tile directly
+ * under the family, so a learner first chooses Antibiotics, Antivirals, Antifungals or
+ * Antiparasitics before reaching a broad class.
+ */
+export type MicroGroup = 'antibiotics' | 'antivirals' | 'antifungals' | 'antiparasitics';
+
+/**
+ * The mechanism-of-action groups antibiotic classes are sorted into. These are the standard
+ * pharmacology buckets — the mechanism is the thing being taught, and the broad class (penicillin,
+ * cephalosporin) then sits under it. `antituberculous` is kept apart because the class is defined
+ * by the disease it treats rather than a single molecular target.
+ */
+export type MoAId =
+  | 'cell-wall'
+  | 'protein'
+  | 'nucleic-acid'
+  | 'folate'
+  | 'membrane'
+  | 'antituberculous';
 
 export type DrugFamily =
   | 'Cardiovascular'
@@ -96,6 +130,8 @@ interface Seed {
   drugs: string[];
   mechanism: string;
   moduleId?: string;
+  microGroup?: MicroGroup;
+  moa?: MoAId;
 }
 
 const SEEDS: Seed[] = [
@@ -279,7 +315,7 @@ const SEEDS: Seed[] = [
     family: 'Respiratory',
     drugs: ['Salbutamol', 'formoterol', 'salmeterol', 'indacaterol'],
     mechanism:
-      'Stimulating beta-2 receptors in bronchial smooth muscle raises cyclic AMP and relaxes the airway, giving bronchodilatation within minutes of an inhaled dose — the rescue of an acute asthma attack. They also increase mucociliary clearance and reduce mast-cell mediator release. Short-acting salbutamol is first-line relief; the long-acting agents (salmeterol, formoterol) provide 12-hour control but are never used alone in asthma because they mask deterioration without treating the underlying inflammation, which is why they are paired with an inhaled corticosteroid.',
+      'Stimulating beta-2 receptors in bronchial smooth muscle raises cyclic amp and relaxes the airway, giving bronchodilatation within minutes of an inhaled dose — the rescue of an acute asthma attack. They also increase mucociliary clearance and reduce mast-cell mediator release. Short-acting salbutamol is first-line relief; the long-acting agents (salmeterol, formoterol) provide 12-hour control but are never used alone in asthma because they mask deterioration without treating the underlying inflammation, which is why they are paired with an inhaled corticosteroid.',
     moduleId: 'respiratoryMechanics',
   },
   {
@@ -499,6 +535,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Aminoglycoside',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Gentamicin', 'amikacin', 'neomycin'],
     mechanism:
       'Aminoglycosides bind the 30S ribosomal subunit and corrupt bacterial protein synthesis, causing misreading and cell death — bactericidal, concentration-dependent and active mainly against aerobic Gram-negatives and, combined with a beta-lactam, the enterococcus. Their potency is their constraint: they cross into renal tubular cells and the cochlea, so nephrotoxicity and ototoxicity accumulate with dose, which is why levels are monitored and courses are short. Gentamicin is the workhorse for serious Gram-negative sepsis, dosed by weight and followed to a level.',
@@ -506,14 +544,16 @@ const SEEDS: Seed[] = [
   {
     className: 'Azole antifungals',
     family: 'Infection',
+    microGroup: 'antifungals',
     drugs: ['Fluconazole', 'itraconazole', 'clotrimazole', 'voriconazole'],
     mechanism:
-      'Azoles block the fungal enzyme that converts lanosterol to ergosterol, the load-bearing structural lipid of the fungal cell membrane — without ergosterol the membrane thins, leaks and the yeast cannot survive. Because ergosterol does not exist in human membranes, the selectivity is real, which is why azoles are so safe. Fluconazole is the systemic azole for candida and the easiest choice for mucosal disease; itraconazole and voriconazole broaden into invasive mould infection while inhibiting human CYP enzymes, so drug interactions are the price of their reach.',
+      'Azoles block the fungal enzyme that converts lanosterol to ergosterol, the load-bearing structural lipid of the fungal cell membrane — without ergosterol the membrane thins, leaks and the yeast cannot survive. Because ergosterol does not exist in human membranes, the selectivity is real, which is why azoles are so safe. Fluconazole is the systemic azole for candida and the easiest choice for mucosal disease; itraconazole and voriconazole broaden into invasive mould infection while inhibiting human cyp enzymes, so drug interactions are the price of their reach.',
     moduleId: 'immuneResponse',
   },
   {
     className: 'Echinocandins',
     family: 'Infection',
+    microGroup: 'antifungals',
     drugs: ['Caspofungin', 'anidulafungin', 'micafungin'],
     mechanism:
       'Echinocandins inhibit the synthesis of beta-glucan, the polymer that forms the fungal cell wall — a structure human cells simply do not have, so the selectivity against the fungus is absolute. Without beta-glucan the wall cannot withstand the fungus’s own osmotic pressure and the cell lyses. They are fungicidal against candida and active against aspergillus, making them first-line for invasive and candida bloodstream infection, especially in the sick. They are given intravenously because they are not absorbed orally, and their safety, including in liver and kidney disease, matches their specificity.',
@@ -522,6 +562,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Polyene antifungals',
     family: 'Infection',
+    microGroup: 'antifungals',
     drugs: ['Amphotericin', 'nystatin'],
     mechanism:
       'The polyenes bind ergosterol directly in the fungal membrane and punch holes in it, killing the fungus for as long as the drug is present — fungicidal, broad and, because ergosterol is fungal-specific, selective between the yeast and the host. Their power is their toxicity: intravenous amphotericin is the reserve treatment for the most serious invasive fungal disease but carries nephrotoxicity and infusion reactions, so it is used hard but not often. Nystatin, being unabsorbed, is the same chemistry confined to the mouth and gut, clearing oral and vaginal thrush with almost no systemic effect.',
@@ -530,6 +571,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Allylamine antifungals',
     family: 'Infection',
+    microGroup: 'antifungals',
     drugs: ['Terbinafine'],
     mechanism:
       'Terbinafine inhibits squalene epoxidase, blocking an early step of fungal ergosterol synthesis and letting the precursor squalene accumulate to toxic levels inside the fungus — it is fungicidal against dermatophytes, the fungi of skin and nail. Because it concentrates in keratin, it is the reference treatment for ringworm and onychomycosis of the nail, given for the weeks or months the new keratin needs to grow out. The mechanism is selective for the fungal enzyme, so it is well tolerated systemically, though oral courses carry a rare hepatotoxicity that means the liver is checked.',
@@ -537,6 +579,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antivirals, nucleoside analogues (anti-herpes)',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Aciclovir', 'valaciclovir'],
     mechanism:
       'Nucleoside analogues look like the building blocks of viral DNA but only become active after a viral enzyme — the thymidine kinase of herpes viruses — phosphorylates them into chain terminators, so they are selectively toxic to infected cells. Aciclovir stops DNA synthesis in herpes simplex and varicella-zoster, treating cold sores, genital herpes, shingles and herpes encephalitis. Because activation is specific to the virus, side effects are mild, but in renal insufficiency the crystallised drug can injure the kidney, and resistance matters in the immunocompromised.',
@@ -545,6 +588,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antiretrovirals, nucleoside reverse-transcriptase inhibitors',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Tenofovir', 'emtricitabine', 'abacavir', 'lamivudine'],
     mechanism:
       'The NRTIs are nucleotide or nucleoside analogues that are incorporated into the growing HIV DNA strand by reverse transcriptase — the viral enzyme that transcribes RNA into DNA — and, because they lack the 3′ end needed to continue, they terminate the chain. They are the backbone of combination antiretroviral therapy, given with agents of other classes because a single drug rapidly selects resistant virus. Tenofovir pairs breadth with renal and bone toxicity, abacavir with a hypersensitivity reaction in some patients; their strength is that they stall HIV replication at its very first enzymatic step.',
@@ -553,6 +597,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antiretrovirals, non-nucleoside reverse-transcriptase inhibitors',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Efavirenz', 'nevirapine', 'rilpivirine'],
     mechanism:
       'NNRTIs bind to a hydrophobic pocket beside the active site of HIV reverse transcriptase and distort it allosterically, so the enzyme can no longer transcribe viral RNA into DNA — no incorporation into the growing strand happens at all, and replication is halted at its first step. They are potent, orally bioavailable and taken once daily, but the pocket they hit is fragile: a single mutation erases the whole class, so a low genetic barrier to resistance defines them. Efavirenz brings vivid dreams and rash, nevirapine a serious hepatic and skin hypersensitivity, and rilpivirine a gentler profile for the already-suppressed.',
@@ -561,6 +606,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antiretrovirals, protease inhibitors',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Darunavir', 'atazanavir', 'ritonavir'],
     mechanism:
       'HIV protease is the enzyme that cleaves the viral polyprotein into the separate functional proteins of the mature virion; protease inhibitors block that cleavage, so the virus is assembled immature and cannot infect new cells. They are potent antiretrovirals, and because the protease is essential they are a mainstay of salvage and first-line therapy. Ritonavir is used at a small dose purely to inhibit the liver enzyme that would otherwise clear its partner, boosting that drug’s level — the notorious “boosting” trick. The costs are the metabolic ones of protease inhibition: lipodystrophy, dyslipidaemia, hyperglycaemia, and drug interactions from the same enzyme they exploit.',
@@ -569,6 +615,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antiretrovirals, integrase inhibitors',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Dolutegravir', 'raltegravir', 'bictegravir'],
     mechanism:
       'HIV integrase is what splices the copied viral DNA into the host chromosome, and integrase strand-transfer inhibitors block exactly that insertion step — the last enzymatic step before HIV becomes a permanent, integrated provirus. Because they act so late and so specifically, they are fast, potent and well tolerated, and the modern UK first-line regimens are built around integrase inhibitors (usually dolutegravir) paired with two NRTIs. The integrase enzyme also has built-in resistance that can strike swiftly, so the class is never used alone, and the price of their cleanliness is the attention any antiretroviral demands.',
@@ -577,6 +624,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antiretrovirals, fusion and entry inhibitors (CCR5)',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Maraviroc'],
     mechanism:
       'For HIV to enter a host immune cell, the virus’s envelope protein must first dock with the CD4 receptor and then with a co-receptor — most commonly the chemokine receptor CCR5. Maraviroc binds that co-receptor, so the virus has nowhere to grip and cannot fuse with the cell, blocking entry at the very first step rather than inside. It is the sole entry-inhibitor in common use, and it only works against the CCR5-tropic virus (not the CXCR4-tropic variant), so a tropism test gates its use. Its advantage is that it acts outside the cell, where the virus’s mutation cannot readily evade it.',
@@ -585,6 +633,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antivirals, neuraminidase inhibitors (anti-influenza)',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Oseltamivir', 'zanamivir'],
     mechanism:
       'Influenza must cut itself free of the infected cell to go on and infect its neighbours, and the enzyme it uses is the surface neuraminidase that severs its bond to the cell’s sialic acid. Neuraminidase inhibitors block that enzyme, so new virus stays tethered to the cell it came from and the infection is contained at its source. Oseltamivir is the oral agent, zanamivir the inhaled one — given early in the illness because the block only helps while virus is still replicating. Their value is modest in the healthy and real in those at risk, curtailing symptoms and spread when started within a day or two.',
@@ -593,6 +642,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antivirals, hepatitis',
     family: 'Infection',
+    microGroup: 'antivirals',
     drugs: ['Sofosbuvir', 'entecavir', 'tenofovir'],
     mechanism:
       'The hepatitis antivirals attack the enzymes that replicate the hepatitis viruses. Against hepatitis C, the direct-acting antivirals — sofosbuvir is a nucleotide inhibitor of the viral NS5B polymerase — block RNA replication so completely that combination regimens cure over 95% of patients. Against hepatitis B, entecavir and tenofovir inhibit the viral reverse transcriptase/polymerase and so suppress the chronic virus in the liver, keeping viral load and liver damage down. In both, the principle is the same: hit an enzyme the virus needs and the human cell does not, and replication stalls.',
@@ -601,6 +651,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Cephalosporins',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Cefalexin', 'cefuroxime', 'ceftriaxone'],
     mechanism:
       'Like all beta-lactams, cephalosporins inhibit bacterial cell-wall cross-linking, weakening the wall until the cell lyses — bactericidal against a wide Gram-positive and Gram-negative net, and safe to dose widely because the target is bacterial. The generations trade coverage: early agents like cefalexin cover skin and Gram-positives, cefuroxime adds respiratory and surgical prophylaxis, and ceftriaxone reaches the meninges and serious Gram-negatives, making it the single daily injection of meningitis and gonorrhoea. The price of breadth is collateral ecology: Clostridioides difficile and resistant organisms flourish where broad beta-lactams go.',
@@ -608,6 +660,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Carbapenems',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Meropenem', 'ertapenem'],
     mechanism:
       'Carbapenems are beta-lactams with the widest and most hydrolysis-resistant cell-wall killing of the class: they inhibit the same cross-linking of the bacterial wall as the penicillins and cephalosporins, but their structure shrugs off the beta-lactamase enzymes that destroy those agents, including the extended-spectrum enzymes of resistant Gram-negatives. They are reserve antibiotics, held for serious hospital and multidrug-resistant infection precisely because their reach is broad. That breadth is their own risk — using them widely selects for the carbapenem-resistant organisms nothing else treats, so they are culture-directed and spent sparingly.',
@@ -615,6 +669,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Chloramphenicol',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Chloramphenicol'],
     mechanism:
       'Chloramphenicol binds the 50S ribosomal subunit and blocks peptide-bond formation, halting bacterial protein synthesis — broad-spectrum, bacteristatic, and uniquely able to penetrate the eye and cerebrospinal fluid. That utility is what keeps it alive today in topical eye preparations and as a reserve drug for meningitis and typhoid. Its notoriety is haematological: an idiosyncratic, sometimes irreversible aplastic anaemia, which is exactly why systemic use is now reserved for cases with no safer alternative.',
@@ -622,6 +678,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Clindamycin',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Clindamycin'],
     mechanism:
       'Clindamycin binds the 50S subunit and inhibits protein synthesis with a particular strength against anaerobes, staphylococci and streptococci — the flora of dental, bone and necrotising infections. It is the standard for anaerobic lung and bone disease and a key player in the antibiotics that cover aspiration and necrotising fasciitis. Its mechanism extends beyond killing: it suppresses toxin production, useful in toxin-mediated disease. The price is a notoriously high risk of Clostridioides difficile colitis because, being biliary-excreted, it concentrates in the gut where it kills the anaerobes that would normally keep C. difficile in check.',
@@ -629,6 +687,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Glycopeptide antibiotics',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Vancomycin', 'teicoplanin'],
     mechanism:
       'Glycopeptides bind to the terminal amino-acid of the peptidoglycan precursor, physically preventing the cell wall from being cross-linked — killing Gram-positive organisms, including MRSA, whose beta-lactam ring they do not need. Vancomycin is the reserve drug for serious resistant Gram-positive infection and, given orally (it is not absorbed), the treatment for Clostridioides difficile colitis. Dosing is monitored by trough levels because accumulation injures the kidneys; red-man syndrome is the histamine-release infusion reaction that teaches every new prescriber its delivery.',
@@ -637,6 +697,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Macrolides',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Clarithromycin', 'azithromycin', 'erythromycin'],
     mechanism:
       'Macrolides bind the 50S ribosomal subunit and halt protein synthesis — bacteriostatic coverage of atypicals, legionella, mycoplasma, chlamydia and pertussis, with a role in Helicobacter pylori eradication and community pneumonia. They inhibit CYP3A4, so they raise the levels of many drugs, the classic interaction being the statin-and-clarithromycin myopathy. They even carry a weak motilin-agonist activity used as a prokinetic in gastroparesis. The caution that unites the class is QT prolongation and, in the thorough antibiotic stewardship sense, resistance from overuse.',
@@ -644,6 +706,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Metronidazole',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'nucleic-acid',
     drugs: ['Metronidazole'],
     mechanism:
       'Metronidazole is reduced inside anaerobic bacteria and protozoa to an active free-radical form that damages their DNA — selectively lethal to organisms whose metabolism reduces it: anaerobes, Giardia, amoebae and Trichomonas. It is therefore the reference drug for anaerobic infection (intra-abdominal, dental, brain abscess), pelvic inflammatory disease and a long list of parasitic syndromes. It interferes with alcohol metabolism, so the classic counselling is the disulfiram-like reaction, and it is generally safe enough to use while pregnant.',
@@ -651,6 +715,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Nitrofurantoin',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'nucleic-acid',
     drugs: ['Nitrofurantoin'],
     mechanism:
       'Nitrofurantoin is activated by bacterial enzymes into reactive intermediates that damage DNA, RNA and proteins, and it concentrates in urine — the perfect profile for a pure urinary-tract antiseptic. It is the standard for acute uncomplicated cystitis and for long-term prophylaxis against recurrent infection, precisely because it stays in the urine and barely touches the body. The mechanism confines it to the bladder, so it cannot treat pyelonephritis or bacteraemia, and prolonged therapy risks pulmonary fibrosis and a peripheral neuropathy.',
@@ -658,6 +724,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Penicillins, antipseudomonal',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Piperacillin with tazobactam'],
     mechanism:
       'A broad-spectrum penicillin (piperacillin) joined to a beta-lactamase inhibitor (tazobactam) that neutralises the enzymes many resistant bacteria use to destroy penicillins. The combination extends beta-lactam cell-wall killing against Enterobacteriaceae, anaerobes and Pseudomonas — a workhorse for severe hospital and nosocomial sepsis where broad empiric cover is urgent. It is the anti-bacterial pharmacy in one infusion, but the very breadth that makes it first-line is what selects for multidrug-resistant organisms, so it is used hard, short and with culture-directed de-escalation.',
@@ -665,6 +733,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Penicillins, broad-spectrum',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Co-amoxiclav', 'amoxicillin'],
     mechanism:
       'Amoxicillin, a beta-lactam, inhibits cell-wall synthesis across a wide Gram-positive and Gram-negative range; co-amoxiclav couples it with clavulanic acid, a beta-lactamase inhibitor that disarms the enzymes resistant staphylococci and Gram-negatives use, so the penicillin’s killing is restored. Together they cover respiratory, urinary, skin and dental infection as first-line empiric therapy. The trade is the breadth: clavulanate adds activity but also the colic and the antibiotic-associated diarrhoea, and every course adds selection pressure for the resistant organisms broad spectrum creates.',
@@ -672,6 +742,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Penicillins, narrow-spectrum',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'cell-wall',
     drugs: ['Flucloxacillin', 'benzylpenicillin', 'phenoxymethylpenicillin'],
     mechanism:
       'Narrow-spectrum penicillins kill by the same cell-wall mechanism but are prized for what they do not cover. Flucloxacillin is the anti-staphylococcal penicillin, the first-line treatment of skin and soft-tissue infection and osteomyelitis; benzylpenicillin (IV) and phenoxymethylpenicillin (oral) target streptococci and cover endocarditis, cellulitis and prophylaxis of rheumatic fever. Choosing the narrow drug is itself the stewardship lesson — the penicillin that does least collateral damage to the gut flora while stopping the target organism is the right penicillin.',
@@ -679,6 +751,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Quinine',
     family: 'Infection',
+    microGroup: 'antiparasitics',
     drugs: ['Quinine sulfate'],
     mechanism:
       'Quinine disrupts the malaria parasite’s haem detoxification inside the red cell — the parasite digests haemoglobin into toxic haem, and quinine stops it polymerising that haem into harmless pigment, so the growing trophozoite poisons itself. It remains the treatment for severe and chloroquine-resistant falciparum malaria even though artemisinin combinations now lead elsewhere. It is also a potassium-avid and QT-prolonging drug, and its classic legacy is the cramp cure — an off-licence use built on the same membrane effects that can harm.',
@@ -686,6 +759,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Quinolones',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'nucleic-acid',
     drugs: ['Ciprofloxacin', 'levofloxacin', 'ofloxacin', 'moxifloxacin'],
     mechanism:
       'Quinolones poison bacterial DNA gyrase and topoisomerase IV, the enzymes that unwind and separate DNA as bacteria replicate, so DNA synthesis stalls and the organism dies — bactericidal, broad, and orally bioavailable enough to treat serious infection at home. Ciprofloxacin is the reference for Pseudomonas and urinary infection; levofloxacin and moxifloxacin cover respiratory and resistant organisms. Their Achilles heel is connective tissue and cartilage: tendon rupture and a warning in the young and elderly, and they push the risk of C. difficile and aortic dissection high enough to reserve the steepest agents.',
@@ -693,6 +768,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Sulfonamides',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'folate',
     drugs: ['Sulfamethoxazole', 'sulfadiazine'],
     mechanism:
       'Sulfonamides block bacterial dihydrofolate synthase, the enzyme that builds folate from para-aminobenzoic acid — so the bacterium cannot make the tetrahydrofolate it needs for DNA synthesis, and growth stalls. They are bacteriostatic and now used sparingly because resistance has spread; their place today is largely inside fixed combinations, most famously as the sulfamethoxazole half of co-trimoxazole, and in topical use. The mechanism is selective because mammals take up pre-formed folate rather than synthesising it, and the clinical cost is the classic sulfa allergies and the photosensitivity that still warn every prescriber about the class.',
@@ -700,6 +777,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Oxazolidinones',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Linezolid', 'tedizolid'],
     mechanism:
       'Linezolid binds the 50S ribosomal subunit and blocks the very first step of protein synthesis — the joining of the two ribosomal subunits around the message — so no bacterial protein is made at all, and it does so in a way that resists the cross-resistance of other agents. It is a reserve drug for serious Gram-positive infection, above all meticillin-resistant Staphylococcus aureus and vancomycin-resistant enterococci, and is fully orally bioavailable, letting serious infection be treated at home. The price is its mechanism’s mitochondrial echo: courses beyond a couple of weeks bring bone-marrow suppression, neuropathy and the serotonin-syndrome interaction with serotonergic drugs.',
@@ -707,6 +786,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Polymyxins',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'membrane',
     drugs: ['Colistin'],
     mechanism:
       'Colistin, the polymyxin in clinical use, is a cationic peptide that binds the lipopolysaccharide of the Gram-negative outer membrane and disrupts it, so the membrane leaks and the bacterium dies — a detergent-like attack on the very structure that shields many Gram-negatives from other antibiotics. Because no other agent penetrates that membrane in the resistant organisms it targets, colistin is the last-resort drug for multidrug-resistant Acinetobacter and Pseudomonas. That desperation is matched by its toxicity: nephrotoxicity and neurotoxicity limit it to the infections nothing else can touch, and its use is a marker of how far resistance has run.',
@@ -714,6 +795,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Lipopeptides',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'membrane',
     drugs: ['Daptomycin'],
     mechanism:
       'Daptomycin is a cyclic lipopeptide that inserts into the bacterial cell membrane in a calcium-dependent way and disrupts it, depolarising the membrane so the bacterium loses its gradient and dies — rapidly bactericidal and, crucially, active against the Gram-positive organisms that resist so many others, including MRSA and vancomycin-resistant enterococci. It is used for serious skin infection, bacteraemia and endocarditis. Because its mechanism is a membrane assault, it is inactivated by the surfactant in lung lining fluid and so cannot treat pneumonia, and muscle toxicity means liver enzymes and a creatine kinase are followed.',
@@ -721,6 +804,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Rifamycins',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'nucleic-acid',
     drugs: ['Rifampicin', 'rifabutin'],
     mechanism:
       'Rifampicin binds the bacterial DNA-dependent RNA polymerase and blocks transcription — no messenger RNA, so no protein, and the organism cannot grow. It is one of the most important drugs in the antituberculous regimen and in the treatment of leprosy, and its sterilising action on slowly dividing mycobacteria is why it is the cornerstone that allows a short course. It is also a powerful enzyme inducer that accelerates its own metabolism and that of warfarin, the pill and many antiretrovirals, so it strips the effect out of co-prescribed drugs; orange discoloration of secretions is its benign biological signature.',
@@ -728,6 +813,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Antituberculous drugs',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'antituberculous',
     drugs: ['Isoniazid', 'ethambutol', 'pyrazinamide'],
     mechanism:
       'Tuberculosis is treated by a regimen that pairs drugs hitting different steps of the mycobacterium, so no population of bacilli is left to a single mechanism. Isoniazid inhibits the synthesis of mycolic acid, the mycobacterial wall’s signature lipid; pyrazinamide acts in the acidic intracellular compartment where the dormant bacilli hide; ethambutol blocks arabinogalactan of the wall. The standard short-course is a rifampicin-plus-these rhythm, under direct observation because compliance is treatment. Each carries its own cost — isoniazid the peripheral neuropathy (prevented by pyridoxine) and hepatitis, ethambutol the red-green colour-vision loss, pyrazinamide the gout — and the combination is what makes cure possible and resistance rare.',
@@ -736,6 +823,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Antimalarials',
     family: 'Infection',
+    microGroup: 'antiparasitics',
     drugs: ['Chloroquine', 'artemether-lumefantrine', 'mefloquine'],
     mechanism:
       'Antimalarials attack the parasite at the point where it is most vulnerable — inside the red cell, digesting haemoglobin. Chloroquine accumulates in the parasite’s food vacuole and blocks the detoxification of haem, so the parasite is poisoned by its own digestion; the artemisinin derivatives (artemether, in combination with lumefantrine) generate free radicals that damage parasite proteins. Artemisinin-based combinations are now the standard, first-line cure for uncomplicated falciparum malaria because they are fast and potent. The mechanism drives the choice at every step — speed for the dangerously sick, and treatment in combination because the parasite mutates away from single agents.',
@@ -743,6 +831,7 @@ const SEEDS: Seed[] = [
   {
     className: 'Anthelminthics',
     family: 'Infection',
+    microGroup: 'antiparasitics',
     drugs: ['Albendazole', 'mebendazole'],
     mechanism:
       'Anthelminthics bind the beta-tubulin of the worm and stop it polymerising into the microtubules the parasite needs for its gut and its uptake of glucose, so the worm starves and dies slowly — and because the human microtubule is far less sensitive, the selectivity spares the host. Albendazole and mebendazole are the broad-spectrum agents for intestinal roundworm, hookworm, whipworm and threadworm, routinely given to whole populations where soil-transmitted helminths are common. The mechanism’s slow action is also why a second dose is often needed, and why treating the family, not just the index case, is the worm’s defeat.',
@@ -751,6 +840,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Tetracyclines',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Doxycycline', 'lymecycline'],
     mechanism:
       'Tetracyclines bind the 30S ribosomal subunit and block aminoacyl-tRNA docking, starving bacterial protein synthesis — broad-spectrum bacteriostatic agents with a special place in atypical respiratory infection, acne, Lyme disease, rickettsia and malaria prophylaxis. Doxycycline is the everyday choice for its long half-life and skin penetration. Chelation with calcium and iron is their famous dietary interaction, so they are taken apart from the mineral supplements that would bind them, and they are avoided in children and pregnancy because they discolour growing teeth.',
@@ -758,6 +849,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Glycylcyclines',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'protein',
     drugs: ['Tigecycline'],
     mechanism:
       'The glycylcycline tigecycline is a modified tetracycline engineered to evade the two resistance mechanisms that defeat the parent drugs: the active-efflux pumps and the ribosomal-protection proteins that stop doxycycline working. It binds the 30S subunit with higher affinity than the tetracyclines and holds on even in resistant bacteria, restoring broad Gram-positive, Gram-negative and anaerobe coverage. That potency is reserved for resistant intra-abdominal and skin infections because it is intravenous-only and carries significant nausea, plus a mortality warning in some uses — the price of the drug that beats the pumps.',
@@ -765,6 +858,8 @@ const SEEDS: Seed[] = [
   {
     className: 'Trimethoprim',
     family: 'Infection',
+    microGroup: 'antibiotics',
+    moa: 'folate',
     drugs: ['Trimethoprim', 'co-trimoxazole'],
     mechanism:
       'Trimethoprim blocks bacterial dihydrofolate reductase, halting folate synthesis and so DNA building — a selective inhibitor because the bacterial enzyme is far more sensitive than the human one. It concentrates in urine, making it a urinary-tract workhorse; co-trimoxazole adds a sulphonamide that blocks an earlier step in the same folate pathway, the double blockade used in Pneumocystis pneumonia and toxoplasmosis. The folate mechanism is also the caution: prolonged or high-dose therapy can produce a megaloblastic picture, and it is potassium-avid.',
@@ -946,7 +1041,7 @@ const SEEDS: Seed[] = [
     family: 'CNS & psychiatry',
     drugs: ['Paracetamol'],
     mechanism:
-      'Paracetamol’s mechanism is still debated but it likely acts as a weak COX inhibitor centrally and, in a newly understood pathway, reduces a pro-nociceptive oxidant in the spinal cord — raising the pain threshold without the peripheral anti-inflammatory action or gastrointestinal toxicity of the NSAIDs. That makes it the safe everyday analgesic and antipyretic for mild pain and fever, and the foundation of the WHO pain ladder. Its danger is metabolic rather than mechanism-specific: at overdose the excess is shunted to a toxic metabolite that depletes glutathione and destroys the liver, which is why acetylcysteine, the glutathione donor, is the antidote.',
+      'Paracetamol’s mechanism is still debated but it likely acts as a weak COX inhibitor centrally and, in a newly understood pathway, reduces a pro-nociceptive oxidant in the spinal cord — raising the pain threshold without the peripheral anti-inflammatory action or gastrointestinal toxicity of the NSAIDs. That makes it the safe everyday analgesic and antipyretic for mild pain and fever, and the foundation of the who pain ladder. Its danger is metabolic rather than mechanism-specific: at overdose the excess is shunted to a toxic metabolite that depletes glutathione and destroys the liver, which is why acetylcysteine, the glutathione donor, is the antidote.',
     moduleId: 'somaticSensation',
   },
   {
@@ -1011,7 +1106,7 @@ const SEEDS: Seed[] = [
     family: 'Musculoskeletal & inflammation',
     drugs: ['Dexamethasone', 'prednisolone', 'hydrocortisone'],
     mechanism:
-      'Glucocorticoids bind an intracellular receptor that both increases and decreases gene transcription, broadly suppressing the cytokines and leukocytes of inflammation and immunity. Prednisolone is the everyday systemic anti-inflammatory for asthma, inflammatory bowel, autoimmune disease and many inflammatory emergencies; hydrocortisone is the stress-replacement for adrenal crisis; dexamethasone is the potent anti-oedema steroid of brain tumours and the adjunct of severe COVID pneumonia. The price of the wide net is its own physiology — weight gain, hyperglycaemia, osteoporosis, immunosuppression — and suppression of the HPA axis, so withdrawal must be gradual.',
+      'Glucocorticoids bind an intracellular receptor that both increases and decreases gene transcription, broadly suppressing the cytokines and leukocytes of inflammation and immunity. Prednisolone is the everyday systemic anti-inflammatory for asthma, inflammatory bowel, autoimmune disease and many inflammatory emergencies; hydrocortisone is the stress-replacement for adrenal crisis; dexamethasone is the potent anti-oedema steroid of brain tumours and the adjunct of severe covid pneumonia. The price of the wide net is its own physiology — weight gain, hyperglycaemia, osteoporosis, immunosuppression — and suppression of the HPA axis, so withdrawal must be gradual.',
     moduleId: 'hpaAxis',
   },
 
@@ -1210,6 +1305,8 @@ export const MEDICATIONS: DrugClass[] = SEEDS.map((seed) => ({
   drugs: seed.drugs,
   mechanism: seed.mechanism,
   moduleId: seed.moduleId,
+  microGroup: seed.microGroup,
+  moa: seed.moa,
 }));
 
 /** Distinct family names in display order (order of first appearance above). */
@@ -1235,4 +1332,187 @@ export const CLASS_IDS: ReadonlySet<string> = new Set(MEDICATIONS.map((c) => c.i
 /** Look up a class by its URL slug. */
 export function getDrugClass(id: string): DrugClass | undefined {
   return MEDICATIONS.find((drug) => drug.id === id);
+}
+
+// ------------------------------------------------------------------- Infection tiers
+
+export interface MicroGroupMeta {
+  /** URL slug for `#medications/infection/<slug>`. */
+  id: MicroGroup;
+  /** Display name, e.g. 'Antibiotics'. */
+  name: string;
+  /** One-line description for the tile, in the app's voice. */
+  blurb: string;
+  /** Number of classes in this branch. */
+  classCount: number;
+  /** True only for the antibiotic branch, which has a further mechanism-of-action tier. */
+  hasMoa: boolean;
+}
+
+/** The four antimicrobial branches, in display order. Counts are filled in below. */
+const MICRO_GROUP_META: Omit<MicroGroupMeta, 'classCount'>[] = [
+  {
+    id: 'antibiotics',
+    name: 'Antibiotics',
+    blurb: 'Agents that kill bacteria — grouped by the bacterial process they attack.',
+    hasMoa: true,
+  },
+  {
+    id: 'antivirals',
+    name: 'Antivirals',
+    blurb: 'Agents that stop viruses replicating — the antiretrovirals and the rest.',
+    hasMoa: false,
+  },
+  {
+    id: 'antifungals',
+    name: 'Antifungals',
+    blurb: 'Agents that damage the fungal membrane or cell wall the host does not share.',
+    hasMoa: false,
+  },
+  {
+    id: 'antiparasitics',
+    name: 'Antiparasitics',
+    blurb: 'Agents that hit the parasite inside the host — malaria, worms and the protozoa.',
+    hasMoa: false,
+  },
+];
+
+/**
+ * The mechanism-of-action groups the antibiotic classes are sorted into, in display order.
+ * This is the tier a learner reads before reaching penicillin or cephalosporin — the standard
+ * pharmacology buckets, with the classes that act through each mechanism counted beneath.
+ */
+export interface MoaMeta {
+  /** URL slug for `#medications/infection/antibiotics/<id>`. */
+  id: MoAId;
+  /** Display name, e.g. 'Inhibit cell wall synthesis'. */
+  name: string;
+  /** One-line description for the tile. */
+  blurb: string;
+  /** Number of antibiotic classes acting through this mechanism. */
+  classCount: number;
+}
+
+const MOA_GROUP_META: Omit<MoaMeta, 'classCount'>[] = [
+  {
+    id: 'cell-wall',
+    name: 'Inhibit cell wall synthesis',
+    blurb: 'Beta-lactams and glycopeptides weaken the bacterial wall until the cell lyses.',
+  },
+  {
+    id: 'protein',
+    name: 'Inhibit protein synthesis',
+    blurb: 'Ribosome-targeting agents — aminoglycosides, tetracyclines, macrolides and more.',
+  },
+  {
+    id: 'nucleic-acid',
+    name: 'Inhibit nucleic acid synthesis',
+    blurb: 'Quinolones, rifamycins and the DNA-damaging agents that stall replication.',
+  },
+  {
+    id: 'folate',
+    name: 'Inhibit folate metabolism',
+    blurb: 'Sulfonamides and trimethoprim starve the bacterium of the folate it needs for DNA.',
+  },
+  {
+    id: 'membrane',
+    name: 'Disrupt the cell membrane',
+    blurb: 'Colistin and daptomycin punch holes in or depolarise the bacterial membrane.',
+  },
+  {
+    id: 'antituberculous',
+    name: 'Antituberculous therapy',
+    blurb: 'A combined regimen for mycobacteria, hitting several targets in one short course.',
+  },
+];
+
+/** The four antimicrobial branch tiles, with class counts filled in. */
+export const MICRO_GROUPS: MicroGroupMeta[] = MICRO_GROUP_META.map((meta) => ({
+  ...meta,
+  classCount: MEDICATIONS.filter((c) => c.microGroup === meta.id).length,
+}));
+
+/** Every valid `#medications/infection/<microGroup>` branch slug. */
+export const MICRO_GROUP_SLUGS: ReadonlySet<string> = new Set(MICRO_GROUPS.map((m) => m.id));
+
+/** Look up an antimicrobial branch by its slug. */
+export function getMicroGroup(id: string): MicroGroupMeta | undefined {
+  return MICRO_GROUPS.find((m) => m.id === id);
+}
+
+/** The antibiotic mechanism-of-action tiles, with their class counts filled in (non-empty). */
+export const MOA_GROUPS: MoaMeta[] = MOA_GROUP_META.map((meta) => ({
+  ...meta,
+  classCount: MEDICATIONS.filter((c) => c.moa === meta.id).length,
+}));
+
+/** Every valid `#medications/infection/antibiotics/<moa>` slug. */
+export const MOA_SLUGS: ReadonlySet<string> = new Set(MOA_GROUPS.map((m) => m.id));
+
+/** Look up an antibiotic mechanism-of-action group by its slug. */
+export function getMoaGroup(id: string): MoaMeta | undefined {
+  return MOA_GROUPS.find((m) => m.id === id);
+}
+
+/** The classes that sit in an antimicrobial branch (a subfamily page's tile list). */
+export function getMicroGroupClasses(microGroup: MicroGroup): DrugClass[] {
+  return MEDICATIONS.filter((c) => c.microGroup === microGroup);
+}
+
+/** The classes that act through a given antibiotic mechanism of action. */
+export function getMoaClasses(moa: MoAId): DrugClass[] {
+  return MEDICATIONS.filter((c) => c.moa === moa);
+}
+
+/**
+ * A resolved `#medications/<...>` sub-route. The formulary has two shapes: most families are a
+ * single flat tier of classes (`#medications/<family>/` and `#medications/<class>`), but Infection
+ * descends two levels deeper — a family into antimicrobial branches, and the antibiotic branch into
+ * mechanism-of-action groups before reaching classes.
+ */
+export type MedicationRoute =
+  | { kind: 'family'; familyId: string }
+  | { kind: 'class'; classId: string }
+  | { kind: 'subfamily'; familyId: string; microGroup: MicroGroup }
+  | { kind: 'moa'; familyId: string; microGroup: MicroGroup; moa: MoAId };
+
+export const MEDICATION_INVALID = Symbol('medication-invalid');
+
+/**
+ * Validate and resolve the segments that follow the `medications/` prefix. Segments come from
+ * splitting the hash remainder on `/`. Returns a discriminated route, or `MEDICATION_INVALID` for
+ * a route that names no real family, class, branch or mechanism (so the hub can be shown instead of
+ * a blank page). Only Infection descends past one level, and only antibiotics past two.
+ */
+export function resolveMedicationRoute(
+  segments: string[],
+): MedicationRoute | typeof MEDICATION_INVALID {
+  const [familyOrClass, branch, moaSlug] = segments;
+
+  if (segments.length === 1) {
+    if (familyOrClass === undefined) return MEDICATION_INVALID;
+    if (FAMILY_SLUGS.has(familyOrClass)) return { kind: 'family', familyId: familyOrClass };
+    if (CLASS_IDS.has(familyOrClass)) return { kind: 'class', classId: familyOrClass };
+    return MEDICATION_INVALID;
+  }
+
+  if (segments.length === 2) {
+    const family = getFamily(familyOrClass ?? '');
+    if (!family || family.name !== 'Infection') return MEDICATION_INVALID;
+    const microGroup = getMicroGroup(branch ?? '');
+    if (!microGroup) return MEDICATION_INVALID;
+    return { kind: 'subfamily', familyId: family.id, microGroup: microGroup.id };
+  }
+
+  if (segments.length === 3) {
+    const family = getFamily(familyOrClass ?? '');
+    if (!family || family.name !== 'Infection') return MEDICATION_INVALID;
+    const microGroup = getMicroGroup(branch ?? '');
+    if (!microGroup || !microGroup.hasMoa) return MEDICATION_INVALID;
+    const moa = getMoaGroup(moaSlug ?? '');
+    if (!moa) return MEDICATION_INVALID;
+    return { kind: 'moa', familyId: family.id, microGroup: microGroup.id, moa: moa.id };
+  }
+
+  return MEDICATION_INVALID;
 }

@@ -14,7 +14,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
     <div className={styles.grid}>
       <ReadoutItem
         label="Feedback mode"
-        value={inPositiveFeedback ? 'POSITIVE' : 'negative'}
+        value={inPositiveFeedback ? 'positive' : 'negative'}
         secondary={inPositiveFeedback ? 'LH surge — ovulation' : undefined}
         colorVar={inPositiveFeedback ? 'var(--lh)' : 'var(--text-dim)'}
       />

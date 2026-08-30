@@ -32,7 +32,7 @@ export const CELL_CYCLE_QUESTIONS: readonly CellCycleQuestion[] = [
     // every cell has arrived there, which can take most of a cycle from any starting phase.
     observeSeconds: 126000,
     explanation:
-      'It collapses toward zero, because functional p53 converts lesion load into checkpoint arrest at BOTH G1/S and G2/M. The cycle stops until repair catches up — or, if the damage is beyond repair, permanently. This is the mechanism of radiotherapy stated plainly: ionising radiation does not kill cells directly so much as it hands them to their own guardian gene. Tumours that retain wild-type p53 tend to respond; the treatment works through the target the cell already owns.',
+      'It collapses toward zero, because functional p53 converts lesion load into checkpoint arrest at both G1/S and G2/M. The cycle stops until repair catches up — or, if the damage is beyond repair, permanently. This is the mechanism of radiotherapy stated plainly: ionising radiation does not kill cells directly so much as it hands them to their own guardian gene. Tumours that retain wild-type p53 tend to respond; the treatment works through the target the cell already owns.',
     metric: (s) => s.derived.cyclingRatePct,
   },
   {
@@ -74,7 +74,7 @@ export const CELL_CYCLE_QUESTIONS: readonly CellCycleQuestion[] = [
     settleSeconds: 36000,
     observeSeconds: 79200,
     explanation:
-      'It falls to zero once every cell has reached the next G1/S boundary, because CDK4/6 activity is what phosphorylates RB — and inhibiting it recreates an intact brake even in a cell whose cyclin D signal is pathologically high. This is why palbociclib-class drugs work in RB-INTACT tumours however oncogenic their drive, and why they predictably fail once RB itself is lost: there is nothing left to dephosphorylate. The target matters less than the state of the pathway downstream of it.',
+      'It falls to zero once every cell has reached the next G1/S boundary, because CDK4/6 activity is what phosphorylates RB — and inhibiting it recreates an intact brake even in a cell whose cyclin D signal is pathologically high. This is why palbociclib-class drugs work in RB-intact tumours however oncogenic their drive, and why they predictably fail once RB itself is lost: there is nothing left to dephosphorylate. The target matters less than the state of the pathway downstream of it.',
     metric: (s) => s.derived.cyclingRatePct,
   },
 

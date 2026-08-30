@@ -31,7 +31,6 @@
   font-size: 9px;
   letter-spacing: 0.04em;
   fill: var(--text-dim);
-  text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

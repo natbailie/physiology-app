@@ -8,6 +8,7 @@ import { HomePage } from '@/home/HomePage';
 import { ThemePage } from '@/home/ThemePage';
 import { THEMES } from '@/home/moduleRegistry';
 import { MedicationsPage } from '@/medications/MedicationsPage';
+import { ChatLauncher } from '@/shared/chat/ChatLauncher';
 import styles from './App.module.css';
 
 /**
@@ -64,6 +65,10 @@ function RoutedApp({ route }: { route: RouteId }) {
           <Page />
         </Suspense>
       )}
+
+      {/* The only element rendered on every route, which is why the tutor mounts here. It
+          stands aside entirely when there is no backend or nobody signed in. */}
+      <ChatLauncher route={route} />
     </div>
   );
 }

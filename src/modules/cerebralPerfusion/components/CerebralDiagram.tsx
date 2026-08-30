@@ -45,7 +45,7 @@ export function CerebralDiagram({ derived }: CerebralDiagramProps) {
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="Intracranial contents and the pressure-volume curve">
       <path className={styles.skull} d={`M ${BOX.x - 8} ${BOX.y - 10} h ${BOX.width + 16} v ${BOX.height + 20} h -${BOX.width + 16} z`} />
       <text className={styles.label} x={BOX.x - 8} y={BOX.y - 18}>
-        A BOX THAT CANNOT EXPAND
+        A box that cannot expand
       </text>
 
       <rect className={styles.brainBlock} x={BOX.x} y={BOX.y} width={brainWidth} height={BOX.height} />
@@ -65,7 +65,7 @@ export function CerebralDiagram({ derived }: CerebralDiagramProps) {
         height={BOX.height}
       />
       <text className={styles.label} x={BOX.x} y={BOX.y + BOX.height + 30}>
-        BRAIN · BLOOD · CSF · MASS
+        Brain · blood · CSF · mass
       </text>
 
       {/* Pressure-volume curve: flat while there is reserve, then exponential. */}
@@ -87,7 +87,7 @@ export function CerebralDiagram({ derived }: CerebralDiagramProps) {
         r={5}
       />
       <text className={styles.label} x={PLOT.x} y={PLOT.y - 12}>
-        PRESSURE vs VOLUME
+        Pressure vs volume
       </text>
       <text className={styles.label} x={PLOT.x} y={PLOT.y + PLOT.height + 18}>
         added volume →

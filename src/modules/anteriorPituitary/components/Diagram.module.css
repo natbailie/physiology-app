@@ -26,10 +26,6 @@
   stroke-width: 1.4;
 }
 
-.cranialNerve {
-  fill: var(--text-faint);
-}
-
 /* --- Hypothalamus, stalk and the two hypophysiotropic routes --- */
 
 .hypothalamus {

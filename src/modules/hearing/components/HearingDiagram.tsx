@@ -173,7 +173,7 @@ export function HearingDiagram({ derived }: HearingDiagramProps) {
 
       {/* ---- Readouts ---- */}
       <text className={styles.label} x={20} y={300}>
-        PTA {derived.ptaDb.toFixed(0)} dB · AIR-BONE GAP {derived.airBoneGapDb.toFixed(0)} dB
+        PTA {derived.ptaDb.toFixed(0)} dB · air-bone gap {derived.airBoneGapDb.toFixed(0)} dB
       </text>
       <DiagramText className={styles.caption} x={20} y={318} maxWidth={520}>
         Rinne {derived.rinneResult} · Weber {derived.weberResult}

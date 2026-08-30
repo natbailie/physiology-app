@@ -105,6 +105,6 @@ export const HPT_QUESTIONS: readonly HptQuestion[] = [
     panel: THYROID_PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'The giveaway is a LOW T3 with a TSH that has not risen to meet it. In real thyroid failure the pituitary would have responded; here it has not, because the axis is intact and the problem is peripheral — severe illness suppresses the enzyme that converts T4 to the active T3. This is an adaptation rather than a disease, and treating it with thyroxine does not help. The practical lesson is in the stem: thyroid function tests taken during acute illness are difficult to interpret, and are usually best repeated once the patient has recovered.',
+      'The giveaway is a low T3 with a TSH that has not risen to meet it. In real thyroid failure the pituitary would have responded; here it has not, because the axis is intact and the problem is peripheral — severe illness suppresses the enzyme that converts T4 to the active T3. This is an adaptation rather than a disease, and treating it with thyroxine does not help. The practical lesson is in the stem: thyroid function tests taken during acute illness are difficult to interpret, and are usually best repeated once the patient has recovered.',
   },
 ];

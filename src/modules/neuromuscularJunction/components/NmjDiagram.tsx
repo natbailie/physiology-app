@@ -210,7 +210,7 @@ export function NmjDiagram({ derived }: NmjDiagramProps) {
 
       {/* ---- Readouts ---- */}
       <text className={styles.label} x={20} y={372}>
-        SAFETY FACTOR {derived.safetyFactor.toFixed(2)} · QUANTA {derived.quantalContent.toFixed(0)}
+        Safety factor {derived.safetyFactor.toFixed(2)} · quanta {derived.quantalContent.toFixed(0)}
       </text>
       <DiagramText className={styles.caption} x={20} y={392} maxWidth={520}>
         train-of-four {derived.trainOfFourRatio.toFixed(2)} · post-tetanic{' '}

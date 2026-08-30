@@ -22,7 +22,7 @@ export function AbsorptionDiagram({ derived }: AbsorptionDiagramProps) {
     <DiagramFrame viewBox="0 0 560 440" ariaLabel="The digestive chain from pancreas and liver to stool">
       {/* The tube, segmented. */}
       <text className={styles.label} x={40} y={54}>
-        THE CHAIN
+        The chain
       </text>
       <rect className={styles.organBox} x={40} y={64} width={110} height={70} />
       <rect className={styles.organBox} x={160} y={64} width={110} height={70} />
@@ -57,7 +57,7 @@ export function AbsorptionDiagram({ derived }: AbsorptionDiagramProps) {
         opacity={0.15 + 0.55 * clamp(derived.enzymeFactor, 0, 1)}
       />
       <text className={styles.label} x={168} y={206}>
-        PANCREAS · enzymes {(derived.enzymeFactor * 100).toFixed(0)}%
+        Pancreas · enzymes {(derived.enzymeFactor * 100).toFixed(0)}%
       </text>
       <path
         className={styles.bileLoop}
@@ -65,7 +65,7 @@ export function AbsorptionDiagram({ derived }: AbsorptionDiagramProps) {
         opacity={0.15 + 0.55 * clamp(derived.bileEmulsificationFactor, 0, 1)}
       />
       <text className={styles.label} x={40} y={268}>
-        LIVER · pool {derived.bileSaltPoolG.toFixed(1)} g · makes{' '}
+        Liver · pool {derived.bileSaltPoolG.toFixed(1)} g · makes{' '}
         {derived.hepaticSynthesisGPerDay.toFixed(1)} g/day
       </text>
 
@@ -82,7 +82,7 @@ export function AbsorptionDiagram({ derived }: AbsorptionDiagramProps) {
 
       {/* Stool bucket with the day's water in it. */}
       <text className={styles.label} x={STOOL.x - 10} y={STOOL.y - 14}>
-        STOOL
+        Stool
       </text>
       <rect className={styles.stoolFrame} x={STOOL.x} y={STOOL.y} width={STOOL.width} height={STOOL.height} />
       <rect
@@ -117,7 +117,7 @@ export function AbsorptionDiagram({ derived }: AbsorptionDiagramProps) {
       {derived.stoolWaterMlPerDay >= WATER.DIARRHOEA_THRESHOLD_ML_PER_DAY && (
         <text className={styles.alarm} x={40} y={350}>
           {derived.stoolClassification} — {derived.stoolWaterMlPerDay.toFixed(0)} ml/day
-          {derived.stoolOsmoticGapHigh ? ' · osmotic gap HIGH' : ''}
+          {derived.stoolOsmoticGapHigh ? ' · osmotic gap high' : ''}
         </text>
       )}
 

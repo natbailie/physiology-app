@@ -1,6 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { knownCount, mastery as masteryOf } from '@/shared/assessment/scheduling';
+import { rankWeaknesses, type WeakSpot } from '@/shared/assessment/weakness';
 import {
   questionIdsFor,
   questionIndexVersion,
@@ -33,6 +34,8 @@ export interface ProgressTotals {
 export function useModuleProgress(): {
   progress: Record<string, ModuleProgress>;
   totals: ProgressTotals;
+  /** Modules with something wrong with them, weakest first. Empty until something is attempted. */
+  weakSpots: WeakSpot[];
 } {
   const store = useProgressStore();
   const indexVersion = useSyncExternalStore(subscribeQuestionIndex, questionIndexVersion);
@@ -40,6 +43,7 @@ export function useModuleProgress(): {
   return useMemo(() => {
     const summaries = store.allSummaries();
     const byModule: Record<string, ModuleProgress> = {};
+    const simulatorIds: string[] = [];
 
     let due = 0;
     let attempted = 0;
@@ -49,6 +53,7 @@ export function useModuleProgress(): {
 
     for (const module of MODULES) {
       if (module.kind === 'reference') continue;
+      simulatorIds.push(module.id);
       const ids = questionIdsFor(module.id);
       totalQuestions += ids.length;
 
@@ -73,6 +78,9 @@ export function useModuleProgress(): {
 
     return {
       progress: byModule,
+      // Ranked in the same pass, off the same `summaries` read — the docblock above is about
+      // not re-reading storage per module, and a separate weakness hook would do exactly that.
+      weakSpots: rankWeaknesses(summaries, questionIdsFor, simulatorIds, Date.now()),
       totals: {
         due,
         attempted,

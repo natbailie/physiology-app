@@ -75,6 +75,107 @@ Questions may carry a `perturb` in the setup or the intervention. Many of the sh
 moments are events rather than settings — a fasting glucose model defends itself almost perfectly,
 and it is the meal that separates a working pancreas from a failed one.
 
+## The tutor
+
+`supabase/functions/chat/` is the only server-side code in the repo, and it exists for one
+reason: every `VITE_`-prefixed variable is compiled into the bundle, so the model API key cannot
+live in `import.meta.env`. It is an edge-function secret (`GEMINI_API_KEY`), and
+`supabase/schema-chat.sql` adds the `chat_usage` table the daily cap counts rows in.
+
+It runs on the **Google Gemini free tier**, over raw `fetch` rather than an SDK — the request
+shape is small and a Deno `npm:` resolution is one more thing to break.
+
+Two things about Google's API cost a debugging session each, and both are now load-bearing:
+
+- **`v1`, not `v1beta`.** `streamGenerateContent` has been dropped from `v1beta` — every current
+  model lists only `generateContent`, `countTokens`, `createCachedContent` and
+  `batchGenerateContent`, and the streaming path 404s **with an empty body**, which reads exactly
+  like a wrong model name. It is still there and streaming on `v1`.
+- **Google separates SSE frames with `\r\n\r\n`, never `\n\n`.** Splitting on `\n\n` matches
+  nothing: the response accumulates in the buffer, no text is extracted, and the stream closes
+  having emitted only a `done`. No error, no answer, just an empty reply — in both hosts at once.
+  `splitFrames` in the shared module is the one implementation, and
+  `src/shared/chat/geminiFrames.test.ts` holds it there with real CRLF fixtures.
+
+Also: `gemini-2.5-flash` is gone. Google answers it with "no longer available to new users", so a
+key issued today cannot reach it at all.
+
+**Two hosts call the model, and they share one module.** `supabase/functions/_shared/gemini.ts`
+holds the persona, the model id, the request body and the frame reader; both
+`supabase/functions/chat/index.ts` (Deno, production) and `tutorDevRoute` in `vite.config.ts`
+(Node, local) import it. That is what makes a working local answer evidence about the deployed one.
+The shared file is **plain data only** — no `Deno.`, no Node APIs, no `ReadableStream` — because
+one runtime resolves `npm:` specifiers and the other does not, and because `vite.config.ts` pulls
+it into the Node typecheck program where only `@types/node` exists. Stream plumbing stays in each
+host; that part is host-specific and is not where drift hurts.
+
+**The free tier is rate limited per project, not per user.** Every learner shares one allowance,
+which is exactly why `DAILY_MESSAGE_CAP` exists — not to control a bill, but to stop one learner
+draining the quota for everyone. Under real traffic this will throttle, and the answer then is a
+paid key rather than a code change.
+
+- **The client assembles the context, the function owns the quota.** Retrieval, the module
+  catalogue and the learner's weakness summary are built in `src/shared/chat/` because the corpus
+  and the progress store are already there. The function owns the persona, the auth check and
+  every cap — all of the latter are named constants in one block at the top of `index.ts`.
+- **The corpus is globbed, not listed, and never eagerly.** `corpus.ts` follows
+  `moduleQuestionIds.ts`: an eager glob would weld ~105,000 words into whatever chunk imports it.
+  `corpus.test.ts` asserts the glob still finds every module, for the same reason — a corpus that
+  quietly stops covering a module breaks nothing and is simply wrong.
+- **Answers are plain prose because there is no markdown renderer.** Adding one would be a runtime
+  dependency for something nothing else needs, so the system prompt forbids markdown and
+  `ChatPanel` splits on blank lines. If an answer ever comes back full of asterisks, the prompt
+  is what to fix.
+- **Retrieval returning nothing is a feature.** `retrieve` scores zero overlap as no result, so
+  the tutor is handed an empty excerpt block and can say the app does not cover something, rather
+  than reasoning from the six least-irrelevant paragraphs in the corpus.
+- **A failed tutor is never a dead end.** Every failure path — unreachable function, exhausted
+  quota, daily cap, expired session — falls back to `corpusAnswer`, which shows the passages
+  retrieval already found, labelled and attributed. Retrieval is therefore hoisted above the token
+  check in `useChat`, so the fallback is available even when the request never leaves the browser.
+  A generated answer and an authored passage are rendered differently on purpose: a learner has to
+  be able to tell which is which.
+- **`Failed to fetch` is a symptom, not a bug.** It is what an undeployed function looks like. The
+  browser's own `TypeError` wording is replaced in `useChat` with something a learner can act on.
+- The tutor renders for nobody when Supabase is unconfigured or nobody is signed in — the same
+  stand-aside `AuthGate` and `useEntitlement` take, and what keeps the unauthed dev config honest.
+
+### Running it locally, with no deploy
+
+The dev server serves the tutor at `/api/chat` itself. Put `GEMINI_API_KEY=...` in `.env.local`
+(**no `VITE_` prefix** — that prefix compiles a value into the bundle every learner downloads) and
+restart dev. `useChat` picks the dev route whenever `import.meta.env.DEV`, so no Supabase deploy,
+CLI or dashboard is involved, and no signed-in session is required for that route.
+
+`src/shared/chat/secrets.test.ts` fails the build if anything under `src/` ever names a server-only
+key, or reads a non-`VITE_` variable from `import.meta.env`. It is the difference between a
+convention and a guarantee, and it has been checked against a deliberate violation.
+
+### Deploying it
+
+Both routes need the same two things: the SQL applied, and `GEMINI_API_KEY` set. Get a free key
+from Google AI Studio (aistudio.google.com/apikey) — it needs no card.
+
+**Dashboard**, no CLI required:
+
+1. SQL Editor → paste `supabase/schema-chat.sql` → Run. It is idempotent, so re-running is safe.
+2. Edge Functions → Create function, name it `chat` → paste `supabase/functions/chat/index.ts`
+   → Deploy.
+3. Edge Functions → Secrets → add `GEMINI_API_KEY`.
+
+**CLI**, the repeatable path:
+
+```
+brew install supabase/tap/supabase
+supabase link --project-ref <ref>
+supabase db push
+supabase secrets set GEMINI_API_KEY=...
+supabase functions deploy chat
+```
+
+`supabase functions serve chat --env-file supabase/.env.local` runs it locally; that file is
+already gitignored by the `*.local` pattern.
+
 ## Before pushing
 
 `npm run verify` runs the same four steps CI does, in the same order: `tsc -b`, `oxlint`,
@@ -126,9 +227,13 @@ are what they are being converged on.
   channels, receptor density and cholinesterase against a rectangle with eight dots in it — four
   real structures, none drawn. Where a control genuinely has no structure to show, it belongs in
   a control group labelled as a model parameter.
-- **Anatomical labels are sentence-case sans. Only measured values are uppercase mono.** The
-  split is what lets a reader tell a structure from a reading at a glance. "Bowman's capsule"
-  and "Proximal tubule" read; "RIGHT ARM (PRE)" reads as terminal output.
+- **Everything is sentence case. Acronyms stay uppercase; nothing else shouts.** The app used
+  to encode structure-versus-reading as sans-sentence-case against mono-uppercase, and the
+  uppercase half is gone: the family carries the split on its own, so an anatomical label is
+  sans ("Bowman's capsule", "Proximal tubule") and a reading is tabular mono ("ADH 27%"). Real
+  acronyms — GH, TSH, ICP, V/Q, FEV1/FVC — keep their capitals; words do not. The global
+  `.label` utility in `index.css` no longer uppercases, so a readout label authored in sentence
+  case renders that way with no per-component work.
 - **Charts leave the diagram frame.** A supply-versus-demand bar pair is a chart. It belongs in
   the `charts` slot, where `ModulePage` groups it with the other traces under a shared time axis.
 - **Centre a label on the thing it names.** Both text collisions ever found in this app came from

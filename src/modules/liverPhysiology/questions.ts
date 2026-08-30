@@ -43,7 +43,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Mild UNCONJUGATED jaundice with completely normal enzymes and no bilirubinuria is Gilbert syndrome — a reduced UGT capacity that hides until fasting, illness or exertion raises the load. The conjugated fraction stays low, urobilinogen is normal, and nothing is damaged. It matters clinically almost entirely so that it is not mistaken for something else: no treatment, no monitoring, no restrictions.',
+      'Mild unconjugated jaundice with completely normal enzymes and no bilirubinuria is Gilbert syndrome — a reduced UGT capacity that hides until fasting, illness or exertion raises the load. The conjugated fraction stays low, urobilinogen is normal, and nothing is damaged. It matters clinically almost entirely so that it is not mistaken for something else: no treatment, no monitoring, no restrictions.',
   },
   {
     id: 'haemolytic-dark-urine-free',
@@ -53,7 +53,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Jaundice with a NEGATIVE bilirubin dipstick localises the problem upstream of the liver: unconjugated bilirubin is albumin-bound and simply cannot reach the urine. The liver copes by upregulating excretion, so conjugated levels stay low while urobilinogen floods through — the one pattern where high turnover reads as HIGH urinary urobilinogen. The gallstone preset produces deep jaundice too, but its urine is inky and its stool pale.',
+      'Jaundice with a negative bilirubin dipstick localises the problem upstream of the liver: unconjugated bilirubin is albumin-bound and simply cannot reach the urine. The liver copes by upregulating excretion, so conjugated levels stay low while urobilinogen floods through — the one pattern where high turnover reads as high urinary urobilinogen. The gallstone preset produces deep jaundice too, but its urine is inky and its stool pale.',
   },
   {
     id: 'obstructive-quartet',
@@ -63,7 +63,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'Conjugated-predominant jaundice with bilirubinuria, ABSENT urobilinogen and pale stools means bile cannot leave the liver — the pigment has nowhere to go but backwards into blood and urine. ALP rises because biliary epithelium responds to pressure, while ALT stays quiet because hepatocytes are unharmed. Pain points to a stone rather than a painless stricture or head-of-pancreas tumour, which can produce an identical chart silently.',
+      'Conjugated-predominant jaundice with bilirubinuria, absent urobilinogen and pale stools means bile cannot leave the liver — the pigment has nowhere to go but backwards into blood and urine. ALP rises because biliary epithelium responds to pressure, while ALT stays quiet because hepatocytes are unharmed. Pain points to a stone rather than a painless stricture or head-of-pancreas tumour, which can produce an identical chart silently.',
   },
   {
     id: 'hepatitis-mixed-pigments',
@@ -73,7 +73,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     panel: PANEL,
     settleSeconds: SETTLE,
     explanation:
-      'ALT in the stratosphere makes this hepatocellular — and note BOTH pigments are raised with bilirubinuria, because dying hepatocytes leak freshly conjugated bilirubin straight back into plasma. Stools keep some colour because the ducts are open, which separates him from obstruction despite the dark urine. The R-factor does the sorting mechanically: transaminase-dominant injury always outranks whatever the ALP is doing.',
+      'ALT in the stratosphere makes this hepatocellular — and note both pigments are raised with bilirubinuria, because dying hepatocytes leak freshly conjugated bilirubin straight back into plasma. Stools keep some colour because the ducts are open, which separates him from obstruction despite the dark urine. The R-factor does the sorting mechanically: transaminase-dominant injury always outranks whatever the ALP is doing.',
   },
   {
     id: 'stent-drains-the-system',
@@ -87,7 +87,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     observeSeconds: 80000,
     tolerance: 0.03,
     explanation:
-      'It falls — drainage is restored, so secretion outruns formation and the pool clears partly down the reopened duct and partly renally. Watch stool colour return with it: pigment reaching the gut again. The clinical corollary is that post-obstructive complications run on the same timeline — fat-soluble vitamin depletion and cholangitis risk track how LONG the system stayed blocked, not just how yellow the patient looked.',
+      'It falls — drainage is restored, so secretion outruns formation and the pool clears partly down the reopened duct and partly renally. Watch stool colour return with it: pigment reaching the gut again. The clinical corollary is that post-obstructive complications run on the same timeline — fat-soluble vitamin depletion and cholangitis risk track how long the system stayed blocked, not just how yellow the patient looked.',
     metric: (s) => s.derived.conjugatedUmolL,
   },
   {
@@ -101,7 +101,7 @@ export const LIVER_QUESTIONS: readonly LiverQuestion[] = [
     settleSeconds: 60000,
     observeSeconds: 3000,
     explanation:
-      'It rises — more haemoglobin breakdown sends more bilirubin down an OPEN bile pathway, where gut flora convert the surplus into urobilinogen, part of which reabsorbs and reaches urine. This is the earliest laboratory hint of haemolysis, appearing before the reticulocyte peak. Note what does NOT happen: no bilirubinuria, because none of the surplus is conjugated unless the liver saturates.',
+      'It rises — more haemoglobin breakdown sends more bilirubin down an open bile pathway, where gut flora convert the surplus into urobilinogen, part of which reabsorbs and reaches urine. This is the earliest laboratory hint of haemolysis, appearing before the reticulocyte peak. Note what does not happen: no bilirubinuria, because none of the surplus is conjugated unless the liver saturates.',
     metric: (s) => s.derived.urineUrobilinogenIndex,
   },
 ];
