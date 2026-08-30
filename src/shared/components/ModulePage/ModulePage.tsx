@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { RelatedModules } from '@/shared/components/RelatedModules/RelatedModules';
 import { ModuleShellProvider, useModuleShell } from '@/shared/context/moduleShell';
+import { BrandMark } from '../BrandMark/BrandMark';
 import styles from './ModulePage.module.css';
 
 interface ModulePageProps {
@@ -124,6 +125,10 @@ export function ModulePage({
       <div ref={pageRef} className={styles.page} style={style}>
         <header ref={topBarRef} className={styles.topBar}>
           <div className={styles.titleRow}>
+            <span className={styles.brandSlot}>
+              <BrandMark size="sm" href="#" />
+            </span>
+            <span className={styles.brandRule} aria-hidden="true" />
             <a className={styles.backLink} href="#">
               &larr; Modules
             </a>

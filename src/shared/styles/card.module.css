@@ -2,31 +2,70 @@
  *
  * The two were near-clones: `.card`, its hover, its focus-visible, `.nameRow` and `.name`
  * were byte-identical between them. Only the body copy, the badge and the progress meter
- * genuinely differ, and those stay in the component stylesheets. */
+ * genuinely differ, and those stay in the component stylesheets.
+ *
+ * The anatomy is the house card: a white tile with a soft border that lifts under the
+ * cursor, and a wash of its own accent bled in from the top-right corner. The accent used
+ * to be a 3px stripe down the left edge; the corner wash says the same thing with more of
+ * the tile and reads at a glance across a grid of thirty. */
 
 .card {
   composes: panel from './panel.module.css';
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
-  padding: var(--s-5) var(--s-5);
+  gap: var(--s-2);
+  padding: var(--s-5);
   text-decoration: none;
   color: inherit;
-  border-left: 3px solid var(--card-accent, var(--panel-border));
   transition:
     border-color var(--dur) var(--ease),
     box-shadow var(--dur) var(--ease),
     transform var(--dur) var(--ease);
 }
 
+/* A card is a large tile and takes the large radius, not the panel's default. Doubled so it
+ * beats the composed `.panel` on specificity rather than on which stylesheet the bundler
+ * happens to emit first — the same reason ModulePage doubles `.trendGroup`. */
+.card.card {
+  border-radius: var(--r-lg);
+}
+
+/* The corner wash. A gradient rather than a disc: the card's top-right corner is where the
+ * count sits, and a hard-edged shape behind a line of text is a legibility problem dressed
+ * as decoration. This fades out well before it reaches anything that has to be read. */
+.card::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(
+    9rem 9rem at 100% 0%,
+    color-mix(in srgb, var(--card-accent, var(--panel-border)) 19%, transparent),
+    transparent 72%
+  );
+  /* Held below full strength so hover has somewhere to go. Opacity clamps at 1, so a hover
+     value above it is a no-op — the resting state is what has to leave the headroom. */
+  opacity: 0.7;
+  transition: opacity var(--dur) var(--ease);
+}
+
 a.card:hover {
-  border-color: var(--card-accent, var(--text-faint));
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--card-accent, var(--text-faint)) 45%, var(--panel-border));
+  box-shadow: var(--shadow-3);
+  transform: translateY(-2px);
+}
+
+/* The accent strengthens under the cursor rather than moving: on a grid of thirty, a shape
+ * that slides is a distraction and a tint that deepens is an answer. */
+a.card:hover::before {
+  opacity: 1;
 }
 
 a.card:focus-visible {
-  outline: 2px solid var(--card-accent, var(--anp));
+  outline: 2px solid var(--card-accent, var(--brand));
   outline-offset: 2px;
 }
 
@@ -45,7 +84,8 @@ a.card:focus-visible {
 
 .name {
   font-size: var(--fs-base);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
   color: var(--text);
 }
 

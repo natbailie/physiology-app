@@ -16,9 +16,9 @@
 }
 
 /* Locked: readable, not greyed out. The point is to make the module look worth buying,
- * which a half-opacity tile does not. Only the accent stripe stands down. */
-.locked {
-  border-left-color: var(--panel-border);
+ * which a half-opacity tile does not. Only the accent stands down. */
+.locked::before {
+  background: color-mix(in srgb, var(--panel-border) 45%, transparent);
 }
 
 .locked .name {
@@ -40,6 +40,7 @@
   border: 1px solid var(--panel-border);
   border-radius: var(--r-pill);
   padding: 0.15rem 0.55rem;
+  background: var(--panel);
 }
 
 /* --- Progress affordances. Absent entirely until a module has been attempted. --- */
@@ -51,7 +52,7 @@
 .due {
   font-family: var(--mono);
   font-size: var(--fs-micro);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--artery);
   background: color-mix(in srgb, var(--artery) 10%, transparent);

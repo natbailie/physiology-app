@@ -1,64 +1,100 @@
+/* The study band: figures stacked over tracked micro labels on the house ink panel. It is the
+ * one place on the home screen carrying a number worth reading from across a desk, and the
+ * dark surface is what makes it the first thing a returning learner's eye lands on. */
+
 .strip {
-  composes: panel from '../shared/styles/panel.module.css';
+  composes: ink from '../shared/styles/panel.module.css';
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.85rem 1.1rem;
+  gap: var(--s-6);
+  padding: var(--s-6) var(--s-7);
 }
 
 .stats {
   display: flex;
-  align-items: baseline;
-  gap: 1.6rem;
+  align-items: center;
+  gap: var(--s-7);
   flex-wrap: wrap;
 }
 
+/* Centred, not left-aligned: the three labels are different widths, and against a shared
+   left edge the dividers between them land at three different distances. */
 .stat {
   display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 2.5rem;
+  background: var(--brand-ink-border);
 }
 
 .statValue {
-  font-family: var(--mono);
-  font-size: 1.15rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
+  composes: figure from '../shared/styles/text.module.css';
+  font-size: var(--fs-3xl);
+  color: var(--on-brand-ink);
+}
+
+/* The one figure that is a call to action rather than a record of progress. */
+.statDue {
+  color: var(--brand-on-ink);
 }
 
 .statLabel {
-  font-size: 0.75rem;
-  color: var(--text-dim);
+  composes: microLabel from '../shared/styles/text.module.css';
+  --micro-label-color: var(--brand-ink-dim);
 }
 
 .action {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--artery);
-  background: color-mix(in srgb, var(--artery) 8%, var(--panel));
-  border: 1px solid color-mix(in srgb, var(--artery) 45%, var(--panel-border));
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--on-solid);
+  background: var(--brand);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-6);
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color var(--dur) var(--ease);
 }
 
 .action:hover {
-  background: color-mix(in srgb, var(--artery) 14%, var(--panel));
-  border-color: var(--artery);
+  background: color-mix(in srgb, var(--brand) 84%, #ffffff);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--brand-on-ink);
+  outline-offset: 2px;
 }
 
 .caughtUp {
-  font-size: 0.75rem;
-  color: var(--ok);
+  font-size: var(--fs-sm);
+  color: var(--brand-ink-dim);
 }
 
 .statOf {
-  font-size: 0.8rem;
+  font-size: var(--fs-lg);
   font-weight: 400;
-  color: var(--text-faint);
+  color: var(--brand-ink-dim);
+}
+
+/* On a phone the dividers stop separating anything — the stats have already wrapped. */
+@media (max-width: 640px) {
+  .strip {
+    padding: var(--s-5);
+    gap: var(--s-5);
+  }
+
+  .stats {
+    gap: var(--s-6);
+  }
+
+  .divider {
+    display: none;
+  }
 }

@@ -133,4 +133,21 @@ describe.each([
     const worst = SIGNALS.map((name) => contrast(onSolid, signal(name, theme))).sort((a, b) => a - b)[0]!;
     expect(worst).toBeGreaterThanOrEqual(3);
   });
+
+  /**
+   * The brand chrome is the one surface pair NOT derived from a signal base: a near-black
+   * slate panel used on the light page, carrying white type and a muted caption. Nothing
+   * else measures it, and it is exactly the combination a palette edit would break quietly.
+   */
+  it('keeps the brand chrome legible on its own ink', () => {
+    const ink = parseHex(theme.get('--brand-ink') ?? light.get('--brand-ink')!);
+    for (const token of ['--on-brand-ink', '--brand-ink-dim']) {
+      const colour = parseHex(theme.get(token) ?? light.get(token)!);
+      expect(contrast(colour, ink), `${token} on --brand-ink in ${themeName}`).toBeGreaterThanOrEqual(4.5);
+    }
+    // --brand itself is NOT the token to use here: calibrated on white, it lands at 3.45:1
+    // on the ink. --brand-on-ink is the step that exists because this assertion caught that.
+    const onInk = parseHex(theme.get('--brand-on-ink') ?? light.get('--brand-on-ink')!);
+    expect(contrast(onInk, ink), `--brand-on-ink on --brand-ink in ${themeName}`).toBeGreaterThanOrEqual(4.5);
+  });
 });
