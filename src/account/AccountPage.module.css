@@ -1,32 +1,31 @@
 .page {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0 3rem;
-  gap: 1rem;
+  padding: var(--s-6) 0 var(--s-8);
+  gap: var(--s-5);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--s-2);
 }
 
 .title {
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-2xl);
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--s-5);
   max-width: 34rem;
 }
 
 .muted {
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
-  line-height: 1.5;
+  line-height: var(--lh-prose);
   max-width: 46ch;
 }
 
@@ -54,10 +53,10 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-  font-size: 0.85rem;
-  padding: 0.45rem 0.7rem;
+  font-size: var(--fs-sm);
+  padding: var(--s-3) var(--s-4);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--r-md);
   background: var(--panel);
 }
 
@@ -76,15 +75,11 @@
 }
 
 .secondaryButton {
+  composes: button from '../shared/styles/button.module.css';
   align-self: flex-start;
-  font-size: 0.85rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  background: none;
-  border: 1px solid var(--panel-border);
-  color: var(--text-dim);
-  margin-top: 0.5rem;
+  font-size: var(--fs-sm);
+  padding: var(--s-4) var(--s-6);
+  margin-top: var(--s-3);
 }
 
 .error {
@@ -115,18 +110,16 @@
 }
 
 .dangerButton {
+  composes: danger from '../shared/styles/button.module.css';
   align-self: flex-start;
-  font-size: 0.82rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  background: none;
-  border: 1px solid var(--danger);
-  color: var(--danger);
+  font-size: var(--fs-sm);
+  padding: var(--s-3) var(--s-5);
 }
 
+/* Second press confirms, so it stops being an outline and becomes the thing it will do. */
 .dangerArmed {
   background: var(--danger);
+  border-color: var(--danger);
   color: var(--on-solid);
 }
 
