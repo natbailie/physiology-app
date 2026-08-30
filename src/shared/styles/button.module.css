@@ -10,7 +10,7 @@
 .button {
   font: inherit;
   font-size: var(--fs-xs);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-dim);
   background: var(--panel);
@@ -49,6 +49,29 @@
   border-color: color-mix(in srgb, var(--accent, var(--text-faint)) 55%, var(--panel-border));
   background: color-mix(in srgb, var(--accent, var(--panel-raised)) 12%, var(--panel));
   z-index: 1;
+}
+
+/* Filled, in the house accent: the ONE primary action on a page, and only on the pages that
+ * have one — sign in, subscribe, start practice. The instrument controls stay outlined; a
+ * rail of eight filled buttons would have eight primary actions, which is none.
+ *
+ * `--brand` rather than `--accent`: this is the house action colour, the same on every page,
+ * and a module's own signal colour is for the physiology it draws, not for its buttons. */
+.primary {
+  composes: button;
+  color: var(--on-solid);
+  background: var(--brand);
+  border-color: transparent;
+  font-weight: 700;
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-5);
+  box-shadow: var(--shadow-brand);
+}
+
+.primary:hover:not(:disabled) {
+  color: var(--on-solid);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--brand) 86%, var(--text));
 }
 
 /* Carries the module accent: the primary action in its context. */

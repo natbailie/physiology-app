@@ -1,4 +1,4 @@
-/* The first screen anyone meets. Deliberately quiet: one card, no marketing furniture. */
+/* The first screen anyone meets. One card, two halves: who this is, and the one decision. */
 
 .page {
   min-height: 100vh;
@@ -6,57 +6,126 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 3rem 1.25rem;
+  gap: var(--s-6);
+  padding: var(--s-8) var(--s-5);
 }
 
 .card {
   width: 100%;
-  max-width: 24rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  padding: 1.75rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  background: var(--panel);
-  box-shadow: var(--shadow-2);
+  max-width: 56rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-3);
 }
 
-.brand {
+/* --- Ink half --- */
+
+/* The card owns the outer radius and the shadow, so this composes the bare ink SURFACE
+   rather than the full ink panel — see the note in panel.module.css. */
+.brandPanel {
+  composes: inkSurface from '../shared/styles/panel.module.css';
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  justify-content: space-between;
+  gap: var(--s-7);
+  padding: var(--s-7);
 }
 
-.title {
-  font-size: 1.35rem;
-  letter-spacing: 0.02em;
+.pitch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* Sized like a heading, but a paragraph: see the note in LandingPage.tsx. */
+.headline {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+  color: var(--on-brand-ink);
+}
+
+.accent {
+  color: var(--brand-on-ink);
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  line-height: 1.55;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--brand-ink-dim);
 }
 
-.rule {
-  height: 1px;
-  background: var(--panel-border);
+.panelFoot {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.04em;
+  color: var(--brand-ink-dim);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--brand-ink-border);
+}
+
+/* --- Paper half --- */
+
+.formPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-6);
+  padding: var(--s-7);
+  background: var(--panel);
+}
+
+.formHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.formTitle {
+  font-size: var(--fs-xl);
+}
+
+.formHint {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
 }
 
 .footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
+  gap: var(--s-2);
+  font-size: var(--fs-xs);
   color: var(--text-faint);
-  line-height: 1.5;
+  line-height: var(--lh-snug);
   text-align: center;
-  max-width: 24rem;
+  max-width: 34rem;
 }
 
 .pricingLink {
   color: var(--text-dim);
+}
+
+/* One column below the width where two halves stop being halves. The brand panel keeps its
+ * lockup and pitch but drops the footnote rule, which would read as a divider mid-card. */
+@media (max-width: 720px) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brandPanel,
+  .formPanel {
+    padding: var(--s-6);
+  }
+
+  .headline {
+    font-size: var(--fs-xl);
+  }
+
+  .panelFoot {
+    display: none;
+  }
 }

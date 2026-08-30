@@ -37,13 +37,15 @@ export function StudyStrip({
     <section className={styles.strip} aria-label="Study progress">
       <div className={styles.stats}>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{dueCount}</span>
+          <span className={`${styles.statValue} ${styles.statDue}`}>{dueCount}</span>
           <span className={styles.statLabel}>due today</span>
         </div>
+        <span className={styles.divider} aria-hidden="true" />
         <div className={styles.stat}>
           <span className={styles.statValue}>{streakDays}</span>
           <span className={styles.statLabel}>day{streakDays === 1 ? '' : 's'} in a row</span>
         </div>
+        <span className={styles.divider} aria-hidden="true" />
         <div className={styles.stat}>
           <span className={styles.statValue}>
             {known}

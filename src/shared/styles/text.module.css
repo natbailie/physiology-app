@@ -1,0 +1,33 @@
+/* HTML text treatments shared across the app chrome.
+ *
+ * The SVG equivalents live in diagramText.module.css and are NOT interchangeable: those set
+ * `fill` and size in SVG user units, so composing one into an HTML element silently does
+ * nothing. This file is the HTML half.
+ *
+ * `microLabel` in particular had been retyped in six stylesheets — the study band, the account
+ * chip, both form label sets and two section headings — every one of them the same four
+ * declarations. */
+
+/* Sentence case, matching the global `.label` utility it is the composable twin of: these
+ * labels are read, not shouted. The tracking that made caps legible reads as broken spacing on
+ * lowercase, so it drops to a hair, and the size steps up one because lowercase carries less
+ * ink than caps at the same nominal size. */
+.microLabel {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: var(--lh-tight);
+  /* Through a custom property, not a plain colour a consumer then restates. A composed class
+   * carries equal specificity, so `.statLabel { color: ... }` beside this one is a coin toss
+   * decided by emitted stylesheet order — and on the ink panel the losing side is 3.1:1. */
+  color: var(--micro-label-color, var(--text-faint));
+}
+
+/* A figure meant to be read at a glance: tabular mono so a column of them does not jitter. */
+.figure {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+}

@@ -37,27 +37,50 @@
 }
 
 :root {
-  /* Surfaces — clinical/laboratory light: paper panels on a cool bench grey */
-  --bg: #f2f5f8;
+  /* Surfaces — the house neutral, shared with the haematology app: white panels on a
+   * slate ground. Both products render the same ramp so a learner moving between them
+   * reads one system rather than two. */
+  --bg: #f8fafc;
   --panel: #ffffff;
-  --panel-raised: #eaeff5;
-  --panel-border: #cfd8e3;
+  --panel-raised: #f1f5f9;
+  --panel-border: #e2e8f0;
   /* Axis gridlines. Only the four modules whose diagram is genuinely a plot use these —
    * the graph paper that used to sit behind every diagram is gone. */
-  --grid-line: #dde5ef;
-  --grid-line-minor: #edf1f6;
+  --grid-line: #e2e8f0;
+  --grid-line-minor: #f1f5f9;
 
   /* Text */
-  --text: #14202e;
-  --text-dim: #55677f;
-  --text-faint: #67768e;
+  --text: #0f172a;
+  /* One notch darker than the house app's own label greys, which sit at 2.6:1 on white.
+   * palette.test.ts holds this ramp to 4.5:1 and the difference is barely visible. */
+  --text-dim: #475569;
+  --text-faint: #64748b;
   /* Text sitting ON a solid signal colour (a filled danger button, a badge). */
   --on-solid: #ffffff;
 
-  /* Elevation — on paper, panels need a hairline plus a whisper of shadow */
-  --shadow-1: 0 1px 2px rgba(20, 32, 46, 0.05);
-  --shadow-2: 0 2px 6px rgba(20, 32, 46, 0.08);
-  --shadow-3: 0 4px 14px rgba(20, 32, 46, 0.10); /* the one element that should read as lifted: the diagram */
+  /* Brand chrome. The house style uses a near-black slate panel ON the light page as a
+   * branding device — the sign-in panel, the study band — rather than reserving dark for
+   * dark mode. These four tokens are that surface and the type that sits on it, and they
+   * are deliberately NOT part of the signal palette: nothing physiological is drawn with
+   * them. In dark mode the ink lifts one step so the band still separates from the page. */
+  --brand-ink: #0f172a;
+  --brand-ink-border: #1e293b;
+  --on-brand-ink: #ffffff;
+  --brand-ink-dim: #94a3b8;
+  /* The accent, lightened for the ink. --brand itself is calibrated on white and reads at
+   * 3.45:1 on slate — below the floor — so the brand panels get their own step. One value
+   * for both themes: it clears 4.5:1 on either ink. */
+  --brand-on-ink: #60a5fa;
+
+  /* Elevation. Three steps, slate-tinted rather than neutral black, so a lifted panel
+   * warms towards the ground it sits on instead of greying it. */
+  --shadow-1: 0 1px 2px 0 rgba(15, 23, 42, 0.06);
+  --shadow-2:
+    0 4px 6px -1px rgba(15, 23, 42, 0.08),
+    0 2px 4px -2px rgba(15, 23, 42, 0.06);
+  --shadow-3:
+    0 20px 25px -5px rgba(15, 23, 42, 0.1),
+    0 8px 10px -6px rgba(15, 23, 42, 0.06); /* a card under the cursor, and the diagram */
 
   /* Diagram effect tuning. The diagrams encode physiological intensity as
    * translucent washes and coloured halos; these tokens let the whole set be
@@ -171,6 +194,10 @@
   --transfusion-base: #2f6db5; /* blood groups & transfusion: donor-recipient matching */
   --thermal-base: #c65200; /* thermoregulation: heat load vs defended set point */
   --exercise-base: #2e7d46; /* exercise physiology: integrated metabolic response */
+  /* The one house accent: primary actions, the brand caption, the focus ring. It is a base
+   * like any other so it lifts into dark mode with the rest of them, and so palette.test.ts
+   * holds it to the same contrast floors. */
+  --brand-base: #2563eb;
   --ok-base: #007a6f;
   --warn-base: #9c6608;
   --danger-base: #c62828;
@@ -196,10 +223,12 @@
   --s-7: 2rem;
   --s-8: 3rem;
 
-  /* Radii. Four steps replacing nine ad-hoc values. */
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
+  /* Radii. Four steps replacing nine ad-hoc values, on the house scale — softer than the
+   * 6/10/14 this app started with, which is most of why the two products used to read as
+   * unrelated at a glance. */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
   --r-pill: 999px;
 
   /* Type. --fs-micro is the tracked instrument label; --fs-base is prose. */
@@ -210,18 +239,28 @@
   --fs-lg: 1.125rem;
   --fs-xl: 1.375rem;
   --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem; /* the one display size: a figure in the study band */
   --lh-tight: 1.2;
   --lh-snug: 1.4;
   --lh-prose: 1.6;
+
+  /* Tracking. Headings pull in. `--tracking-wide` is what remains of the uppercase label
+   * voice: labels are sentence case now, so the only thing still spread out is the wordmark
+   * in BrandMark, which is a logotype rather than a label. */
+  --tracking-tight: -0.015em;
+  --tracking-wide: 0.09em;
 
   /* Motion */
   --dur-fast: 120ms;
   --dur: 180ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
-  /* Focus. Modules set --accent, so a ring picks up the module's colour and
-   * falls back to a neutral teal on pages that have none. */
-  --focus-ring: 2px solid var(--accent, var(--anp));
+  /* Focus. Modules set --accent, so a ring picks up the module's colour and falls back to
+   * the house accent on the pages — home, landing, account — that have none. */
+  --focus-ring: 2px solid var(--accent, var(--brand));
+
+  /* A filled primary action carries a shadow in its own colour rather than a grey one. */
+  --shadow-brand: 0 10px 15px -3px color-mix(in srgb, var(--brand) 30%, transparent);
 
   color-scheme: light;
   color: var(--text);
@@ -326,6 +365,7 @@
   --transfusion: color-mix(in oklab, var(--transfusion-base), var(--signal-tint) var(--signal-lift));
   --thermal: color-mix(in oklab, var(--thermal-base), var(--signal-tint) var(--signal-lift));
   --exercise: color-mix(in oklab, var(--exercise-base), var(--signal-tint) var(--signal-lift));
+  --brand: color-mix(in oklab, var(--brand-base), var(--signal-tint) var(--signal-lift));
   --ok: color-mix(in oklab, var(--ok-base), var(--signal-tint) var(--signal-lift));
   --warn: color-mix(in oklab, var(--warn-base), var(--signal-tint) var(--signal-lift));
   --danger: color-mix(in oklab, var(--danger-base), var(--signal-tint) var(--signal-lift));
@@ -342,24 +382,35 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #10161d;
-  --panel: #18202a;
-  --panel-raised: #212b37;
-  --panel-border: #2e3a48;
-  --grid-line: #222d3a;
-  --grid-line-minor: #1a222c;
+  /* The same slate ramp as light, walked the other way: --panel here IS the ink the light
+   * theme paints its brand panels in, so the two themes are one family rather than two. */
+  --bg: #0b1220;
+  --panel: #0f172a;
+  --panel-raised: #1e293b;
+  --panel-border: #334155;
+  --grid-line: #1e293b;
+  --grid-line-minor: #172033;
 
-  --text: #e8eef6;
-  --text-dim: #a3b4c8;
-  --text-faint: #8194aa;
+  --text: #f1f5f9;
+  --text-dim: #cbd5e1;
+  --text-faint: #94a3b8;
+
+  /* Ink one step up from --panel, so the brand panels still read as a distinct surface
+   * instead of dissolving into the page the way a literal slate-900 would. */
+  --brand-ink: #1e293b;
+  --brand-ink-border: #334155;
 
   /* On a lifted signal colour the ground reads, not white. */
   --on-solid: #10161d;
 
   /* Shadow does less work on dark, so the hairline border carries the separation instead. */
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.45);
-  --shadow-3: 0 4px 18px rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-2:
+    0 4px 6px -1px rgba(0, 0, 0, 0.5),
+    0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-3:
+    0 20px 25px -5px rgba(0, 0, 0, 0.55),
+    0 8px 10px -6px rgba(0, 0, 0, 0.4);
 
   /* Lift every signal towards a cool near-white. Tuned against the contrast assertions in
    * src/theme/palette.test.ts — raising it washes the hues together, lowering it loses the
@@ -397,7 +448,8 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
   color: var(--text);
 }
 

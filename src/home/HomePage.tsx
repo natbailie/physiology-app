@@ -9,6 +9,7 @@ import { MODULES, THEMES, type ThemeId } from './moduleRegistry';
 import { MEDICATIONS } from '@/medications/drugs';
 import { useModuleProgress } from './useModuleProgress';
 import { ThemeToggle } from '@/theme/ThemeToggle';
+import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import styles from './HomePage.module.css';
 
 export function HomePage() {
@@ -30,12 +31,13 @@ export function HomePage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.titleRow}>
-          <h1 className={styles.title}>Physiology Lab</h1>
+          <BrandMark as="h1" />
           <div className={styles.headerActions}>
             <ThemeToggle />
             {!initialising && (
               <a href="#account" className={styles.accountLink}>
-                {user ? user.email : 'Sign in'}
+                <span className={styles.accountLabel}>{user ? 'Account' : 'Access'}</span>
+                <span className={styles.accountValue}>{user ? user.email : 'Sign in'}</span>
               </a>
             )}
           </div>

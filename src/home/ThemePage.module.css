@@ -1,8 +1,8 @@
 .page {
   display: flex;
   flex-direction: column;
-  padding: 1rem 0 3rem;
-  gap: 1.5rem;
+  padding: var(--s-5) 0 var(--s-8);
+  gap: var(--s-6);
 }
 
 .backRow {
@@ -10,42 +10,42 @@
 }
 
 .backLink {
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
   color: var(--text-dim);
   text-decoration: none;
 }
 
 .backLink:hover {
-  text-decoration: underline;
+  color: var(--text);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-top: -0.5rem;
+  gap: var(--s-2);
+  margin-top: calc(-1 * var(--s-3));
 }
 
 .title {
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-2xl);
 }
 
 .blurb {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
-  max-width: 46ch;
-  line-height: 1.5;
+  max-width: 52ch;
+  line-height: var(--lh-prose);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--s-5);
 }
 
 .footnote {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
-  line-height: 1.5;
+  line-height: var(--lh-snug);
 }

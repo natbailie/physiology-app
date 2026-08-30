@@ -2,26 +2,22 @@
   display: flex;
   flex-direction: column;
   /* App shell no longer pads vertically — ModulePage owns a flush sticky bar. */
-  padding: 1.5rem 0 3rem;
-  gap: 1.5rem;
+  padding: var(--s-6) 0 var(--s-8);
+  gap: var(--s-6);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--s-4);
 }
 
 .titleRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-}
-
-.title {
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
+  gap: var(--s-5);
+  flex-wrap: wrap;
 }
 
 .headerActions {
@@ -30,50 +26,69 @@
   gap: var(--s-4);
 }
 
+/* The account chip: a tracked micro caption over the identity it names, on its own small
+ * panel. The same two-line construction as the lockup opposite it, which is what keeps the
+ * two ends of the header looking deliberate rather than merely aligned. */
 .accountLink {
-  font-size: 0.8rem;
-  color: var(--text-dim);
+  composes: panel from '../shared/styles/panel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  padding: var(--s-2) var(--s-4);
   text-decoration: none;
+  max-width: 16rem;
+  transition: border-color var(--dur) var(--ease);
 }
 
 .accountLink:hover {
-  text-decoration: underline;
+  border-color: var(--text-faint);
+}
+
+.accountLabel {
+  composes: microLabel from '../shared/styles/text.module.css';
+}
+
+.accountValue {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  line-height: var(--lh-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .subtitle {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
-  max-width: 46ch;
-  line-height: 1.5;
+  max-width: 52ch;
+  line-height: var(--lh-prose);
 }
 
 .themeGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--s-5);
 }
 
 .tools {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: var(--s-4);
 }
 
 .toolsTitle {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--text-faint);
+  composes: microLabel from '../shared/styles/text.module.css';
   margin: 0;
 }
 
 .toolsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 28ch));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 30ch));
 }
 
 .footnote {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
-  line-height: 1.5;
+  line-height: var(--lh-snug);
 }

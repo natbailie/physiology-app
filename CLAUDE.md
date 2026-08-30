@@ -263,6 +263,35 @@ Two ways to check the result, both cheap:
 - Contrast: `src/theme/palette.test.ts` checks all 93 signal colours against both themes. If a
   diagram needs a colour that is not in the palette, add a base and let it derive.
 
+## The house style
+
+This app and the haematology app (Bentara Medical) are one company's products and are meant to
+read that way. The shared language lives in `src/index.css` and the four stylesheets in
+`src/shared/styles/` — change it there, not in a component.
+
+- **Neutrals are the slate ramp**, surfaces and text alike, in both themes. Dark mode's `--panel`
+  is the same slate the light theme paints its brand panels in, so the two themes are one family.
+- **`--brand` is the one house accent** and the only colour a primary action is ever painted in.
+  A module's signal colour is for the physiology it draws, never for its buttons. It is declared
+  as a `-base` like every signal, so it lifts into dark mode automatically and `palette.test.ts`
+  holds it to the same contrast floors.
+- **`--brand-ink` is a near-black panel used ON the light page**, not a dark-mode surface: the
+  sign-in split card and the study band. Text on it uses `--on-brand-ink` / `--brand-ink-dim`,
+  and the accent on it is **`--brand-on-ink`, never `--brand`** — blue-600 reads at 3.45:1 on
+  slate, which is how that token came to exist. Compose `inkSurface` when the panel is a HALF of
+  a larger card and `ink` when it is the whole thing.
+- **Headings are 700 and pull in** (`--tracking-tight`); **instrument labels are sentence case**
+  (compose `microLabel` from `shared/styles/text.module.css`, or the global `.label` utility).
+  Positive tracking on a heading is the old voice and should be deleted where it survives.
+  This is the one place we depart from the haematology app, which shouts its labels in caps —
+  see the sentence-case rule under "Drawing diagrams". `--tracking-wide` survives for the one
+  thing that is still a logotype rather than a label: the wordmark in `BrandMark`.
+- `text.module.css` is the HTML half of `diagramText.module.css`. They are not interchangeable:
+  the diagram sheet sets `fill` and sizes in SVG user units, so composing one into an HTML element
+  silently does nothing.
+- The house app sets its muted labels at 2.6:1 on white. We do not: `palette.test.ts` holds the
+  text ramp to 4.5:1, so `--text-dim` / `--text-faint` sit one notch darker.
+
 ## Conventions
 
 - Module ids are camelCase and appear in four places: `moduleRegistry.ts`, `useHashRoute.ts`,

@@ -25,3 +25,24 @@
   border: 1px solid var(--panel-border);
   border-radius: var(--r-md);
 }
+
+/* The house branding surface: a near-black slate panel used ON the light page, not only in
+ * dark mode. The sign-in split card and the study band are the two places it appears, and
+ * between them they are most of what makes this app read as a sibling of the other one.
+ * Anything inside inherits the ink type ramp rather than restating it.
+ *
+ * Split in two on purpose. A consumer that is a HALF of some larger card must not carry its
+ * own border, radius and shadow, and cancelling them from the consumer is a coin toss:
+ * composed classes have equal specificity, so which declaration wins depends on the order the
+ * bundler happens to emit. `inkSurface` is the half that is always right. */
+.inkSurface {
+  background: var(--brand-ink);
+  color: var(--on-brand-ink);
+}
+
+.ink {
+  composes: inkSurface;
+  border: 1px solid var(--brand-ink-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+}

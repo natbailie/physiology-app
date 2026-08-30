@@ -21,9 +21,25 @@
 
 .titleRow {
   display: flex;
-  align-items: baseline;
+  /* Centre, not baseline: the lockup is two lines and would drag the row's baseline with it. */
+  align-items: center;
   gap: var(--s-4);
   flex-wrap: wrap;
+}
+
+/* Its own element rather than styling the lockup from here: reaching into another
+   component's hashed class names to hide it on a phone worked, but only by accident. */
+.brandSlot {
+  display: flex;
+}
+
+/* Separates the group identity from this page's own navigation, so the two do not read as
+   one run of links. */
+.brandRule {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1.5rem;
+  background: var(--panel-border);
 }
 
 .backLink {
@@ -46,7 +62,6 @@
 
 .title {
   font-size: var(--fs-lg);
-  letter-spacing: 0.02em;
 }
 
 .subtitle {
@@ -55,7 +70,7 @@
 }
 
 .practiceCta {
-  composes: accent from '../../styles/button.module.css';
+  composes: primary from '../../styles/button.module.css';
   margin-left: auto;
 }
 
@@ -274,8 +289,11 @@
   }
 
   /* The module tagline is redundant once the title is on screen, and the
-   * sticky bar must not eat half a phone viewport. */
-  .subtitle {
+   * sticky bar must not eat half a phone viewport. The lockup goes with it: this bar is
+   * sticky, and on a phone every row it keeps is a row of diagram it hides. */
+  .subtitle,
+  .brandRule,
+  .brandSlot {
     display: none;
   }
 }
