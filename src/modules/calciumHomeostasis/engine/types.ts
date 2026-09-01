@@ -42,6 +42,8 @@ export interface CalciumDerived {
   serumCalciumMgDl: number;
   serumPhosphateMgDl: number;
   pthLevel: number;
+  /** PTH as an assay reports it, pg/mL. Reference range 15-65. */
+  pthPgPerML: number;
   calcitriolLevel: number;
   calcitoninLevel: number;
   boneResorptionRate: number;

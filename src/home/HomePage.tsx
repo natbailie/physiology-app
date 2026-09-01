@@ -1,11 +1,11 @@
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
-import { ThemeCard } from '@/shared/components/ThemeCard/ThemeCard';
+import { DisciplineCard } from '@/shared/components/DisciplineCard/DisciplineCard';
 import { useAuth } from '@/auth/AuthContext';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { StudyStrip } from './StudyStrip';
 import { StudyReport } from './StudyReport';
-import { MODULES, THEMES, type ThemeId } from './moduleRegistry';
+import { DISCIPLINES, MODULES, THEMES, type DisciplineId } from './moduleRegistry';
 import { MEDICATIONS } from '@/medications/drugs';
 import { useModuleProgress } from './useModuleProgress';
 import { ThemeToggle } from '@/theme/ThemeToggle';
@@ -20,11 +20,15 @@ export function HomePage() {
 
   const reference = MODULES.find((module) => module.kind === 'reference');
 
-  // Counted in the same pass as the theme grid renders, so a theme can never claim a module
-  // size that the filter below will not actually display.
-  const byTheme = new Map<ThemeId, number>();
+  // Simulators per subject, counted through the theme each module belongs to so a tile can
+  // never claim a size the pages below it will not actually show. Reference pages (the
+  // formula sheet, the medications hub) are not simulators and are excluded.
+  const disciplineOf = new Map(THEMES.map((theme) => [theme.id, theme.discipline]));
+  const byDiscipline = new Map<DisciplineId, number>();
   for (const module of MODULES) {
-    if (module.theme) byTheme.set(module.theme, (byTheme.get(module.theme) ?? 0) + 1);
+    if (!module.theme || module.kind === 'reference') continue;
+    const discipline = disciplineOf.get(module.theme);
+    if (discipline) byDiscipline.set(discipline, (byDiscipline.get(discipline) ?? 0) + 1);
   }
 
   return (
@@ -44,7 +48,7 @@ export function HomePage() {
         </div>
         <p className={styles.subtitle}>
           Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE,
-          MRCP). Pick a system to explore.
+          MRCP). Pick a subject to explore.
         </p>
       </header>
 
@@ -60,15 +64,22 @@ export function HomePage() {
 
       <StudyReport weakSpots={weakSpots} />
 
-      <div className={styles.themeGrid}>
-        {THEMES.map((theme) => (
-          <ThemeCard
-            key={theme.id}
-            {...theme}
-            moduleCount={byTheme.get(theme.id) ?? 0}
-            countText={theme.id === 'medications' ? `${MEDICATIONS.length} classes` : undefined}
-          />
-        ))}
+      <div className={styles.disciplineGrid}>
+        {DISCIPLINES.map((discipline) => {
+          const count = byDiscipline.get(discipline.id) ?? 0;
+          return (
+            <DisciplineCard
+              key={discipline.id}
+              {...discipline}
+              href={discipline.href ?? `#discipline/${discipline.id}`}
+              countText={
+                discipline.id === 'pharmacology'
+                  ? `${MEDICATIONS.length} classes`
+                  : `${count} simulator${count === 1 ? '' : 's'}`
+              }
+            />
+          );
+        })}
       </div>
 
       {reference && (

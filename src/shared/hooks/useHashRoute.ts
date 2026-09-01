@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
-import { THEMES } from '@/home/moduleRegistry';
+import { DISCIPLINES, THEMES } from '@/home/moduleRegistry';
 import { MEDICATION_INVALID, resolveMedicationRoute } from '@/medications/drugs';
 import { routeIdFromHash } from './scenarioUrl';
+
+/** `#discipline/<id>` — one browse route per subject, generated so DISCIPLINES stays the
+ * single source of truth. A discipline that names its own `href` (its only theme is already a
+ * hub) gets no route: the tier would render a single tile, so nothing should link there. */
+export type DisciplineRouteId = `discipline/${(typeof DISCIPLINES)[number]['id']}`;
 
 /** `#theme/<id>` — one browse route per theme, generated so THEMES stays the single source
  * of truth. The prefix also keeps them distinct from module routes that share a name. */
@@ -63,6 +68,7 @@ export type RouteId =
   | 'micturition'
   | 'reference'
   | 'medications'
+  | DisciplineRouteId
   | ThemeRouteId
   | MedicationRouteId;
 
@@ -118,6 +124,9 @@ export const VALID_ROUTES: RouteId[] = [
   'micturition',
   'reference',
   'medications',
+  ...DISCIPLINES.filter((discipline) => discipline.status === 'available' && !discipline.href).map(
+    (discipline) => `discipline/${discipline.id}` as DisciplineRouteId,
+  ),
   ...THEMES.map((theme) => `theme/${theme.id}` as ThemeRouteId),
 ];
 

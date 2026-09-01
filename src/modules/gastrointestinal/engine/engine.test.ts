@@ -46,6 +46,9 @@ describe('engine — fasting baseline', () => {
           expect(Number.isFinite(value), `${key} should be finite for ${JSON.stringify(inputs)}`).toBe(true);
         }
       }
+      // These two are a CLAMP check and are correctly written against the clamp's own constants.
+      // The separate question — whether the fasting pH is the pH a fasting stomach actually has —
+      // is asserted against the published band in `references.ts`.
       expect(derived.gastricPH).toBeGreaterThanOrEqual(GASTRIC_PH.MIN_PH - 1e-6);
       expect(derived.gastricPH).toBeLessThanOrEqual(GASTRIC_PH.MAX_PH + 1e-6);
       expect(derived.duodenalPH).toBeGreaterThanOrEqual(DUODENAL_PH.MIN_PH - 1e-6);

@@ -6,6 +6,13 @@ export const GAS_EXCHANGE = {
   AA_GRADIENT_BASELINE_MMHG: 5,
   // Added at full (1.0) airway obstruction — V/Q mismatch widening the A-a gradient.
   AA_GRADIENT_OBSTRUCTION_GAIN_MMHG: 25,
+  /**
+   * Added at full (1.0) V/Q mismatch. Much larger than the bronchospasm gain above because it is
+   * a different lesion: bronchospasm is mostly a ventilation problem, where mismatch and shunt are
+   * mostly a GRADIENT problem. A normal A-a gradient is under 15 mmHg and severe mismatch takes it
+   * past 60, which is what lets an exacerbation be profoundly hypoxaemic while the CO2 barely moves.
+   */
+  AA_GRADIENT_VQ_GAIN_MMHG: 75,
   // Prevents divide-by-zero blowup as alveolar ventilation approaches zero.
   VA_FLOOR_FRACTION: 0.05,
   PACO2_MIN_MMHG: 10,
@@ -27,6 +34,17 @@ export const VENTILATION = {
   MIN_VENTILATION_MULTIPLIER: 0.05,
   // obstruction=1 cuts alveolar ventilation by up to 70%.
   MAX_OBSTRUCTION_VENTILATION_REDUCTION: 0.7,
+  /**
+   * V/Q mismatch = 1 wastes up to 35% of alveolar ventilation as dead space.
+   *
+   * Deliberately far smaller than the obstruction reduction above. CO2 is roughly twenty times more
+   * diffusible than oxygen and its dissociation curve is near-linear over the physiological range,
+   * so mismatch that devastates oxygenation costs only a little CO2 clearance — and the well
+   * ventilated alveoli can compensate for the poor ones on CO2 in a way they cannot on O2. That
+   * asymmetry IS the teaching: hypoxaemia out of proportion to hypercapnia means mismatch, not
+   * hypoventilation.
+   */
+  MAX_VQ_DEAD_SPACE_FRACTION: 0.35,
 };
 
 export const CHEMORECEPTOR = {

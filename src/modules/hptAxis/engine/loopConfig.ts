@@ -9,7 +9,7 @@ export const hptLoopConfig: EngineLoopConfig<HptState, HptInputs, HptDerived, Hp
   computeDerived,
   toHistoryPoint: (snapshot) => ({
     t: snapshot.state.simTimeSeconds,
-    tsh: snapshot.derived.tshLevel * 100,
+    tsh: snapshot.derived.tshMilliUnitsPerL,
     t4: snapshot.derived.t4Level,
     t3: snapshot.derived.t3Level,
   }),

@@ -47,9 +47,34 @@ export function extractionRatio(consumptionMlPerMin: number, deliveryMlPerMin: n
   return clamp(consumptionMlPerMin / deliveryMlPerMin, 0, 1);
 }
 
-/** Lactate accumulates in proportion to unmet demand and clears slowly, so it reports the
- * INTEGRAL of the debt rather than the instantaneous state. */
-export function lactateTarget(demandMlPerMin: number, consumptionMlPerMin: number): number {
+/**
+ * Lactate accumulates in proportion to unmet demand and clears slowly, so it reports the INTEGRAL
+ * of the debt rather than the instantaneous state.
+ *
+ * TWO sources, and the second is what makes lactate an early sign rather than a late one. Global
+ * debt is a threshold — tissue simply extracts more until it cannot, and only then goes into debt.
+ * Regional production starts sooner: the vasoconstriction defending arterial pressure is itself
+ * shutting beds down, and they go anaerobic while the global numbers still balance. See
+ * `LACTATE.REGIONAL_THRESHOLD_DRIVE`.
+ *
+ * A bed starves for either of two reasons, so the regional term takes the WORSE of them: the
+ * reflex has diverted its flow away, or there is not enough flow to divert. Keying it to reflex
+ * drive alone left the `decompensating` preset — a patient at MAP 38 with the reflex removed —
+ * reporting a normal lactate, which is the one thing that state cannot have.
+ */
+export function lactateTarget(
+  demandMlPerMin: number,
+  consumptionMlPerMin: number,
+  sympatheticDrive = 0,
+  cardiacOutputFraction = 1,
+): number {
   const debt = Math.max(0, demandMlPerMin - consumptionMlPerMin);
-  return clamp(LACTATE.BASELINE_MMOL_L + debt * LACTATE.PRODUCTION_GAIN * 60, LACTATE.BASELINE_MMOL_L, LACTATE.MAX_MMOL_L);
+  const starved = Math.max(clamp(sympatheticDrive, 0, 1), clamp(1 - cardiacOutputFraction, 0, 1));
+  const constricted = Math.max(0, starved - LACTATE.REGIONAL_THRESHOLD_DRIVE);
+  const regional = (constricted / (1 - LACTATE.REGIONAL_THRESHOLD_DRIVE)) * LACTATE.REGIONAL_GAIN_MMOL_L;
+  return clamp(
+    LACTATE.BASELINE_MMOL_L + debt * LACTATE.PRODUCTION_GAIN * 60 + regional,
+    LACTATE.BASELINE_MMOL_L,
+    LACTATE.MAX_MMOL_L,
+  );
 }

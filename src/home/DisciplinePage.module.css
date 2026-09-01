@@ -1,0 +1,35 @@
+/* The subject page is the theme page one tier up, and it should be indistinguishable from
+ * it: same rhythm, same back row, same grid. Composed rather than copied so the two cannot
+ * drift apart. */
+
+.page {
+  composes: page from './ThemePage.module.css';
+}
+
+.backRow {
+  composes: backRow from './ThemePage.module.css';
+}
+
+.backLink {
+  composes: backLink from './ThemePage.module.css';
+}
+
+.header {
+  composes: header from './ThemePage.module.css';
+}
+
+.title {
+  composes: title from './ThemePage.module.css';
+}
+
+.blurb {
+  composes: blurb from './ThemePage.module.css';
+}
+
+.grid {
+  composes: grid from './ThemePage.module.css';
+}
+
+.footnote {
+  composes: footnote from './ThemePage.module.css';
+}

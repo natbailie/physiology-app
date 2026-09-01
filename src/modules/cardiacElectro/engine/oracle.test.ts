@@ -147,14 +147,49 @@ describe('oracle: end-systolic volume is defended against preload, in both engin
     expect(ourLoop(CARDIAC_PRESETS.hypovolemia).strokeVolume).toBeLessThan(ourDefault.strokeVolume);
   });
 });
+/**
+ * End-diastolic volume as a direct input — settled, and settled by keeping the slider.
+ *
+ * Pulse's healthy ventricle fills to 142 mL against our default 120, because for Pulse EDV is
+ * emergent from venous return while for us it is a slider. Matched at the same EDV the two
+ * ventricles agree closely — ESV 60.5 vs 60.0, SV 61.4 vs 62.4, EF 50.3% vs 51.0% — so this was a
+ * modelling choice rather than a calibration error, and the choice stands: the slider is the
+ * instrument this module is built on, and `venousReturn` and `shockStates` already own emergent
+ * filling. Our 120 mL is also the textbook normal, where Pulse's 142 sits at the top of the range.
+ *
+ * What was genuinely missing is that the loop could not respond to anything on its own. End-
+ * diastolic volume is the residue of the last beat plus venous return, so a ventricle that empties
+ * badly starts the next beat fuller — and without that, raising afterload or dropping contractility
+ * moved end-systolic volume while the right-hand edge of the loop stayed pinned. See
+ * `VENTRICLE.RESIDUAL_FILLING_COUPLING`.
+ */
+describe('oracle: the loop responds to more than its own slider', () => {
+  it('still fills to exactly the requested preload when nothing is wrong', () => {
+    // The coupling is measured from the baseline residue, so the calibration is untouched and the
+    // slider still means what its label says.
+    expect(Math.abs(ourDefault.derived.fillingTargetEDV - DEFAULT_CARDIAC_INPUTS.preloadEDV)).toBeLessThan(2);
+    expect(Math.abs(ourDefault.edv - DEFAULT_CARDIAC_INPUTS.preloadEDV)).toBeLessThan(3);
+  });
 
-describe('oracle: open questions', () => {
-  it.todo(
-    'decide whether end-diastolic volume should stay a direct input — Pulse’s healthy ventricle ' +
-      'fills to 142 mL against our default 120, because for Pulse EDV is emergent from venous ' +
-      'return while for us it is the preloadEDV slider. Matched at the same EDV the two ventricles ' +
-      'agree closely (ESV 60.5 vs 60.0, SV 61.4 vs 62.4, EF 50.3% vs 51.0%), so this is a modelling ' +
-      'choice rather than a calibration error — but it does mean the loop cannot respond to a bleed ' +
-      'on its own',
-  );
+  it('dilates a failing ventricle — the residue it cannot eject fills the next beat', () => {
+    const failing = ourLoop({ contractility: 0.4 });
+
+    expect(failing.esv).toBeGreaterThan(ourDefault.esv);
+    // The thing the loop could not previously draw: the right-hand edge moves out too.
+    expect(failing.edv).toBeGreaterThan(ourDefault.edv);
+    expect(failing.derived.ejectionFractionPercent).toBeLessThan(ourDefault.derived.ejectionFractionPercent);
+  });
+
+  it('partly buys back stroke volume against a raised afterload, as a real ventricle does', () => {
+    const loaded = ourLoop({ afterloadPressure: 140 });
+
+    // Afterload mismatch still costs stroke volume — it should.
+    expect(loaded.strokeVolume).toBeLessThan(ourDefault.strokeVolume);
+    // But not one-for-one with the rise in end-systolic volume, because the residue recruits
+    // Starling on the next beat. Pinned preload made the two exactly equal and opposite.
+    const esvRise = loaded.esv - ourDefault.esv;
+    const svFall = ourDefault.strokeVolume - loaded.strokeVolume;
+    expect(esvRise).toBeGreaterThan(0);
+    expect(svFall).toBeLessThan(esvRise);
+  });
 });

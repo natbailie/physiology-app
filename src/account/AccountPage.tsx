@@ -4,6 +4,7 @@ import { AuthForm } from '@/auth/AuthForm';
 import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { MODULES } from '@/home/moduleRegistry';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { useEntitlement } from '@/billing/useEntitlement';
 import styles from './AccountPage.module.css';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 
@@ -96,6 +97,47 @@ function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; messa
   );
 }
 
+/**
+ * Which of the two revenue streams is paying for this learner.
+ *
+ * Worth saying out loud rather than just showing a padlock or not: a student whose school has
+ * bought a seat may ALSO be paying us themselves, and has no way to discover that unless we tell
+ * them. Quietly taking both is not a thing this product should do.
+ */
+function AccessSummary() {
+  const { status, source, institutionName } = useEntitlement();
+
+  if (status === 'loading') return <p className={styles.muted}>Checking your access…</p>;
+
+  if (status === 'free') {
+    return (
+      <p className={styles.muted}>
+        Free account — the three free simulators and the reference pages.{' '}
+        <a href="#pricing" className={styles.moduleLink}>
+          See what full access includes
+        </a>
+        .
+      </p>
+    );
+  }
+
+  if (source === 'institution') {
+    return (
+      <p className={styles.muted}>
+        Full access, covered by <strong>{institutionName ?? 'your institution'}</strong>&rsquo;s licence.
+        If you are also paying for a personal subscription you can cancel it — this does not depend
+        on it.
+      </p>
+    );
+  }
+
+  if (source === 'subscription') {
+    return <p className={styles.muted}>Full access through your own subscription. Cancel any time.</p>;
+  }
+
+  return <p className={styles.muted}>Full access.</p>;
+}
+
 function LocalOnlyNotice() {
   return (
     <p className={styles.muted}>
@@ -119,6 +161,9 @@ function SignedInView({ email, onSignOut }: { email: string; onSignOut: () => vo
         Signed in as <strong>{email}</strong>. Answers are saved against this account and follow you
         across devices.
       </p>
+
+      <h2 className={styles.sectionTitle}>Access</h2>
+      <AccessSummary />
 
       <h2 className={styles.sectionTitle}>Progress</h2>
       {rows.length === 0 ? (

@@ -52,8 +52,8 @@ function FamilyHub() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <a className={styles.backLink} href="#">
-          &larr; Modules
+        <a className={styles.backLink} href="#home">
+          &larr; All subjects
         </a>
         <h1 className={styles.title}>Medications</h1>
         <span className={styles.subtitle}>{MEDICATIONS.length} drug classes, grouped by system</span>

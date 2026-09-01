@@ -224,8 +224,15 @@ describe('engine — the three renal tubular acidoses separate on three facts', 
     expect(derived.serumBicarbonateMeqL).toBeLessThan(16);
     // THE diagnostic fact: systemic acidaemia with an inappropriately ALKALINE urine.
     expect(derived.urinePH).toBeGreaterThan(7.0);
-    // Ammoniagenesis still works under normal aldosterone tone, so the UAG stays negative.
-    expect(derived.urineAnionGapMeqL).toBeLessThan(-10);
+    // And a POSITIVE urine anion gap, which is the finding that names the lesion.
+    //
+    // This assertion used to read `toBeLessThan(-10)`, with a comment reasoning that
+    // ammoniagenesis still works under normal aldosterone tone. Production is not excretion:
+    // ammonium reaches the urine only if distal H+ secretion traps the diffused NH3 as NH4+, and
+    // that trapping is precisely what fails here. So urinary ammonium falls, the unmeasured cation
+    // disappears, chloride dominates, and the gap turns positive — which is the whole reason the
+    // gap is measured in a hyperchloraemic acidosis.
+    expect(derived.urineAnionGapMeqL).toBeGreaterThan(0);
     // Potassium is wasted by the same distal failure — but not catastrophically.
     expect(derived.serumPotassiumEstimateMeqL).toBeLessThan(4.6);
   });

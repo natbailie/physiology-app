@@ -22,7 +22,7 @@ import {
   urineOutput,
 } from './renal';
 import { approach, clamp } from '@/shared/lib/math';
-import { BAROREFLEX, RAAS, ANP } from './constants';
+import { BAROREFLEX, HEMODYNAMICS, RAAS, ANP } from './constants';
 import type { DerivedValues, SimInputs, SimSnapshot, SimState } from './types';
 
 export function createInitialState(): SimState {
@@ -30,6 +30,7 @@ export function createInitialState(): SimState {
     bloodVolume: 100,
     simTimeSeconds: 0,
     baroreflexDrive: 0,
+    baroreflexSetpointMmHg: HEMODYNAMICS.MAP_SETPOINT,
     raasActivation: 0,
     anpLevel: 0,
   };
@@ -105,7 +106,7 @@ export function tick(state: SimState, derived: DerivedValues, dtSeconds: number)
     SIMULATION.BLOOD_VOLUME_MAX_PCT,
   );
 
-  const targetDrive = baroreflexDriveTarget(derived.meanArterialPressure);
+  const targetDrive = baroreflexDriveTarget(derived.meanArterialPressure, state.baroreflexSetpointMmHg);
   const targetAnp = anpLevelTarget(derived.preloadFactor);
   const targetRaas = raasActivationTarget(derived.meanArterialPressure, derived.gfr, state.anpLevel);
 
@@ -113,6 +114,12 @@ export function tick(state: SimState, derived: DerivedValues, dtSeconds: number)
     bloodVolume,
     simTimeSeconds: state.simTimeSeconds + dtSeconds,
     baroreflexDrive: approach(state.baroreflexDrive, targetDrive, dtSeconds, BAROREFLEX.TAU_SECONDS),
+    baroreflexSetpointMmHg: approach(
+      state.baroreflexSetpointMmHg,
+      derived.meanArterialPressure,
+      dtSeconds,
+      BAROREFLEX.RESETTING_TAU_SECONDS,
+    ),
     raasActivation: approach(state.raasActivation, targetRaas, dtSeconds, RAAS.TAU_SECONDS),
     anpLevel: approach(state.anpLevel, targetAnp, dtSeconds, ANP.TAU_SECONDS),
   };

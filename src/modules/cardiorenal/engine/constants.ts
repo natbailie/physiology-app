@@ -14,8 +14,22 @@ export const HEMODYNAMICS = {
 export const STARLING = {
   // Blood volume % at which preload benefit peaks.
   BV_OPTIMAL_PCT: 120,
-  // Below this, preload factor scales roughly linearly down to 0 at BV=0.
+  // Below this, preload factor falls toward 0 at BV=0.
   BV_BASELINE_PCT: 100,
+  /**
+   * How steeply preload falls BELOW baseline volume, as an exponent on the remaining fraction.
+   * 1 is the straight line this used to be.
+   *
+   * Filling pressure comes from STRESSED volume, and the unstressed compartment does not give up
+   * its share when blood is lost — vessels recoil, so the loss comes preferentially out of the part
+   * that stretches them. Stroke volume therefore falls faster than volume does. Pulse's baroreflex
+   * trace is the measurement: a ~9% loss costs it 24% of stroke volume, where a straight line costs
+   * 9% and left our cardiac output falling 2.7% against its 10.4%.
+   *
+   * `shockStates` corrects the same assumption in its own units — see
+   * `CIRCULATION.UNSTRESSED_RECOIL_EXPONENT` there. One mechanism, two modules.
+   */
+  SUB_BASELINE_EXPONENT: 2.5,
   // Above this volume, an overloaded/failing heart starts to decompensate (preload factor falls).
   DECOMPENSATION_START_PCT: 150,
   // How much contractility must be preserved to resist decompensation at high volume.
@@ -25,12 +39,45 @@ export const STARLING = {
 };
 
 export const BAROREFLEX = {
-  // MAP deviation (mmHg) that saturates the reflex drive at +/-1.
-  SENSITIVITY_RANGE: 40,
-  MAX_HEART_RATE_ADJUST: 30,
-  MAX_TONE_ADJUST: 0.3,
+  /**
+   * MAP deviation (mmHg) at which the reflex is working at half its authority.
+   *
+   * Drive used to be LINEAR in the error and saturate only 40 mmHg from setpoint, which left the
+   * reflex almost idle over the range a patient actually occupies: a ~9% blood loss moved our heart
+   * rate 2.5% where Pulse's moved 17%, and the shockStates oracle found the same under-response at
+   * the other end of the severity range. One shared assumption, two modules — so both now use the
+   * same saturating form and the same 8 mmHg half-activation. See
+   * `src/modules/shockStates/engine/constants.ts`, which carries the longer note.
+   *
+   * A high-gain loop holds a SMALL error with a LARGE output. That is why Pulse can defend pressure
+   * to within 1.2% of setpoint and be tachycardic at the same time, and why a model that reports
+   * the error instead of correcting it teaches the opposite lesson.
+   */
+  HALF_ACTIVATION_ERROR_MMHG: 8,
+  /** Beats per minute the reflex can add or remove at full drive. Raised with the gain above: the
+   * rate arm is what Pulse leans on hardest, and 30 could not reach the +17% a Class I loss
+   * produces even with the drive corrected. */
+  MAX_HEART_RATE_ADJUST: 45,
+  /** Fractional rise in vascular tone at full drive. Trimmed from 0.30 as the rate arm above was
+   * raised: the finding behind both numbers is that this reflex leaned almost entirely on
+   * resistance, so rebalancing the two arms IS the fix rather than a tuning of either alone. */
+  MAX_TONE_ADJUST: 0.2,
   // Fast: seconds-scale reflex.
   TAU_SECONDS: 8,
+  /**
+   * How slowly the setpoint the reflex defends drifts toward the pressure it is actually seeing.
+   *
+   * Baroreceptors RESET. They defend against an acute change over seconds to minutes and then
+   * accept the new pressure as normal, which is exactly why chronic hypertension persists instead
+   * of being reflexively corrected away — and why the reflex is not a long-term controller of
+   * arterial pressure at all. The kidney is.
+   *
+   * Without this the corrected reflex was too good at its job in the wrong direction: a kidney at
+   * 25% function expanded blood volume to 130% of normal and the reflex held the pressure rise to
+   * 4%, which teaches that renal failure does not cause hypertension. Slow relative to RAAS, so
+   * the acute defence this module is otherwise about is untouched.
+   */
+  RESETTING_TAU_SECONDS: 900,
 };
 
 export const RAAS = {

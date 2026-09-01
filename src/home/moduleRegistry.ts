@@ -1,3 +1,73 @@
+/** The top tier of the catalogue: the subject a learner picks before anything else. A
+ * discipline owns themes, a theme owns modules. Route ids are `discipline/<id>` (see
+ * useHashRoute and App.tsx). */
+export interface DisciplineDescriptor {
+  id: string;
+  name: string;
+  /** One line saying what lives here, shown under the discipline's name. */
+  blurb: string;
+  status: 'available' | 'comingSoon';
+  accentColorVar?: string;
+  /**
+   * Where the tile goes when this discipline's only theme is itself a browseable hub, so the
+   * generated `#discipline/<id>` page would hold a single tile and teach nobody anything.
+   * Absent for the normal case, and a discipline that sets it gets no generated route at all.
+   */
+  href?: string;
+}
+
+/** The disciplines, in the order they should be presented. The unbuilt ones ship as
+ * coming-soon tiles on purpose: the roadmap is worth showing, and an empty subject is more
+ * honest than a subject that is silently missing. */
+export const DISCIPLINES: DisciplineDescriptor[] = [
+  {
+    id: 'physiology',
+    name: 'Physiology',
+    blurb: 'The feedback-loop simulators, one organ system at a time.',
+    status: 'available',
+    accentColorVar: 'var(--artery)',
+  },
+  {
+    id: 'pharmacology',
+    name: 'Pharmacology',
+    blurb: 'The high-yield drug classes of the UK top-100, and the diagrams that show how each works.',
+    status: 'available',
+    accentColorVar: 'var(--raas)',
+    // Its one theme IS the hub, so the tile skips the tier that would hold a single card.
+    href: '#theme/medications',
+  },
+  {
+    id: 'microbiology',
+    name: 'Microbiology',
+    blurb: 'The organisms, what they infect and the drugs that reach them.',
+    status: 'comingSoon',
+    accentColorVar: 'var(--pathogen)',
+  },
+  {
+    id: 'biochemistry',
+    name: 'Biochemistry',
+    blurb: 'The pathways underneath the physiology, and where each one fails.',
+    status: 'comingSoon',
+    accentColorVar: 'var(--glucose)',
+  },
+  {
+    id: 'anatomy',
+    name: 'Anatomy',
+    blurb: 'Structure and the relationships that make the clinical signs make sense.',
+    status: 'comingSoon',
+    accentColorVar: 'var(--sarcomere)',
+  },
+  {
+    id: 'pathology',
+    name: 'Pathology',
+    blurb: 'How disease processes begin, spread and show themselves.',
+    status: 'comingSoon',
+    accentColorVar: 'var(--fibrin)',
+  },
+];
+
+export type DisciplineId = (typeof DISCIPLINES)[number]['id'];
+
 /** One way of slicing the simulator catalogue. The home page is a grid of these; each opens
  * its own page of module cards (see ThemePage). A module belongs to exactly one theme. */
 export interface ThemeDescriptor {
@@ -5,6 +75,9 @@ export interface ThemeDescriptor {
   name: string;
   /** One line saying what lives here, shown under the theme's name. */
   blurb: string;
+  /** The subject this theme sits under. Required, so a new theme cannot belong to nothing
+   * and quietly disappear from every discipline page. */
+  discipline: DisciplineId;
   accentColorVar?: string;
 }
 
@@ -15,72 +88,84 @@ export const THEMES: ThemeDescriptor[] = [
     id: 'cardiovascular',
     name: 'Cardiovascular',
     blurb: 'The pump, its pipes and the pressures that keep both honest.',
+    discipline: 'physiology',
     accentColorVar: 'var(--artery)',
   },
   {
     id: 'respiratory',
     name: 'Respiratory',
     blurb: 'Ventilation, gas exchange and the blood-gas numbers they produce.',
+    discipline: 'physiology',
     accentColorVar: 'var(--o2)',
   },
   {
     id: 'renalFluids',
     name: 'Renal & Fluids',
     blurb: 'The nephron, the electrolytes and the bladder they drain into.',
+    discipline: 'physiology',
     accentColorVar: 'var(--kidney)',
   },
   {
     id: 'endocrine',
     name: 'Endocrine',
     blurb: 'The axes — every gland, its hormone and the feedback loop around it.',
+    discipline: 'physiology',
     accentColorVar: 'var(--cortisol)',
   },
   {
     id: 'gastrointestinal',
     name: 'Gastrointestinal',
     blurb: 'From gastric acid to the stool that names the broken segment.',
+    discipline: 'physiology',
     accentColorVar: 'var(--gastrin)',
   },
   {
     id: 'haematology',
     name: 'Haematology & Immunity',
     blurb: 'Cells, clotting, transfusion and the immune systems that guard them.',
+    discipline: 'physiology',
     accentColorVar: 'var(--fibrin)',
   },
   {
     id: 'neuroMuscle',
     name: 'Neuro & Muscle',
     blurb: 'Nerves, synapses, muscle and the circuits that command them.',
+    discipline: 'physiology',
     accentColorVar: 'var(--sarcomere)',
   },
   {
     id: 'specialSenses',
     name: 'Special Senses',
     blurb: 'How each sense turns a physical signal into a nerve impulse.',
+    discipline: 'physiology',
     accentColorVar: 'var(--retina)',
   },
   {
     id: 'reproduction',
     name: 'Reproduction & Development',
     blurb: 'The maternal adaptations of pregnancy and the two circulations of birth.',
+    discipline: 'physiology',
     accentColorVar: 'var(--placenta)',
   },
   {
     id: 'integrative',
     name: 'Integrative Physiology',
     blurb: 'Whole-body physiology that no single organ owns.',
+    discipline: 'physiology',
     accentColorVar: 'var(--exercise)',
   },
   {
     id: 'cellMolecular',
     name: 'Cell & Molecular',
     blurb: 'The cell-level machinery underneath the organ systems.',
+    discipline: 'physiology',
     accentColorVar: 'var(--marrow)',
   },
   {
     id: 'medications',
     name: 'Medications',
     blurb: 'The high-yield drug classes of the UK top-100 — how each works, and the diagrams that show it.',
+    discipline: 'pharmacology',
     accentColorVar: 'var(--raas)',
   },
 ];

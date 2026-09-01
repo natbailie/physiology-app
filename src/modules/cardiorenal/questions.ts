@@ -29,6 +29,11 @@ export const CARDIORENAL_QUESTIONS: readonly CardiorenalQuestion[] = [
     explanation:
       'A kidney that cannot excrete the daily sodium and water load lets blood volume expand, and the expanded volume raises cardiac output and therefore pressure. RAAS compounds it: the failing kidney reads its own low filtration as underperfusion and keeps signalling for more retention even as the pressure climbs. This is why hypertension is near-universal in CKD, and why it is treated with salt restriction and RAAS blockade rather than with agents that simply dilate.',
     metric: (s) => s.derived.meanArterialPressure,
+    // Volume-driven hypertension is slow: the kidney has to retain enough salt and water for the
+    // expanded volume to show up as pressure, and the baroreflex opposes the rise while it happens.
+    // Its three siblings below already watch for 1200 s; at the default 600 this one caught the
+    // excursion mid-climb and the harness rightly called it too small to see.
+    observeSeconds: 1200,
   },
 
   {

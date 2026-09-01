@@ -5,6 +5,9 @@
 #
 #   ./run.sh                    regenerate every trace in traces.json
 #   ./run.sh hemorrhage-class3  regenerate one
+#   ./run.sh --list             list the container's scenario library
+#   ./run.sh --list patient     list one subdirectory of it
+#   ./run.sh --columns <id>     print the CSV header a trace produced, from raw/
 #
 set -euo pipefail
 
@@ -30,6 +33,25 @@ image="$(node -e 'process.stdout.write(require("./traces.json").pulseImage)' 2>/
   || python3 -c 'import json;print(json.load(open("traces.json"))["pulseImage"],end="")')"
 
 cd "$here"
+
+# The container ships a large scenario library, and a trace entry that names a file which is not
+# there fails deep inside a docker run. Listing it is the cheap way to author a new entry — and the
+# respiratory scenarios emit a much richer column set than the haemorrhage ones, so `--columns`
+# exists to check a quantity is actually recorded before a test is written against it.
+if [ "${1:-}" = "--list" ]; then
+  docker run --rm --platform linux/amd64 "$image" bash -lc \
+    "cd /source/data/human/adult/scenarios && ls ${2:+$2/}*.json 2>/dev/null || ls -d */"
+  exit 0
+fi
+if [ "${1:-}" = "--columns" ]; then
+  csv="$(ls -t "$raw"/*Results.csv 2>/dev/null | head -1)"
+  [ -n "${2:-}" ] && csv="$(ls -t "$raw"/*Results.csv 2>/dev/null | grep -i "$2" | head -1 || true)"
+  [ -z "$csv" ] && { echo "no CSV in raw/ — run the trace first" >&2; exit 1; }
+  echo "$csv"
+  head -1 "$csv" | tr ',' '\n'
+  exit 0
+fi
+
 failed=""
 # macOS ships bash 3.2, which has no `mapfile`.
 if [ "$#" -eq 0 ]; then

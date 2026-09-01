@@ -20,6 +20,9 @@ afterEach(cleanup);
  * `home/moduleQuestionIds.ts` discovers questions: a fifth hand-maintained list of module ids would
  * be the one that silently under-reports. Slider ranges are read off the rendered control panel
  * rather than duplicated here, so this measures the ranges a learner can actually reach.
+ *
+ * What this file does NOT reach is the sticky top bar: the scenario buttons and the one-off action
+ * buttons live in `PresetBar`, not in the control panel, and are covered by `actions.test.tsx`.
  */
 
 type AnyConfig = EngineLoopConfig<unknown, unknown, unknown, unknown>;
@@ -52,6 +55,8 @@ interface ModuleUnderTest {
   config: AnyConfig;
   defaults: Inputs;
   presets: Record<string, Inputs>;
+  /** Everything `presets.ts` exports, so a block control can find the resolver behind it. */
+  presetExports: Record<string, unknown>;
   /** Scenarios defined by elapsed time rather than by a setting; see `useScenarioPreset`. */
   settleOverrides: Record<string, number>;
   ControlPanel: ComponentType<Record<string, unknown>>;
@@ -110,6 +115,7 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
     config,
     defaults,
     presets,
+    presetExports,
     settleOverrides,
     ControlPanel: components[controlName]!,
     diagrams,
@@ -227,30 +233,94 @@ function differs(a: Settled, b: Settled, tolerance = 0.01): boolean {
 interface Control {
   key: string;
   label: string;
-  low: unknown;
-  high: unknown;
+  /**
+   * Every setting the control can reach, in the order the panel offers them: the two ENDS of a
+   * slider's range, and EVERY option of a toggle group.
+   *
+   * Toggles used to contribute their first and last option only. That exercised none of the middle
+   * ones, and the middle is where the teaching lives — ten of ecgConduction's twelve leads, ten of
+   * vision's twelve field-lesion sites and six of its eight rhythms were never once selected by
+   * this suite.
+   */
+  values: unknown[];
+  /**
+   * Controls that replace a BLOCK of inputs rather than setting one key.
+   *
+   * capillaryExchange's tissue bed is the only one in the app: it calls back with a bed name and
+   * the page splices in a whole `bedDefaults(bed)` patch, because a bed's pressures and reflection
+   * coefficient are properties of the vessel wall rather than free choices.
+   */
+  patch?: (value: unknown) => Inputs;
+}
+
+/** The inputs a control asks for at one of its settings. */
+function applied(background: Inputs, control: Control, value: unknown): Inputs {
+  return control.patch ? { ...background, ...control.patch(value) } : { ...background, [control.key]: value };
 }
 
 /**
- * Every control the panel renders, with the ends of its range — learnt by driving the real UI.
+ * The resolver behind a block control, found by shape in the module's own `presets.ts` — an
+ * exported function that turns one of the recorded option values into an input patch.
+ *
+ * Discovered rather than listed, like everything else here. A module that grows a second such
+ * control gets swept with no edit to this file; a module whose resolver disappears fails loudly
+ * instead of quietly dropping the control, which is exactly how the tissue bed came to be untested.
+ */
+function findBlockResolver(module: ModuleUnderTest, values: unknown[]): (value: unknown) => Inputs {
+  for (const value of Object.values(module.presetExports)) {
+    if (typeof value !== 'function' || value.length !== 1) continue;
+    const resolve = value as (v: unknown) => unknown;
+    try {
+      const patches = values.map((v) => resolve(v));
+      if (patches.every((p) => p && typeof p === 'object' && Object.keys(p).length > 0)) {
+        return resolve as (v: unknown) => Inputs;
+      }
+    } catch {
+      // Not this export; a resolver for a different value space throws or returns nothing useful.
+    }
+  }
+  throw new Error(`${module.id}: a control asks for a block of inputs but presets.ts exports no resolver for it`);
+}
+
+/**
+ * Every control the panel renders, with every setting it can reach — learnt by driving the real UI.
  *
  * Ranges live inside eight thousand lines of control-panel JSX and nowhere else. Reading them off
  * the rendered inputs keeps this honest: it tests the range a learner can actually reach, and it
- * cannot drift out of date the way a duplicated table would. Toggle groups are swept the same way,
- * by clicking each option and recording what it asks for.
+ * cannot drift out of date the way a duplicated table would.
+ *
+ * The panel is rendered ONCE PER TOGGLE SETTING, not once, because a panel may render different
+ * sliders for different settings. hpgAxis is the only one that does — it offers exogenous estrogen
+ * to a female patient and exogenous testosterone to a male one — and rendering only the default
+ * (female) panel hid `exogenousTestosterone` completely, despite `anabolicSteroidUse` being a
+ * shipped scenario that sets it.
  */
 function discoverControls(module: ModuleUnderTest): Control[] {
-  const calls: { key: string; value: unknown }[] = [];
-  // Recorded from the raw arguments: a control wired straight to a ToggleGroup calls back with one
-  // argument, which is a selection rather than an input change and is not a control to sweep.
-  const onChange = (...args: unknown[]) => {
-    if (args.length === 2 && typeof args[0] === 'string') calls.push({ key: args[0], value: args[1] });
+  const found = new Map<string, Control>();
+  const collect = (inputs: Inputs) => {
+    for (const control of controlsInPanel(module, inputs)) if (!found.has(control.key)) found.set(control.key, control);
+  };
+  collect(module.defaults);
+  for (const control of [...found.values()]) {
+    if (control.values.length <= 2 && typeof control.values[0] === 'number') continue; // A slider reveals nothing.
+    for (const value of control.values) collect(applied(module.defaults, control, value));
+  }
+  return [...found.values()];
+}
+
+function controlsInPanel(module: ModuleUnderTest, inputs: Inputs): Control[] {
+  const calls: unknown[][] = [];
+  // The raw arguments, not a normalised pair: a control wired straight to a ToggleGroup may call
+  // back with ONE argument — a selection rather than an input change — and the old recorder
+  // discarded those, which is why capillaryExchange's four tissue beds were never swept.
+  const record = (...args: unknown[]) => {
+    calls.push(args);
   };
   const { container } = render(
     createElement(
       ModuleShellProvider as ComponentType<{ blinded: boolean }>,
       { blinded: false },
-      createElement(module.ControlPanel, { inputs: module.defaults, onChange, onSelectBed: onChange }),
+      createElement(module.ControlPanel, { inputs, onChange: record, onSelectBed: record }),
     ),
   );
 
@@ -264,24 +334,36 @@ function discoverControls(module: ModuleUnderTest): Control[] {
     // module whose defaults sit at the bottom of the range.
     calls.length = 0;
     fireEvent.change(input, { target: { value: String(Number(input.value) === min ? max : min) } });
-    if (calls.length !== 1) continue;
-    controls.push({ key: calls[0]!.key, label, low: min, high: max });
+    if (calls.length !== 1 || calls[0]!.length !== 2 || typeof calls[0]![0] !== 'string') continue;
+    controls.push({ key: calls[0]![0], label, values: [min, max] });
   }
 
-  // Toggle groups: each option is a button that asks for one value of one input.
-  const byKey = new Map<string, { label: string; values: unknown[] }>();
-  for (const button of Array.from(container.querySelectorAll('button'))) {
-    calls.length = 0;
-    fireEvent.click(button);
-    if (calls.length !== 1) continue;
-    const { key, value } = calls[0]!;
-    const seen = byKey.get(key) ?? { label: button.textContent ?? key, values: [] };
-    if (!seen.values.some((v) => Object.is(v, value))) seen.values.push(value);
-    byKey.set(key, seen);
-  }
-  for (const [key, { label, values }] of byKey) {
+  // Toggle groups announce themselves as radiogroups, which is a firmer handle than "a button that
+  // happened to call back exactly once" — and it is what finds a one-argument selection at all.
+  for (const group of Array.from(container.querySelectorAll('[role="radiogroup"]'))) {
+    const label = group.getAttribute('aria-label') ?? '(unlabelled)';
+    const values: unknown[] = [];
+    let key: string | null = null;
+    let isBlock = false;
+    for (const option of Array.from(group.querySelectorAll('button'))) {
+      calls.length = 0;
+      fireEvent.click(option);
+      if (calls.length !== 1) continue;
+      const args = calls[0]!;
+      const value = args.length === 2 && typeof args[0] === 'string' ? ((key = args[0]), args[1]) : ((isBlock = true), args[0]);
+      if (!values.some((v) => Object.is(v, value))) values.push(value);
+    }
     if (values.length < 2) continue;
-    controls.push({ key, label: `${label} (toggle)`, low: values[0], high: values.at(-1) });
+    if (isBlock) {
+      const resolve = findBlockResolver(module, values);
+      // Named after the input the patch itself carries, so an allowlist entry reads the same way as
+      // one for any other control.
+      const patch = resolve(values[0]);
+      const carried = Object.keys(patch).find((k) => Object.is(patch[k], values[0]));
+      controls.push({ key: carried ?? label, label: `${label} (toggle)`, values, patch: resolve });
+    } else {
+      controls.push({ key: key!, label: `${label} (toggle)`, values });
+    }
   }
   cleanup();
   return controls;
@@ -309,12 +391,32 @@ function sweepChangesReadings(module: ModuleUnderTest, control: Control): boolea
   ];
   for (const [seconds, cap] of horizons) {
     for (const background of backgrounds(module)) {
-      const low = settle(module.config, { ...background, [control.key]: control.low }, seconds, cap);
-      const high = settle(module.config, { ...background, [control.key]: control.high }, seconds, cap);
-      if (differs(low, high)) return true;
+      const first = settle(module.config, applied(background, control, control.values[0]), seconds, cap);
+      // Any setting reaching a different reading is enough for the control to be alive. Whether the
+      // settings are distinct FROM EACH OTHER is a sharper question, asked separately below.
+      for (const value of control.values.slice(1)) {
+        if (differs(first, settle(module.config, applied(background, control, value), seconds, cap))) return true;
+      }
     }
   }
   return false;
+}
+
+/**
+ * Compares an allowlist against what the sweep actually finds, in BOTH directions.
+ *
+ * Each of the three lists below is a backlog with a reason per line, and a plain `filter`-then-
+ * expect-empty leaves them one-way: an entry whose diagram has since gained the correlate, or a
+ * control that has since come alive, stays on the list silently and the backlog only ever grows.
+ * Asserting set equality means the list has to be maintained down as well as up.
+ */
+function expectExactly(actual: string[], allowed: string[], what: string) {
+  const added = actual.filter((entry) => !allowed.includes(entry)).sort();
+  const fixed = allowed.filter((entry) => !actual.includes(entry)).sort();
+  expect(
+    { [what]: added, 'entries that are no longer needed — delete them from the allowlist': fixed },
+    `${what}:\n  ${added.join('\n  ') || '(none)'}\nallowlisted but no longer true:\n  ${fixed.join('\n  ') || '(none)'}`,
+  ).toEqual({ [what]: [], 'entries that are no longer needed — delete them from the allowlist': [] });
 }
 
 /**
@@ -323,12 +425,14 @@ function sweepChangesReadings(module: ModuleUnderTest, control: Control): boolea
  *
  * This is a BACKLOG, not a set of exemptions. Each entry is a slider that moves the numbers and
  * leaves the picture untouched, which is the drift CLAUDE.md already names as the thing that went
- * furthest wrong in this app. Twelve diagrams are involved; four of them (coagulation, immune
+ * furthest wrong in this app. Fourteen diagrams are involved; four of them (coagulation, immune
  * response, hypersensitivity, inflammation) show none of their controls at all, because each draws
  * a fixed cascade with the readings living entirely in the readout tiles beside it.
  *
- * The list is declared here so it can be read and worked off rather than growing in silence. Take
- * entries OUT as diagrams gain the structures; nothing should ever be added without a reason.
+ * The list is declared here so it can be read and worked off rather than growing in silence, and it
+ * is asserted in BOTH directions — an entry whose diagram has since gained the correlate fails
+ * until it is deleted. That is not hypothetical: `calciumHomeostasis.dietaryPhosphateIntake` was
+ * the first entry the two-way check retired.
  */
 const NO_DIAGRAM_CORRELATE = new Set<string>([
   // Fixed cascade drawings: the whole control rail feeds tiles, not the picture.
@@ -339,7 +443,6 @@ const NO_DIAGRAM_CORRELATE = new Set<string>([
   // The nephron schematic draws flow and transport, not the drugs and tones acting on them.
   ...['acetazolamideDose', 'enacBlockade', 'aldosteroneTone', 'distalAcidSecretion', 'proximalAcidReclaim'].map((k) => `renalTubular.${k}`),
   // Single quantities the drawing has no structure for yet.
-  'calciumHomeostasis.dietaryPhosphateIntake',
   'digestionAbsorption.mealLactoseGrams',
   'gastrointestinal.mealFatGrams',
   'gastrointestinal.mealCarbGrams',
@@ -375,6 +478,42 @@ const NOT_SWEEPABLE = new Set<string>([
   'glucoseRegulation.exogenousInsulinUnits',
 ]);
 
+/**
+ * Toggle options that genuinely read alike, one line of reason each.
+ *
+ * Populated from what the sweep actually finds. Like the lists above it is asserted in both
+ * directions, so an option that gains a reading of its own has to be taken off.
+ */
+const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([]);
+
+/**
+ * Two scenarios that draw the same screen AT THE MOMENT THEY ARE PRESSED, one line of reason each.
+ *
+ * This is a different question from the one below, and keeping them on one list was hiding an
+ * answer. A host module's scenarios are a patient waiting for an event — the preset comments say so
+ * themselves, "hit Infect", "deposit an insult" — so on press the drawing is identical and correct.
+ * They no longer settle alike, which is why they have come OFF the collisions list and stayed on
+ * this one.
+ */
+const SAME_SCREEN_ON_PRESS_BY_DESIGN = new Set<string>([
+  // Two modules whose scenarios are a HOST, waiting for an event. Nothing has happened yet when the
+  // button is pressed, so the drawing is rightly identical; the host differences appear the moment
+  // an infection or an insult lands, and they now show up in the settle test below.
+  ...['healthyHost==intracellularPathogen','healthyHost==neutropenia','healthyHost==hivCd4Depletion','healthyHost==bCellDeficiency','healthyHost==transplantImmunosuppression','intracellularPathogen==neutropenia','intracellularPathogen==hivCd4Depletion','intracellularPathogen==bCellDeficiency','intracellularPathogen==transplantImmunosuppression','neutropenia==hivCd4Depletion','neutropenia==bCellDeficiency','neutropenia==transplantImmunosuppression','hivCd4Depletion==bCellDeficiency','hivCd4Depletion==transplantImmunosuppression','bCellDeficiency==transplantImmunosuppression'].map((pair) => `immuneResponse.${pair}`),
+  ...['normal==acuteCellulitis','normal==severeBacterialLoad','normal==steroidsOverInfection','acuteCellulitis==severeBacterialLoad','acuteCellulitis==steroidsOverInfection','severeBacterialLoad==steroidsOverInfection'].map((pair) => `inflammation.${pair}`),
+  // The meal and the insulin are events, not settings: a fasting pancreas and a failed one look the
+  // same until something is eaten.
+  'glucoseRegulation.normal==fasting',
+  'glucoseRegulation.normal==insulinOverdose',
+  'glucoseRegulation.fasting==insulinOverdose',
+  // A cell population takes whole 24-hour cycles to reach the phase an arrest acts in, and an
+  // irradiated cell and a p53-null one are both undamaged at time zero.
+  'cellCycle.normal==taxaneArrest',
+  'cellCycle.normal==hydroxyurea',
+  'cellCycle.taxaneArrest==hydroxyurea',
+  'cellCycle.irradiated==tp53Mutated',
+]);
+
 /** Two scenarios that genuinely settle to the same physiology, one line of reason each. */
 const PRESET_COLLISIONS_BY_DESIGN = new Set<string>([
   // Both are the absence of a reaction, which is the teaching: a compatible transfusion is a
@@ -384,11 +523,6 @@ const PRESET_COLLISIONS_BY_DESIGN = new Set<string>([
   'glucoseRegulation.normal==fasting',
   'glucoseRegulation.normal==insulinOverdose',
   'glucoseRegulation.fasting==insulinOverdose',
-  'cellCycle.irradiated==tp53Mutated',
-  // Two modules whose scenarios are a HOST, waiting for an event. Their own preset comments say so
-  // — "hit Infect", "deposit an insult" — and the host differences appear the moment one lands.
-  ...['healthyHost==intracellularPathogen','healthyHost==neutropenia','healthyHost==hivCd4Depletion','healthyHost==bCellDeficiency','healthyHost==transplantImmunosuppression','intracellularPathogen==neutropenia','intracellularPathogen==hivCd4Depletion','intracellularPathogen==bCellDeficiency','intracellularPathogen==transplantImmunosuppression','neutropenia==hivCd4Depletion','neutropenia==bCellDeficiency','neutropenia==transplantImmunosuppression','hivCd4Depletion==bCellDeficiency','hivCd4Depletion==transplantImmunosuppression','bCellDeficiency==transplantImmunosuppression'].map((pair) => `immuneResponse.${pair}`),
-  ...['normal==acuteCellulitis','normal==severeBacterialLoad','normal==steroidsOverInfection','acuteCellulitis==severeBacterialLoad','acuteCellulitis==steroidsOverInfection','severeBacterialLoad==steroidsOverInfection'].map((pair) => `inflammation.${pair}`),
   // Arrest presets need whole cell cycles to separate; covered by the module's own engine tests.
   'cellCycle.normal==taxaneArrest',
   'cellCycle.normal==hydroxyurea',
@@ -436,27 +570,53 @@ describe('every control moves the model', () => {
       expect(controls.length).toBeGreaterThan(0);
     });
 
-    it('changes a reading when each control is swept end to end', () => {
-      const inert = controls
-        .filter((control) => !NOT_SWEEPABLE.has(`${id}.${control.key}`))
-        .filter((control) => !sweepChangesReadings(module, control))
-        .map((control) => `${control.label} (${control.key})`);
-      expect(inert, `${id}: controls that change no reading at either end:\n  ${inert.join('\n  ')}`).toEqual([]);
+    it('changes a reading when each control is swept across its range', () => {
+      const inert = controls.filter((control) => !sweepChangesReadings(module, control)).map((control) => `${id}.${control.key}`);
+      expectExactly(inert, [...NOT_SWEEPABLE].filter((entry) => entry.startsWith(`${id}.`)), `${id}: controls that change no reading`);
     });
 
-    it('changes the diagram when each control is swept end to end', () => {
+    it('changes the diagram when each control is swept across its range', () => {
       const seconds = module.config.settleSeconds ?? 60;
       const drawn = (background: Inputs, control: Control, value: unknown) => {
-        const inputs = { ...background, [control.key]: value };
+        const inputs = applied(background, control, value);
         return paint(module.diagrams, inputs, settle(module.config, inputs, seconds, SWEEP_STEPS));
       };
       const invisible = controls
-        .filter((control) => !NO_DIAGRAM_CORRELATE.has(`${id}.${control.key}`))
         // Same rule as the readings sweep: a conditional control is judged against the scenarios
         // that make it matter, not only against a resting patient.
-        .filter((control) => backgrounds(module).every((bg) => drawn(bg, control, control.low) === drawn(bg, control, control.high)))
-        .map((control) => `${control.label} (${control.key})`);
-      expect(invisible, `${id}: controls the diagram does not show:\n  ${invisible.join('\n  ')}`).toEqual([]);
+        .filter((control) =>
+          backgrounds(module).every((bg) => {
+            const first = drawn(bg, control, control.values[0]);
+            return control.values.slice(1).every((value) => drawn(bg, control, value) === first);
+          }),
+        )
+        .map((control) => `${id}.${control.key}`);
+      expectExactly(
+        invisible,
+        [...NO_DIAGRAM_CORRELATE].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: controls the diagram does not show`,
+      );
+    });
+
+    /**
+     * Every option of a toggle group is a scenario a learner can select, and each should be worth
+     * selecting. This is the same question the preset test asks, put to the categorical controls:
+     * comparing only the first option against the last says nothing about the ten in between.
+     */
+    it('gives each toggle option a reading of its own', () => {
+      const seconds = module.config.settleSeconds ?? 60;
+      const ties: string[] = [];
+      for (const control of controls.filter((c) => c.values.length > 2 || typeof c.values[0] === 'string')) {
+        const settled = control.values.map((value) =>
+          settle(module.config, applied(module.defaults, control, value), seconds, SWEEP_STEPS),
+        );
+        for (let i = 0; i < control.values.length; i++) {
+          for (let j = i + 1; j < control.values.length; j++) {
+            if (!differs(settled[i]!, settled[j]!, 0.02)) ties.push(`${id}.${control.key}:${control.values[i]}==${control.values[j]}`);
+          }
+        }
+      }
+      expectExactly(ties, [...TOGGLE_OPTION_TIES_BY_DESIGN].filter((e) => e.startsWith(`${id}.`)), `${id}: toggle options that read alike`);
     });
 
     it('opens on a state that is already steady', () => {
@@ -495,11 +655,14 @@ describe('every control moves the model', () => {
       for (let i = 0; i < names.length; i++) {
         for (let j = i + 1; j < names.length; j++) {
           const [a, b] = [names[i]!, names[j]!];
-          if (PRESET_COLLISIONS_BY_DESIGN.has(`${id}.${a}==${b}`)) continue;
-          if (painted.get(a) === painted.get(b)) identical.push(`${a} == ${b}`);
+          if (painted.get(a) === painted.get(b)) identical.push(`${id}.${a}==${b}`);
         }
       }
-      expect(identical, `${id}: presets that draw the same screen on press:\n  ${identical.join('\n  ')}`).toEqual([]);
+      expectExactly(
+        identical,
+        [...SAME_SCREEN_ON_PRESS_BY_DESIGN].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: presets that draw the same screen on press`,
+      );
     });
 
     it('settles each preset to a scenario of its own', () => {
@@ -510,15 +673,18 @@ describe('every control moves the model', () => {
       for (let i = 0; i < names.length; i++) {
         for (let j = i + 1; j < names.length; j++) {
           const [a, b] = [names[i]!, names[j]!];
-          if (PRESET_COLLISIONS_BY_DESIGN.has(`${id}.${a}==${b}`)) continue;
           // AS SHOWN, not eventually. A scenario button that needs ten real minutes of watching
           // before it separates from the one beside it is the complaint this suite exists for.
           if (!differs(shown.get(a)!, shown.get(b)!, 0.02)) {
-            collisions.push(differs(later.get(a)!, later.get(b)!, 0.02) ? `${a} == ${b} on press` : `${a} == ${b}`);
+            collisions.push(`${id}.${a}==${b}${differs(later.get(a)!, later.get(b)!, 0.02) ? ' (separates later)' : ''}`);
           }
         }
       }
-      expect(collisions, `${id}: presets that settle to the same scenario:\n  ${collisions.join('\n  ')}`).toEqual([]);
+      expectExactly(
+        collisions.map((entry) => entry.replace(' (separates later)', '')),
+        [...PRESET_COLLISIONS_BY_DESIGN].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: presets that settle to the same scenario`,
+      );
     });
   });
 });

@@ -7,8 +7,10 @@ import { describe, expect, it } from 'vitest';
  *
  * Vite compiles every `VITE_`-prefixed variable into the bundle a learner downloads. A model API
  * key that reaches `import.meta.env` is therefore published to everyone who loads the page, and
- * the mistake is invisible until somebody reads the built JavaScript. `src/billing/config.ts`
- * documents the same hazard for the access code.
+ * the mistake is invisible until somebody reads the built JavaScript. Billing has the same hazard
+ * twice over: a `TEST_ACCESS_CODE` used to sit in `src/billing/config.ts` and was readable by
+ * anyone who opened devtools, and RevenueCat ships a public key and a secret one that differ by a
+ * prefix.
  *
  * The tutor's key is deliberately named without the prefix so Vite refuses to expose it — it is
  * read by the dev server in `vite.config.ts` and by the edge function from `Deno.env`, both of
@@ -19,7 +21,15 @@ import { describe, expect, it } from 'vitest';
 const SOURCE = import.meta.glob<string>('../../**/*.{ts,tsx}', { eager: true, query: '?raw', import: 'default' });
 
 /** Secret names that must never appear in client source, however they are referenced. */
-const SERVER_ONLY = ['GEMINI_API_KEY', 'ANTHROPIC_API_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
+const SERVER_ONLY = [
+  'GEMINI_API_KEY',
+  'ANTHROPIC_API_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  // RevenueCat's secret API key and the webhook's shared secret. The WEB BILLING key is a
+  // different thing and is legitimately public — see VITE_REVENUECAT_PUBLIC_KEY in vite-env.d.ts.
+  'REVENUECAT_SECRET_API_KEY',
+  'REVENUECAT_WEBHOOK_SECRET',
+];
 
 describe('client source', () => {
   it.each(SERVER_ONLY)('never reaches for %s', (secret) => {
@@ -48,6 +58,20 @@ describe('client source', () => {
     const suspect = reads.filter(({ name }) => !name.startsWith('VITE_') && !builtIn.has(name));
 
     expect(suspect).toEqual([]);
+  });
+});
+
+describe('RevenueCat keys', () => {
+  it('never carries a secret key literal, whatever it is called', () => {
+    // The two kinds are told apart by prefix: `sk_` is the secret API key, and a Web Billing
+    // public key is not. Naming the variable something innocuous would walk past the list above,
+    // so the value's own shape is checked too.
+    const offenders = Object.entries(SOURCE)
+      .filter(([file]) => !file.endsWith('secrets.test.ts'))
+      .filter(([, contents]) => /['"`]sk_[A-Za-z0-9]/.test(contents))
+      .map(([file]) => file);
+
+    expect(offenders, 'a RevenueCat secret key must never reach the bundle').toEqual([]);
   });
 });
 

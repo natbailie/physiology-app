@@ -12,7 +12,7 @@ export function preloadFactor(bloodVolumePct: number, contractility: number): nu
   // baseline stroke volume constant. Rises further toward BV_OPTIMAL_PCT.
   const rising =
     bloodVolumePct <= STARLING.BV_BASELINE_PCT
-      ? scaleClamped(bloodVolumePct, 0, STARLING.BV_BASELINE_PCT, 0, 1)
+      ? Math.pow(clamp(bloodVolumePct, 0, STARLING.BV_BASELINE_PCT) / STARLING.BV_BASELINE_PCT, STARLING.SUB_BASELINE_EXPONENT)
       : scaleClamped(bloodVolumePct, STARLING.BV_BASELINE_PCT, STARLING.BV_OPTIMAL_PCT, 1, STARLING.MAX_PRELOAD_FACTOR);
 
   if (bloodVolumePct <= STARLING.DECOMPENSATION_START_PCT) {

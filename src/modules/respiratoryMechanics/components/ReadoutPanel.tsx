@@ -50,6 +50,12 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         unit="L/min"
         colorVar="var(--compliance)"
       />
+      <ReadoutItem
+        label="Work of breathing"
+        value={derived.workOfBreathingJPerMin.toFixed(1)}
+        unit=" J/min"
+        colorVar="var(--resistance)"
+      />
       <ReadoutItem label="HPV diversion" value={(derived.hpvDiversionLevel * 100).toFixed(0)} unit="%" colorVar="var(--vq)" />
     </div>
   );

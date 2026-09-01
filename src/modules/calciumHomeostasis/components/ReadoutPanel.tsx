@@ -36,7 +36,7 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
         secondary={phosphateStatus(derived.serumPhosphateMgDl)}
         colorVar="var(--phosphate)"
       />
-      <ReadoutItem label="PTH" value={(derived.pthLevel * 100).toFixed(0)} unit="%" colorVar="var(--pth)" />
+      <ReadoutItem label="PTH" value={derived.pthPgPerML.toFixed(0)} unit=" pg/mL" colorVar="var(--pth)" />
       <ReadoutItem label="Calcitriol" value={(derived.calcitriolLevel * 100).toFixed(0)} unit="%" colorVar="var(--calcitriol)" />
       <ReadoutItem label="Calcitonin" value={(derived.calcitoninLevel * 100).toFixed(0)} unit="%" colorVar="var(--calcitonin)" />
       <ReadoutItem

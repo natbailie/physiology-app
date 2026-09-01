@@ -24,6 +24,30 @@ export const ACTH = {
   TAU_SECONDS: 30,
 };
 
+/**
+ * The ACTH assay value, pg/mL, from the corticotroph drive.
+ *
+ * `acthLevel` is a 0-1 actuator. ACTH is also the single measurement that separates a failed
+ * ADRENAL from a failed PITUITARY — both present with a low cortisol, and only the ACTH tells them
+ * apart — so expressing it as a percentage left the module's central discrimination dimensionless.
+ *
+ * The map is logarithmic because ACTH spans two and a half decades across the states this module
+ * ships, and because the drive already carries both the cortisol feedback and the pituitary gate.
+ * Calibrated on the normal range and on Addison's, and the other three fall where they should:
+ *   - normal        drive 0.61 -> 25 pg/mL   (reference range 10-60)
+ *   - Addison's     drive 1.00 -> ~250       (primary failure: the pituitary is shouting)
+ *   - secondary     drive 0.10 -> ~1.2       (the pituitary is the thing that failed)
+ *   - steroids      drive 0.29 -> ~3.6       (exogenous suppression)
+ *   - adrenal adenoma drive 0.00 -> ~0.7     (autonomous cortisol, axis switched off)
+ */
+export const ACTH_ASSAY = {
+  LOG_INTERCEPT: -0.184,
+  LOG_SLOPE_PER_DRIVE: 2.584,
+  /** Assay reporting floor and a ceiling above the highest ectopic values, pg/mL. */
+  MIN_PG_ML: 0.5,
+  MAX_PG_ML: 2000,
+};
+
 export const CORTISOL = {
   BASAL_UGDL: 2.4,
   ACTH_GAIN_UGDL: 20,

@@ -57,7 +57,7 @@ export function RespiratoryDiagram({ derived }: RespiratoryDiagramProps) {
         labelPos={{ x: 300, y: 252 }}
       />
 
-      <Lungs x={240} y={100} breathRate={breathRate} ventDepth={ventDepth} />
+      <Lungs x={240} y={100} breathRate={breathRate} ventDepth={ventDepth} vqMismatch={derived.vqMismatch} />
       <RenalCompensationOrgan x={355} y={220} hco3Intensity={hco3Intensity} />
 
       <text x={240} y={264} className={styles.pathLabel} textAnchor="middle">

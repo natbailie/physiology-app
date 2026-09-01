@@ -1,6 +1,11 @@
 /**
- * What the product costs and what is free. Every price and plan string in the UI comes from
- * here, so changing the offer is one edit rather than a search across pages.
+ * What the product costs and what is free.
+ *
+ * Prices now live in the RevenueCat dashboard and reach the pricing page through the offering, so
+ * changing the offer is a dashboard edit rather than a deploy. What is here is the FALLBACK — what
+ * a learner sees when RevenueCat is unconfigured, unreachable, or still loading. The pricing page
+ * has to render something truthful in all three cases, the same way the tutor and the auth gate
+ * stand aside rather than breaking when their backend is absent.
  */
 
 /**
@@ -18,33 +23,31 @@ export const FREE_MODULE_IDS: ReadonlySet<string> = new Set([
   'medications',
 ]);
 
-/** Subscription states that unlock everything. Mirrors Stripe's own status vocabulary. */
-export const ACTIVE_SUBSCRIPTION_STATUSES: ReadonlySet<string> = new Set(['active', 'trialing']);
+export const PLAN_NAME = 'Physiology Lab Full Access';
 
-/** TODO: set to the real price before launch — this is a placeholder, not a decision. */
-export const PLAN = {
-  name: 'Physiology Lab Full Access',
-  price: '£9',
-  period: 'month',
-  features: [
-    'Every simulator, not just the three free systems',
-    'The full practice-question bank with worked explanations',
-    'Spaced review — questions come back when you are about to forget them',
-    'Progress that follows you across devices',
-  ],
-} as const;
+export interface PlanPackage {
+  /** Matches RevenueCat's own package identifiers, which is how an offering is mapped onto this. */
+  id: '$rc_monthly' | '$rc_annual';
+  label: string;
+  price: string;
+  period: string;
+  /** Set on whichever package is the better deal, so the saving is stated rather than computed. */
+  note?: string;
+}
 
 /**
- * A code that unlocks full access without paying.
- *
- * TODO: remove before payments go live. This string is compiled into the JS bundle — anyone who
- * opens devtools and searches can find it and let themselves into the paid catalogue. That costs
- * nothing while `startCheckout` is a stub and nothing is actually being sold; it is a back door the
- * moment that changes. The real replacement is server-side redemption: an `access_codes` table plus
- * a `security definer` rpc that sets `profiles.subscription_status` for the calling user, which is
- * also what institutional or promo codes would need.
- *
- * Rotating this constant revokes every unlock already granted — `accessCode.ts` stores the redeemed
- * code and re-checks it against this value on every read.
+ * Two packages, because students buy revision resources in both shapes: a month to get through a
+ * block, and a year bought once before finals. Annual is the one that matters commercially and is
+ * discounted enough to say so.
  */
-export const TEST_ACCESS_CODE = 'mbbs2627';
+export const FALLBACK_PACKAGES: readonly PlanPackage[] = [
+  { id: '$rc_monthly', label: 'Monthly', price: '£9', period: 'month' },
+  { id: '$rc_annual', label: 'Annual', price: '£55', period: 'year', note: 'Two months free' },
+];
+
+export const PLAN_FEATURES: readonly string[] = [
+  'Every simulator, not just the three free systems',
+  'The full practice-question bank with worked explanations',
+  'Spaced review — questions come back when you are about to forget them',
+  'Progress that follows you across devices',
+];

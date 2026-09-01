@@ -46,7 +46,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     observeSeconds: 2400,
     explanation:
       'PTH falls, which is the wrong direction for a low calcium and is exactly what makes this presentation so confusing. Magnesium is permissive both for PTH secretion and for PTH action at bone and kidney, so severe depletion produces hypocalcaemia with an inappropriately low PTH — the only hypocalcaemia that does. It also explains why the calcium stays stubbornly refractory to replacement: until the magnesium is corrected, neither the gland nor its target tissue can respond.',
-    metric: (s) => s.derived.pthLevel,
+    metric: (s) => s.derived.pthPgPerML,
   },
 
   {
@@ -60,7 +60,7 @@ export const CALCIUM_QUESTIONS: readonly CalciumQuestion[] = [
     observeSeconds: 1200,
     explanation:
       'PTH rises, because without calcitriol the gut cannot absorb calcium and the parathyroid responds to the falling serum level exactly as it should. This is secondary hyperparathyroidism — a normal gland reacting normally to an abnormal stimulus — and it is why the calcium can look almost normal while the PTH is grossly raised. Distinguishing it from a primary adenoma matters because the treatment is vitamin D rather than surgery, and the discriminator is the calcium: high in the primary form, low or low-normal here.',
-    metric: (s) => s.derived.pthLevel,
+    metric: (s) => s.derived.pthPgPerML,
   },
   {
     id: 'hypoparathyroidism-phosphate',

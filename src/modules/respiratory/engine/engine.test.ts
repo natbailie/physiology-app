@@ -35,7 +35,17 @@ describe('engine — baseline steady state', () => {
           for (const metabolicAcidLoad of [-100, 100]) {
             for (const renalCompensationCapacity of [0, 1.5]) {
               for (const acidType of ['anionGap', 'hyperchloraemic'] as const) {
-                extremes.push({ minuteVentilation, fiO2, co2Production, metabolicAcidLoad, acidType, renalCompensationCapacity });
+                for (const vqMismatch of [0, 1]) {
+                  extremes.push({
+                    minuteVentilation,
+                    fiO2,
+                    co2Production,
+                    metabolicAcidLoad,
+                    acidType,
+                    renalCompensationCapacity,
+                    vqMismatch,
+                  });
+                }
               }
             }
           }

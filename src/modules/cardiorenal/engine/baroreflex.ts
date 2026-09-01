@@ -7,10 +7,19 @@ import { clamp } from '@/shared/lib/math';
  * "sympathetic activation" — raise heart rate and vascular tone to restore pressure.
  * The engine relaxes the actual (smoothed) drive toward this target on
  * BAROREFLEX.TAU_SECONDS rather than snapping to it.
+ *
+ * Measured against the CURRENT setpoint, which resets slowly toward the prevailing pressure, so
+ * this defends against a CHANGE in pressure rather than against a level.
+ *
+ * SATURATING in the error, not linear in it. The reflex has most of its gain close to the
+ * setpoint, which is where a patient lives and where a controller has to do its work; a linear ramp
+ * out to 40 mmHg put nearly all of the gain in territory nobody survives. Symmetric, because this
+ * reflex also has to slow a heart when pressure runs high.
  */
-export function baroreflexDrive(map: number): number {
-  const error = HEMODYNAMICS.MAP_SETPOINT - map;
-  return clamp(error / BAROREFLEX.SENSITIVITY_RANGE, -1, 1);
+export function baroreflexDrive(map: number, setpointMmHg: number = HEMODYNAMICS.MAP_SETPOINT): number {
+  const error = setpointMmHg - map;
+  const magnitude = Math.abs(error) / (Math.abs(error) + BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG);
+  return clamp(Math.sign(error) * magnitude, -1, 1);
 }
 
 export function effectiveHeartRate(sliderHeartRate: number, drive: number): number {

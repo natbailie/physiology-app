@@ -6,21 +6,23 @@ import { useEntitlement } from '@/billing/useEntitlement';
 import { Paywall } from '@/billing/Paywall';
 import { HomePage } from '@/home/HomePage';
 import { ThemePage } from '@/home/ThemePage';
-import { THEMES } from '@/home/moduleRegistry';
+import { DisciplinePage } from '@/home/DisciplinePage';
+import { DISCIPLINES, THEMES } from '@/home/moduleRegistry';
 import { MedicationsPage } from '@/medications/MedicationsPage';
 import { ChatLauncher } from '@/shared/chat/ChatLauncher';
 import styles from './App.module.css';
 
 /**
  * Routes that are never a paid module: they must open whatever the subscription says. That
- * includes every theme page — it is a browse page, and the module-level lock is rendered on
- * its cards instead.
+ * includes every subject and theme page — those are browse pages, and the module-level lock is
+ * rendered on their cards instead.
  */
 const UNGATED_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>([
   'home',
   'account',
   'privacy',
   'pricing',
+  ...DISCIPLINES.map((discipline) => `discipline/${discipline.id}` as RouteId),
   ...THEMES.map((theme) => `theme/${theme.id}` as RouteId),
 ]);
 
@@ -55,6 +57,9 @@ function RoutedApp({ route }: { route: RouteId }) {
 
   return (
     <div className={styles.app}>
+      {route.startsWith('discipline/') && (
+        <DisciplinePage disciplineId={route.slice('discipline/'.length)} />
+      )}
       {route.startsWith('theme/') && route !== 'theme/medications' && (
         <ThemePage themeId={route.slice('theme/'.length) as (typeof THEMES)[number]['id']} />
       )}

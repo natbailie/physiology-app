@@ -10,7 +10,12 @@ export function ReadoutPanel({ derived }: ReadoutPanelProps) {
   return (
     <div className={styles.grid}>
       <ReadoutItem label="Cortisol" value={derived.cortisolLevel.toFixed(1)} unit="µg/dL" colorVar="var(--cortisol)" />
-      <ReadoutItem label="ACTH" value={`${(derived.acthLevel * 100).toFixed(0)}%`} colorVar="var(--acth)" />
+      <ReadoutItem
+        label="ACTH"
+        value={derived.acthPgPerML < 10 ? derived.acthPgPerML.toFixed(1) : derived.acthPgPerML.toFixed(0)}
+        unit=" pg/mL"
+        colorVar="var(--acth)"
+      />
       <ReadoutItem label="CRH drive" value={`${(derived.crhDrive * 100).toFixed(0)}%`} colorVar="var(--co2)" />
       <ReadoutItem label="Adrenal reserve" value={`${(derived.adrenalReserve * 100).toFixed(0)}%`} colorVar="var(--text)" />
     </div>

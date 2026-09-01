@@ -27,6 +27,22 @@
   }
 }
 
+/* Alveolar units. An exchanging unit is drawn in the oxygen colour; a mismatched one is still
+   being ventilated but no longer equilibrating, so it is drawn hollow and in the CO2 colour —
+   position and fill carry it, not motion, because `index.css` stops all animation under
+   prefers-reduced-motion. */
+.alveolus {
+  fill: var(--o2);
+  opacity: 0.55;
+}
+
+.alveolusMismatched {
+  fill: none;
+  stroke: var(--co2);
+  stroke-width: 1.6;
+  stroke-dasharray: 2 2;
+}
+
 .trachea {
   stroke: var(--text-faint);
   stroke-width: 2;

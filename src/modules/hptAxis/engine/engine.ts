@@ -1,6 +1,6 @@
 import { TRH, TSH, T4, ACUTE_ILLNESS } from './constants';
 import { trhDriveTarget } from './trh';
-import { tshLevelTarget } from './tsh';
+import { tshLevelTarget, tshMilliUnitsPerL } from './tsh';
 import { t3Level, t4LevelTarget, conversionEfficiency } from './thyroidHormone';
 import { approach, clamp } from '@/shared/lib/math';
 import type { HptDerived, HptInputs, HptSnapshot, HptState } from './types';
@@ -28,6 +28,7 @@ export function computeDerived(state: HptState, inputs: HptInputs): HptDerived {
   return {
     trhDrive: state.trhDrive,
     tshLevel: state.tshLevel,
+    tshMilliUnitsPerL: tshMilliUnitsPerL(state.t4Level, inputs.pituitaryTshFunction),
     t4Level: state.t4Level,
     t3Level: t3,
     conversionEfficiency: efficiency,

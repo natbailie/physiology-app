@@ -2,6 +2,7 @@ import type { RespInputs } from './types';
 
 export const DEFAULT_RESP_INPUTS: RespInputs = {
   minuteVentilation: 100,
+  vqMismatch: 0,
   fiO2: 0.21,
   co2Production: 100,
   metabolicAcidLoad: 0,
@@ -12,6 +13,7 @@ export const DEFAULT_RESP_INPUTS: RespInputs = {
 export type RespPresetName =
   | 'normal'
   | 'copdChronicAcidosis'
+  | 'copdExacerbation'
   | 'panicHyperventilation'
   | 'dkaMetabolicAcidosis'
   | 'highAltitude'
@@ -28,6 +30,18 @@ export const RESP_PRESETS: Record<RespPresetName, Partial<RespInputs>> = {
   // hypercapnic: a retainer who is not hypoxaemic is never given oxygen, so the milder
   // setting this replaced could not show what oxygen does to such a patient.
   copdChronicAcidosis: { minuteVentilation: 30 },
+  // The OTHER COPD patient, and the commoner one in an emergency department. Pulse's own
+  // exacerbation is dominated by hypoxaemia — PaO2 89 -> 27 mmHg — with the CO2 barely moving
+  // (40 -> 45). That is V/Q mismatch, not hypoventilation, and until this preset existed the module
+  // could only teach the retainer above.
+  //
+  // Note the ventilation is set BELOW baseline even though Pulse's patient is breathing 36 times a
+  // minute. Rate is not alveolar ventilation: breathing fast and shallow over a large dead space
+  // moves less gas than breathing normally, which is exactly why the effort is not rewarded. Lands
+  // at PaCO2 46, PaO2 29, SaO2 55% against Pulse's 45, 27 and 51% — and on an acid-base
+  // interpretation that reads NORMAL, which is the trap: half the gas is reassuring and the patient
+  // is dying of the other half.
+  copdExacerbation: { minuteVentilation: 60, vqMismatch: 0.78 },
   // Acute hyperventilation, e.g. a panic attack — renal compensation hasn't had time to engage.
   panicHyperventilation: { minuteVentilation: 260 },
   // Ketoacid production drives a primary metabolic acidosis; Kussmaul hyperventilation
@@ -61,6 +75,7 @@ export const RESP_PRESETS: Record<RespPresetName, Partial<RespInputs>> = {
 export const RESP_PRESET_LABELS: Record<RespPresetName, string> = {
   normal: 'Normal',
   copdChronicAcidosis: 'COPD (chronic)',
+  copdExacerbation: 'COPD (exacerbation)',
   panicHyperventilation: 'Panic attack',
   dkaMetabolicAcidosis: 'DKA',
   highAltitude: 'High altitude',
@@ -74,6 +89,7 @@ export const RESP_PRESET_LABELS: Record<RespPresetName, string> = {
 export const PRESET_ORDER: RespPresetName[] = [
   'normal',
   'copdChronicAcidosis',
+  'copdExacerbation',
   'panicHyperventilation',
   'dkaMetabolicAcidosis',
   'highAltitude',

@@ -123,3 +123,28 @@ export const CALCIUM_SIMULATION = {
    * the moment before it. */
   SETTLE_SECONDS: 3600,
 };
+
+/**
+ * The PTH assay value, pg/mL, from the parathyroid drive.
+ *
+ * `pthLevel` is a 0-1 actuator. PTH is the measurement that makes sense of a calcium: the same
+ * 10.8 mg/dL means primary hyperparathyroidism if the PTH is 100 and malignancy if it is 5, and
+ * "inappropriately normal" is a phrase that needs a number to mean anything. On a 0-1 scale it
+ * could not be said at all.
+ *
+ * Logarithmic, because PTH spans nearly two decades across the states this module ships.
+ * Calibrated on the normal range and on hypoparathyroidism; the rest fall where they should:
+ *   - normal              drive 0.34 -> 35 pg/mL  (reference range 15-65)
+ *   - hypoparathyroid     drive 0.05 -> 8         (low, against a calcium of 7.4)
+ *   - hypomagnesaemia     drive 0.00 -> 6         (magnesium is required to SECRETE PTH)
+ *   - primary hyperPTH    drive 0.55 -> 104       (non-suppressed against a high calcium)
+ *   - CKD-MBD             drive 0.73 -> 256       (secondary, driven by phosphate retention)
+ *   - vitamin D deficiency drive 0.79 -> 358      (secondary, driven by poor gut absorption)
+ */
+export const PTH_ASSAY = {
+  LOG_INTERCEPT: 0.807,
+  LOG_SLOPE_PER_DRIVE: 2.2,
+  /** Assay reporting floor and a ceiling above tertiary values, pg/mL. */
+  MIN_PG_ML: 1,
+  MAX_PG_ML: 2000,
+};

@@ -13,7 +13,7 @@ export type HptQuestion = ModuleQuestion<HptInputs, HptPresetName, Snapshot>;
  * row separates them, which is the whole reason a TSH is never interpreted alone.
  */
 const THYROID_PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'TSH', value: (s) => s.derived.tshLevel, decimals: 2 },
+  { label: 'TSH', value: (s) => s.derived.tshMilliUnitsPerL, decimals: 2 },
   { label: 'Free T4', value: (s) => s.derived.t4Level, decimals: 1 },
   { label: 'T3', value: (s) => s.derived.t3Level, decimals: 0 },
 ];
@@ -34,7 +34,7 @@ export const HPT_QUESTIONS: readonly HptQuestion[] = [
     observeSeconds: 3000,
     explanation:
       'Falling thyroid hormone releases the brake on the pituitary, so TSH climbs — high TSH with low T4 is primary hypothyroidism. TSH is the sensitive test here because the pituitary response to thyroid hormone is steep: a small drift in T4 produces a large, easily measured move in TSH. That is why TSH is the screening test even though it is not the hormone doing the work, and why an abnormal TSH with borderline-normal T4 is a real finding rather than a contradiction.',
-    metric: (s) => s.derived.tshLevel,
+    metric: (s) => s.derived.tshMilliUnitsPerL,
   },
   {
     id: 'sick-euthyroid-t3',
@@ -62,7 +62,7 @@ export const HPT_QUESTIONS: readonly HptQuestion[] = [
     observeSeconds: 6000,
     explanation:
       'The pituitary cannot tell exogenous thyroxine from the endogenous kind, so replacement restores the feedback signal and TSH falls back toward normal. That is precisely why TSH — not T4 — is used to titrate the dose: it is the readout of whether the tissue that matters is adequately supplied. Note how slowly it moves. T4 turns over across about a week, so nothing meaningful can be judged for several weeks, which is why thyroid function is rechecked at around six weeks rather than at one.',
-    metric: (s) => s.derived.tshLevel,
+    metric: (s) => s.derived.tshMilliUnitsPerL,
   },
 
   // --- Reading a thyroid panel: which level of the axis has failed ---

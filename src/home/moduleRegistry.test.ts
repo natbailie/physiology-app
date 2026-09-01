@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import indexCss from '../index.css?raw';
 import { PAGES } from '@/pages';
 import { VALID_ROUTES } from '@/shared/hooks/useHashRoute';
-import { MODULES, THEMES } from './moduleRegistry';
+import { DISCIPLINES, MODULES, THEMES } from './moduleRegistry';
 
 /**
  * A module id has to appear in four places (see CLAUDE.md) and nothing checked that it did.
@@ -41,8 +41,10 @@ describe('module registry wiring', () => {
     const utility = new Set(['account', 'privacy', 'pricing']);
     const known = new Set(MODULES.map((module) => module.id));
     const themeRoutes = new Set(THEMES.map((theme) => `theme/${theme.id}`));
+    const disciplineRoutes = new Set(DISCIPLINES.map((d) => `discipline/${d.id}`));
     const stray = VALID_ROUTES.filter(
-      (id) => !utility.has(id) && !known.has(id) && !themeRoutes.has(id),
+      (id) =>
+        !utility.has(id) && !known.has(id) && !themeRoutes.has(id) && !disciplineRoutes.has(id),
     );
     expect(stray.join(', ')).toBe('');
   });
@@ -129,6 +131,76 @@ describe('theme wiring', () => {
       expect(defined.has(name), `${theme.id} uses ${name}, which index.css does not define`).toBe(
         true,
       );
+    }
+  });
+});
+
+describe('discipline wiring', () => {
+  const disciplineIds = new Set(DISCIPLINES.map((discipline) => discipline.id));
+  const available = DISCIPLINES.filter((discipline) => discipline.status === 'available');
+
+  it('gives every discipline a unique id', () => {
+    expect(disciplineIds.size).toBe(DISCIPLINES.length);
+  });
+
+  it('puts every theme under a discipline that exists', () => {
+    for (const theme of THEMES) {
+      expect(
+        disciplineIds.has(theme.discipline),
+        `${theme.id} has no valid discipline (${theme.discipline})`,
+      ).toBe(true);
+    }
+  });
+
+  it('gives every available discipline somewhere to go', () => {
+    // Either its own generated page, or an explicit href for the one whose only theme is
+    // already a hub. A tile with neither is a dead tile.
+    const routable = new Set<string>(VALID_ROUTES);
+    const stranded = available
+      .filter((discipline) => !discipline.href && !routable.has(`discipline/${discipline.id}`))
+      .map((discipline) => discipline.id);
+    expect(stranded.join(', '), `disciplines whose tile goes nowhere: ${stranded.join(', ')}`).toBe(
+      '',
+    );
+  });
+
+  it('does not route a discipline that names its own href', () => {
+    // Otherwise `#discipline/pharmacology` exists as an orphan page holding a single tile.
+    const routable = new Set<string>(VALID_ROUTES);
+    const doubled = DISCIPLINES.filter(
+      (discipline) => discipline.href && routable.has(`discipline/${discipline.id}`),
+    ).map((discipline) => discipline.id);
+    expect(doubled.join(', ')).toBe('');
+  });
+
+  it('gives every available discipline at least one theme', () => {
+    const assigned = new Set(THEMES.map((theme) => theme.discipline));
+    const empty = available.filter((discipline) => !assigned.has(discipline.id)).map((d) => d.id);
+    expect(empty.join(', '), `available disciplines with no themes: ${empty.join(', ')}`).toBe('');
+  });
+
+  it('keeps coming-soon disciplines genuinely empty', () => {
+    // A subject cannot ship content while still advertising itself as unreleased: the tile is
+    // not a link, so anything filed under it is unreachable.
+    const assigned = new Set(THEMES.map((theme) => theme.discipline));
+    const stocked = DISCIPLINES.filter(
+      (discipline) => discipline.status === 'comingSoon' && assigned.has(discipline.id),
+    ).map((discipline) => discipline.id);
+    expect(stocked.join(', '), `coming-soon disciplines with themes: ${stocked.join(', ')}`).toBe(
+      '',
+    );
+  });
+
+  it('uses only accent colours that index.css actually defines', () => {
+    const defined = new Set([...indexCss.matchAll(/(--[\w-]+)\s*:/g)].map((match) => match[1]));
+
+    for (const discipline of DISCIPLINES) {
+      const name = discipline.accentColorVar?.match(/var\((--[\w-]+)\)/)?.[1];
+      if (!name) continue;
+      expect(
+        defined.has(name),
+        `${discipline.id} uses ${name}, which index.css does not define`,
+      ).toBe(true);
     }
   });
 });

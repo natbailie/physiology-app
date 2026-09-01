@@ -40,6 +40,22 @@ export function cardiacPhase(
 }
 
 /**
+ * The end-diastolic volume the ventricle is actually filling toward, mL.
+ *
+ * The requested preload plus a share of whatever the last beat failed to eject. See
+ * `VENTRICLE.RESIDUAL_FILLING_COUPLING`. At the calibrated baseline the residue is exactly
+ * `BASELINE_ESV_ML`, so this returns `preloadEDV` unchanged and the slider still means what it says.
+ */
+export function effectivePreloadEDV(preloadEDV: number, endSystolicVolumeLastBeat: number): number {
+  const residue = endSystolicVolumeLastBeat - VENTRICLE.BASELINE_ESV_ML;
+  return clamp(
+    preloadEDV + VENTRICLE.RESIDUAL_FILLING_COUPLING * residue,
+    VENTRICLE.MIN_VOLUME_ML,
+    VENTRICLE.MAX_VOLUME_ML,
+  );
+}
+
+/**
  * Advances ventricular volume for one tick according to the current phase. Volume changes ONLY
  * when a valve is open — during both isovolumic phases it is held constant by definition,
  * which is what produces the PV loop's two vertical limbs.

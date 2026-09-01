@@ -1,7 +1,7 @@
 import { FVC_MANEUVER, MECHANICS, VOLUMES, VQ } from './constants';
 import { effectiveCompliance } from './surfactant';
 import { functionalResidualCapacityML, residualVolumeML, totalLungCapacityML, vitalCapacityML } from './staticVolumes';
-import { expiratoryTimeSeconds, targetVolumeAtPhase, timeConstantSeconds } from './lungMechanics';
+import { expiratoryTimeSeconds, targetVolumeAtPhase, timeConstantSeconds, workOfBreathingJPerMin } from './lungMechanics';
 import { classifyPattern, expiratoryFlowAtVolume, fev1Fraction, peakExpiratoryFlow } from './fvcManeuver';
 import { hpvDiversionTarget, vqCompartments } from './vqMatching';
 import { approach, clamp } from '@/shared/lib/math';
@@ -76,6 +76,12 @@ export function computeDerived(state: RespMechState, inputs: RespMechInputs): Re
     vqRatioB: compartments.vqRatioB,
     hpvDiversionLevel: hpv,
     alveolarVentilationMLPerMin: alveolarVentilation,
+    workOfBreathingJPerMin: workOfBreathingJPerMin(
+      inputs.tidalVolumeML,
+      inputs.respiratoryRate,
+      compliance,
+      inputs.airwayResistance,
+    ),
     minuteVentilationMLPerMin: minuteVentilation,
     respiratoryRate: inputs.respiratoryRate,
     tidalVolumeML: inputs.tidalVolumeML,

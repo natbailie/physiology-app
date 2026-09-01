@@ -13,9 +13,18 @@ export function effectiveMinuteVentilation(inputVentilationPct: number, chemorec
   );
 }
 
-export function alveolarVentilationFraction(effectiveVentilationPct: number, airwayObstruction: number): number {
+export function alveolarVentilationFraction(
+  effectiveVentilationPct: number,
+  airwayObstruction: number,
+  vqMismatch = 0,
+): number {
   const obstructionMultiplier = 1 - airwayObstruction * VENTILATION.MAX_OBSTRUCTION_VENTILATION_REDUCTION;
-  return Math.max(GAS_EXCHANGE.VA_FLOOR_FRACTION, (effectiveVentilationPct / 100) * obstructionMultiplier);
+  // Mismatch wastes some of each breath on alveoli that are ventilated but not perfused.
+  const deadSpaceMultiplier = 1 - clamp(vqMismatch, 0, 1) * VENTILATION.MAX_VQ_DEAD_SPACE_FRACTION;
+  return Math.max(
+    GAS_EXCHANGE.VA_FLOOR_FRACTION,
+    (effectiveVentilationPct / 100) * obstructionMultiplier * deadSpaceMultiplier,
+  );
 }
 
 /** PaCO2 is proportional to CO2 production over alveolar ventilation (a normalized form
@@ -25,8 +34,19 @@ export function paCO2(co2ProductionPct: number, vaFraction: number): number {
   return clamp(raw, GAS_EXCHANGE.PACO2_MIN_MMHG, GAS_EXCHANGE.PACO2_MAX_MMHG);
 }
 
-export function aaGradient(airwayObstruction: number): number {
-  return GAS_EXCHANGE.AA_GRADIENT_BASELINE_MMHG + airwayObstruction * GAS_EXCHANGE.AA_GRADIENT_OBSTRUCTION_GAIN_MMHG;
+/**
+ * The A-a gradient, mmHg — how much oxygen is lost between alveolus and artery.
+ *
+ * Two contributors with very different weights. Bronchospasm mostly stops air arriving, which the
+ * alveolar gas equation already accounts for; V/Q mismatch and shunt leave blood passing alveoli it
+ * cannot equilibrate with, and that is what a gradient measures.
+ */
+export function aaGradient(airwayObstruction: number, vqMismatch = 0): number {
+  return (
+    GAS_EXCHANGE.AA_GRADIENT_BASELINE_MMHG +
+    airwayObstruction * GAS_EXCHANGE.AA_GRADIENT_OBSTRUCTION_GAIN_MMHG +
+    clamp(vqMismatch, 0, 1) * GAS_EXCHANGE.AA_GRADIENT_VQ_GAIN_MMHG
+  );
 }
 
 /** Alveolar gas equation (PAO2 = FiO2*(Patm-PH2O) - PaCO2/RQ), minus the A-a gradient

@@ -28,7 +28,11 @@ export interface HptState {
 
 export interface HptDerived {
   trhDrive: number;
+  /** Thyrotroph DRIVE, 0-1 — the internal actuator that sets thyroid output. The number a
+   * clinician reads is `tshMilliUnitsPerL`. */
   tshLevel: number;
+  /** TSH as an assay reports it, mIU/L. Reference range 0.4-4.0. */
+  tshMilliUnitsPerL: number;
   t4Level: number;
   t3Level: number;
   conversionEfficiency: number;

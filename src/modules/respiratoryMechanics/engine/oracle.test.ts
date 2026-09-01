@@ -202,19 +202,64 @@ describe('oracle: Pulse does not distinguish ARDS from pneumonia', () => {
     expect(ards.paO2MmHg).toBe(pneumonia.paO2MmHg);
   });
 });
+/**
+ * The two open divergences this trace found, both now closed.
+ *
+ * Neither was a tolerance to widen. One was a preset that modelled a single mechanism where the
+ * disease has three; the other was a quantity the module computed nowhere and so could not show.
+ */
+describe('oracle: what the pneumonia and asthma traces changed', () => {
+  it('makes the consolidated lung stiffer and wasteful of each breath, as Pulse does', () => {
+    // Pulse's moderate pneumonia does far more than shunt: lung compliance 0.20 -> 0.11 L/cmH2O,
+    // airway resistance 1.5 -> 3.6, dead-space ratio 0.29 -> 0.55. Ours changed shuntFraction alone,
+    // so a student saw the oxygenation fall and none of the mechanics behind it.
+    //
+    // Compared as FRACTIONS of each engine's own healthy value, because the two compliances are not
+    // the same quantity — Pulse reports lung compliance where ours is respiratory-system compliance,
+    // and matching the absolute numbers would be wrong.
+    const theirComplianceRatio = pneumonia.lungComplianceLPerCmH2O / healthyLung.lungComplianceLPerCmH2O;
+    const theirResistanceRatio = pneumonia.inspiratoryResistanceCmH2OSPerL / healthyLung.inspiratoryResistanceCmH2OSPerL;
+    const ourComplianceRatio = RESP_MECH_PRESETS.pneumonia.lungCompliance! / DEFAULT_RESP_MECH_INPUTS.lungCompliance;
+    const ourResistanceRatio = RESP_MECH_PRESETS.pneumonia.airwayResistance! / DEFAULT_RESP_MECH_INPUTS.airwayResistance;
 
-describe('oracle: open questions', () => {
-  it.todo(
-    'decide whether the pneumonia preset should do more than shunt — Pulse’s moderate pneumonia ' +
-      'also cuts lung compliance (0.20 -> 0.11 L/cmH2O), raises airway resistance (1.5 -> 3.6) and ' +
-      'nearly doubles the dead-space ratio (0.29 -> 0.55), where ours changes shuntFraction alone. ' +
-      'The shunt magnitude is right; the consolidated lung is also stiffer and wastes more of each ' +
-      'breath, and a student currently sees none of that',
-  );
-  it.todo(
-    'decide whether obstruction should raise the respiratory RATE — Pulse answers a severe attack ' +
-      'with 12 -> 18.6 breaths/min and a tidal volume cut from 535 to 314 mL, where our ' +
-      'respiratoryRate and tidalVolumeML are inputs the learner sets, so the compensatory response ' +
-      'is not modelled and a student never sees the work of breathing rise',
-  );
+    // Both engines stiffen the lung by roughly half and roughly double the resistance.
+    expect(ourComplianceRatio).toBeLessThan(1);
+    expect(Math.abs(ourComplianceRatio - theirComplianceRatio)).toBeLessThan(0.2);
+    expect(ourResistanceRatio).toBeGreaterThan(1.5);
+    expect(Math.abs(ourResistanceRatio - theirResistanceRatio)).toBeLessThan(1);
+    // And it now wastes more of each breath, which is the dead-space half of the same lesion.
+    expect(RESP_MECH_PRESETS.pneumonia.deadSpaceFraction!).toBeGreaterThan(15);
+  });
+
+  it('shows the work of breathing rising, which no reading used to', () => {
+    // The other half of this module's open question. Respiratory rate and tidal volume are inputs
+    // the learner sets, so the compensatory response Pulse produces — 12 -> 18.6 breaths/min with
+    // tidal volume cut from 535 to 314 mL — cannot emerge here, and turning them into outputs would
+    // take away the instrument the module is built on. What CAN be shown, and now is, is the COST
+    // of that pattern: the Otis, Fenn & Rahn (1950) decomposition of work into elastic and
+    // resistive halves. A stiff lung and a narrow airway each raise it, by opposite routes.
+    const healthy = settle({});
+    const consolidated = settle(RESP_MECH_PRESETS.pneumonia);
+    const obstructed = settle(RESP_MECH_PRESETS.copd);
+
+    expect(healthy.workOfBreathingJPerMin).toBeGreaterThan(0);
+    expect(consolidated.workOfBreathingJPerMin).toBeGreaterThan(healthy.workOfBreathingJPerMin * 2);
+    expect(obstructed.workOfBreathingJPerMin).toBeGreaterThan(healthy.workOfBreathingJPerMin * 2);
+  });
+
+  it('punishes tachypnoea far harder in an obstructed lung than in a stiff one', () => {
+    // The two halves of the work scale differently with RATE, which is what makes the breathing
+    // pattern diagnostic. Elastic work per minute rises in proportion to frequency; resistive work
+    // rises with its SQUARE, because breathing faster at the same tidal volume means driving gas
+    // through the airways faster as well as more often. So doubling the rate costs an obstructed
+    // patient much more than a stiff-lunged one — which is why dynamic hyperinflation is treated by
+    // slowing the rate down.
+    const cost = (preset: Partial<RespMechInputs>) =>
+      settle({ ...preset, respiratoryRate: 28, tidalVolumeML: 500 }).workOfBreathingJPerMin /
+      settle({ ...preset, respiratoryRate: 14, tidalVolumeML: 500 }).workOfBreathingJPerMin;
+
+    expect(cost(RESP_MECH_PRESETS.copd)).toBeGreaterThan(cost(RESP_MECH_PRESETS.pulmonaryFibrosis));
+    // Both still cost more, so this is a difference of degree in the right direction.
+    expect(cost(RESP_MECH_PRESETS.pulmonaryFibrosis)).toBeGreaterThan(2);
+  });
 });

@@ -39,7 +39,14 @@ with a confusing credentials error.
 ```
 ./run.sh                    # regenerate every trace
 ./run.sh hemorrhage-class3  # regenerate one
+./run.sh --list             # list the container's scenario library
+./run.sh --list patient     # list one subdirectory of it
+./run.sh --columns asthma   # print the CSV header a trace produced, from raw/
 ```
+
+`--list` and `--columns` exist because the two ways an new trace entry goes wrong are both cheap to
+rule out first: a scenario path that is not in the image fails deep inside a docker run, and a
+column that scenario does not record fails in the downsampler. Check both before writing the test.
 
 Each trace is declared in `traces.json`: which of Pulse's bundled scenarios to run, which CSV
 columns to keep, how often to sample, and the named landmark times the tests assert against.
@@ -69,8 +76,8 @@ Still to do:
 
 - `patient/TensionPneumothorax*` -> `respiratoryMechanics`.
 - The `energyenvironment/` scenarios -> `exercisePhysiology`, which is untouched so far.
-- `patient/Baroreceptors` is now used by three modules (`cardiorenal`, `cardiacElectro`, and as the
-  source of the PV loops). Other cardiovascular scenarios would broaden that base.
+- A distributive-shock oracle. `patient/Sepsis` does not work — see the null result below — so this
+  needs either a longer sepsis run or a different scenario.
 
 **Deliberately skipped — `ecgConduction` and `cardiacElectro`'s conduction half.** Pulse does not
 model cardiac conduction. Its ECG is a single stored waveform, `/pulse/bin/ecg/StandardECG.json`,
@@ -117,16 +124,56 @@ curve for the one claim the module exists to make.
 | 35% | 65.0 | 76.8 | 129 | 80 |
 | 42% | 21.7 *(collapse)* | 73.1 | 155 | 83 |
 
-**Pulse holds pressure almost still through Class I and II, then loses it off a cliff. We fall in
-a straight line from the first millilitre.** A learner reading our curve concludes that pressure
+**Pulse held pressure almost still through Class I and II, then lost it off a cliff. We fell in a
+straight line from the first millilitre.** A learner reading our curve concluded that pressure
 tracks blood loss proportionally — the opposite of the lesson the module is named for, and the
-reason "classify before you treat" matters. The tachycardia gap is the same defect seen from the
-other side: our reflex never really engages, so it cannot defend early or fail late.
+reason "classify before you treat" matters. The tachycardia gap was the same defect seen from the
+other side: our reflex never really engaged, so it could not defend early or fail late.
 
-This is the clearest instance of what this whole exercise was for. It is a missing mechanism, not
-a constant to tune, and it is one mechanism explaining four separate `it.todo`s: the flat MAP
-curve, the tachycardia gap, lactate that never rises, and a classification that still reads "no
-shock" at a 25% loss where Pulse's patient is at 110 bpm.
+This was the clearest instance of what this whole exercise was for.
+
+### FIXED — and it was two mechanisms, not one
+
+The reflex was the obvious half and not the sufficient one.
+
+1. **Sympathetic drive was a sigmoid of ABSOLUTE pressure**, half-activating at 55 mmHg. That put a
+   resting patient at 93 mmHg on the flat tail of the curve with a drive of 0.02, so the reflex did
+   essentially nothing until pressure was already nearly lethal. A real carotid sinus has its
+   greatest gain at the normal operating point — that is what makes it a controller rather than an
+   alarm. Drive is now taken from the ERROR against a setpoint and saturates smoothly
+   (`BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG`).
+2. **Filling pressure fell in PROPORTION to blood volume.** Correcting only the reflex produced a
+   circulation that defended pressure for ever and never reached a cliff at all — because with the
+   reflex switched off entirely, a 42% loss still gave MAP 58 and a cardiac output of 3.1 L/min
+   against Pulse's 21.7 and 0.63. Baseline stressed volume is only ~700 mL of a 5 L circulation,
+   and vessels recoil as they empty, so blood is drawn preferentially out of the part that
+   generates pressure. `CIRCULATION.UNSTRESSED_RECOIL_EXPONENT` makes that explicit.
+
+The shape of the saturation mattered as much as the gain. A logistic steep enough to give the right
+Class I tachycardia pinned at maximum by Class III, so every shock state on the page read 165 bpm
+and the rate stopped discriminating between them. A Michaelis form keeps headroom all the way down.
+
+| lost | Pulse MAP | ours | Pulse HR | ours |
+|---|---|---|---|---|
+| 0% | 95.3 | 93.0 | 72 | 70 |
+| 15% | 94.4 | 90.5 | 92 | 93 |
+| 25% | 90.8 | 84.6 | 110 | 119 |
+| 35% | 65.0 | 59.9 | 129 | 147 |
+| 42% | 21.7 | 22.3 | 155 | 155 |
+
+Stroke volume tracks too — 71, 46, 29, 15, 5 mL against Pulse's 80, 52, 38, 26, 4. The residual
+difference is that our rate runs high through Classes II and III where Pulse still has reserve;
+the shape, which is what the module teaches, now matches.
+
+Two consequences worth recording:
+
+- **The `haemorrhagic` preset was rescaled from 3000 mL to 3600 mL.** Its 40% loss was chosen when
+  a 40% loss was survivable with a near-normal pressure. Against the corrected curve 3000 mL reads
+  MAP 35 — Class IV, not the compensated patient the module's classification trap is about.
+  `decompensating` is the same bleed with the reflex removed, so the pair stays a controlled
+  comparison.
+- **Lactate now rises on its own** at the severe end, which is part of the third `it.todo`
+  answering itself.
 
 Class IV is worth noting on its own: Pulse reaches cardiovascular collapse and an irreversible
 state at ~746 s and the driver aborts. `run.sh` tolerates that and downsamples the partial CSV,
@@ -155,7 +202,42 @@ us it is a slider. Fill ours to Pulse's post-bleed 122 mL and the two ventricles
 Both engines also defend ESV against a preload change while giving up stroke volume — Starling,
 independently reproduced.
 
-### `copd-exacerbation` -> `respiratory`
+**The EDV question — settled by KEEPING the slider, and fixing what was actually wrong.** For Pulse
+end-diastolic volume is emergent from venous return; for us it is an input, and 120 mL is the
+textbook normal where Pulse's 142 sits at the top of the range. The slider stays: it is the
+instrument this module is built on, and `venousReturn` and `shockStates` already own emergent
+filling. But the real complaint behind that todo was that *the loop could not respond to anything on
+its own* — and it could not, because EDV was pinned. End-diastolic volume is the residue of the last
+beat plus venous return, so a ventricle that empties badly starts the next beat fuller.
+`VENTRICLE.RESIDUAL_FILLING_COUPLING` adds that, measured from the baseline residue so the
+calibration is untouched. A failing ventricle now DILATES — the single most recognisable thing about
+one, and something this loop previously could not draw — and a raised afterload no longer costs
+stroke volume one-for-one, because the accumulating residue recruits Starling.
+
+### `copd-exacerbation` -> `respiratory` — FIXED, by shipping the second patient
+
+Our `copdChronicAcidosis` was pure hypoventilation: PaCO2 71, a normal A-a gradient, PaO2 56. Pulse's
+exacerbation is a different animal — PaO2 89 -> 27 with the CO2 barely moving, 40 -> 45. Both are
+real patients and only one was teachable, so there are now two presets and what separates them is a
+MECHANISM rather than a severity.
+
+`vqMismatch` is a new input feeding the A-a gradient (and, more weakly, dead space). The asymmetry
+is the teaching: CO2 is ~20x more diffusible and its dissociation curve is near-linear, so mismatch
+that devastates oxygenation costs little CO2 clearance. Hypoxaemia out of proportion to hypercapnia
+means mismatch, not hypoventilation.
+
+| | pH | PaCO2 | PaO2 | SaO2 | A-a |
+|---|---|---|---|---|---|
+| chronic retainer | 7.28 | 70.7 | 56 | 89% | 5 |
+| exacerbation (ours) | 7.37 | 45.9 | 29 | 55% | 64 |
+| exacerbation (Pulse) | 7.31 | 45.0 | 27 | 51% | — |
+
+Note the preset's minute ventilation is set BELOW baseline even though Pulse's patient is breathing
+36 times a minute. Rate is not alveolar ventilation: fast and shallow over a large dead space moves
+less gas, which is exactly why the effort is not rewarded. And the acid-base half of that gas reads
+NORMAL — the trap being that half the ABG is reassuring while the patient is dying of the other half.
+
+### `copd-exacerbation` -> `respiratory`, as first recorded
 
 Baseline agreement is close on every gas: pH 7.400 vs 7.42, PaCO2 40.0 vs 39.9, PaO2 94.7 vs 89.3,
 bicarbonate 24.0 vs 25.9, SaO2 97.4% vs 97%.
@@ -197,8 +279,19 @@ Pulse's moderate pneumonia settles at a shunt fraction of **0.35**.
 
 Pulse's pneumonia does more than shunt, though — it also cuts lung compliance (0.20 -> 0.11
 L/cmH2O), raises airway resistance (1.5 -> 3.6) and nearly doubles the dead-space ratio (0.29 ->
-0.55). Ours changes shunt alone. Recorded as an `it.todo`: the consolidated lung is also stiffer
-and wastes more of each breath.
+0.55). Ours changed shunt alone. **FIXED:** the preset now stiffens the lung, narrows the airways
+and wastes more of each breath, scaled to the same fractions of our own baseline (our compliance is
+respiratory-system compliance where Pulse's is lung compliance, so the absolute numbers must not be
+matched).
+
+**The rate question — FIXED by measuring the COST rather than modelling the response.** Pulse answers
+a severe attack with 12 -> 18.6 breaths/min and tidal volume cut 535 -> 314 mL. Our respiratory rate
+and tidal volume are inputs the learner sets, and turning them into outputs would take away the
+instrument the module is built on. What was genuinely absent is that nothing showed the cost of the
+pattern — so `workOfBreathingJPerMin` now does, using the Otis, Fenn & Rahn (1950) decomposition into
+elastic and resistive work. The two halves scale differently with rate (elastic with f, resistive
+with f^2), which is why tachypnoea punishes an obstructed lung far harder than a stiff one, and why
+dynamic hyperinflation is treated by slowing the rate down.
 
 **Pulse does not distinguish ARDS from pneumonia.** `PneumoniaModerateBothLungs` and
 `ARDSModerateBothLungs` are genuinely different `PatientCondition`s at the same severity (0.6,
@@ -214,38 +307,162 @@ which is the result that makes the rest worth reading. Two divergences are recor
 in `src/modules/shockStates/engine/oracle.test.ts`. **Both are decisions about what the module
 should teach, not tolerances to widen.**
 
-### 1. Haemoglobin in acute haemorrhage
+### 1. Haemoglobin in acute haemorrhage — FIXED
 
 Pulse's haemoglobin *content* falls 821 g → 535 g, but blood volume falls in step, so the
-*concentration* barely moves: **15.0 → 14.8 g/dL across a 1.9 L loss.** You lose whole blood; you
-do not dilute it until interstitial fluid shifts in or someone hangs crystalloid.
+*concentration* barely moves. Checking all four no-fluid traces rather than the one makes it
+emphatic:
 
-Our `haemorrhagic` preset sets `haemoglobinGDl: 7.5`, and the comment on it teaches that oxygen
-delivery is "hit twice over — by the flow term and by the carriage term". For acute haemorrhage
-before resuscitation that inverts the usual teaching point, which is that a normal haemoglobin
-does not exclude massive blood loss.
+| lost | content | volume | concentration |
+|---|---|---|---|
+| 15% | 821 → 698 g | 5.49 → 4.72 L | 14.95 → 14.79 g/dL (−1.1%) |
+| 25% | 821 → 616 g | 5.49 → 4.19 L | 14.95 → 14.70 g/dL (−1.7%) |
+| 35% | 821 → 535 g | 5.49 → 3.71 L | 14.95 → 14.42 g/dL (−3.6%) |
+| 42% | 821 → 474 g | 5.49 → 3.23 L | 14.95 → 14.67 g/dL (−1.9%) |
 
-Either reading can be defended — the preset may be intended as *resuscitated* haemorrhage, which
-is the state most patients are in by the time anyone measures a haemoglobin. But it is currently
-implicit, and the two readings teach opposite lessons. Worth settling deliberately.
+You lose whole blood; you do not dilute it until interstitial fluid shifts in or someone hangs
+crystalloid.
 
-### 2. How the baroreflex defends pressure — seen in BOTH modules
+Our `haemorrhagic` preset set `haemoglobinGDl: 7.5`, and its comment taught that oxygen delivery is
+"hit twice over — by the flow term and by the carriage term". For acute haemorrhage before
+resuscitation that inverts the usual teaching point: **a normal haemoglobin does not exclude
+massive blood loss**, and that is the commonest way an early bleed is missed.
 
-At a *larger* fractional volume loss than Pulse's, we land at a higher MAP (74 vs 65), nearly
-double the stroke volume (44 vs 26 mL), and a heart rate of 82 against Pulse's 129. Our reflex
-defends pressure mostly through resistance; Pulse's does much more of it through rate.
-Tachycardia is the earliest and most reliable sign of Class III haemorrhage, so a model that
-reaches Class III at 82/min under-teaches it.
+**Both readings were defensible, which is why the answer was to stop conflating them.** The bleed
+now holds its concentration at 14.5 g/dL, and a new `resuscitated` preset — volume largely restored
+at 4700 mL, haemoglobin diluted to 7.5 — carries the state most patients are actually in by the
+time anyone measures one. The two terms of oxygen delivery can now be taught separately instead of
+at once, and the pair makes a further point the single preset could not: the resuscitated patient's
+haemodynamic classification reads "no shock" while their oxygen delivery is down by a third,
+because the classification reads flow and filling and cannot see carriage.
 
-The `cardiorenal` trace shows the same thing independently, at the other end of the severity
-range: a ~9% loss moves our rate +2.5% against Pulse's +17%. Two different modules, two different
-scenarios, one direction of error. **That points at a single shared assumption about how much of
-the baroreflex runs through rate rather than resistance, rather than at two tuning problems.** It
-is the more interesting finding of the two, because fixing it in one place would move both.
+### 3. Lactate — FIXED, and the one claim NOT taken from the oracle
+
+Ours held at 1.00 mmol/L at every severity. Pulse cannot arbitrate this one: its own lactate is flat
+too, 1.60 -> 1.66 even at collapse with a mixed venous saturation of 21%, so agreeing with it would
+have been agreeing with a gap. The case rests on the clinical literature, and the ladder is keyed to
+the ATLS class bands.
+
+The missing mechanism is regional. Global oxygen debt is a THRESHOLD — tissue extracts more until it
+cannot — so keying lactate to it alone gave a flat line and then a step change. Defending arterial
+pressure means shutting down splanchnic, muscle and skin, and those beds go anaerobic while the
+global figures still balance. That is what makes a raised lactate in a patient with acceptable
+vital signs mean anything at all.
+
+Ours now runs 1.0, 1.0, 2.9, 5.1, 18.7 up the ladder — normal at Class I, clearly raised by Class II
+while the MAP still reads 85. One refinement fell out of testing it: keyed to reflex drive alone, the
+`decompensating` preset (reflex removed, MAP 38) reported a normal lactate. A bed starves for either
+of two reasons, so the term takes the worse of reflex diversion and absent flow.
+
+### 2. How the baroreflex defends pressure — seen in BOTH modules — FIXED
+
+At a *larger* fractional volume loss than Pulse's we used to land at a higher MAP (74 vs 65),
+nearly double the stroke volume (44 vs 26 mL), and a heart rate of 82 against Pulse's 129. Our
+reflex defended pressure mostly through resistance; Pulse's does much more of it through rate.
+
+The `cardiorenal` trace showed the same thing independently, at the other end of the severity
+range: a ~9% loss moved our rate +2.5% against Pulse's +17%. Two different modules, two different
+scenarios, one direction of error — **a single shared assumption, not two tuning problems.** That
+is what made it worth chasing, and fixing it in one place did move both.
+
+`cardiorenal` needed the same two corrections in its own units: a saturating drive
+(`BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG`, the same 8 mmHg) in place of a linear ramp that
+saturated only 40 mmHg from setpoint, and `STARLING.SUB_BASELINE_EXPONENT` in place of a preload
+factor that fell linearly with volume. A ~9% loss now moves our rate +14.7% against Pulse's +17.2%
+and our cardiac output −10.0% against its −10.4%. The reflex's two arms were also rebalanced —
+`MAX_HEART_RATE_ADJUST` 30 -> 45, `MAX_TONE_ADJUST` 0.30 -> 0.20 — because leaning on resistance
+rather than rate was the finding itself.
+
+A third mechanism had to be added to keep the module honest afterwards: **baroreceptor resetting**
+(`BAROREFLEX.RESETTING_TAU_SECONDS`). With the reflex corrected but its setpoint fixed, a kidney at
+25% function expanded blood volume to 130% of normal while the reflex held the pressure rise to 4%
+— teaching that renal failure does not cause hypertension. Real baroreceptors reset to the
+prevailing pressure, which is exactly why chronic hypertension persists and why the kidney, not the
+reflex, is the long-term controller of arterial pressure.
 
 Note that the severity of divergence 2 is partly downstream of decision 1: at 14.8 g/dL rather
 than 7.5, oxygen delivery roughly doubles and the mixed venous saturation we produce (29.8%)
 would be far less extreme.
+
+## The second batch
+
+Seven more traces, run to broaden the evidence under the baroreflex rebuild and to give the
+non-haemorrhagic shock states any external evidence at all. Five were useful, one settled an open
+question, and one is a null result worth committing.
+
+### `hemorrhage-to-shock` — the best single trace in the suite
+
+One patient bled steadily from health into collapse and then watched recovering, so the plateau and
+the cliff are two parts of the same curve rather than an inference across four separate runs.
+
+| lost | MAP | HR | CO |
+|---|---|---|---|
+| 0% | 95.3 | 72 | 5.79 |
+| 20% | **93.0** | **105** | 4.55 |
+| 31% | 64.1 | 122 | 3.19 |
+| 38% | 44.0 | 154 | 2.14 |
+| 38%, 24 min later | 71.6 | 97 | 3.74 |
+
+The 20% row is the whole lesson in one line: **a fifth of the blood volume gone, the pressure down
+2.4%, and the heart rate already up 46%.** Taking the blood pressure reassures you; taking the pulse
+does not. The last row matters too — pressure climbs back and the rate falls with no fluid given,
+so compensation is not a one-way ratchet and a falling heart rate is how haemostasis announces
+itself.
+
+### `hemorrhage-varying-severity` — the rate-versus-resistance split, measured
+
+The only trace that records systemic vascular resistance alongside heart rate through a graded
+bleed, so it answers the question the A1 divergence was actually about rather than leaving it to
+inference. At a fifth of blood volume lost Pulse has raised the rate 46% and the resistance 26%; by
+collapse the rate is up over 100% and the resistance still only about a fifth, because
+**vasoconstriction saturates first and the rate arm carries everything after it.** That is a sharper
+statement of the original finding and it is now asserted directly.
+
+### `hemorrhage-class3-prbc` and `hemorrhage-class2-saline` — a preset corrected
+
+The pair asks the same question from both sides: packed cells replace what was lost, crystalloid
+replaces volume without cells.
+
+- **PRBC:** concentration holds at 14.95 -> 14.34 g/dL across the bleed AND the transfusion, while
+  content falls 821 -> 572 g and is then partly replaced. Confirms that a bleed does not dilute
+  itself.
+- **Saline:** flat through the bleed (14.95 -> 14.84), then falls only once fluid goes in, reaching
+  **13.2 g/dL** with the haemoglobin content unchanged.
+
+That last number **refuted a preset**. `resuscitated` was written at 7.5 g/dL as an inference when
+the haemoglobin question was settled; with the content Pulse is left holding, reaching 7.5 by
+dilution would take a blood volume near 8 litres, which is not a patient. It now sits at 10.5 g/dL —
+about 40% of red cell mass lost and then volume-restored: clearly anaemic, below the reference
+range, and still above the 7 g/dL transfusion threshold.
+
+### `ventricular-systolic-dysfunction` — cardiogenic shock, corroborated at last
+
+Until this trace the only externally corroborated shock state was haemorrhage. Pulse produces the
+fingerprint the module teaches: output down (5.79 -> 5.23 L/min), mean pressure down (95 -> 79), and
+the **wedge nearly doubled (6.5 -> 12.9 mmHg)** with mixed venous saturation falling — all achieved
+without any tachycardia at all, which is the opposite of the haemorrhage picture at a similar output.
+
+One divergence is recorded as an `it.todo`. Pulse leaves the CENTRAL venous pressure almost
+untouched (4.6 -> 4.8) while the wedge doubles, so its wedge-to-CVP ratio nearly doubles; ours raises
+both, so the ratio falls instead. Both are defensible — Pulse models a mild isolated left ventricular
+lesion and ours a profound one where secondary right heart failure is real — but the ratio is the
+bedside discriminator and the two engines move it in opposite directions.
+
+### `sepsis` and `sepsis-zero` — a NULL result, committed on purpose
+
+`Sepsis.json` applies Kitware's sepsis condition at severity 0.5 and then advances its own two
+minutes. That is not long enough for anything to happen: comparing the trace against its
+zero-severity control, **not one of the sixty-four recorded columns differs by more than 1%**. The
+septic patient still has a normal systemic vascular resistance, so there is nothing here to compare
+a distributive shock state against.
+
+Both traces are committed anyway, and the test asserts the identity — exactly as the
+ARDS-versus-pneumonia test does. If a future Pulse gains a sepsis model that does something in two
+minutes, it fails and the trace becomes worth having.
+
+One practical note for anyone adding traces: `TotalHemorrhagedVolume` does not exist in scenarios
+with no haemorrhage, and the downsampler rightly refuses to write a column it cannot find. Check the
+CSV header with `--columns` before writing the manifest entry.
 
 ## Attribution
 

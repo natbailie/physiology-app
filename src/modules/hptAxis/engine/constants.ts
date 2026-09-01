@@ -21,6 +21,32 @@ export const TSH = {
   TAU_SECONDS: 35,
 };
 
+/**
+ * The TSH assay value, mIU/L, from the log-linear relation between TSH and thyroid hormone.
+ *
+ * `tshLevel` above is the thyrotroph DRIVE, a 0-1 actuator that sets thyroid output. It is not an
+ * assay result, and expressing the module's single most-used clinical number as a percentage meant
+ * the one relation every clinician relies on — that TSH moves LOG-linearly against free T4, so a
+ * small hormone change is a large TSH change — could not be read off the screen or asserted in a
+ * test. "Graves TSH < 0.05" is meaningless on a 0-1 scale.
+ *
+ * log10(TSH) = A - B x T4, gated by pituitary thyrotroph function. Calibrated on three clinical
+ * landmarks and checked against a fourth:
+ *   - euthyroid T4 7.9 ug/dL  -> 1.5 mIU/L   (mid reference range)
+ *   - Graves    T4 14.8       -> 0.03        (suppressed below the assay's reporting floor)
+ *   - primary hypothyroid T4 4.3 -> 11       (overt, in the 10-100 band)
+ *   - secondary hypothyroid, the same T4 4.3 with a failing pituitary -> ~1.7, INAPPROPRIATELY
+ *     NORMAL for that T4, which is the textbook finding and the whole discrimination this
+ *     module exists to teach.
+ */
+export const TSH_ASSAY = {
+  LOG_INTERCEPT: 2.095,
+  LOG_SLOPE_PER_UGDL: 0.2445,
+  /** Reporting floor and ceiling of a third-generation assay, mIU/L. */
+  MIN_MIU_L: 0.005,
+  MAX_MIU_L: 150,
+};
+
 export const T4 = {
   BASAL_UGDL: 1.6,
   TSH_GAIN_UGDL: 18,

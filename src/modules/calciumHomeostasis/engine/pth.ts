@@ -1,4 +1,4 @@
-import { PTH } from './constants';
+import { PTH, PTH_ASSAY } from './constants';
 import { clamp, scaleClamped } from '@/shared/lib/math';
 
 /**
@@ -26,4 +26,14 @@ export function pthLevelTarget(
   const regulated = calciumDrive * parathyroidGlandFunction * magnesiumGate(serumMagnesium);
   const autonomous = clamp(autonomousPTHSecretion / 100, 0, 1) * magnesiumGate(serumMagnesium);
   return clamp(regulated + autonomous, 0, 1);
+}
+
+
+/**
+ * PTH as an assay would report it, pg/mL — see `PTH_ASSAY`. A change of units on the existing
+ * drive, not a second model of it.
+ */
+export function pthPgPerML(pthLevel: number): number {
+  const raw = Math.pow(10, PTH_ASSAY.LOG_INTERCEPT + PTH_ASSAY.LOG_SLOPE_PER_DRIVE * clamp(pthLevel, 0, 1));
+  return clamp(raw, PTH_ASSAY.MIN_PG_ML, PTH_ASSAY.MAX_PG_ML);
 }

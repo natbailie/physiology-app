@@ -30,6 +30,8 @@ export interface HpaState {
 }
 
 export interface HpaDerived {
+  /** ACTH as an assay reports it, pg/mL. Reference range 10-60. */
+  acthPgPerML: number;
   crhDrive: number;
   acthLevel: number;
   cortisolLevel: number;

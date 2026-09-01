@@ -66,6 +66,9 @@ export interface CardiacDerived {
   afterloadPressure: number;
   contractility: number;
   avConductionDelay: number;
+  /** The EDV the ventricle is actually filling toward: the requested preload plus a share of what
+   * the last beat failed to eject. Equals `preloadEDV` at the calibrated baseline. */
+  fillingTargetEDV: number;
 }
 
 export interface CardiacSnapshot {

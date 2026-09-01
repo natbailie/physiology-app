@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeDerived, createInitialState, perturbInjury, step } from './engine';
 import { COAG_PRESETS, DEFAULT_COAG_INPUTS } from './presets';
+import { COAGULATION_REFERENCE_RANGES } from './references';
 import { LAB_BASELINE } from './constants';
 import { thrombinAmplification } from './commonPathway';
 import type { CoagInputs } from './types';
@@ -34,7 +35,13 @@ const APTT_UPPER = LAB_BASELINE.APTT_SECONDS * 1.2;
 describe('coagulation — normal haemostasis', () => {
   it('reports a normal screening panel', () => {
     const normal = panel(DEFAULT_COAG_INPUTS);
-    expect(normal.ptSeconds).toBeCloseTo(LAB_BASELINE.PT_SECONDS, 1);
+    // Against the PUBLISHED interval, not against LAB_BASELINE.PT_SECONDS. Comparing the engine to
+    // its own constant passes by construction and cannot catch a wrong constant; see
+    // `references.ts`, where the band and its source live.
+    expect(normal.ptSeconds).toBeGreaterThanOrEqual(COAGULATION_REFERENCE_RANGES.ptSeconds!.low);
+    expect(normal.ptSeconds).toBeLessThanOrEqual(COAGULATION_REFERENCE_RANGES.ptSeconds!.high);
+    expect(normal.apttSeconds).toBeGreaterThanOrEqual(COAGULATION_REFERENCE_RANGES.apttSeconds!.low);
+    expect(normal.apttSeconds).toBeLessThanOrEqual(COAGULATION_REFERENCE_RANGES.apttSeconds!.high);
     expect(normal.inr).toBeCloseTo(1, 1);
     expect(normal.apttSeconds).toBeCloseTo(LAB_BASELINE.APTT_SECONDS, 1);
     expect(normal.bleedingTimeMinutes).toBeCloseTo(LAB_BASELINE.BLEEDING_TIME_MINUTES, 1);

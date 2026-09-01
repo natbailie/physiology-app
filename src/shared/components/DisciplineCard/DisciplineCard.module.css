@@ -1,0 +1,44 @@
+.card {
+  composes: card from '../../styles/card.module.css';
+}
+
+.nameRow {
+  composes: nameRow from '../../styles/card.module.css';
+}
+
+.name {
+  composes: name from '../../styles/card.module.css';
+}
+
+.blurb {
+  composes: blurb from '../../styles/card.module.css';
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Unbuilt subjects stand down rather than disappear: the roadmap is part of what the
+ * picker is saying. Same treatment as a coming-soon ModuleCard. */
+.comingSoon {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.badge {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-pill);
+  padding: 0.15rem 0.55rem;
+  background: var(--panel);
+}

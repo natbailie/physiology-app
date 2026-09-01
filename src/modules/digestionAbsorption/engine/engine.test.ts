@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { computeDerived, createInitialState, perturbEatMeal, step } from './engine';
 import { DEFAULT_DIGESTION_INPUTS } from './presets';
-import { BILE, MICRONUTRIENT, WATER } from './constants';
+import { MICRONUTRIENT, WATER } from './constants';
 import type { DigestionInputs } from './types';
+import { DIGESTION_REFERENCE_RANGES } from './references';
 
 type Snapshot = ReturnType<typeof step>;
 
@@ -30,8 +31,11 @@ describe('baseline calibration', () => {
   const baseline = run({});
 
   it('holds the bile salt pool near its textbook size', () => {
-    expect(baseline.state.bileSaltPoolG).toBeGreaterThan(BILE.POOL_REF_G - 0.5);
-    expect(baseline.state.bileSaltPoolG).toBeLessThanOrEqual(BILE.POOL_REF_G);
+    // Against the published pool size, not against BILE.POOL_REF_G — the engine was being compared
+    // to its own constant. See `references.ts` for the band and its source: the pool is only 3-4 g
+    // and works by recirculating six to eight times a day.
+    expect(baseline.state.bileSaltPoolG).toBeGreaterThanOrEqual(DIGESTION_REFERENCE_RANGES.bileSaltPoolG!.low);
+    expect(baseline.state.bileSaltPoolG).toBeLessThanOrEqual(DIGESTION_REFERENCE_RANGES.bileSaltPoolG!.high);
     // The liver replaces exactly what escapes, well inside its synthetic capacity.
     expect(baseline.derived.hepaticSynthesisGPerDay).toBeGreaterThan(0.2);
     expect(baseline.derived.hepaticSynthesisGPerDay).toBeLessThan(2);

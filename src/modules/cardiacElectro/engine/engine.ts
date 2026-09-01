@@ -1,6 +1,6 @@
 import { VENTRICLE } from './constants';
 import { pacemakerRateBpm, saNodeRamp } from './pacemaker';
-import { cardiacPhase, nextVolume, ventricularPressure } from './pvLoop';
+import { cardiacPhase, effectivePreloadEDV, nextVolume, ventricularPressure } from './pvLoop';
 import { ecgVoltage, isHeartBlock } from './avConduction';
 import { cardiacOutputLPerMin, ejectionFractionPercent, strokeVolume } from './cardiacOutput';
 import { clamp } from '@/shared/lib/math';
@@ -27,7 +27,8 @@ export function createInitialState(): CardiacState {
  */
 export function computeDerived(state: CardiacState, inputs: CardiacInputs): CardiacDerived {
   const heartRateBpm = pacemakerRateBpm(inputs.intrinsicHeartRate, inputs.sympatheticDrive, inputs.parasympatheticDrive);
-  const phase = cardiacPhase(state.cyclePhaseFraction, state.lvPressureMmHg, inputs.afterloadPressure, state.lvVolumeML, inputs.preloadEDV);
+  const fillingTarget = effectivePreloadEDV(inputs.preloadEDV, state.endSystolicVolumeLastBeat);
+  const phase = cardiacPhase(state.cyclePhaseFraction, state.lvPressureMmHg, inputs.afterloadPressure, state.lvVolumeML, fillingTarget);
 
   const sv = state.strokeVolumeLastBeat;
   // SV = EDV − ESV by definition, so the end-diastolic volume actually achieved follows.
@@ -51,6 +52,7 @@ export function computeDerived(state: CardiacState, inputs: CardiacInputs): Card
     sympatheticDrive: inputs.sympatheticDrive,
     parasympatheticDrive: inputs.parasympatheticDrive,
     preloadEDV: inputs.preloadEDV,
+    fillingTargetEDV: fillingTarget,
     afterloadPressure: inputs.afterloadPressure,
     contractility: inputs.contractility,
     avConductionDelay: inputs.avConductionDelay,
@@ -66,7 +68,7 @@ export function tick(state: CardiacState, derived: CardiacDerived, dtSeconds: nu
   const volumeML = nextVolume(
     derived.phase,
     state.lvVolumeML,
-    derived.preloadEDV,
+    derived.fillingTargetEDV,
     state.lvPressureMmHg,
     derived.afterloadPressure,
     dtSeconds,

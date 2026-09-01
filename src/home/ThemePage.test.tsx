@@ -14,11 +14,11 @@ beforeAll(async () => {
 });
 
 describe('ThemePage', () => {
-  it('shows the theme title and links back to the topic grid', () => {
+  it('shows the theme title and links back to its subject', () => {
     render(<ThemePage themeId="cardiovascular" />);
     expect(screen.getByRole('heading', { name: 'Cardiovascular' })).toBeTruthy();
-    const back = screen.getByRole('link', { name: /All topics/i });
-    expect(back.getAttribute('href')).toBe('#home');
+    const back = screen.getByRole('link', { name: /Physiology/i });
+    expect(back.getAttribute('href')).toBe('#discipline/physiology');
   });
 
   it('renders the module cards the registry assigns to the theme', () => {

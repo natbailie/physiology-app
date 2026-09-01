@@ -131,7 +131,18 @@ export function acidSteadyState(inputs: RenalTubularInputs): AcidReadouts {
   // Urine anion gap tracks the ammonium supply: abundant NH4+ (an unmeasured cation) makes
   // the gap clearly negative; a starved supply lets measured chloride dominate and the gap
   // turns positive — the lab signature that says the ACIDOSIS is the kidney's own fault.
-  const deficiency = 1 - clamp(effectiveDistalDrive(inputs) / ACID.BUFFER_HALF_ALDOSTERONE, 0, 1);
+  //
+  // Ammonium excretion needs TWO things and is limited by whichever is scarcer: ammoniagenesis,
+  // which aldosterone and potassium drive, and distal H+ secretion, which traps the diffused NH3
+  // as NH4+ in the lumen. Keying the gap to aldosterone alone left it pinned at its floor of -25
+  // in every state this module can reach — including distal (type 1) RTA, where impaired H+
+  // secretion IS the lesion and a POSITIVE gap is the finding that identifies it. The readout was
+  // inert in exactly the scenario it exists to report.
+  const ammoniumSupply = Math.min(
+    clamp(effectiveDistalDrive(inputs) / ACID.BUFFER_HALF_ALDOSTERONE, 0, 1),
+    clamp(inputs.distalAcidSecretion, 0, 1),
+  );
+  const deficiency = 1 - ammoniumSupply;
   const urineAnionGapMeqL = clamp(
     -ACID.UAG_NEGATIVE_BASELINE + deficiency * ACID.UAG_DEFICIENCY_SWING,
     -ACID.UAG_NEGATIVE_BASELINE,

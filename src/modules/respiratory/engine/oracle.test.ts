@@ -170,12 +170,45 @@ describe('oracle: our oxygen dissociation curve is Pulse’s curve', () => {
   });
 });
 
-describe('oracle: open questions', () => {
-  it.todo(
-    'decide whether a COPD preset should model V/Q mismatch as well as hypoventilation — Pulse’s ' +
-      'exacerbation is dominated by hypoxaemia (PaO2 89 -> 27) with only mild CO2 retention (40 -> 45) ' +
-      'and a RISING respiratory rate (12 -> 36), where our copdChronicAcidosis preset is pure ' +
-      'hypoventilation (PaCO2 71, ventilation at 30%). Both are real patients, but they are ' +
-      'different patients, and only one of them is currently teachable',
-  );
+/**
+ * The two COPD patients, and the reason there had to be two.
+ *
+ * Pulse's exacerbation is dominated by hypoxaemia — PaO2 89 -> 27 mmHg — with only mild CO2
+ * retention (40 -> 45). Our `copdChronicAcidosis` preset is pure hypoventilation, PaCO2 71 with a
+ * normal A-a gradient, which is a real patient but a different one. Both are now shipped, and what
+ * separates them is a mechanism rather than a severity: hypoventilation moves O2 and CO2 together
+ * in the ratio the alveolar gas equation fixes, while V/Q mismatch pulls them apart.
+ */
+describe('oracle: hypoxaemia out of proportion to hypercapnia is a different lesion', () => {
+  const chronic = settle(RESP_PRESETS.copdChronicAcidosis);
+  const exacerbation = settle(RESP_PRESETS.copdExacerbation);
+  const severe = at('severe');
+
+  it('reproduces Pulse’s exacerbation gases, which the retainer preset could not', () => {
+    expect(exacerbation.paO2).toBeGreaterThan(severe.paO2MmHg - 10);
+    expect(exacerbation.paO2).toBeLessThan(severe.paO2MmHg + 10);
+    expect(exacerbation.paCO2).toBeGreaterThan(severe.paCO2MmHg - 8);
+    expect(exacerbation.paCO2).toBeLessThan(severe.paCO2MmHg + 8);
+    // Pulse reports saturation as a FRACTION; ours is a percentage.
+    expect(Math.abs(exacerbation.saO2 - severe.oxygenSaturation * 100)).toBeLessThan(10);
+  });
+
+  it('separates the two patients by MECHANISM, not by severity', () => {
+    // The retainer: CO2 high, gradient normal — every mmHg of oxygen lost is explained by the CO2.
+    expect(chronic.paCO2).toBeGreaterThan(60);
+    expect(chronic.aaGradient).toBeLessThan(15);
+    // The exacerbation: CO2 near normal, gradient wide. Same disease, opposite blood gas.
+    expect(exacerbation.paCO2).toBeLessThan(55);
+    expect(exacerbation.aaGradient).toBeGreaterThan(40);
+    // And it is the more hypoxaemic of the two despite the better CO2, which is the whole point.
+    expect(exacerbation.paO2).toBeLessThan(chronic.paO2);
+  });
+
+  it('leaves the acid-base half of the exacerbation looking reassuring', () => {
+    // The trap: a learner reading pH and bicarbonate alone finds nothing wrong with a patient whose
+    // saturation is in the fifties.
+    expect(exacerbation.pH).toBeGreaterThan(7.35);
+    expect(exacerbation.pH).toBeLessThan(7.45);
+    expect(exacerbation.saO2).toBeLessThan(70);
+  });
 });

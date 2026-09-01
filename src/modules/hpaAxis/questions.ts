@@ -14,7 +14,7 @@ export type HpaQuestion = ModuleQuestion<HpaInputs, HpaPresetName, Snapshot>;
  * separates a suppressed axis that will recover from one that has been replaced.
  */
 const ADRENAL_PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'ACTH', value: (s) => s.derived.acthLevel, decimals: 2 },
+  { label: 'ACTH', value: (s) => s.derived.acthPgPerML, decimals: 1 },
   { label: 'Cortisol', value: (s) => s.derived.cortisolLevel, decimals: 1 },
   { label: 'Adrenal reserve', value: (s) => s.derived.adrenalReserve, decimals: 2 },
 ];
@@ -34,7 +34,7 @@ export const HPA_QUESTIONS: readonly HpaQuestion[] = [
     observeSeconds: 2400,
     explanation:
       'Cortisol falls, and because negative feedback is working perfectly the pituitary responds by driving ACTH up — it is shouting at a gland that cannot answer. This is the reading rule for every hormone axis: when the hormone and its trophic signal move in opposite directions the lesion is in the gland itself. High ACTH with low cortisol is primary adrenal insufficiency, and the same excess ACTH is what pigments the skin in Addison\'s disease.',
-    metric: (s) => s.derived.acthLevel,
+    metric: (s) => s.derived.acthPgPerML,
   },
   {
     id: 'stress-in-addisons',

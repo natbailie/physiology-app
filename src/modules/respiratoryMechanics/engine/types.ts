@@ -70,6 +70,10 @@ export interface RespMechDerived {
   /** Alveolar ventilation, mL/min — what actually reaches gas-exchanging alveoli */
   alveolarVentilationMLPerMin: number;
   minuteVentilationMLPerMin: number;
+  /** Work of breathing, J/min, and its two components — see `workOfBreathingJPerMin`. Normal
+   * quiet breathing costs a few joules a minute; obstruction and stiff lungs each multiply it,
+   * by different routes. */
+  workOfBreathingJPerMin: number;
   // Passthrough of inputs so tick() can stay a pure (state, derived, dt) function.
   respiratoryRate: number;
   tidalVolumeML: number;

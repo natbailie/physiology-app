@@ -77,6 +77,10 @@ describe('the four shock states produce distinguishable fingerprints', () => {
       tamponade: 'obstructive',
       pulmonaryEmbolism: 'obstructive',
       anaphylaxis: 'distributive',
+      // Haemodynamically recovered, and that IS the point of it: the classification is a reading of
+      // flow and filling, and it cannot see that half the oxygen carriage is gone. See the
+      // oxygen-transport tests below.
+      resuscitated: 'no shock',
       decompensating: 'hypovolaemic',
     };
     for (const name of SHOCK_PRESET_ORDER) {
@@ -137,8 +141,42 @@ describe('oxygen transport tells a different story from blood pressure', () => {
   });
 
   it('drops the mixed venous saturation in haemorrhage, where extraction is intact', () => {
+    const normal = settle(SHOCK_PRESETS.normal);
     const d = settle(SHOCK_PRESETS.haemorrhagic);
-    expect(d.mixedVenousSaturationPercent).toBeLessThan(50);
+    // Clearly below the normal 65-75% band, and by extraction rather than by anaemia: this patient
+    // still has a normal haemoglobin. Contrast the septic case above, where a HIGH saturation sits
+    // beside a high lactate because the tissue cannot take what is delivered.
+    expect(d.mixedVenousSaturationPercent).toBeLessThan(65);
+    expect(d.mixedVenousSaturationPercent).toBeLessThan(normal.mixedVenousSaturationPercent - 10);
+  });
+
+  /**
+   * The two terms of oxygen delivery, separated.
+   *
+   * DO2 is a product of flow and carriage, and a bleed hits them at different times. During the
+   * bleed the haemoglobin concentration barely moves — Pulse's four no-fluid traces put it at
+   * 14.8, 14.7, 14.4 and 14.7 g/dL across losses of 15 to 42 percent — so the loss is pure flow.
+   * It is the crystalloid that dilutes the carriage, hours later. Teaching both at once, which is
+   * what a single preset at 7.5 g/dL did, taught neither.
+   */
+  it('loses oxygen delivery through FLOW while bleeding and through CARRIAGE after resuscitation', () => {
+    const bleeding = settle(SHOCK_PRESETS.haemorrhagic);
+    const resuscitated = settle(SHOCK_PRESETS.resuscitated);
+
+    // Bleeding: carriage intact, flow collapsed.
+    expect(bleeding.cardiacIndex).toBeLessThan(2.2);
+    // Resuscitated: flow restored, carriage halved — and the haemodynamic classification, which
+    // reads flow and filling only, now says there is no shock at all.
+    expect(resuscitated.cardiacIndex).toBeGreaterThan(bleeding.cardiacIndex);
+    expect(resuscitated.classification).toBe('no shock');
+    expect(resuscitated.oxygenDeliveryMlPerMin).toBeLessThan(settle(SHOCK_PRESETS.normal).oxygenDeliveryMlPerMin * 0.7);
+    // Extraction is doing the compensating, which is what a below-normal SvO2 in an anaemic patient
+    // with a restored circulation means. Note it is HIGHER than the actively bleeding patient's,
+    // because flow has been given back — the two patients are anaemic and underperfused in
+    // opposite proportions, which is the pair's whole point.
+    const normal = settle(SHOCK_PRESETS.normal);
+    expect(resuscitated.mixedVenousSaturationPercent).toBeLessThan(normal.mixedVenousSaturationPercent - 8);
+    expect(resuscitated.mixedVenousSaturationPercent).toBeGreaterThan(bleeding.mixedVenousSaturationPercent);
   });
 
   it('holds a near-normal blood pressure while the cardiac index collapses', () => {

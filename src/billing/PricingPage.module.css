@@ -105,7 +105,7 @@
   line-height: 1.6;
 }
 
-/* Access code. Deliberately understated — it is a side door, not the offer. */
+/* Licence code. Deliberately understated — it is a side door, not the offer. */
 .codeRow {
   display: flex;
   align-items: center;
@@ -150,4 +150,78 @@
 .codeButton {
   composes: button from '../shared/styles/button.module.css';
   padding: var(--s-3) var(--s-5);
+}
+
+/* The package chooser. Two radios drawn as cards, so the choice is one tap and still a fieldset
+   a screen reader can announce as one. */
+.packages {
+  display: flex;
+  gap: var(--s-3);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.packageLegend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.packageOption {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: var(--s-4);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--panel-raised);
+  cursor: pointer;
+}
+
+.packageOption:has(input:checked) {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+.packageOption:has(input:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.packageRadio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.packageLabel {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.packagePrice {
+  font-size: 1.35rem;
+  letter-spacing: var(--tracking-tight);
+}
+
+.packagePeriod {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.packageNote {
+  font-size: 0.72rem;
+  color: var(--ok);
+}
+
+/* Where access comes from, when a learner already has it. */
+.sourceNote {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.6;
 }

@@ -161,10 +161,14 @@ describe('engine — V/Q mismatch: dead space vs shunt', () => {
   });
 
   it('shunt lowers the affected unit\'s V/Q ratio', () => {
+    // Varied from the healthy patient rather than read off the pneumonia preset, so this tests the
+    // SHUNT and not the rest of the disease. The preset now also stiffens the lung, narrows the
+    // airways and raises the rate, and a mechanism test that moves with preset composition is
+    // measuring the preset instead of the mechanism.
     const normal = settled('normal');
-    const pneumonia = settled('pneumonia');
+    const shunted = settled('normal', { shuntFraction: 35 });
 
-    expect(pneumonia.vqRatioB).toBeLessThan(normal.vqRatioB * 0.6);
+    expect(shunted.vqRatioB).toBeLessThan(normal.vqRatioB * 0.6);
   });
 
   it('HPV partially corrects shunt but does nothing at all for dead space', () => {

@@ -67,8 +67,9 @@ Three rules hold the project together:
    React updates, with transport controls (play/pause/step/speed) and baseline capture shared by
    every module.
 3. **Nothing the learner sees depends on a library.** Every chart, diagram and ECG trace is
-   hand-written SVG. The only runtime dependencies are React and the Supabase client, and the
-   latter is optional — without credentials the app runs local-only and never loads it.
+   hand-written SVG. The only runtime dependencies are React, the Supabase client and RevenueCat's
+   web SDK. The latter two are infrastructure rather than UI, and both are optional: without
+   credentials the app runs local-only and loads neither.
 
 ## Questions are verified against the engine
 

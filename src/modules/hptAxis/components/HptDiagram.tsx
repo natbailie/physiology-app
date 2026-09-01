@@ -57,7 +57,10 @@ export function HptDiagram({ derived }: HptDiagramProps) {
 
       <text className={styles.label} x={20} y={410}>
         T4 {derived.t4Level.toFixed(1)} · T3 {derived.t3Level.toFixed(1)} · TSH{' '}
-        {(derived.tshLevel * 100).toFixed(0)}%
+        {derived.tshMilliUnitsPerL < 0.1
+          ? derived.tshMilliUnitsPerL.toFixed(3)
+          : derived.tshMilliUnitsPerL.toFixed(2)}{' '}
+        mIU/L
       </text>
       <DiagramText className={styles.caption} x={20} y={430} maxWidth={520}>
         conversion {(derived.conversionEfficiency * 100).toFixed(0)}% · TRH drive{' '}

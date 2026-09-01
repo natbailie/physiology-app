@@ -137,10 +137,30 @@ describe('oracle: the reflex responds the way Pulse’s does', () => {
   });
 });
 
-describe('oracle: open questions', () => {
-  it.todo(
-    'decide whether the baroreflex should lean harder on heart rate — we answer a ~9% loss with ' +
-      '+2.5% rate against Pulse’s +17%, the same under-response the shockStates oracle found at ' +
-      'Class III, so this is one shared mechanism and not two module-specific tuning problems',
-  );
+describe('oracle: the reflex leans on RATE, not only on resistance', () => {
+  /**
+   * This was an open divergence and is now the thing under test. We used to answer a ~9% loss with
+   * +2.5% heart rate against Pulse's +17%, and the shockStates oracle found the same
+   * under-response at the other end of the severity range — one shared assumption, two modules.
+   *
+   * Two things were wrong and both are corrected. Reflex drive was LINEAR in the pressure error and
+   * saturated only 40 mmHg from setpoint, so almost all its gain sat in territory nobody survives;
+   * and preload fell in proportion to blood volume, so a 9% loss cost 9% of stroke volume where
+   * Pulse loses 24%. See `BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG` and
+   * `STARLING.SUB_BASELINE_EXPONENT`.
+   */
+  it('answers a Class I loss with a tachycardia of the order Pulse produces', () => {
+    const theirs = theirFraction('heartRateBpm');
+    const ours = ourFraction('effectiveHeartRate');
+    expect(theirs).toBeGreaterThan(0.1);
+    // Compared as a BAND rather than a value: the two engines model different patients, and the
+    // claim worth holding is that the rate arm carries compensation of the same magnitude.
+    expect(ours).toBeGreaterThan(theirs * 0.6);
+    expect(ours).toBeLessThan(theirs * 1.6);
+  });
+
+  it('gives up stroke volume the way Pulse does, which is what the rate is compensating for', () => {
+    // The reason the rate response was too small: filling, and so stroke volume, barely moved.
+    expect(ourFraction('strokeVolume')).toBeLessThan(-0.1);
+  });
 });

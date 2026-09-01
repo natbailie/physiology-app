@@ -30,6 +30,16 @@ function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
         onChange={(v) => onChange('minuteVentilation', v)}
       />
       <Slider
+        label="V/Q mismatch"
+        value={inputs.vqMismatch}
+        min={0}
+        max={1}
+        step={0.02}
+        unit="%"
+        formatValue={percent}
+        onChange={(v) => onChange('vqMismatch', v)}
+      />
+      <Slider
         label="Inspired O2 (FiO2)"
         value={inputs.fiO2}
         min={0.05}

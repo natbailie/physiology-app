@@ -1,10 +1,23 @@
 import { BAROREFLEX, CIRCULATION, HEART, PULMONARY } from './constants';
 import { clamp } from '@/shared/lib/math';
 
-/** Mean systemic filling pressure, mmHg — the pressure the vessels would settle at with the
- * heart stopped. Only STRESSED volume contributes; the rest merely fills the vessels. */
+/**
+ * Mean systemic filling pressure, mmHg — the pressure the vessels would settle at with the heart
+ * stopped. Only STRESSED volume contributes; the rest merely fills the vessels.
+ *
+ * The unstressed compartment is a CAPACITY that recoils as blood is lost, not a fixed share of
+ * whatever is left. That distinction is the whole dose-response of haemorrhage: baseline stressed
+ * volume is only about 700 mL of a 5 L circulation, so once more than that has been bled the
+ * filling pressure is held up by venoconstriction alone, and it falls away steeply rather than in
+ * proportion. See `CIRCULATION.UNSTRESSED_RECOIL_EXPONENT`.
+ */
 export function meanSystemicFillingPressure(bloodVolumeMl: number, sympatheticDrive = 0): number {
-  const stressed = Math.max(0, bloodVolumeMl * (1 - CIRCULATION.UNSTRESSED_FRACTION));
+  const remaining = clamp(bloodVolumeMl / CIRCULATION.BASELINE_BLOOD_VOLUME_ML, 0, 2);
+  const unstressedCapacity =
+    CIRCULATION.BASELINE_BLOOD_VOLUME_ML *
+    CIRCULATION.UNSTRESSED_FRACTION *
+    Math.pow(remaining, CIRCULATION.UNSTRESSED_RECOIL_EXPONENT);
+  const stressed = Math.max(0, bloodVolumeMl - unstressedCapacity);
   const venoconstriction = 1 + BAROREFLEX.VENOCONSTRICTION_GAIN * clamp(sympatheticDrive, 0, 1);
   return (stressed / CIRCULATION.TOTAL_COMPLIANCE_ML_PER_MMHG) * venoconstriction;
 }

@@ -30,10 +30,19 @@ export function createInitialState(): ShockState {
   };
 }
 
-/** Sympathetic outflow the baroreceptors are calling for, 0..1. Steep around a MAP of ~62,
- * which is why compensation looks like nothing at all until it suddenly looks like everything. */
+/**
+ * Sympathetic outflow the baroreceptors are calling for, 0..1 — driven by how far pressure has
+ * fallen BELOW its setpoint, not by pressure itself.
+ *
+ * Zero at the setpoint by construction, so a resting patient carries no standing sympathetic tone
+ * and the module's calibrated baseline is the unstimulated circulation. It then climbs steeply,
+ * saturating around 20 mmHg of error, which is what produces the shape the module is named for:
+ * pressure held almost still while the reflex has headroom, then a cliff once it runs out.
+ */
 function sympatheticTarget(meanArterialPressureMmHg: number, baroreflexGain: number): number {
-  const raw = 1 / (1 + Math.exp((meanArterialPressureMmHg - BAROREFLEX.HALF_ACTIVATION_MMHG) / BAROREFLEX.STEEPNESS_MMHG));
+  const error = BAROREFLEX.SETPOINT_MMHG - meanArterialPressureMmHg;
+  if (error <= 0) return 0;
+  const raw = error / (error + BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG);
   return clamp(raw * clamp(baroreflexGain, 0, 1.5), 0, 1);
 }
 
@@ -141,7 +150,12 @@ export function tick(state: ShockState, derived: ShockDerived, inputs: ShockInpu
     ),
     lactateMmolL: approach(
       state.lactateMmolL,
-      lactateTarget(inputs.oxygenDemandMlPerMin, derived.oxygenConsumptionMlPerMin),
+      lactateTarget(
+        inputs.oxygenDemandMlPerMin,
+        derived.oxygenConsumptionMlPerMin,
+        state.sympatheticDrive,
+        derived.cardiacOutputLPerMin / CIRCULATION.BASELINE_CARDIAC_OUTPUT,
+      ),
       dtSeconds,
       LACTATE.CLEARANCE_TAU_SECONDS,
     ),

@@ -310,7 +310,7 @@
       "id": "pneumonia-zero",
       "module": "respiratoryMechanics",
       "scenario": "/source/data/human/adult/scenarios/patient/ZeroPneumonia.json",
-      "description": "The zero-severity control for the pneumonia condition \u2014 the same patient, healthy.",
+      "description": "The zero-severity control for the pneumonia condition — the same patient, healthy.",
       "sampleIntervalSeconds": 10,
       "landmarks": {
         "settled": 120
@@ -352,7 +352,7 @@
       "id": "ards-zero",
       "module": "respiratoryMechanics",
       "scenario": "/source/data/human/adult/scenarios/patient/ZeroARDS.json",
-      "description": "The zero-severity control for the ARDS condition \u2014 the same patient, healthy.",
+      "description": "The zero-severity control for the ARDS condition — the same patient, healthy.",
       "sampleIntervalSeconds": 10,
       "landmarks": {
         "settled": 120
@@ -416,6 +416,348 @@
         "strokeVolumeMl": "HeartStrokeVolume(mL)",
         "ejectionFraction": "HeartEjectionFraction"
       }
+    },
+    {
+      "id": "hemorrhage-to-shock",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageToShock.json",
+      "description": "Kitware's own bleed-until-shock case. The ladder's four fixed classes each show one point on the pressure curve; this shows the TRANSITION, which is the shape the module is named for and the thing our straight-line reflex gets wrong.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "compensated": 360,
+        "decompensating": 540,
+        "collapse": 720,
+        "recovered": 2150
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "hemorrhage-varying-severity",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageVaryingSeverity.json",
+      "description": "Bleed rate stepped through several severities in one run — a dose-response curve for the baroreflex from a single scenario, independent of the four-class ladder.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "mild": 360,
+        "plateau": 720,
+        "decompensating": 900,
+        "collapse": 1230
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "hemorrhage-class3-prbc",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass3PackedRBC.json",
+      "description": "The same 35% loss as `hemorrhage-class3`, resuscitated with packed red cells. Paired with the no-fluid trace this is the direct evidence for what haemoglobin CONCENTRATION does across a bleed and its treatment, which is the open decision in this module.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "bleeding": 480,
+        "resuscitated": 2880
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "hemorrhage-class2-saline",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/HemorrhageClass2Saline.json",
+      "description": "Class II loss resuscitated with crystalloid — the other half of the haemoglobin question. Whole-blood loss should hold the concentration; saline is what dilutes it.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "baseline": 30,
+        "bleeding": 720,
+        "diluted": 1080
+      },
+      "columns": {
+        "hemorrhagedMl": "TotalHemorrhagedVolume(mL)",
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "sepsis",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/Sepsis.json",
+      "description": "Kitware's bundled sepsis condition at severity 0.5, then its own 2-minute advance. Recorded as evidence of a NULL result: see the write-up in README.md — not one of the 64 columns differs from the zero control by more than 1%, so this cannot serve as a distributive-shock oracle as the scenario is shipped.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)",
+        "oxygenConsumptionMlPerMin": "OxygenConsumptionRate(mL/min)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "sepsis-zero",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/ZeroSepsis.json",
+      "description": "The zero-severity control for the sepsis condition — the same patient, healthy.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "settled": 120
+      },
+      "columns": {
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)",
+        "oxygenConsumptionMlPerMin": "OxygenConsumptionRate(mL/min)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
+    },
+    {
+      "id": "ventricular-systolic-dysfunction",
+      "module": "shockStates",
+      "scenario": "/source/data/human/adult/scenarios/patient/VentricularSystolicDysfunction.json",
+      "description": "Moderate ventricular systolic dysfunction applied as a condition at stabilisation, then watched for 140 minutes. Note there is no healthy baseline inside this trace: the patient is already deranged at t=0, so the resting comparison comes from another trace.",
+      "sampleIntervalSeconds": 10,
+      "landmarks": {
+        "onset": 30,
+        "settled": 8400
+      },
+      "columns": {
+        "bloodVolumeL": "BloodVolume(L)",
+        "heartRateBpm": "HeartRate(1/min)",
+        "strokeVolumeMl": "HeartStrokeVolume(mL)",
+        "meanArterialPressureMmHg": "MeanArterialPressure(mmHg)",
+        "cardiacOutputLPerMin": "CardiacOutput(L/min)",
+        "haemoglobinContentG": "HemoglobinContent(g)",
+        "centralVenousPressureMmHg": "CentralVenousPressure(mmHg)",
+        "wedgePressureMmHg": "PulmonaryCapillariesWedgePressure(mmHg)",
+        "systemicVascularResistance": "SystemicVascularResistance(mmHg_s/mL)",
+        "oxygenSaturation": "OxygenSaturation",
+        "mixedVenousOxygenSaturation": "VenaCava-Oxygen-Saturation",
+        "lactateMmolL": "Aorta-Lactate-Molarity(mmol/L)",
+        "oxygenConsumptionMlPerMin": "OxygenConsumptionRate(mL/min)"
+      },
+      "extraDataRequests": [
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "VenaCava",
+          "SubstanceName": "Oxygen",
+          "PropertyName": "Saturation",
+          "Unit": "unitless"
+        },
+        {
+          "DecimalFormat": {
+            "Precision": 3
+          },
+          "Category": "LiquidCompartment",
+          "CompartmentName": "Aorta",
+          "SubstanceName": "Lactate",
+          "PropertyName": "Molarity",
+          "Unit": "mmol/L"
+        }
+      ]
     }
   ]
 }

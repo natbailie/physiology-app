@@ -31,9 +31,9 @@ export function createInitialState(): RespState {
  */
 export function computeDerived(state: RespState, inputs: RespInputs): RespDerived {
   const effVent = effectiveMinuteVentilation(inputs.minuteVentilation, state.chemoreceptorDrive);
-  const vaFraction = alveolarVentilationFraction(effVent, state.airwayObstruction);
+  const vaFraction = alveolarVentilationFraction(effVent, state.airwayObstruction, inputs.vqMismatch);
   const co2 = paCO2(inputs.co2Production, vaFraction);
-  const aaGrad = aaGradient(state.airwayObstruction);
+  const aaGrad = aaGradient(state.airwayObstruction, inputs.vqMismatch);
   const o2 = paO2(inputs.fiO2, co2, aaGrad);
   const sat = saO2(o2);
   const currentPH = pH(state.plasmaHCO3, co2);
@@ -62,6 +62,7 @@ export function computeDerived(state: RespState, inputs: RespInputs): RespDerive
     acuteBufferDrive: state.acuteBufferDrive,
     renalCompensationDrive: state.renalCompensationDrive,
     airwayObstruction: state.airwayObstruction,
+    vqMismatch: inputs.vqMismatch,
     metabolicAcidLoad: inputs.metabolicAcidLoad,
     acidType: inputs.acidType,
     renalCompensationCapacity: inputs.renalCompensationCapacity,

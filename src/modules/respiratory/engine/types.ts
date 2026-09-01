@@ -36,6 +36,15 @@ export interface AcidBaseInterpretation {
 export interface RespInputs {
   /** Minute ventilation effort, % of baseline where 100 = normal resting ventilation (20-300) */
   minuteVentilation: number;
+  /**
+   * Ventilation-perfusion mismatch, 0-1 — blood passing alveoli it cannot fully equilibrate with.
+   *
+   * Separate from ventilation on purpose. Hypoventilation raises CO2 and lowers O2 together, in the
+   * fixed ratio the alveolar gas equation dictates; mismatch pulls them apart, devastating
+   * oxygenation while the CO2 barely moves. Hypoxaemia out of proportion to hypercapnia is the
+   * signature, and it is what separates an exacerbation from a chronic retainer.
+   */
+  vqMismatch: number;
   /** Fraction of inspired O2 — models both supplemental O2 (>0.21) and altitude-equivalent
    * hypoxia (<0.21, via reduced atmospheric pressure in this simplified model) (0.05-1.0) */
   fiO2: number;
@@ -116,6 +125,8 @@ export interface RespDerived {
   acuteBufferDrive: number;
   renalCompensationDrive: number;
   airwayObstruction: number;
+  /** Echoed so the diagram can draw the alveolar units that have dropped out of exchange. */
+  vqMismatch: number;
   // Passthrough of inputs so tick() can stay a pure (state, derived, dt) function.
   metabolicAcidLoad: number;
   acidType: AcidType;

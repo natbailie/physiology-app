@@ -25,6 +25,9 @@ export interface SimState {
   baroreflexDrive: number; // -1..1
   raasActivation: number; // 0..1
   anpLevel: number; // 0..1
+  /** The pressure the reflex is currently defending, mmHg. Drifts toward the prevailing MAP —
+   * see `BAROREFLEX.RESETTING_TAU_SECONDS`. */
+  baroreflexSetpointMmHg: number;
 }
 
 export interface DerivedValues {

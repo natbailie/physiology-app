@@ -1,22 +1,36 @@
-export type CheckoutResult = { ok: true; url: string } | { ok: false; message: string };
+import type { Package } from '@revenuecat/purchases-js';
+import { purchasePackage } from './revenuecat';
+import { confirmSubscription } from './useEntitlement';
 
 /**
- * Begin a subscription purchase.
+ * Begin — and finish — a subscription purchase.
  *
- * TODO: Stripe. The shape here is the one the real implementation will keep:
- *   1. Call a Supabase Edge Function (`create-checkout-session`) with the user's access token.
- *      The function creates or reuses a Stripe customer, opens a Checkout session for the
- *      subscription price, and returns its URL.
- *   2. Return `{ ok: true, url }`; the caller sends the browser there.
- *   3. A second Edge Function handles the `checkout.session.completed` and
- *      `customer.subscription.*` webhooks and writes `profiles.subscription_status` with the
- *      service-role key. The client never writes that column — see supabase/schema.sql.
+ * This used to be a stub shaped for Stripe Checkout: create a session, return a URL, send the
+ * browser there. RevenueCat's Web SDK does not work that way. It renders the payment UI inside the
+ * page and resolves once the purchase is complete, so there is no URL to redirect to and the
+ * result gained a third case — the learner closing the sheet, which the SDK reports as an error
+ * and which is not one.
  *
- * Until then this is the one place that has to change, which is the point of it existing.
+ * This file existing is what kept that change to one place.
  */
-export async function startCheckout(): Promise<CheckoutResult> {
-  return {
-    ok: false,
-    message: 'Payments are not live yet. Full access will open here shortly — thanks for your patience.',
-  };
+
+export type CheckoutResult =
+  | { ok: true }
+  | { cancelled: true }
+  | { ok: false; message: string };
+
+export async function startCheckout(
+  userId: string,
+  rcPackage: Package,
+  customerEmail?: string,
+): Promise<CheckoutResult> {
+  const outcome = await purchasePackage(userId, rcPackage, customerEmail);
+
+  if ('cancelled' in outcome) return outcome;
+  if (!outcome.ok) return outcome;
+
+  // Unlock now, reconcile with the webhook in the background. See confirmSubscription.
+  void confirmSubscription(userId);
+
+  return { ok: true };
 }

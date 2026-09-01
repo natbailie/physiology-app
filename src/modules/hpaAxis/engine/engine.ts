@@ -1,6 +1,6 @@
 import { CRH, ACTH, CORTISOL, ACUTE_STRESSOR } from './constants';
 import { crhDriveTarget } from './crh';
-import { acthLevelTarget } from './acth';
+import { acthLevelTarget, acthPgPerML } from './acth';
 import { cortisolLevelTarget } from './cortisol';
 import { tickAdrenalReserve } from './adrenalReserve';
 import { approach, clamp } from '@/shared/lib/math';
@@ -27,6 +27,7 @@ export function computeDerived(state: HpaState, inputs: HpaInputs): HpaDerived {
   return {
     crhDrive: state.crhDrive,
     acthLevel: state.acthLevel,
+    acthPgPerML: acthPgPerML(state.acthLevel),
     cortisolLevel: state.cortisolLevel,
     adrenalReserve: state.adrenalReserve,
     acuteStressBolus: state.acuteStressBolus,

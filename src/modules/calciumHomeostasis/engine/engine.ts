@@ -1,5 +1,5 @@
 import { CALCITONIN, CALCITRIOL, CALCIUM, PHOSPHATE, PRECIPITATION, PTH } from './constants';
-import { pthLevelTarget } from './pth';
+import { pthLevelTarget, pthPgPerML } from './pth';
 import { calcitriolLevelTarget } from './calcitriol';
 import { calcitoninLevelTarget } from './calcitonin';
 import { boneCalciumRelease, bonePhosphateRelease, boneResorptionRate } from './boneRemodeling';
@@ -42,6 +42,7 @@ export function computeDerived(state: CalciumState, inputs: CalciumInputs): Calc
     serumCalciumMgDl: state.serumCalciumMgDl,
     serumPhosphateMgDl: state.serumPhosphateMgDl,
     pthLevel: state.pthLevel,
+    pthPgPerML: pthPgPerML(state.pthLevel),
     calcitriolLevel: state.calcitriolLevel,
     calcitoninLevel: state.calcitoninLevel,
     boneResorptionRate: resorption,

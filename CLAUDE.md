@@ -10,10 +10,28 @@ app is; this file is about how to work in it.
   control and baseline comparison all depend on it.
 - **No new runtime dependencies for anything the learner sees.** Charts and diagrams are
   hand-written SVG on purpose. Reach for a library and the engines stop being the fast, testable
-  part of the app. The one exception is the Supabase client, which backs optional accounts and is
-  never loaded when the app runs unconfigured — an infrastructure dependency, not a UI one.
+  part of the app. There are exactly two exceptions, both infrastructure rather than UI, and both
+  absent from what a learner downloads unless they need them: the Supabase client, which backs
+  optional accounts and is never loaded when the app runs unconfigured, and RevenueCat's
+  `@revenuecat/purchases-js`, which is imported dynamically inside `src/billing/revenuecat.ts` and
+  only when somebody is actually buying. It is 840 kB — larger than the whole rest of the app — so
+  the lazy chunk is not a nicety. `vite build` will tell you if it ever lands in the entry.
 - **Constants are calibrated, not invented.** Baseline inputs must land on textbook values. If a
   constant changes, the engine test asserting the baseline should fail — that is the point.
+- **Every module says where its numbers came from.** `src/modules/*/engine/references.ts` pairs each
+  asserted band with a `Provenance`: `oracle` (corroborated by a committed Pulse trace),
+  `literature` (a citation someone can look up) or `unsourced` (with a `needs` saying what would
+  settle it). `src/shared/verification/references.test.ts` discovers them, fails if a module has
+  none, and fails if a baseline falls outside its own band.
+
+  **`unsourced` is a first-class answer, not a failure.** 23 of 219 bands are unsourced, and almost
+  all of them for the same reason: the quantity is a 0-1 or 0-100 index, so no published reference
+  interval CAN apply until the engine changes units. Reading those `needs` strings end to end is
+  the most useful validation backlog in the repo. Do not convert one to `literature` without a
+  citation you could hand a reviewer — a uniform-looking citation list that would not survive an
+  audit is worth less than an honest gap.
+
+  The repo-wide corroboration percentage is asserted as a RATCHET and should only ever rise.
 
 ## Adding or changing physiology
 
@@ -47,6 +65,37 @@ and backward failure had to load the right heart before cardiogenic shock raised
   the diagram, if two presets settle to the same scenario, or if a module that declares a settle is
   still drifting at it. Its two allowlists are a backlog with a reason per line, not exemptions.
 
+## Validating against something other than ourselves
+
+Three kinds of oracle, in descending order of how hard they are to fake:
+
+- **Analytic** (`engine/analytic.test.ts`) — the reference is a published EQUATION, written out
+  inside the test and importing nothing from the engine but the value under test. The strongest
+  kind, because some of these are identities that must hold for any input at all: `ecgConduction`
+  checks Einthoven's law (II = I + III) against arbitrary dipoles and it holds to ten decimal
+  places, which no amount of miscalibration could produce.
+
+  Nine modules have one: `membranePotentials` (Nernst, Goldman), `enzymeKinetics`
+  (Michaelis-Menten, the three inhibition transforms, Lineweaver-Burk), `respiratory`
+  (Henderson-Hasselbalch, the alveolar gas equation, Winters), `ecgConduction` (Einthoven,
+  Bazett), `muscleContraction` (Gordon-Huxley, Hill), `venousReturn` (Guyton), `capillaryExchange`
+  (Starling, Landis-Pappenheimer), `electrolyteBalance` (Edelman, the osmolar gap, the glucose
+  correction), `renalTubular` (the clearance identities), `vision` (Watson-Yellott) and
+  `vestibular` (Steinhausen).
+
+  Where our model is not the published equation, say so and test the SHAPE rather than widening a
+  tolerance until point agreement appears. `membranePotentials` inverts Goldman to recover the
+  permeability ratio our membrane behaves as if it had, which is a sharper question than whether
+  two voltages are close — a model can land on the right voltage with an absurd permeability.
+- **Trace** (`engine/oracle.test.ts`, against `engine/__oracle__/*.json`) — the reference is a
+  committed trace from the independently validated Pulse engine. See `tools/pulse-oracle/`.
+- **Reference range** (`engine/references.ts`) — the reference is a published interval. Every
+  module has this; the other two are for the modules where something better is available.
+
+When writing an analytic oracle, the reference side must not call our own implementation of the
+equation. A test that computed the expected Nernst potential by calling our Nernst function would
+pass no matter what either of them did.
+
 ## Adding practice questions
 
 `src/modules/<module>/questions.ts`, verified by `questions.test.ts`. A question is a stem, a
@@ -74,6 +123,39 @@ Things that have caught questions out:
 Questions may carry a `perturb` in the setup or the intervention. Many of the sharpest teaching
 moments are events rather than settings — a fasting glucose model defends itself almost perfectly,
 and it is the meal that separates a working pancreas from a failed one.
+
+## Selling it
+
+Two revenue streams, resolved by one Postgres view so a client cannot route around the precedence
+rule. `supabase/schema-billing.sql` is the whole design; `src/billing/useEntitlement.ts` reads
+`v_entitlement` and nothing else.
+
+- **Individuals** subscribe through RevenueCat Web Billing. The App User ID **is** the Supabase user
+  id, which is what lets `supabase/functions/revenuecat-webhook/` join `app_user_id` onto
+  `profiles.id` with no mapping table, and what makes a subscription follow the account rather than
+  the browser.
+- **Institutions** never touch RevenueCat. A school pays by purchase order — which is how UK medical
+  schools pay — and you mint a code with `mint_licence` (service role only). Students redeem it with
+  `redeem_licence`, which takes a row lock before counting seats so two people cannot both claim the
+  last one. A licence may name a cohort, and redeeming then enrols the student in it: one code both
+  pays for them and puts them in their teacher's dashboard.
+- **An institutional seat beats a personal subscription**, and the account page says so. A student
+  whose school has paid may also be paying us directly, and has no way to find that out unless we
+  tell them.
+- **`CANCELLATION` does not end access.** It means auto-renew is off; the learner keeps what they
+  paid for until `EXPIRATION`. `_shared/revenuecat.ts` derives status from `expiration_at_ms` rather
+  than from the event type, which gets that right without a special case and also survives
+  out-of-order delivery. `src/billing/revenuecatWebhook.test.ts` holds it there.
+- The webhook is **idempotent on the event id** — RevenueCat retries five times over two and a half
+  hours — and the event is recorded AFTER the writes, so a failed write is retried rather than
+  swallowed.
+- `startCheckout` unlocks **optimistically** and reconciles with the webhook afterwards
+  (`confirmSubscription`). `purchase()` resolves before the webhook lands, and a learner who has
+  just paid must not be looking at a paywall. If the poll never agrees the grant stands for the
+  session.
+
+There was a `TEST_ACCESS_CODE` compiled into the bundle. It is gone, and `licence.ts` replaced it;
+if it reappears, `vite build` plus a grep of `dist/` is how that gets caught.
 
 ## The tutor
 
@@ -298,6 +380,12 @@ read that way. The shared language lives in `src/index.css` and the four stylesh
   `App.tsx`, and the module directory name. Theme ids live in `THEMES` in `moduleRegistry.ts`
   and their `#theme/<id>` routes are generated from it, so a theme added there routes, renders
   and passes the wiring tests with no further edits.
+- The catalogue has three tiers: `DISCIPLINES` (the subject picker on `#home`) own themes, themes
+  own modules. `#discipline/<id>` routes are generated from `DISCIPLINES` the same way, with two
+  rules the wiring test enforces: a `comingSoon` discipline owns no themes and gets no route, and
+  a discipline that names its own `href` gets no route either — pharmacology points straight at
+  `#theme/medications` because its one theme is already a hub, and a generated page would hold a
+  single tile.
 - New component tests need `afterEach(cleanup)` — vitest runs with `globals: false`, so Testing
   Library's automatic cleanup is never registered.
 - Querying a CSS-module class in a test needs `[class*="name"]`, not `.name`. Vitest renders
