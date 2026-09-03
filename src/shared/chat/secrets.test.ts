@@ -29,6 +29,10 @@ const SERVER_ONLY = [
   // different thing and is legitimately public — see VITE_REVENUECAT_PUBLIC_KEY in vite-env.d.ts.
   'REVENUECAT_SECRET_API_KEY',
   'REVENUECAT_WEBHOOK_SECRET',
+  // Stripe invoicing. Both are edge-function secrets read by supabase/functions/stripe-webhook/;
+  // neither has any business in the browser, because nothing client-side talks to Stripe at all.
+  'STRIPE_SECRET_KEY',
+  'STRIPE_WEBHOOK_SECRET',
 ];
 
 describe('client source', () => {
@@ -41,21 +45,35 @@ describe('client source', () => {
     expect(offenders, `${secret} is server-only and must not appear in src/`).toEqual([]);
   });
 
-  it('only ever reads VITE_-prefixed variables from import.meta.env', () => {
+  it('reaches for import.meta.env only in src/lib/env.ts', () => {
+    // The env seam (see src/lib/env.ts) is the one place `src/` is allowed to talk to the
+    // bundler's environment, so the React Native app can swap in env.native.ts reading the
+    // EXPO_PUBLIC_* globals instead. A read anywhere else is a boundary-crossing that would
+    // bundle a VITE_-only value into the native build as an undefined constant — compiled in,
+    // never errored on. Allowing it here and nowhere else is the guarantee that the web file
+    // stays the single decision point, and it is what makes the seam harder to cross than not.
+    const asideFromSeam = Object.entries(SOURCE)
+      .filter(([file]) => file !== '../../lib/env.ts' && !file.endsWith('secrets.test.ts'))
+      .filter(([, contents]) => contents.includes('import.meta.env'))
+      .map(([file]) => file);
+
+    expect(asideFromSeam, `import.meta.env outside the env seam:\n${asideFromSeam.join('\n')}`).toEqual([]);
+
+    const seam = SOURCE['../../lib/env.ts'];
+    expect(seam, 'src/lib/env.ts must exist for the env seam').toBeDefined();
+    expect(seam!.includes('import.meta.env')).toBe(true);
+  });
+
+  it('reads only VITE_-prefixed variables from import.meta.env', () => {
     // Anything else read this way is either undefined at runtime or, worse, a secret someone has
     // just prefixed to make it work.
-    const reads = Object.entries(SOURCE)
-      .filter(([file]) => !file.endsWith('secrets.test.ts'))
-      .flatMap(([file, contents]) =>
-        [...contents.matchAll(/import\.meta\.env\.([A-Z][A-Z0-9_]*)/g)].map((match) => ({
-          file,
-          name: match[1]!,
-        })),
-      );
+    const env = SOURCE['../../lib/env.ts'];
+    expect(env, 'src/lib/env.ts must exist for the env seam').toBeDefined();
+    const reads = [...env!.matchAll(/import\.meta\.env\.([A-Z][A-Z0-9_]*)/g)].map((match) => match[1]!);
 
     // `DEV`, `PROD`, `MODE`, `SSR`, `BASE_URL` are Vite's own and are not secrets.
     const builtIn = new Set(['DEV', 'PROD', 'MODE', 'SSR', 'BASE_URL']);
-    const suspect = reads.filter(({ name }) => !name.startsWith('VITE_') && !builtIn.has(name));
+    const suspect = reads.filter((name) => !name.startsWith('VITE_') && !builtIn.has(name));
 
     expect(suspect).toEqual([]);
   });

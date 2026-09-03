@@ -135,10 +135,11 @@ rule. `supabase/schema-billing.sql` is the whole design; `src/billing/useEntitle
   `profiles.id` with no mapping table, and what makes a subscription follow the account rather than
   the browser.
 - **Institutions** never touch RevenueCat. A school pays by purchase order — which is how UK medical
-  schools pay — and you mint a code with `mint_licence` (service role only). Students redeem it with
-  `redeem_licence`, which takes a row lock before counting seats so two people cannot both claim the
-  last one. A licence may name a cohort, and redeeming then enrols the student in it: one code both
-  pays for them and puts them in their teacher's dashboard.
+  schools pay — against a **Stripe invoice**, and `invoice.paid` mints the code itself. Students
+  redeem it with `redeem_licence`, which takes a row lock before counting seats so two people cannot
+  both claim the last one. A licence may name a cohort, and redeeming then enrols the student in it:
+  one code both pays for them and puts them in their teacher's dashboard. `mint_licence` (service
+  role only) is still there and still works, for a school that pays some other way.
 - **An institutional seat beats a personal subscription**, and the account page says so. A student
   whose school has paid may also be paying us directly, and has no way to find that out unless we
   tell them.
@@ -156,6 +157,119 @@ rule. `supabase/schema-billing.sql` is the whole design; `src/billing/useEntitle
 
 There was a `TEST_ACCESS_CODE` compiled into the bundle. It is gone, and `licence.ts` replaced it;
 if it reappears, `vite build` plus a grep of `dist/` is how that gets caught.
+
+### Invoicing a school
+
+`supabase/functions/stripe-webhook/` turns a paid invoice into a licence, so the second half of an
+institutional sale is not your memory. **There is no admin UI and none is wanted: the Stripe
+dashboard is the admin UI.** You raise the invoice there and type the seat count and expiry into its
+metadata; the header of `supabase/schema-billing.sql` lists the keys. Nothing client-side talks to
+Stripe, so this adds nothing to the bundle and no `VITE_` variable exists.
+
+- **An invoice opts IN, via the `physiology_licence` marker.** You will invoice for things that are
+  not seat licences, and the alternative — minting for every invoice that fails to opt out — is a
+  licence attached to a conference stand.
+- **`invoice.paid` only.** `invoice.finalized` means a school has been ASKED for money. Granting on
+  it hands a year group full access against an unpaid invoice, which is the one failure in this
+  path that costs real revenue rather than a support email.
+- **A skip and an error are different answers and both return 200.** Not our invoice is silence.
+  Ours-but-unusable — `seats: "three hundred"` — means somebody has paid and is owed a code, so the
+  reason is written to `billing_events.error` where a query can find it. A retry cannot fix a typo,
+  which is why neither is a 500; collapsing them would bury the case that matters.
+- **Verify against the RAW body.** `await request.text()` before any parsing. `request.json()` looks
+  right and re-serialises the payload, after which the signature can never match again. Note also
+  `constructEventAsync`, not `constructEvent`: Deno's crypto is async and the sync form throws about
+  a missing implementation rather than about the signature.
+- **This is the one place an SDK earns its place.** The tutor deliberately uses raw `fetch`, but
+  Stripe's signature scheme has a timestamp tolerance and multiple `v1` signatures during secret
+  rotation, and getting either subtly wrong is silent. `npm:stripe` is server-side and never reaches
+  a learner.
+- **Idempotent three times over**, because Stripe retries for three days and can duplicate a success:
+  the `billing_events` id check, an advisory lock inside `mint_licence_for_invoice` that serialises
+  concurrent deliveries of the same invoice, and `licences.stripe_invoice_id` being unique.
+- **`mint_licence_for_invoice` wraps `mint_licence` rather than extending it.** That signature is
+  named in its own `revoke`/`grant` statements and called positionally by the documented SQL-editor
+  workflow, so a sixth parameter would quietly break both.
+- **A bare `expires_at` date means the END of that day.** `2027-07-31` becomes `23:59:59.999Z`, not
+  UTC midnight, which would cut a school off a day early, on the day, looking exactly like an
+  intentional expiry.
+- Writing the minted code back onto the invoice is deliberately **not** fatal. The licence exists and
+  the code is in Postgres either way; failing there would trade a working sale for a retry loop.
+
+Test it with `stripe listen --forward-to localhost:54321/functions/v1/stripe-webhook` against
+`supabase functions serve`. `stripe events resend <evt_id>` is the assertion worth being most
+careful about — a second delivery must return 200 and produce no second licence.
+
+**`automatic_tax` is off, on purpose.** It collects nothing until there is an active registration in
+the customer's jurisdiction and it returns no error while doing so, and past invoices that collected
+zero VAT cannot be corrected through Stripe. Turning it on is a decision with an accountant, not a
+code change.
+
+### Setting it up
+
+Nothing is downloaded from RevenueCat — the SDK is an npm dependency and the integration code is
+already here. What follows is account and dashboard work, and **the long pole is Stripe, not
+RevenueCat**: Web Billing settles through a connected Stripe account, and live-mode activation wants
+business and bank details that take days. Do not wait for it. If the connected account has test mode,
+RevenueCat uses Stripe test mode automatically for sandbox purchases from a single Web Billing
+config, so everything below is provable today and only real money waits on Stripe.
+
+1. **Stripe.** Create the account and start live-mode activation. Then carry on.
+2. **RevenueCat project**, then connect Stripe from it. **Only the project owner can connect a
+   Stripe account** — a collaborator cannot, and the button is simply absent rather than an error.
+3. **Web Billing config** in the project, with the connected Stripe account as the payment gateway.
+4. **The key.** Copy the Web Billing *public* key into `.env.local` as `VITE_REVENUECAT_PUBLIC_KEY`
+   and restart dev. It is publishable and belongs in the bundle, like the Supabase anon key. The
+   secret key (`sk_…`) is a different object and must never go near `src/` — `secrets.test.ts`
+   fails the build on both the name and the `sk_` shape.
+
+**Three identifiers have to match the code exactly, and a mismatch fails silently**: the offering
+loads, no package matches, `fetchOfferedPackages` drops it, and the pricing page quietly shows the
+fallback prices and declines to sell. Nothing is logged, because nothing went wrong.
+
+| Dashboard | Must be | Named in |
+| --- | --- | --- |
+| Entitlement | `full_access` | `ENTITLEMENT_ID`, `supabase/functions/_shared/revenuecat.ts` |
+| Monthly package | Monthly, auto-id `$rc_monthly` | `FALLBACK_PACKAGES`, `src/billing/config.ts` |
+| Annual package | Annual, auto-id `$rc_annual` | the same |
+
+5. Create the two subscription products and attach both to the `full_access` entitlement.
+6. Create one offering, **mark it current**, and add a Monthly and an Annual package. Choosing those
+   two package TYPES is what generates the reserved identifiers above; a hand-typed custom
+   identifier will not match.
+7. Set real prices here. The `£9`/`£55` in `config.ts` are the fallback for when RevenueCat is
+   unconfigured or unreachable — the dashboard wins at runtime and localises the currency.
+
+Then the server half:
+
+```
+supabase secrets set REVENUECAT_WEBHOOK_SECRET=<a string you invent>
+supabase functions deploy revenuecat-webhook --no-verify-jwt
+```
+
+Apply the SQL **in this order** — `schema-billing.sql` references `cohorts` and `cohort_members`
+and fails if run before them: `schema.sql`, `schema-teachers.sql`, `schema-billing.sql`.
+
+`--no-verify-jwt` is required and is not a hole. RevenueCat has no Supabase session to present, so
+the request is authenticated by the shared secret in the Authorization header instead — set the
+same string in the dashboard under Integrations > Webhooks, alongside the URL
+`https://<project-ref>.supabase.co/functions/v1/revenuecat-webhook`.
+
+Send a test event from that screen. **`200` with `{"status":"ok","applied":0}` is the pass** —
+`TEST` is in `IGNORED_TYPES`, so zero writes is the correct answer rather than a failure.
+
+What to check once it is live, in sandbox with Stripe's `4242 4242 4242 4242`: a purchase unlocks
+the catalogue *immediately* (the optimistic grant in `confirmSubscription`) and `profiles` catches
+up when the webhook lands; replaying an event id answers `{"status":"duplicate"}` and writes
+nothing; a `CANCELLATION` with a future expiry leaves access **intact**, and only `EXPIRATION` drops
+it. The institutional stream is testable with no RevenueCat at all:
+
+```
+select code from public.mint_licence('Test School', 2, null, null, 'smoke test');
+```
+
+Redeem it from the pricing page on two accounts, then a third, which should be refused for want of
+a seat.
 
 ## The tutor
 

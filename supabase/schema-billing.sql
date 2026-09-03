@@ -5,8 +5,9 @@
 --
 --   * Individuals subscribe through RevenueCat. The webhook writes profiles.subscription_status
 --     with the service role; the client has never been able to write that column and still cannot.
---   * Institutions buy seats offline — UK medical schools pay by purchase order, not by card — and
---     receive a licence code their students redeem. Nothing in this path touches RevenueCat.
+--   * Institutions buy seats against a Stripe invoice — UK medical schools pay by purchase order,
+--     not by card — and receive a licence code their students redeem. `invoice.paid` mints it, or
+--     you mint it by hand. Nothing in this path touches RevenueCat.
 --
 -- `v_entitlement` is where the two meet, so the precedence rule lives in one place that a client
 -- cannot route around. Everything reading entitlement reads that view.
@@ -20,8 +21,24 @@
 --   the same moment cannot both get it.
 -- * The whole file is idempotent, like the others.
 --
--- Selling a licence, once the invoice is paid. Run in the SQL Editor, which runs as the service
--- role — `authenticated` cannot call mint_licence at all:
+-- SELLING A LICENCE, the normal way: raise the invoice in the Stripe dashboard and let it mint
+-- itself. Add these keys to the invoice's METADATA before you send it, and `invoice.paid` does the
+-- rest through supabase/functions/stripe-webhook/ — there is no admin UI because the Stripe
+-- dashboard is the admin UI:
+--
+--   physiology_licence  true                 (the marker; without it the invoice is ignored)
+--   seats               350
+--   expires_at          2027-07-31           (optional — omit for a perpetual licence)
+--   cohort_id           <uuid>               (optional — also enrols every student in that cohort)
+--   institution_name    Barts and The London (optional — defaults to the customer's name)
+--
+-- The minted code is written back onto the invoice's metadata as `licence_code`, so it ends up
+-- beside the thing that bought it. A bare `expires_at` date means the END of that day: a licence
+-- reading 2027-07-31 works through the 31st, which is what a finance officer means by it.
+--
+-- SELLING A LICENCE BY HAND, still supported and still the answer for a school that pays some
+-- other way. Run in the SQL Editor, which runs as the service role — `authenticated` cannot call
+-- mint_licence at all:
 --
 --   select code, seats, expires_at from public.mint_licence(
 --     'Barts and The London', 350, '2027-07-31'::timestamptz, null, 'PO 44821'
@@ -54,6 +71,16 @@ create table if not exists public.licences (
   notes text,
   created_at timestamptz not null default now ()
 );
+
+-- Which Stripe invoice bought this licence, when one did. Null for a licence minted by hand.
+--
+-- The UNIQUE is the point of the column rather than a side effect of it: it is what makes a second
+-- delivery of the same `invoice.paid` physically unable to mint a second licence, independently of
+-- the billing_events check the webhook does first. Two guards, because the failure this prevents —
+-- a school silently issued two codes and two seat pools off one payment — is invisible until
+-- somebody counts.
+alter table public.licences
+  add column if not exists stripe_invoice_id text unique;
 
 create table if not exists public.licence_seats (
   licence_id uuid not null references public.licences (id) on delete cascade,
@@ -88,8 +115,9 @@ revoke select on public.licences from authenticated;
 grant select (id, institution_name, seats, expires_at, cohort_id, created_at)
   on public.licences to authenticated;
 
--- No insert/update/delete policy anywhere: licences are minted by mint_licence with the service
--- role after an invoice has been raised. The revoke is belt and braces.
+-- No insert/update/delete policy anywhere: licences are minted by mint_licence, or by
+-- mint_licence_for_invoice on the webhook's behalf, and both need the service role. The revoke is
+-- belt and braces.
 revoke insert, update, delete on public.licences from authenticated;
 
 drop policy if exists "read own seat" on public.licence_seats;
@@ -145,6 +173,79 @@ $$;
 revoke execute on function public.mint_licence (text, int, timestamptz, uuid, text)
   from anon, authenticated, public;
 grant execute on function public.mint_licence (text, int, timestamptz, uuid, text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- rpc: a paid Stripe invoice mints its own licence (service role only)
+--
+-- The same sale as mint_licence above, arriving on its own instead of being typed out after you
+-- notice the money. `supabase/functions/stripe-webhook/` calls this when `invoice.paid` fires, with
+-- the seat count and expiry read off the invoice's metadata.
+--
+-- It WRAPS mint_licence rather than replacing it, and mint_licence keeps its exact signature.
+-- That signature is named in the revoke/grant statements above and the SQL-editor workflow at the
+-- top of this file calls it positionally, so adding a parameter there would quietly break both.
+-- The hand-minting path stays exactly as it was, and is still the answer for a school that pays
+-- some other way.
+--
+-- Idempotent by construction, which matters because Stripe retries a failed delivery for three
+-- days and can duplicate a successful one:
+--   * the advisory lock serialises concurrent deliveries of the SAME invoice, so two of them
+--     cannot both find nothing and both mint;
+--   * a redelivery after the fact finds the existing row and returns it unchanged;
+--   * licences.stripe_invoice_id is unique, so even a bug here cannot produce two.
+-- ---------------------------------------------------------------------------
+create or replace function public.mint_licence_for_invoice (
+  p_stripe_invoice_id text,
+  p_institution_name text,
+  p_seats int,
+  p_expires_at timestamptz default null,
+  p_cohort_id uuid default null,
+  p_notes text default null
+)
+returns public.licences
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  existing public.licences;
+  created public.licences;
+begin
+  if p_stripe_invoice_id is null or btrim (p_stripe_invoice_id) = '' then
+    raise exception 'an invoice id is required to mint against an invoice';
+  end if;
+
+  -- Held to the end of the transaction, and scoped to this invoice rather than to the table, so
+  -- two schools paying in the same second do not queue behind each other.
+  perform pg_advisory_xact_lock (hashtext (p_stripe_invoice_id));
+
+  select * into existing
+  from public.licences
+  where stripe_invoice_id = p_stripe_invoice_id;
+
+  -- Already minted. Return what the first delivery produced rather than a second code: the school
+  -- has the first one on a handout by now.
+  if existing.id is not null then
+    return existing;
+  end if;
+
+  created := public.mint_licence (
+    p_institution_name, p_seats, p_expires_at, p_cohort_id, p_notes
+  );
+
+  update public.licences
+  set stripe_invoice_id = p_stripe_invoice_id
+  where id = created.id
+  returning * into created;
+
+  return created;
+end;
+$$;
+
+revoke execute on function public.mint_licence_for_invoice (text, text, int, timestamptz, uuid, text)
+  from anon, authenticated, public;
+grant execute on function public.mint_licence_for_invoice (text, text, int, timestamptz, uuid, text)
+  to service_role;
 
 -- ---------------------------------------------------------------------------
 -- rpc: a student claims a seat
@@ -225,6 +326,18 @@ create table if not exists public.billing_events (
   received_at timestamptz not null default now (),
   payload jsonb
 );
+
+-- Why an event was not acted on, when it was ours and could not be honoured — seats typed as
+-- "three hundred", an expiry that is not a date. Null on every event that went through cleanly.
+--
+-- This column is the difference between a bad invoice being visible and being silent. A retry
+-- cannot fix a typo, so the webhook answers those with a 200; without somewhere to put the reason,
+-- a school would have paid, received nothing, and left no trace anywhere but a log line:
+--
+--   select id, event_type, error, received_at from public.billing_events
+--   where error is not null order by received_at desc;
+alter table public.billing_events
+  add column if not exists error text;
 
 alter table public.billing_events enable row level security;
 revoke all on public.billing_events from anon, authenticated;
