@@ -1,5 +1,6 @@
 import { lazy, Suspense, useRef, useState } from 'react';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { isDev } from '@/lib/env';
 import { useAuthOptional } from '@/auth/AuthContext';
 import { MODULES } from '@/home/moduleRegistry';
 import styles from './ChatLauncher.module.css';
@@ -33,7 +34,7 @@ export function ChatLauncher({ route }: ChatLauncherProps) {
   const [open, setOpen] = useState(false);
   const launcher = useRef<HTMLButtonElement>(null);
 
-  if (!import.meta.env.DEV && (!isSupabaseConfigured || !user)) return null;
+  if (!isDev() && (!isSupabaseConfigured || !user)) return null;
 
   const close = (): void => {
     setOpen(false);

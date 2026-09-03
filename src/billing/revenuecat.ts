@@ -1,5 +1,6 @@
 import type { Package, Purchases, PurchasesError } from '@revenuecat/purchases-js';
 import { FALLBACK_PACKAGES, type PlanPackage } from './config';
+import { revenueCatPublicKey } from '@/lib/env';
 
 /**
  * The RevenueCat Web Billing SDK, loaded only when somebody is actually going to buy something.
@@ -14,8 +15,7 @@ import { FALLBACK_PACKAGES, type PlanPackage } from './config';
  * `app_user_id` straight onto `profiles.id` with no mapping table, and what makes a subscription
  * follow the account rather than the browser.
  */
-
-const apiKey = import.meta.env.VITE_REVENUECAT_PUBLIC_KEY;
+const apiKey = revenueCatPublicKey;
 
 /** False until the key is set — the pricing page then shows the fallback prices and says so. */
 export const isRevenueCatConfigured = Boolean(apiKey);

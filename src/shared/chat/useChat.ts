@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { isDev, supabaseAnonKey, supabaseUrl } from '@/lib/env';
 import { MODULES } from '@/home/moduleRegistry';
 import type { WeakSpot } from '@/shared/assessment/weakness';
 import { loadCorpus, type Chunk } from './corpus';
@@ -60,11 +61,11 @@ const DEV_ENDPOINT = '/api/chat';
 /** Read per call, not at module load, so a test can exercise both paths rather than only the
  * one the test runner happens to be in. */
 function usingDevRoute(): boolean {
-  return import.meta.env.DEV;
+  return isDev();
 }
 
 function endpoint(): string {
-  return usingDevRoute() ? DEV_ENDPOINT : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+  return usingDevRoute() ? DEV_ENDPOINT : `${supabaseUrl}/functions/v1/chat`;
 }
 
 async function accessToken(): Promise<string | null> {
@@ -161,7 +162,7 @@ export function useChat({ moduleId, weakSpots }: UseChatOptions): UseChat {
                 ? {}
                 : {
                     Authorization: `Bearer ${token}`,
-                    apikey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? '',
+                    apikey: supabaseAnonKey ?? '',
                   }),
             },
             body: JSON.stringify(request),
