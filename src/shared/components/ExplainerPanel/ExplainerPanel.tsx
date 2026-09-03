@@ -1,41 +1,17 @@
 import { memo } from 'react';
 import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './ExplainerPanel.module.css';
+import {
+  type ExplainerContent,
+  type ExplainerDemo,
+  type ExplainerSection,
+  paragraphsOf,
+} from './types';
 
-/**
- * A scenario a section is talking about, offered as a button beside the prose that names it.
- *
- * Generic over the module's own preset union, so renaming a preset fails `tsc -b` rather than
- * rendering a button that quietly does nothing.
- */
-export interface ExplainerDemo<TPreset extends string = string> {
-  preset: TPreset;
-  /** Button text. Defaults to the module's own label for that preset. */
-  label?: string;
-  /** Readout to watch once it loads, shown beside the button. */
-  watch?: string;
-}
+// Re-exported so the many `content.ts` files and the tutor corpus keep their existing import.
+export { paragraphsOf };
+export type { ExplainerContent, ExplainerDemo, ExplainerSection };
 
-export interface ExplainerSection<TPreset extends string = string> {
-  /** A claim, not a topic — the same voice as the module title. */
-  heading: string;
-  paragraphs: string[];
-  demos?: ExplainerDemo<TPreset>[];
-}
-
-export interface ExplainerContent<TPreset extends string = string> {
-  title: string;
-  /** Legacy flat prose. Replaced by `sections` as modules migrate. */
-  paragraphs?: string[];
-  sections?: ExplainerSection<TPreset>[];
-}
-
-/** Every paragraph in a module, whichever shape it is authored in. Used by the content test. */
-export function paragraphsOf(content: ExplainerContent): string[] {
-  return content.sections
-    ? content.sections.flatMap((section) => section.paragraphs)
-    : (content.paragraphs ?? []);
-}
 
 interface ExplainerPanelProps {
   content: ExplainerContent;
