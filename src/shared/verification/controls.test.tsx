@@ -450,10 +450,6 @@ const NO_DIAGRAM_CORRELATE = new Set<string>([
   'liverPhysiology.albuminGPerL',
   'muscleContraction.extracellularCalcium',
   'micturition.cortexInhibitsMicturition',
-  // The infarct shows on the ECG strip and the twelve-lead grid, both of which sit in the charts
-  // slot; the conduction schematic beside them draws timing only.
-  'ecgConduction.ischemicInjury',
-  'ecgConduction.injuryTerritory',
   // Cell-cycle controls act over whole 24-hour cycles; see the readings note below.
   ...['dnaDamage', 'p53Function', 'spindlePoisonPct', 'replicationBlockPct'].map((k) => `cellCycle.${k}`),
   // Delivered as events, not settings; see the readings note below.
