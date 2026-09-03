@@ -178,17 +178,25 @@ export function createMemoryProgressStore(
 }
 
 export function createLocalStorageProgressStore(now: () => number = () => Date.now()): ProgressStore {
-  if (typeof window === 'undefined' || !window.localStorage) return createMemoryProgressStore(emptyProgress(), now);
+  // globalThis, not window: the React Native app is what makes this file shareable byte-for-byte,
+  // and there `expo-sqlite/localStorage/install` puts localStorage on globalThis. Identifying the
+  // storage by a held reference rather than by name means the same guarded fallback to the
+  // memory store covers an absent web localStorage and an RN build that never installed the shim.
+  const storage =
+    typeof globalThis.localStorage === 'object' && globalThis.localStorage !== null
+      ? globalThis.localStorage
+      : null;
+  if (!storage) return createMemoryProgressStore(emptyProgress(), now);
 
   const read = (): PersistedProgress => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = storage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as PersistedProgress;
         // Tolerate a partially-written payload rather than trapping the learner.
         return { modules: parsed.modules ?? {}, studyDays: parsed.studyDays ?? [] };
       }
-      const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      const legacy = storage.getItem(LEGACY_STORAGE_KEY);
       if (legacy) return migrateV1(JSON.parse(legacy) as Record<string, ModuleSummary>, now());
       return emptyProgress();
     } catch {
@@ -200,7 +208,7 @@ export function createLocalStorageProgressStore(now: () => number = () => Date.n
 
   const write = (all: PersistedProgress): void => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+      storage.setItem(STORAGE_KEY, JSON.stringify(all));
     } catch {
       // Quota exceeded or storage disabled — progress is lost, the quiz still works.
     }

@@ -20,6 +20,16 @@ export interface EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint> {
    * reads on load is the state the verification harness checks.
    */
   settleSeconds?: number;
+  /**
+   * Whether the learner has asked the OS to reduce motion. Read once at mount and again when
+   * Reset restores the mount-time rule, so it must be re-readable rather than a one-shot value.
+   *
+   * Defaults to the browser's `prefers-reduced-motion` `matchMedia` query. The React Native app
+   * passes Reanimated's `useReducedMotion` (a `() => boolean` with the same read-once-at-init
+   * semantics), which is what keeps this file — whose only other browser-only call is
+   * `requestAnimationFrame`, shared with RN — importable by a bundle with no `window`.
+   */
+  prefersReducedMotion?: () => boolean;
 }
 
 /**
@@ -127,7 +137,7 @@ function sameInputs<TInputs>(a: TInputs, b: TInputs): boolean {
   return keys.every((key) => Object.is((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
 }
 
-function prefersReducedMotion(): boolean {
+function webPrefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -150,6 +160,13 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
 ): UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   const inputsRef = useRef(inputs);
   const configRef = useRef(config);
+  // Resolves the effective `prefersReducedMotion` through the ref so the loop's two reads (mount
+  // and Reset) stay current without reading `config` directly, and so an RN caller's injected
+  // function is re-read like every other piece of config rather than captured once.
+  const reducedMotion = useCallback(
+    () => (configRef.current.prefersReducedMotion ?? webPrefersReducedMotion)(),
+    [],
+  );
   // Lazy initialiser, not `useRef(settledState(...))`: a ref's argument is evaluated on every
   // render, which would re-settle the engine on every pointer move of a slider drag.
   const [initialState] = useState(() => settledState(config, inputs));
@@ -164,7 +181,7 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
 
   // Someone who has asked the OS for reduced motion should not be handed a
   // continuously animating diagram unprompted; they start paused and opt in.
-  const [playing, setPlaying] = useState(() => !prefersReducedMotion());
+  const [playing, setPlaying] = useState(() => !reducedMotion());
   const [speed, setSpeedState] = useState(1);
   const [baselineHistory, setBaselineHistory] = useState<THistoryPoint[] | null>(null);
 
@@ -325,8 +342,8 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
   const transportReset = useCallback(() => {
     speedRef.current = 1;
     setSpeedState(1);
-    setPlayingNow(!prefersReducedMotion());
-  }, [setPlayingNow]);
+    setPlayingNow(!reducedMotion());
+  }, [setPlayingNow, reducedMotion]);
 
   // Memoised: `SimControls` and the pages holding these can only skip a re-render if the
   // object identity survives an engine tick.
