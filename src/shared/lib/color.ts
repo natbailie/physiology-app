@@ -29,6 +29,12 @@ const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055
 const toGamma = (c: number) => (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055);
 const clamp01 = (c: number) => Math.min(1, Math.max(0, c));
 
+/** sRGB back to a `#rrggbb` string, rounded to whole steps. */
+export function toHex({ r, g, b }: Rgb): string {
+  const byte = (c: number) => Math.round(clamp01(c) * 255).toString(16).padStart(2, '0');
+  return `#${byte(r)}${byte(g)}${byte(b)}`;
+}
+
 /** sRGB to Oklab (Ottosson). */
 export function toOklab({ r, g, b }: Rgb): [number, number, number] {
   const lr = toLinear(r);

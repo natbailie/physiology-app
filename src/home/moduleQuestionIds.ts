@@ -5,18 +5,21 @@
  * learner has attempted — mastery counts the unseen ones against you, so the denominator has to
  * be the whole module.
  *
- * Globbed instead of hand-maintained on purpose. Module ids already appear in four places (see
+ * Generated rather than hand-maintained on purpose. Module ids already appear in four places (see
  * CLAUDE.md) and a fifth that silently under-reports a module's size would be the least visible
- * of them: nothing would break, the numbers would just quietly be wrong. `moduleQuestionIds.test.ts`
- * asserts the glob still finds every module in the registry, so if this stops matching it fails
- * loudly rather than reporting zero.
+ * of them: nothing would break, the numbers would just quietly be wrong. This used to be an
+ * `import.meta.glob`; it is now `modules/manifest.generated.ts`, which nobody edits by hand and
+ * which `manifest.generated.test.ts` re-globs to prove still covers every module. That swap is
+ * what lets the React Native app share this file — Metro has no glob and Hermes rejects
+ * `import.meta` outright. `moduleQuestionIds.test.ts` still asserts the index finds every module
+ * in the registry, so if discovery breaks it fails loudly rather than reporting zero.
  *
- * The glob is deliberately NOT eager. An eager glob welds every module's questions into the
- * chunk that imports this file — fine while App.tsx statically imported all pages, fatal to
- * first-load size now that each page is its own lazy route. The index builds once in the
+ * The loaders are deliberately NOT eager. Eagerly importing them welds every module's questions
+ * into the chunk that imports this file — fine while App.tsx statically imported all pages, fatal
+ * to first-load size now that each page is its own lazy route. The index builds once in the
  * background; consumers subscribe and re-render when it lands.
  */
-const questionModules = import.meta.glob<Record<string, unknown>>('../modules/*/questions.ts');
+import { questionModules } from '@/modules/manifest.generated';
 
 function hasStringId(value: unknown): value is { id: string } {
   return typeof value === 'object' && value !== null && typeof (value as { id?: unknown }).id === 'string';
@@ -27,17 +30,14 @@ let version = 0;
 let loadStarted = false;
 const listeners = new Set<() => void>();
 
-function buildIndexFor(path: string, exports: Record<string, unknown>): [string, string[]] | null {
-  const moduleId = path.match(/modules\/([^/]+)\/questions\.ts$/)?.[1];
-  if (!moduleId) return null;
-
+function questionIdsIn(exports: Record<string, unknown>): string[] {
   // Each module names its array differently (RESPIRATORY_QUESTIONS, ECG_QUESTIONS, ...), so
   // it is found by shape: the exported array whose entries carry a string id.
   const questions = Object.values(exports).find(
     (value): value is readonly { id: string }[] =>
       Array.isArray(value) && value.length > 0 && value.every(hasStringId),
   );
-  return [moduleId, questions ? questions.map((q) => q.id) : []];
+  return questions ? questions.map((q) => q.id) : [];
 }
 
 function startLoad(): void {
@@ -45,13 +45,13 @@ function startLoad(): void {
   loadStarted = true;
 
   void Promise.all(
-    Object.entries(questionModules).map(async ([path, loader]) =>
-      buildIndexFor(path, (await loader()) as Record<string, unknown>),
+    Object.entries(questionModules).map(
+      async ([moduleId, loader]): Promise<[string, string[]]> => [moduleId, questionIdsIn(await loader())],
     ),
   ).then((entries) => {
     index = {};
-    for (const entry of entries) {
-      if (entry) index[entry[0]] = entry[1];
+    for (const [moduleId, ids] of entries) {
+      index[moduleId] = ids;
     }
     version += 1;
     for (const listener of listeners) listener();
@@ -74,7 +74,7 @@ export function questionIdsFor(moduleId: string): string[] {
   return index?.[moduleId] ?? [];
 }
 
-/** Test/SSR escape hatch: resolves with the full index once the glob has been walked. */
+/** Test/SSR escape hatch: resolves with the full index once every module has been loaded. */
 export async function loadQuestionIndex(): Promise<Record<string, string[]>> {
   startLoad();
   await new Promise<void>((resolve) => {

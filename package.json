@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "verify": "tsc -b && npm run lint && vitest run && vite build",
+    "build": "npm run generate:manifest && npm run generate:tokens && tsc -b && vite build",
+    "verify": "npm run generate:manifest && npm run generate:tokens && tsc -b && npm run lint && vitest run && vite build",
+    "generate:manifest": "node tools/module-manifest/generate.mjs",
+    "generate:tokens": "node tools/generate-tokens/generate.ts",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",

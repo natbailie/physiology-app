@@ -7,16 +7,21 @@
  * plausible paragraph in someone else's voice. Roughly 105,000 words, all of it already held to a
  * quality floor by `src/modules/content.test.ts`.
  *
- * The globs are deliberately NOT eager, and the four static sources are dynamically imported, for
- * the reason `moduleQuestionIds.ts` documents at length: an eager glob welds every module into
- * whichever chunk imports this file. Nothing here is loaded until a learner actually opens the
- * chat panel, and a learner who never opens it pays nothing.
+ * The module loaders are deliberately NOT eager, and the four static sources are dynamically
+ * imported, for the reason `moduleQuestionIds.ts` documents at length: eagerly importing them
+ * welds every module into whichever chunk imports this file. Nothing here is loaded until a
+ * learner actually opens the chat panel, and a learner who never opens it pays nothing.
+ *
+ * Discovery is `modules/manifest.generated.ts` rather than an `import.meta.glob` so this file can
+ * be shared with the React Native app, which has neither. The manifest is generated and re-globbed
+ * by its own test, so it still cannot quietly stop covering a module.
  *
  * No `useSyncExternalStore` triple, unlike `moduleQuestionIds`. That file needs one because the
  * home grid renders synchronously and has to re-render when the index lands; the chat panel is
  * itself lazy and can simply await this.
  */
 
+import { contentModules, questionModules } from '@/modules/manifest.generated';
 import type { ExplainerContent } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 
 export interface Chunk {
@@ -29,13 +34,6 @@ export interface Chunk {
   /** Retrieval weights title matches more heavily than body matches. */
   title: string;
   text: string;
-}
-
-const contentModules = import.meta.glob<Record<string, unknown>>('../../modules/*/content.ts');
-const questionModules = import.meta.glob<Record<string, unknown>>('../../modules/*/questions.ts');
-
-function moduleIdFrom(path: string): string | null {
-  return path.match(/modules\/([^/]+)\/(?:content|questions)\.ts$/)?.[1] ?? null;
 }
 
 /** The explainer export, found by shape — each module names its const differently. */
@@ -103,16 +101,12 @@ async function moduleChunks(moduleNames: Map<string, string>): Promise<Chunk[]> 
   const chunks: Chunk[] = [];
 
   await Promise.all([
-    ...Object.entries(contentModules).map(async ([path, loader]) => {
-      const moduleId = moduleIdFrom(path);
-      if (!moduleId) return;
+    ...Object.entries(contentModules).map(async ([moduleId, loader]) => {
       const content = explainerIn(await loader());
       if (!content) return;
       chunks.push(...explainerChunks(moduleId, content, moduleNames.get(moduleId) ?? moduleId));
     }),
-    ...Object.entries(questionModules).map(async ([path, loader]) => {
-      const moduleId = moduleIdFrom(path);
-      if (!moduleId) return;
+    ...Object.entries(questionModules).map(async ([moduleId, loader]) => {
       const moduleName = moduleNames.get(moduleId) ?? moduleId;
       for (const question of questionsIn(await loader())) {
         chunks.push({
