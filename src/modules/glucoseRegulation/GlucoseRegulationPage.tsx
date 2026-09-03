@@ -1,13 +1,9 @@
+import { getPresentationContext } from '@/shared/presentation/context';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { GlucoseDiagram } from './components/GlucoseDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { GLUCOSE_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
@@ -19,7 +15,9 @@ import { glucoseRegulationContent } from './content';
 import { glucoseLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal, perturbGiveInsulin } from './engine/engine';
 import { DEFAULT_GLUCOSE_INPUTS, GLUCOSE_PRESETS, GLUCOSE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { GlucoseInputs } from './engine/types';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildGlucosePresentation } from './presentation';
+import type { GlucoseDerived, GlucoseHistoryPoint, GlucoseInputs, GlucoseState } from './engine/types';
 
 export function GlucoseRegulationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GlucoseInputs>('glucoseRegulation', DEFAULT_GLUCOSE_INPUTS);
@@ -63,12 +61,8 @@ export function GlucoseRegulationPage() {
     perturb((state) => perturbGiveInsulin(state, inputs.exogenousInsulinUnits));
   }
 
-  const glucoseHistory = useSeries(history, (h) => h.bloodGlucose);
-  const glucoseHistoryBaseline = useSeries(baseline.history, (h) => h.bloodGlucose);
-  const insulinHistory = useSeries(history, (h) => h.insulin * 100);
-  const insulinHistoryBaseline = useSeries(baseline.history, (h) => h.insulin * 100);
-  const glucagonHistory = useSeries(history, (h) => h.glucagon * 100);
-  const glucagonHistoryBaseline = useSeries(baseline.history, (h) => h.glucagon * 100);
+  const ctx = getPresentationContext<GlucoseState, GlucoseDerived, GlucoseInputs, GlucoseHistoryPoint>(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('glucoseRegulation', buildGlucosePresentation(ctx), ctx, inputs, handleChange);
 
   return (
     <ModulePage
@@ -86,18 +80,12 @@ export function GlucoseRegulationPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<GlucoseDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline label="Blood glucose" unit="mg/dL" data={glucoseHistory} baselineData={glucoseHistoryBaseline} domainMin={20} domainMax={400} colorVar="var(--glucose)" />
-  <Sparkline label="Insulin" unit="%" data={insulinHistory} baselineData={insulinHistoryBaseline} domainMin={0} domainMax={200} colorVar="var(--insulin)" />
-  <Sparkline label="Glucagon" unit="%" data={glucagonHistory} baselineData={glucagonHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--glucagon)" />
-        </>
-      }
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      charts={slots.charts}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={glucoseRegulationContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of glucose regulation — not a clinical or diagnostic tool. Pick a preset (or set the sliders yourself), then click "Eat meal" to deliver the carbohydrate load and "Give insulin" to deliver the insulin dose. Try the Type 1 diabetes preset, eat a meal, and watch glucose climb unchecked — then give insulin. Simulated time runs faster than real time so a post-meal glucose excursion (physiologically a couple of hours) is watchable within a session.'}
     />

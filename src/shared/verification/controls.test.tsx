@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ModuleShellProvider } from '@/shared/context/moduleShell';
 import type { EngineLoopConfig } from '@/shared/hooks/useEngineLoop';
+import { DiagramView } from '@/shared/presentation/web/DiagramView';
+import { ReadoutGridView } from '@/shared/presentation/web/ReadoutGridView';
+import { getDiagramClasses } from '@/shared/presentation/web/diagramClasses';
 
 afterEach(cleanup);
 
@@ -28,8 +31,26 @@ afterEach(cleanup);
 type AnyConfig = EngineLoopConfig<unknown, unknown, unknown, unknown>;
 type Inputs = Record<string, unknown>;
 
+/** The slice of a ModulePresentation the harness reads, without importing control/readout
+ * accessors that depend on module-specific State/Derived/History types. */
+interface ModulePresentationLike {
+  diagram: readonly { type: 'frame'; viewBox: number[]; ariaLabel: string }[];
+  controls: readonly ControlSpecLike[];
+  readouts: readonly unknown[];
+}
+interface ControlSpecLike {
+  label: string;
+  key: string;
+  kind?: string;
+  min: number;
+  max: number;
+  step?: number;
+  options?: readonly { value: string }[];
+}
+
 const configModules = import.meta.glob<Record<string, unknown>>('../../modules/*/engine/loopConfig.ts', { eager: true });
 const presetModules = import.meta.glob<Record<string, unknown>>('../../modules/*/engine/presets.ts', { eager: true });
+const presentationModules = import.meta.glob<Record<string, unknown>>('../../modules/*/presentation.ts', { eager: true });
 const componentModules = import.meta.glob<Record<string, unknown>>('../../modules/*/components/*.tsx', { eager: true });
 const pageSources = import.meta.glob<string>('../../modules/*/*Page.tsx', { eager: true, query: '?raw', import: 'default' });
 
@@ -59,6 +80,10 @@ interface ModuleUnderTest {
   presetExports: Record<string, unknown>;
   /** Scenarios defined by elapsed time rather than by a setting; see `useScenarioPreset`. */
   settleOverrides: Record<string, number>;
+  /** When the module presents itself as data, its standalone presentation builder. The schema
+   * then drives controls/readouts/diagram instead of the legacy named-component discovery, so the
+   * harness verifies the same presentation a native renderer would. */
+  buildPresentation?: (ctx: unknown) => ModulePresentationLike;
   ControlPanel: ComponentType<Record<string, unknown>>;
   diagrams: ComponentType<Record<string, unknown>>[];
   /** Diagram plus readout tiles: everything a learner can actually see change. */
@@ -110,6 +135,13 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
     .map((name) => components[name])
     .filter((component): component is ComponentType<Record<string, unknown>> => Boolean(component));
 
+  // A schema-driven module (a `buildXPresentation` in presentation.ts) verifies against the same
+  // presentation a native renderer reads, not against named page components.
+  const presentation = presentationModules[`../../modules/${id}/presentation.ts`];
+  const buildPresentation = presentation
+    ? (findByShape<unknown>(presentation, (v) => typeof v === 'function' && /build.*[Pp]resentation$/.test(nameOf(presentation, v))) as (ctx: unknown) => ModulePresentationLike)
+    : undefined;
+
   return {
     id,
     config,
@@ -117,6 +149,7 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
     presets,
     presetExports,
     settleOverrides,
+    buildPresentation,
     ControlPanel: components[controlName]!,
     diagrams,
     visible: [
@@ -127,6 +160,12 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
     ],
   };
 });
+
+/** The key a value was exported under — used to find a module's `build*Presentation` builder. */
+function nameOf(exports: Record<string, unknown>, value: unknown): string {
+  for (const [name, v] of Object.entries(exports)) if (v === value) return name;
+  return '';
+}
 
 interface Settled {
   state: unknown;
@@ -296,6 +335,17 @@ function findBlockResolver(module: ModuleUnderTest, values: unknown[]): (value: 
  * shipped scenario that sets it.
  */
 function discoverControls(module: ModuleUnderTest): Control[] {
+  // A schema module declares its controls as data — read them directly rather than by firing
+  // events at a rendered panel. A slider becomes [min, max]; a toggle group keeps every option
+  // so the sweeps exercise each selection a learner can make.
+  if (module.buildPresentation) {
+    const presentation = schemaFor(module, module.defaults, settle(module.config, module.defaults, module.config.settleSeconds ?? 60, SWEEP_STEPS));
+    return (presentation?.controls ?? []).map((spec) =>
+      spec.kind === 'toggle'
+        ? { key: spec.key, label: spec.label, values: [...(spec.options ?? []).map((option) => option.value)] }
+        : { key: spec.key, label: spec.label, values: [spec.min, spec.max] },
+    );
+  }
   const found = new Map<string, Control>();
   const collect = (inputs: Inputs) => {
     for (const control of controlsInPanel(module, inputs)) if (!found.has(control.key)) found.set(control.key, control);
@@ -528,9 +578,50 @@ const PRESET_COLLISIONS_BY_DESIGN = new Set<string>([
 /** Renders the given components against a settled scenario and returns their markup. Everything a
  * learner can see is either in the diagram or in the readout tiles, so comparing this markup is
  * the closest a test gets to asking "did the screen change?". */
-function paint(components: ComponentType<Record<string, unknown>>[], inputs: Inputs, settled: Settled): string {
-  const props = { derived: settled.derived, inputs, state: settled.state, history: [], baselineHistory: null, excitationPulse: 0 };
+/** A standalone presentation for a settled frame, as a native renderer would get it. */
+function schemaFor(module: ModuleUnderTest, inputs: Inputs, settled: Settled): ModulePresentationLike | undefined {
+  if (!module.buildPresentation) return undefined;
+  return module.buildPresentation({
+    state: settled.state,
+    derived: settled.derived,
+    inputs,
+    history: [],
+    baselineHistory: null,
+  });
+}
+
+/** Renders a schema module's diagram or diagram-plus-readouts and returns the HTML, the same
+ * serialization `paint` produces for a legacy module — so a sweep of a schema module compares
+ * picture against picture the same way. */
+function paintSchema(module: ModuleUnderTest, parts: 'diagram' | 'visible', inputs: Inputs, settled: Settled): string {
+  const presentation = schemaFor(module, inputs, settled);
+  const children: React.ReactElement[] = [];
+  if (parts === 'visible') {
+    children.push(
+      createElement(ReadoutGridView as ComponentType<{ readouts: readonly unknown[]; ctx: unknown }>, {
+        readouts: presentation?.readouts ?? [],
+        ctx: { state: settled.state, derived: settled.derived, inputs },
+      }),
+    );
+  }
+  for (const frame of presentation?.diagram ?? []) {
+    children.push(
+      createElement(DiagramView as ComponentType<{ frame: unknown; classes: unknown }>, {
+        frame: frame as never,
+        classes: getDiagramClasses(module.id),
+      }),
+    );
+  }
   const { container } = render(
+    createElement(ModuleShellProvider as ComponentType<{ blinded: boolean }>, { blinded: false }, ...children),
+  );
+  const html = container.innerHTML;
+  cleanup();
+  return html;
+}
+
+function paint(components: ComponentType<Record<string, unknown>>[], inputs: Inputs, settled: Settled): string {
+  const props = { derived: settled.derived, inputs, state: settled.state, history: [], baselineHistory: null, excitationPulse: 0 };  const { container } = render(
     createElement(
       ModuleShellProvider as ComponentType<{ blinded: boolean }>,
       { blinded: false },
@@ -556,7 +647,9 @@ describe('every control moves the model', () => {
   it('discovered every module', () => {
     expect(modules.length).toBeGreaterThanOrEqual(45);
     expect(modules.filter((m) => !m.ControlPanel || !m.presets || !m.defaults).map((m) => m.id)).toEqual([]);
-    expect(modules.filter((m) => m.diagrams.length === 0).map((m) => m.id)).toEqual([]);
+    // Schema modules present their diagram as data rather than as named page components, so their
+    // legacy diagram list is legitimately empty; every other module must render something.
+    expect(modules.filter((m) => m.diagrams.length === 0 && !m.buildPresentation).map((m) => m.id)).toEqual([]);
   });
 
   describe.each(modules.map((m) => [m.id, m] as const))('%s', (id, module) => {
@@ -575,7 +668,9 @@ describe('every control moves the model', () => {
       const seconds = module.config.settleSeconds ?? 60;
       const drawn = (background: Inputs, control: Control, value: unknown) => {
         const inputs = applied(background, control, value);
-        return paint(module.diagrams, inputs, settle(module.config, inputs, seconds, SWEEP_STEPS));
+        return module.buildPresentation
+          ? paintSchema(module, 'diagram', inputs, settle(module.config, inputs, seconds, SWEEP_STEPS))
+          : paint(module.diagrams, inputs, settle(module.config, inputs, seconds, SWEEP_STEPS));
       };
       const invisible = controls
         // Same rule as the readings sweep: a conditional control is judged against the scenarios
@@ -644,7 +739,9 @@ describe('every control moves the model', () => {
       const painted = new Map(
         names.map((name) => [
           name,
-          paint(module.visible, { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, false)),
+          module.buildPresentation
+            ? paintSchema(module, 'visible', { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, false))
+            : paint(module.visible, { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, false)),
         ]),
       );
       const identical: string[] = [];

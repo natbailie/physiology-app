@@ -1,15 +1,8 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { RespiratoryDiagram } from './components/RespiratoryDiagram';
-import { DavenportDiagram } from './components/DavenportDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { OxygenDissociationCurve } from '@/shared/components/OxygenDissociationCurve/OxygenDissociationCurve';
 import { RESPIRATORY_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
@@ -20,9 +13,11 @@ import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryContent } from './content';
 import { respiratoryLoopConfig } from './engine/loopConfig';
 import { perturbAirwayObstruction } from './engine/engine';
-import { saO2 } from './engine/gasExchange';
 import { DEFAULT_RESP_INPUTS, RESP_PRESETS, RESP_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { RespInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildRespiratoryPresentation } from './presentation';
+import type { RespDerived, RespHistoryPoint, RespInputs, RespState } from './engine/types';
 
 export function RespiratoryPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<RespInputs>('respiratory', DEFAULT_RESP_INPUTS);
@@ -62,12 +57,8 @@ export function RespiratoryPage() {
     perturb((state) => perturbAirwayObstruction(state));
   }
 
-  const pHHistory = useSeries(history, (h) => h.pH);
-  const pHHistoryBaseline = useSeries(baseline.history, (h) => h.pH);
-  const paCO2History = useSeries(history, (h) => h.paCO2);
-  const paCO2HistoryBaseline = useSeries(baseline.history, (h) => h.paCO2);
-  const saO2History = useSeries(history, (h) => h.saO2);
-  const saO2HistoryBaseline = useSeries(baseline.history, (h) => h.saO2);
+  const ctx = getPresentationContext<RespState, RespDerived, RespInputs, RespHistoryPoint>(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('respiratory', buildRespiratoryPresentation(ctx), ctx, inputs, handleChange);
 
   return (
     <ModulePage
@@ -86,34 +77,13 @@ export function RespiratoryPage() {
           disabled={session.blinded}
         />
       }
-      diagram={
-        <>
-          <RespiratoryDiagram derived={snapshot.derived} />
-          <DavenportDiagram derived={snapshot.derived} history={history} baselineHistory={baseline.history} />
-        </>
-      }
-      readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       practice={<QuizPanel session={session} summary={summary} presetLabels={RESP_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline label="pH" data={pHHistory} baselineData={pHHistoryBaseline} domainMin={6.9} domainMax={7.7} colorVar="var(--ph)" />
-  <Sparkline label="PaCO2" unit="mmHg" data={paCO2History} baselineData={paCO2HistoryBaseline} domainMin={10} domainMax={100} colorVar="var(--co2)" />
-  <Sparkline label="SaO2" unit="%" data={saO2History} baselineData={saO2HistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--o2)" />
-  <OxygenDissociationCurve
-    curveFn={saO2}
-    currentX={snapshot.derived.paO2}
-    currentY={snapshot.derived.saO2}
-    xDomain={[0, 120]}
-    yDomain={[0, 100]}
-    colorVar="var(--o2)"
-    xLabel="PaO2 (mmHg)"
-    yLabel="SaO2 (%)"
-  />
-        </>
-      }
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={respiratoryContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of respiratory and acid-base physiology — not a clinical or diagnostic tool. Simulated time runs faster than real time so chemoreceptor responses (seconds-minutes) and renal compensation (physiologically days) are both watchable within roughly a minute — which means a settled run is by definition a CHRONIC picture, and the acute one is what you see on the way there. Watch the trail on the Davenport diagram: it is the path from the acute position to the compensated one. The anion gap is modelled as a consequence of what kind of acid is being produced, so it moves only when an organic acid is the cause; lactate, ketones and salicylate are not distinguished from one another.'
