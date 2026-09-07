@@ -46,6 +46,56 @@ export interface ClipNode {
   children: readonly PathNode[];
 }
 
+/** One colour stop of a gradient. `offset` is 0-1 along the gradient's own axis. */
+export interface GradientStop {
+  offset: number;
+  colorToken: ColorToken;
+  /** Stop opacity, for a shading overlay that fades to nothing rather than to a colour. */
+  opacity?: number;
+}
+
+/**
+ * A gradient, declared in a frame's defs and referenced by `fillGradientId`.
+ *
+ * Stops carry TOKENS rather than hex, so a gradient lifts into the dark theme with the rest of
+ * the palette and `src/theme/palette.test.ts` still sees every colour the app draws.
+ *
+ * A gradient is DEPTH, never data: it says an organ is round, not that a value is high. Anything
+ * a learner has to read stays carried by position, size or a legended signal colour — see the
+ * "Drawing diagrams" rules in CLAUDE.md.
+ */
+/** `objectBoundingBox` (the default) sizes the gradient to each shape it paints; `userSpaceOnUse`
+ * resolves it against the coordinate system in force where it is referenced, which is what puts
+ * one light source across a whole organ rather than one per chamber. */
+export type GradientUnits = 'objectBoundingBox' | 'userSpaceOnUse';
+
+export interface LinearGradientNode {
+  type: 'linearGradient';
+  id: string;
+  units?: GradientUnits;
+  /** Gradient vector in object bounding-box units (0-1), defaulting to a left-to-right sweep. */
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  stops: readonly GradientStop[];
+}
+
+export interface RadialGradientNode {
+  type: 'radialGradient';
+  id: string;
+  units?: GradientUnits;
+  /** Centre and radius in object bounding-box units (0-1); `fx`/`fy` offset the highlight. */
+  cx?: number;
+  cy?: number;
+  r?: number;
+  fx?: number;
+  fy?: number;
+  stops: readonly GradientStop[];
+}
+
+export type DefNode = MarkerNode | ClipNode | LinearGradientNode | RadialGradientNode;
+
 /** The animated vessel: a faint static path plus a dashed flow overlay. */
 export interface VesselNode {
   type: 'vessel';
@@ -104,7 +154,14 @@ export interface PathNode {
   /** Stroke colour. */
   colorToken?: ColorToken;
   fill?: ColorToken | 'none';
+  /** A gradient id declared in the frame's defs. Wins over `fill` when both are given. */
+  fillGradientId?: string;
+  fillOpacity?: number;
   strokeWidth?: number;
+  strokeOpacity?: number;
+  strokeLinecap?: 'butt' | 'round' | 'square';
+  strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  opacity?: number;
   /** A marker id declared in the frame's defs. */
   markerEnd?: string;
   clipPathId?: string;
@@ -118,6 +175,9 @@ export interface CircleNode {
   r: number;
   cls?: string;
   fill?: ColorToken;
+  fillGradientId?: string;
+  fillOpacity?: number;
+  opacity?: number;
   styleVars?: StyleVars;
 }
 
@@ -129,6 +189,9 @@ export interface RectNode {
   height: number;
   cls?: string;
   fill?: ColorToken;
+  fillGradientId?: string;
+  fillOpacity?: number;
+  opacity?: number;
   clipPathId?: string;
   styleVars?: StyleVars;
 }
@@ -174,7 +237,7 @@ export interface FrameNode {
   key?: string;
   viewBox: [number, number, number, number];
   ariaLabel: string;
-  defs?: readonly (MarkerNode | ClipNode)[];
+  defs?: readonly DefNode[];
   children: readonly SceneNode[];
 }
 

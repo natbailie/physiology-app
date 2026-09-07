@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import { VesselFlow } from '@/shared/components/VesselFlow/VesselFlow';
 import { HormoneArrow } from '@/shared/components/HormoneArrow/HormoneArrow';
-import type { ClipNode, FrameNode, MarkerNode, SceneNode } from '../types';
+import type { DefNode, FrameNode, GradientStop, SceneNode } from '../types';
 import { ORGANS } from './organs';
 import type { ResolvedDiagramClasses } from './diagramClasses';
 
@@ -22,7 +22,14 @@ function resolveClass(classes: ResolvedDiagramClasses, cls?: string): string | u
   return cls ? classes[cls as keyof ResolvedDiagramClasses] : undefined;
 }
 
-function renderDef(def: MarkerNode | ClipNode, index: number): ReactNode {
+function renderStops(stops: readonly GradientStop[]): ReactNode {
+  return stops.map((stop, i) => (
+    // eslint-disable-next-line react/no-array-index-key -- stops are a fixed authored list
+    <stop key={i} offset={stop.offset} stopColor={colorVar(stop.colorToken)} stopOpacity={stop.opacity} />
+  ));
+}
+
+function renderDef(def: DefNode, index: number): ReactNode {
   if (def.type === 'marker') {
     return (
       <marker key={index} id={def.id} markerWidth={8} markerHeight={8} refX={6} refY={4} orient="auto">
@@ -39,7 +46,27 @@ function renderDef(def: MarkerNode | ClipNode, index: number): ReactNode {
       </clipPath>
     );
   }
-  return null;
+  /* `objectBoundingBox` by default, so one gradient serves every shape that references it
+   * whatever its size; `userSpaceOnUse` is how an organ gets ONE light source across all of its
+   * parts instead of one per part. */
+  if (def.type === 'linearGradient') {
+    return (
+      <linearGradient key={index} id={def.id} gradientUnits={def.units} x1={def.x1} y1={def.y1} x2={def.x2} y2={def.y2}>
+        {renderStops(def.stops)}
+      </linearGradient>
+    );
+  }
+  return (
+    <radialGradient key={index} id={def.id} gradientUnits={def.units} cx={def.cx} cy={def.cy} r={def.r} fx={def.fx} fy={def.fy}>
+      {renderStops(def.stops)}
+    </radialGradient>
+  );
+}
+
+/** A gradient reference wins over a flat token, so a shaded shape needs only the one field. */
+function paint(fill: string | undefined, gradientId: string | undefined): string | undefined {
+  if (gradientId) return `url(#${gradientId})`;
+  return fill === 'none' ? 'none' : colorVar(fill);
 }
 
 function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: number): ReactNode {
@@ -57,8 +84,13 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           d={node.d}
           className={resolveClass(classes, node.cls)}
           stroke={colorVar(node.colorToken)}
-          fill={node.fill === 'none' ? 'none' : colorVar(node.fill)}
+          fill={paint(node.fill, node.fillGradientId)}
+          fillOpacity={node.fillOpacity}
           strokeWidth={node.strokeWidth}
+          strokeOpacity={node.strokeOpacity}
+          strokeLinecap={node.strokeLinecap}
+          strokeLinejoin={node.strokeLinejoin}
+          opacity={node.opacity}
           markerEnd={node.markerEnd ? `url(#${node.markerEnd})` : undefined}
           clipPath={node.clipPathId ? `url(#${node.clipPathId})` : undefined}
           style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
@@ -72,7 +104,9 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           cy={node.cy}
           r={node.r}
           className={resolveClass(classes, node.cls)}
-          fill={colorVar(node.fill)}
+          fill={paint(node.fill, node.fillGradientId)}
+          fillOpacity={node.fillOpacity}
+          opacity={node.opacity}
           style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
         />
       );
@@ -85,7 +119,9 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           width={node.width}
           height={node.height}
           className={resolveClass(classes, node.cls)}
-          fill={colorVar(node.fill)}
+          fill={paint(node.fill, node.fillGradientId)}
+          fillOpacity={node.fillOpacity}
+          opacity={node.opacity}
           clipPath={node.clipPathId ? `url(#${node.clipPathId})` : undefined}
           style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
         />

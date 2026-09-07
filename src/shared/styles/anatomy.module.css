@@ -1,0 +1,74 @@
+/* Animation for the shared anatomy builders in `src/shared/diagram/organShapes.ts`.
+ *
+ * Everything else those builders need — fill, stroke, opacity, gradient — is on the scene nodes
+ * themselves, so an organ needs no per-module stylesheet and the native renderer needs no
+ * stylesheet at all. What CANNOT go on a node is animation: it is a CSS concern on the web and
+ * has no equivalent on the phone, which is exactly why it lives here and only here.
+ *
+ * Every organ that beats or breathes composes from this file, so a module adopting the anatomy
+ * library adds no CSS of its own. That is the whole point: the previous generation re-declared
+ * `.heart`, `.lungs` and their keyframes in every module that drew one.
+ *
+ * The organs these drive are drawn about their own origin and placed with a translate, so
+ * `transform-box: fill-box` would scale each about ITS box rather than the organ's — a heart
+ * whose chambers each pulsed about their own centre. The group is transformed about the origin
+ * instead, which is where the builder centred the organ.
+ */
+
+/* --- Heart --- */
+
+.beat {
+  animation: beat calc(60s / var(--hr-bpm, 70)) ease-in-out infinite;
+  transform-origin: 0 0;
+}
+
+/* Stroke volume, as a separate group so the beat and the filling are not one transform fighting
+ * itself: rate is the animation, volume is the transition. */
+.beatVolume {
+  transform: scale(var(--sv-scale, 1));
+  transform-origin: 0 0;
+  transition: transform 0.3s ease;
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.05);
+  }
+  40% {
+    transform: scale(0.98);
+  }
+}
+
+/* --- Lungs --- */
+
+.breathe {
+  animation: breathe calc(60s / var(--breath-rate, 14)) ease-in-out infinite;
+  transform-origin: 0 0;
+  transform: scale(var(--vent-depth, 1));
+  transition: transform 0.3s ease;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.05);
+  }
+}
+
+/* Motion is emphasis, never the only carrier of meaning — every quantity these animations show
+ * is also carried by a wash, a size or a readout. */
+@media (prefers-reduced-motion: reduce) {
+  .beat,
+  .beatVolume,
+  .breathe {
+    animation: none !important;
+    transition: none !important;
+  }
+}

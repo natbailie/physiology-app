@@ -1,4 +1,5 @@
 import text from '@/shared/styles/diagramText.module.css';
+import anatomy from '@/shared/styles/anatomy.module.css';
 import glucoseClasses from '@/modules/glucoseRegulation/components/Diagram.module.css';
 import cardiorenalClasses from '@/modules/cardiorenal/components/Diagram.module.css';
 import respiratoryClasses from '@/modules/respiratory/components/Diagram.module.css';
@@ -48,6 +49,12 @@ export interface ResolvedDiagramClasses {
   baselineTrail: string;
   livePoint: string;
   verdictMixed: string;
+  /* The shared anatomy animations. Global rather than per-module, because unlike `.chamber` or
+   * `.canal` these mean exactly one thing wherever they appear: a heart beats and a lung
+   * breathes, and a module that draws either wants the same motion the last one did. */
+  beat: string;
+  beatVolume: string;
+  breathe: string;
 }
 
 type ClassKey = keyof ResolvedDiagramClasses;
@@ -66,6 +73,9 @@ const shared: Partial<ResolvedDiagramClasses> = {
   alarm: text.alarm!,
   axis: text.axis!,
   verdict: text.verdict!,
+  beat: anatomy.beat!,
+  beatVolume: anatomy.beatVolume!,
+  breathe: anatomy.breathe!,
 };
 
 /** The class keys each module diagram owns, resolved by direct read of the module's own CSS.
