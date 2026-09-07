@@ -220,6 +220,7 @@ export const MODULES: ModuleDescriptor[] = [
     related: [
       { id: 'respiratoryMechanics', why: 'how the ventilation this assumes is actually generated' },
       { id: 'electrolyteBalance', why: 'the other half of an acid-base disturbance' },
+      { id: 'respiratoryFailure', why: 'reading the gas exchange this module produces as a diagnosis' },
     ],
   },
   {
@@ -324,6 +325,32 @@ export const MODULES: ModuleDescriptor[] = [
     accentColorVar: 'var(--compliance)',
     related: [
       { id: 'respiratory', why: 'what the ventilation does to gas exchange and pH' },
+      { id: 'mechanicalVentilation', why: 'the machine that can supply the work breathing is failing to' },
+    ],
+  },
+  {
+    id: 'mechanicalVentilation',
+    name: 'Mechanical Ventilation & Ventilator Pressures',
+    tagline: 'PEEP, pressure support, driving pressure & how much of the breath is yours',
+    status: 'available',
+    theme: 'respiratory',
+    accentColorVar: 'var(--vq)',
+    related: [
+      { id: 'respiratoryMechanics', why: 'the lung behaviour the ventilator adjusts' },
+      { id: 'respiratory', why: 'the gas exchange and acid-base outcomes of a breath' },
+    ],
+  },
+  {
+    id: 'respiratoryFailure',
+    name: 'Respiratory Failure & V/Q Mismatch',
+    tagline: 'Reading a blood gas as two axes: the oxygen shunt and the CO2 drive',
+    status: 'available',
+    theme: 'respiratory',
+    accentColorVar: 'var(--o2)',
+    related: [
+      { id: 'respiratory', why: 'the gas exchange and acid-base numbers this failure is read from' },
+      { id: 'respiratoryMechanics', why: 'the dead space and V/Q matching behind the shunt and drive' },
+      { id: 'mechanicalVentilation', why: 'the machine that supplies the work this CO2 axis has lost' },
     ],
   },
   {

@@ -530,7 +530,14 @@ const NOT_SWEEPABLE = new Set<string>([
  * Populated from what the sweep actually finds. Like the lists above it is asserted in both
  * directions, so an option that gains a reading of its own has to be taken off.
  */
-const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([]);
+const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([
+  // Course is the renal-compensation lever: acute vs chronic changes nothing at rest because a
+  // normal PaCO2 gives the kidney nothing to compensate, and the two options must not be allowed
+  // to read alike once hypercapnia appears. The backgrounds sweep proves they separate under the
+  // type-II presets (acute-on-chronic HCO3 34.4 vs 26.6 without compensation), and the module's
+  // own engine test pins the separation down.
+  'respiratoryFailure.course:acute==chronic',
+]);
 
 /**
  * Two scenarios that draw the same screen AT THE MOMENT THEY ARE PRESSED, one line of reason each.

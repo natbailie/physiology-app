@@ -24,6 +24,8 @@ export const PAGES: Partial<Record<RouteId, ComponentType>> = {
   renalTubular: lazy(() => import('@/modules/renalTubular/RenalTubularPage').then(({ RenalTubularPage }) => ({ default: RenalTubularPage }))),
   cardiacElectro: lazy(() => import('@/modules/cardiacElectro/CardiacElectroPage').then(({ CardiacElectroPage }) => ({ default: CardiacElectroPage }))),
   respiratoryMechanics: lazy(() => import('@/modules/respiratoryMechanics/RespiratoryMechanicsPage').then(({ RespiratoryMechanicsPage }) => ({ default: RespiratoryMechanicsPage }))),
+  mechanicalVentilation: lazy(() => import('@/modules/mechanicalVentilation/MechanicalVentilationPage').then(({ MechanicalVentilationPage }) => ({ default: MechanicalVentilationPage }))),
+  respiratoryFailure: lazy(() => import('@/modules/respiratoryFailure/RespiratoryFailurePage').then(({ RespiratoryFailurePage }) => ({ default: RespiratoryFailurePage }))),
   hpgAxis: lazy(() => import('@/modules/hpgAxis/HpgAxisPage').then(({ HpgAxisPage }) => ({ default: HpgAxisPage }))),
   ecgConduction: lazy(() => import('@/modules/ecgConduction/EcgConductionPage').then(({ EcgConductionPage }) => ({ default: EcgConductionPage }))),
   coagulation: lazy(() => import('@/modules/coagulation/CoagulationPage').then(({ CoagulationPage }) => ({ default: CoagulationPage }))),

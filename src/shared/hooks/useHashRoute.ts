@@ -33,6 +33,8 @@ export type RouteId =
   | 'renalTubular'
   | 'cardiacElectro'
   | 'respiratoryMechanics'
+  | 'mechanicalVentilation'
+  | 'respiratoryFailure'
   | 'hpgAxis'
   | 'ecgConduction'
   | 'coagulation'
@@ -89,6 +91,8 @@ export const VALID_ROUTES: RouteId[] = [
   'renalTubular',
   'cardiacElectro',
   'respiratoryMechanics',
+  'mechanicalVentilation',
+  'respiratoryFailure',
   'hpgAxis',
   'ecgConduction',
   'coagulation',

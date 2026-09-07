@@ -1,0 +1,92 @@
+/* The airway-pressure monitor trace and the lung-unit / inspired-gas tints. */
+
+.waveTrail {
+  fill: none;
+  stroke: var(--vq);
+  stroke-width: 2;
+}
+
+.waveDot {
+  fill: var(--vq);
+  stroke: var(--panel);
+  stroke-width: 1.5;
+}
+
+.peepLine {
+  stroke: var(--resistance);
+  stroke-width: 1.5;
+}
+
+.peepLabel {
+  stroke: none;
+  fill: var(--resistance);
+}
+
+.ventBox {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+}
+
+.effortFill {
+  fill: var(--compliance);
+}
+
+.effortBg {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+}
+
+/* Alveolar units: tinted by how far from being recruited (open) or shunted they are. */
+.unitCircle {
+  fill: color-mix(in srgb, var(--vq) calc(var(--wash-faint) + var(--vq-deviation, 0) * var(--wash-strong)), transparent);
+  stroke: var(--vq);
+  stroke-width: 1.5;
+  transition: fill 0.4s ease;
+}
+
+.flowArrow {
+  stroke: var(--vq);
+  stroke-width: 2;
+  fill: none;
+}
+
+/* The inspired-gas pill: fill tracks FiO2 so the O2 dial has a structure, not just a number. */
+.o2Pill {
+  fill: color-mix(in srgb, var(--o2) calc(var(--wash-faint) + var(--o2-strength, 0.5) * var(--wash-strong)), transparent);
+  stroke: var(--o2);
+  stroke-width: 1.25;
+}
+
+.organLabel {
+  composes: organLabel from '../../../shared/styles/diagramText.module.css';
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+}
+
+.pathLabel {
+  composes: pathLabel from '../../../shared/styles/diagramText.module.css';
+  font-size: 8.5px;
+}
+
+.valueLabel {
+  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
+  text-anchor: middle;
+}
+
+.tickLabel {
+  composes: tickLabel from '../../../shared/styles/diagramText.module.css';
+}
+
+.axis {
+  composes: axis from '../../../shared/styles/diagramText.module.css';
+}
+
+.verdict {
+  composes: verdict from '../../../shared/styles/diagramText.module.css';
+}
+
+.caption {
+  composes: caption from '../../../shared/styles/diagramText.module.css';
+}
