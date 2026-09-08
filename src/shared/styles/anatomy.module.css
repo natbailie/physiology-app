@@ -72,3 +72,13 @@
     transition: none !important;
   }
 }
+
+/* --- Leader lines --- */
+
+/* The hairline from a label to the structure it names. A name floating beside an organ names
+ * the ORGAN; a leader is what lets two labels name two different layers of the same one. */
+.leader {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+}

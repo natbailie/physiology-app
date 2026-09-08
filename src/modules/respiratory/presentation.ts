@@ -1,13 +1,19 @@
 import { clamp } from '@/shared/lib/math';
+import { kidneyScene, lungsScene } from '@/shared/diagram/organShapes';
 import { saO2 } from './engine/gasExchange';
 import type { RespDerived, RespHistoryPoint, RespInputs, RespState } from './engine/types';
-import type { FrameNode, ModulePresentation, PresentationContext } from '@/shared/presentation/types';
+import type { FrameNode, ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
 
 /* --- The anatomy diagram -------------------------------------------- */
 
-const BLOOD_GAS_PATH = 'M240,168 L240,250';
-const CHEMORECEPTOR_PATH = 'M225,58 C180,20 130,10 95,28';
-const RENAL_PATH = 'M355,190 C300,150 275,125 250,110';
+/* Where the two organs sit. Every path below is anchored to them, so moving one is a matter of
+ * moving a constant rather than re-typing nine coordinates. */
+const LUNGS = { x: 214, y: 142, scale: 1 };
+const KIDNEY = { x: 396, y: 252, scale: 0.85 };
+
+const BLOOD_GAS_PATH = 'M214,222 L214,300';
+const CHEMORECEPTOR_PATH = 'M172,62 C130,24 100,22 80,44';
+const RENAL_PATH = 'M372,232 C324,204 292,182 266,166';
 
 /* --- The Davenport diagram ------------------------------------------- */
 
@@ -103,14 +109,22 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
   const chemoActivation = clamp((derived.chemoreceptorDrive + 1) / 2, 0, 1);
   const renalActivation = clamp((derived.renalCompensationDrive + 1) / 2, 0, 1);
 
+  const lungs = lungsScene(LUNGS, { breathRate, ventDepth, vqMismatch: derived.vqMismatch });
+  /* The kidney is here for bicarbonate, so it is washed in the bicarbonate colour rather than in
+   * the renal one — the reader is being asked to follow HCO3-, not to admire a kidney. */
+  const kidney = kidneyScene(KIDNEY, { gfrIntensity: hco3Intensity, colorToken: 'bicarb', medullaToken: 'bicarb' });
+
   const anatomy: FrameNode = {
     type: 'frame',
     key: 'respiratory-anatomy',
-    viewBox: [0, 0, 480, 300],
-    ariaLabel: 'Animated diagram of the lungs and kidneys, connected by gas exchange, the chemoreceptor reflex, and renal bicarbonate compensation',
+    viewBox: [10, 14, 470, 306],
+    ariaLabel:
+      'Animated diagram of the lungs in anterior view — three lobes on the right and two on the left, separated by their fissures, with the trachea dividing at the carina into the main and lobar bronchi — connected by gas exchange to the tissues, by the chemoreceptor reflex to the brainstem, and by bicarbonate handling to a sectioned kidney',
     defs: [
       { type: 'marker', id: 'chemo-arrow', colorToken: 'co2' },
       { type: 'marker', id: 'renal-comp-arrow', colorToken: 'bicarb' },
+      ...lungs.defs,
+      ...kidney.defs,
     ],
     children: [
       { type: 'vessel', path: BLOOD_GAS_PATH, speed: bloodGasSpeed, colorToken: 'o2' },
@@ -121,8 +135,8 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
         colorToken: 'co2',
         label: 'Chemoreceptors',
         markerId: 'chemo-arrow',
-        labelX: 95,
-        labelY: 22,
+        labelX: 26,
+        labelY: 72,
       },
       {
         type: 'axis',
@@ -131,13 +145,18 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
         colorToken: 'bicarb',
         label: 'Renal HCO3-',
         markerId: 'renal-comp-arrow',
-        labelX: 300,
-        labelY: 252,
+        labelX: 250,
+        labelY: 212,
       },
-      { type: 'organ', name: 'lungs', x: 240, y: 100, params: { breathRate, ventDepth, vqMismatch: derived.vqMismatch } },
-      { type: 'organ', name: 'renalCompensation', x: 355, y: 220, params: { hco3Intensity } },
-      { type: 'text', x: 240, y: 264, text: 'tissues', cls: 'pathLabel', anchor: 'middle' },
-    ],
+      lungs.node,
+      kidney.node,
+      /* The asymmetry IS the teaching point, and it is the one thing about the lungs a
+       * symmetrical pair of balloons actively taught wrong. Said once, in the corner. */
+      { type: 'text', x: 466, y: 34, text: 'Right 3 lobes · left 2', cls: 'caption', anchor: 'end' },
+      { type: 'text', x: 132, y: 208, text: 'Diaphragm', cls: 'anatomy', anchor: 'end' },
+      { type: 'text', x: 214, y: 312, text: 'tissues', cls: 'pathLabel', anchor: 'middle' },
+      { type: 'text', x: KIDNEY.x + 2, y: 300, text: 'Kidney', cls: 'organLabel', anchor: 'middle' },
+    ] as SceneNode[],
   };
 
   const live = project(derived.pH, derived.plasmaHCO3);

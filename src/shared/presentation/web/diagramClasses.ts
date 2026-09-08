@@ -55,6 +55,7 @@ export interface ResolvedDiagramClasses {
   beat: string;
   beatVolume: string;
   breathe: string;
+  leader: string;
 }
 
 type ClassKey = keyof ResolvedDiagramClasses;
@@ -76,6 +77,7 @@ const shared: Partial<ResolvedDiagramClasses> = {
   beat: anatomy.beat!,
   beatVolume: anatomy.beatVolume!,
   breathe: anatomy.breathe!,
+  leader: anatomy.leader!,
 };
 
 /** The class keys each module diagram owns, resolved by direct read of the module's own CSS.
@@ -93,16 +95,8 @@ const MODULE_CLASS_KEYS: Record<string, ClassKey[]> = {
     'liverShape',
     'glycogenFill',
   ],
-  cardiorenal: ['pathLabel', 'organLabel', 'heart', 'heartShape', 'kidneyShape', 'urineFlow'],
+  cardiorenal: ['urineFlow'],
   respiratory: [
-    'organLabel',
-    'pathLabel',
-    'kidneyShape',
-    'trachea',
-    'lungs',
-    'lungShape',
-    'alveolus',
-    'alveolusMismatched',
     'plotAxis',
     'plotGrid',
     'axisLabel',
