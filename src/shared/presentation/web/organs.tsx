@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
-import { LIVER_PATH, KIDNEY_PATH, PANCREAS_PATH } from '@/shared/diagram/organShapes';
+import { LIVER_PATH, PANCREAS_PATH } from '@/shared/diagram/organShapes';
 import type { OrganName, StyleVars } from '../types';
 
 /**
@@ -97,108 +97,12 @@ function Liver({ x, y, params, classes }: OrganProps) {
   );
 }
 
-const HEART_PATH = 'M0,-12 C-16,-28 -40,-12 -40,8 C-40,28 -16,36 0,48 C16,36 40,28 40,8 C40,-12 16,-28 0,-12 Z';
-
-function Heart({ x, y, params, classes }: OrganProps) {
-  const style = toStyleVars({ 'hr-bpm': params.heartRate ?? 70, 'sv-scale': params.strokeVolumeScale ?? 1 });
-  return (
-    <g transform={`translate(${x}, ${y})`} style={style}>
-      <g className={classes.heart}>
-        <path className={classes.heartShape} d={HEART_PATH} />
-      </g>
-      <text className={classes.organLabel} y={68}>
-        Heart
-      </text>
-    </g>
-  );
-}
-
-function Kidneys({ x, y, params, classes }: OrganProps) {
-  const style = toStyleVars({ 'gfr-intensity': params.gfrIntensity ?? 1, 'urine-speed': params.urineSpeed ?? 0.5 });
-  return (
-    <g transform={`translate(${x}, ${y})`} style={style}>
-      <g transform="translate(0, -22)">
-        <path className={classes.kidneyShape} d={KIDNEY_PATH} />
-      </g>
-      <g transform="translate(0, 24) scale(-1, 1)">
-        <path className={classes.kidneyShape} d={KIDNEY_PATH} />
-      </g>
-      <path className={classes.urineFlow} d="M0,68 L0,96" />
-      <text className={classes.pathLabel} x={14} y={90}>
-        urine
-      </text>
-      <text className={classes.organLabel} y={112}>
-        Kidneys
-      </text>
-    </g>
-  );
-}
-
-const LUNG_PATH =
-  'M0,-38 C18,-40 30,-14 28,14 C26,38 14,50 0,50 C-2,50 -4,49 -6,48 C-16,42 -24,26 -24,4 C-24,-20 -14,-38 0,-38 Z';
-
 /** Positions of the alveolar units drawn inside each lung, in the lung path's own coordinates. */
-const UNITS = [
-  { x: -6, y: -22 },
-  { x: 6, y: -6 },
-  { x: -8, y: 6 },
-  { x: 4, y: 20 },
-  { x: -4, y: 34 },
-];
 
-function Lungs({ x, y, params, classes }: OrganProps) {
-  const style = toStyleVars({ 'breath-rate': params.breathRate ?? 14, 'vent-depth': params.ventDepth ?? 1 });
-  // Which units have dropped out. Rounded so the count steps visibly as the slider moves rather
-  // than fading, because a shunted alveolus is not a partly shunted one.
-  const deadUnits = Math.round((params.vqMismatch ?? 0) * UNITS.length);
-  return (
-    <g transform={`translate(${x}, ${y})`} style={style}>
-      <path className={classes.trachea} d="M0,-56 L0,-8" />
-      <g className={classes.lungs}>
-        <path className={classes.lungShape} d={LUNG_PATH} transform="translate(-20, 0)" />
-        <path className={classes.lungShape} d={LUNG_PATH} transform="translate(20, 0) scale(-1, 1)" />
-        {[-20, 20].map((side) =>
-          UNITS.map((unit, index) => (
-            <circle
-              // eslint-disable-next-line react/no-array-index-key -- one circle per fixed alveolar unit
-              key={`${side}-${index}`}
-              className={index < deadUnits ? classes.alveolusMismatched : classes.alveolus}
-              cx={side + unit.x * (side < 0 ? 1 : -1)}
-              cy={unit.y}
-              r={4}
-            />
-          )),
-        )}
-      </g>
-      <text className={classes.organLabel} y={66}>
-        Lungs
-      </text>
-    </g>
-  );
-}
-
-function RenalCompensation({ x, y, params, classes }: OrganProps) {
-  const style = toStyleVars({ 'hco3-intensity': params.hco3Intensity ?? 0.5 });
-  return (
-    <g transform={`translate(${x}, ${y})`} style={style}>
-      <g transform="translate(0, -22)">
-        <path className={classes.kidneyShape} d={KIDNEY_PATH} />
-      </g>
-      <g transform="translate(0, 24) scale(-1, 1)">
-        <path className={classes.kidneyShape} d={KIDNEY_PATH} />
-      </g>
-      <text className={classes.organLabel} y={54}>
-        Kidneys
-      </text>
-    </g>
-  );
-}
-
+/* The legacy per-platform organ registry, now down to the two glucoseRegulation still uses.
+ * Nothing should be added: new anatomy goes in `src/shared/diagram/organShapes.ts` as a scene
+ * builder, so it is drawn once for the web and the phone rather than twice. */
 export const ORGANS: Record<OrganName, (props: OrganProps) => ReactElement> = {
   pancreas: Pancreas,
   liver: Liver,
-  heart: Heart,
-  kidneys: Kidneys,
-  lungs: Lungs,
-  renalCompensation: RenalCompensation,
 };

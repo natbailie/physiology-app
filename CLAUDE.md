@@ -414,10 +414,45 @@ still the best of them), box-and-line circuits (fetalCirculation, shockStates) a
 living inside the diagram frame (coronaryCirculation, neuromuscularJunction). The rules below
 are what they are being converged on.
 
-- **Schematic but correct.** Topologically and structurally truthful — the right structures, in
-  the right relationships, in the right spatial order — without atlas rendering. A module whose
-  subject genuinely IS a graph stays a graph: venousReturn's Guyton curves and respiratory's
-  Davenport diagram are not anatomy and should not be dressed as it.
+Four modules have been through it — cardiorenal, respiratory, gastrointestinal and
+liverPhysiology. They are the worked examples; the rest of the anatomy-bearing modules are the
+backlog, and `src/shared/diagram/organShapes.ts` is where the next organ goes.
+
+- **Anatomical where the subject is an organ; schematic everywhere else.** This rule used to say
+  "without atlas rendering", and that half is retired. A module whose subject is an ORGAN draws
+  the organ — four chambers and a coronary tree, three lobes on the right and two on the left,
+  a cortex and its medullary pyramids — because the drawing is the first thing a learner looks
+  at and a heart with no chambers teaches nothing to somebody learning where the chambers are.
+  A module whose subject is a GRAPH stays a graph: venousReturn's Guyton curves and respiratory's
+  Davenport diagram are not anatomy and must not be dressed as it. A module whose subject is
+  CELLULAR or MOLECULAR stays schematic too — a sarcomere, the neuromuscular junction, a
+  capillary wall, the cell cycle. Drawing those as gross anatomy would be a lie about the scale.
+  Topological and structural truth is still the floor under all three.
+- **Anatomy is written once, in `src/shared/diagram/organShapes.ts`, as a scene BUILDER.** A
+  builder takes a placement and returns `{ node, defs }` — ordinary group/path nodes both
+  renderers already handle — so an organ is drawn once for the web and the phone alike. The
+  `organ` node type and its two per-platform registries are legacy: they are down to the two
+  shapes glucoseRegulation still uses, and nothing should be added to them. A builder takes its
+  COLOUR from the caller, because the same organ is drawn for different reasons in different
+  modules — the pancreas is the insulin colour in glucoseRegulation and the CCK colour in
+  gastrointestinal.
+- **Shading is the organ's own colour getting denser, never white or black.** A white highlight
+  survives the light theme and vanishes on the dark one; the same hue at 16% against the same hue
+  at 68% reads as volume under both, and every colour stays a token `palette.test.ts` checks. Use
+  `bodyGradient` with a `light` source in the ORGAN's coordinates for anything drawn as more than
+  one shape — lit per shape, a heart's four chambers read as a patchwork however good each is.
+  Light falls from the top-left, consistently, across the whole app.
+- **A gradient is depth, never data.** It says an organ is round, not that a value is high.
+  Anything a learner has to READ stays carried by position, size or a legended signal colour.
+- **Layer an organ: wash, structures, outline, labels — and put an opaque underlay first.** Every
+  organ used to be a stained-glass window: the wash is translucent, so the aorta showed straight
+  through the atria. `opaqueUnderlay` paints the silhouette in `panel`, which is the ground the
+  diagram sits on in both themes, so it occludes without introducing a colour. Draw a structure
+  that is INSIDE an organ after the organ's fill — the bronchial tree drawn first was occluded by
+  the very lungs it ventilates. Use `tubeNodes` for a vessel, bronchus or duct: a single
+  translucent stroke has no edge, and every great vessel was a pale smudge until it had three.
+- **A label beside an organ names the organ.** Give it a `leader` whenever it names a LAYER or a
+  part instead — "Cortex" and "Medulla" beside one kidney are meaningless without one.
 - **Every control needs a visible correlate.** The test of a diagram is that moving a slider
   changes the picture, not just a number. neuromuscularJunction offered vesicle release, calcium
   channels, receptor density and cholinesterase against a rectangle with eight dots in it — four
@@ -451,11 +486,18 @@ are what they are being converged on.
   under `prefers-reduced-motion`, so anything a diagram says only by moving is lost for those
   readers. Say it with position, size or colour as well.
 
-Two ways to check the result, both cheap:
+Three ways to check the result, all cheap:
 
+- Shape, before wiring anything up: `node --experimental-strip-types` can import
+  `organShapes.ts` directly, because its only import is a type-only one and type stripping
+  removes it. A twenty-line script that walks a builder's nodes into a standalone SVG will show
+  you an organ in a second, which beats booting the app and clicking to a module. Every shape in
+  that file was corrected two or three times that way; the heart took four.
 - Overlapping labels: in the browser pane, measure every `<text>` in `svg[role="img"]` with
   **`getBoundingClientRect`, not `getBBox`** — `getBBox` ignores ancestor transforms, so labels
-  inside a translated `<g>` all report the same origin and every diagram looks 100% broken.
+  inside a translated `<g>` all report the same origin and every diagram looks 100% broken. That
+  sweep sees TEXT only: a hormone arrow's arrowhead is a path, and the one collision it missed
+  was a label sitting under one.
 - Contrast: `src/theme/palette.test.ts` checks all 93 signal colours against both themes. If a
   diagram needs a colour that is not in the palette, add a base and let it derive.
 

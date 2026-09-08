@@ -27,16 +27,9 @@ export interface ResolvedDiagramClasses {
   alphaIslet: string;
   isletLabel: string;
   liverShape: string;
-  glycogenFill: string;
-  heart: string;
-  heartShape: string;
-  kidneyShape: string;
+  /** Cardiorenal's dashed urine stream — the one organ-adjacent class a module still owns. */
   urineFlow: string;
-  trachea: string;
-  lungs: string;
-  lungShape: string;
-  alveolus: string;
-  alveolusMismatched: string;
+  glycogenFill: string;
   plotAxis: string;
   plotGrid: string;
   axisLabel: string;

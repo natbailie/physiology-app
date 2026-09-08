@@ -131,13 +131,16 @@ export interface OrganNode {
   params: Readonly<Record<string, number>>;
 }
 
-export type OrganName =
-  | 'pancreas'
-  | 'liver'
-  | 'heart'
-  | 'kidneys'
-  | 'lungs'
-  | 'renalCompensation';
+/**
+ * The organs still drawn by the per-platform registries.
+ *
+ * This list SHRINKS. An `organ` node is drawn by two hand-written registries — one per platform —
+ * so anatomy added here has to be written twice and drifts; the shared builders in
+ * `src/shared/diagram/organShapes.ts` emit ordinary scene nodes instead and are drawn once. The
+ * heart, the kidneys, the lungs and the renal-compensation kidneys have all moved there. These
+ * two are what remains, and nothing should be added.
+ */
+export type OrganName = 'pancreas' | 'liver';
 
 export interface GroupNode {
   type: 'group';
