@@ -1,5 +1,4 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
@@ -9,10 +8,9 @@ import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { LiverDiagram } from './components/LiverDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
+import { buildLiverPhysiologyPresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
 import { LIVER_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { liverPhysiologyContent } from './content';
@@ -24,7 +22,7 @@ import {
   LIVER_PRESET_ORDER,
   DEFAULT_LIVER_INPUTS,
 } from './engine/presets';
-import type { LiverInputs } from './engine/types';
+import type { LiverDerived, LiverHistoryPoint, LiverInputs, LiverInternalState } from './engine/types';
 
 export function LiverPhysiologyPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<LiverInputs>('liverPhysiology', DEFAULT_LIVER_INPUTS);
@@ -60,14 +58,8 @@ export function LiverPhysiologyPage() {
     resetEngine: reset,
   });
 
-  const totalHistory = useSeries(history, (h) => h.total);
-  const totalBaseline = useSeries(baseline.history, (h) => h.total);
-  const uncHistory = useSeries(history, (h) => h.unconjugated);
-  const uncBaseline = useSeries(baseline.history, (h) => h.unconjugated);
-  const conjHistory = useSeries(history, (h) => h.conjugated);
-  const conjBaseline = useSeries(baseline.history, (h) => h.conjugated);
-  const ammoniaHistory = useSeries(history, (h) => h.ammonia);
-  const ammoniaBaseline = useSeries(baseline.history, (h) => h.ammonia);
+  const ctx = getPresentationContext<LiverInternalState, LiverDerived, LiverInputs, LiverHistoryPoint>(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('liverPhysiology', buildLiverPhysiologyPresentation(ctx), ctx, inputs, handleChange);
 
   return (
     <ModulePage
@@ -90,52 +82,13 @@ export function LiverPhysiologyPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<LiverDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       practice={<QuizPanel session={session} summary={summary} presetLabels={LIVER_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-          <Sparkline
-            label="Total bilirubin"
-            unit="µmol/L"
-            data={totalHistory}
-            baselineData={totalBaseline}
-            domainMin={0}
-            domainMax={400}
-            colorVar="var(--warn)"
-          />
-          <Sparkline
-            label="Unconjugated"
-            unit="µmol/L"
-            data={uncHistory}
-            baselineData={uncBaseline}
-            domainMin={0}
-            domainMax={300}
-            colorVar="var(--danger)"
-          />
-          <Sparkline
-            label="Conjugated"
-            unit="µmol/L"
-            data={conjHistory}
-            baselineData={conjBaseline}
-            domainMin={0}
-            domainMax={300}
-            colorVar="var(--liver)"
-          />
-          <Sparkline
-            label="Ammonia"
-            unit="µmol/L"
-            data={ammoniaHistory}
-            baselineData={ammoniaBaseline}
-            domainMin={0}
-            domainMax={220}
-            colorVar="var(--nociception)"
-          />
-        </>
-      }
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={liverPhysiologyContent} startCollapsed={session.phase !== 'idle'} />}
       footnote="A simplified conceptual model of the bilirubin pathway and its failure modes — not a clinical or diagnostic tool. Albumin binding is represented as a single capacity rather than competitive binding; enzyme levels are modelled as multiples of ULN driven by injury and pressure rather than individual isoforms; and the encephalopathy grade is an ammonia-based simplification of a clinical scoring system. Pools equilibrate over simulated days; acute bursts decay within hours."
     />

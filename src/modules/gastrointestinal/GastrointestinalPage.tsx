@@ -1,13 +1,8 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { GiDiagram } from './components/GiDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { GI_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
@@ -19,7 +14,10 @@ import { gastrointestinalContent } from './content';
 import { giLoopConfig } from './engine/loopConfig';
 import { perturbEatMeal } from './engine/engine';
 import { DEFAULT_GI_INPUTS, GI_PRESETS, GI_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { GiInputs } from './engine/types';
+import { buildGastrointestinalPresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import type { GiDerived, GiHistoryPoint, GiInputs, GiState } from './engine/types';
 
 export function GastrointestinalPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<GiInputs>('gastrointestinal', DEFAULT_GI_INPUTS);
@@ -59,12 +57,8 @@ export function GastrointestinalPage() {
     perturb((state) => perturbEatMeal(state));
   }
 
-  const gastricPHHistory = useSeries(history, (h) => h.gastricPH);
-  const gastricPHHistoryBaseline = useSeries(baseline.history, (h) => h.gastricPH);
-  const duodenalPHHistory = useSeries(history, (h) => h.duodenalPH);
-  const duodenalPHHistoryBaseline = useSeries(baseline.history, (h) => h.duodenalPH);
-  const gastrinHistory = useSeries(history, (h) => h.gastrinDrive * 100);
-  const gastrinHistoryBaseline = useSeries(baseline.history, (h) => h.gastrinDrive * 100);
+  const ctx = getPresentationContext<GiState, GiDerived, GiInputs, GiHistoryPoint>(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('gastrointestinal', buildGastrointestinalPresentation(ctx), ctx, inputs, handleChange);
 
   return (
     <ModulePage
@@ -82,18 +76,12 @@ export function GastrointestinalPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<GiDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       practice={<QuizPanel session={session} summary={summary} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline label="Gastric pH" data={gastricPHHistory} baselineData={gastricPHHistoryBaseline} domainMin={1} domainMax={7} colorVar="var(--gastrin)" />
-  <Sparkline label="Duodenal pH" data={duodenalPHHistory} baselineData={duodenalPHHistoryBaseline} domainMin={2} domainMax={8} colorVar="var(--secretin)" />
-  <Sparkline label="Gastrin" unit="%" data={gastrinHistory} baselineData={gastrinHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--gastrin)" />
-        </>
-      }
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      charts={slots.charts}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={gastrointestinalContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of GI physiology — not a clinical or diagnostic tool. Adjust the meal composition and drug/tone sliders first, then click "Eat meal" to trigger digestion — or leave the stomach empty and just watch to see the migrating motor complex sweep through its interdigestive cycle. Simulated time runs much faster than real time so hormone responses and gastric emptying (physiologically hours) are watchable within a session.'}
     />

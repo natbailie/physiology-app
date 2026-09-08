@@ -84,7 +84,8 @@ interface ModuleUnderTest {
    * then drives controls/readouts/diagram instead of the legacy named-component discovery, so the
    * harness verifies the same presentation a native renderer would. */
   buildPresentation?: (ctx: unknown) => ModulePresentationLike;
-  ControlPanel: ComponentType<Record<string, unknown>>;
+  /** Absent for a schema module, which declares its controls as data — see `discoverControls`. */
+  ControlPanel?: ComponentType<Record<string, unknown>>;
   diagrams: ComponentType<Record<string, unknown>>[];
   /** Diagram plus readout tiles: everything a learner can actually see change. */
   visible: ComponentType<Record<string, unknown>>[];
@@ -129,7 +130,7 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
       }
     }
   }
-  const controlName = Object.keys(components).find((name) => /ControlPanel$/.test(name))!;
+  const controlName = Object.keys(components).find((name) => /ControlPanel$/.test(name));
   const source = Object.entries(pageSources).find(([pagePath]) => moduleIdOf(pagePath) === id)![1];
   const diagrams = diagramNames(source)
     .map((name) => components[name])
@@ -150,7 +151,7 @@ const modules: ModuleUnderTest[] = Object.entries(configModules).map(([path, exp
     presetExports,
     settleOverrides,
     buildPresentation,
-    ControlPanel: components[controlName]!,
+    ControlPanel: controlName ? components[controlName] : undefined,
     diagrams,
     visible: [
       ...diagrams,
@@ -370,7 +371,7 @@ function controlsInPanel(module: ModuleUnderTest, inputs: Inputs): Control[] {
     createElement(
       ModuleShellProvider as ComponentType<{ blinded: boolean }>,
       { blinded: false },
-      createElement(module.ControlPanel, { inputs, onChange: record, onSelectBed: record }),
+      createElement(module.ControlPanel!, { inputs, onChange: record, onSelectBed: record }),
     ),
   );
 
@@ -653,10 +654,12 @@ function scenarioAt(module: ModuleUnderTest, name: string, long: boolean): Settl
 describe('every control moves the model', () => {
   it('discovered every module', () => {
     expect(modules.length).toBeGreaterThanOrEqual(45);
-    expect(modules.filter((m) => !m.ControlPanel || !m.presets || !m.defaults).map((m) => m.id)).toEqual([]);
-    // Schema modules present their diagram as data rather than as named page components, so their
-    // legacy diagram list is legitimately empty; every other module must render something.
+    expect(modules.filter((m) => !m.presets || !m.defaults).map((m) => m.id)).toEqual([]);
+    // Schema modules present their diagram AND their controls as data rather than as named page
+    // components, so both legacy lists are legitimately empty for them; every other module must
+    // render something in each slot.
     expect(modules.filter((m) => m.diagrams.length === 0 && !m.buildPresentation).map((m) => m.id)).toEqual([]);
+    expect(modules.filter((m) => !m.ControlPanel && !m.buildPresentation).map((m) => m.id)).toEqual([]);
   });
 
   describe.each(modules.map((m) => [m.id, m] as const))('%s', (id, module) => {
