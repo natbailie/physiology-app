@@ -1,5 +1,6 @@
 import { clamp } from '@/shared/lib/math';
 import { LIVER_LEFT_LOBE_PATH, LIVER_RIGHT_LOBE_PATH, liverScene } from '@/shared/diagram/organShapes';
+import { monoCharsPerLine, wrapSvgText } from '@/shared/lib/wrapSvgText';
 import { BILIRUBIN } from './engine/constants';
 import type { LiverDerived, LiverHistoryPoint, LiverInputs, LiverInternalState } from './engine/types';
 import type { ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
@@ -7,6 +8,30 @@ import type { ModulePresentation, PresentationContext, SceneNode } from '@/share
 type Ctx = PresentationContext<LiverInternalState, LiverDerived, LiverInputs, LiverHistoryPoint>;
 
 const POOL_MAX = 400;
+
+/** The frame's right edge, which is what the prose lines at its foot have to fit inside. */
+const FRAME_RIGHT = 580;
+const SUMMARY_X = 32;
+const SUMMARY_MAX_CHARS = monoCharsPerLine(FRAME_RIGHT - SUMMARY_X, 11);
+const SUMMARY_LINE_HEIGHT = 16;
+
+/**
+ * One `text` node per wrapped line, running down from `y`.
+ *
+ * `patternSummary` sentences reach 130-odd characters and `<text>` does not wrap, so past the
+ * viewBox they are not merely ugly: `DiagramFrame` clips with `overflow: hidden`, and the rest
+ * of the sentence is simply gone with nothing in the DOM to say so. Every state but the normal
+ * one overflowed.
+ */
+function prose(y: number, text: string, cls: string): SceneNode[] {
+  return wrapSvgText(text, SUMMARY_MAX_CHARS).map((line, index) => ({
+    type: 'text' as const,
+    x: SUMMARY_X,
+    y: y + index * SUMMARY_LINE_HEIGHT,
+    text: line,
+    cls,
+  }));
+}
 
 /** Where the liver sits. The bile duct and the conjugated fill are both anchored to it. */
 const LIVER = { x: 278, y: 152 };
@@ -115,7 +140,7 @@ export function buildLiverPhysiologyPresentation(ctx: Ctx): ModulePresentation<L
     ...(showObstruction
       ? [
           { type: 'line' as const, x1: 344, y1: 180, x2: 360, y2: 206, colorToken: 'danger' },
-          { type: 'text' as const, x: 392, y: 214, text: `Obstructed ${derived.effectiveObstructionPct.toFixed(0)}%`, cls: 'alarm' },
+          { type: 'text' as const, x: 372, y: 242, text: `Obstructed ${derived.effectiveObstructionPct.toFixed(0)}%`, cls: 'alarm' },
         ]
       : []),
 
@@ -132,39 +157,29 @@ export function buildLiverPhysiologyPresentation(ctx: Ctx): ModulePresentation<L
     { type: 'text', x: 394, y: 100, text: 'Gut · pigment arriving', cls: 'label' },
 
     // --- Summary annotations ---
-    {
-      type: 'text',
-      x: 40,
-      y: 286,
-      text: `stool colour ${derived.stoolColourPct.toFixed(0)}% · urobilinogen ${derived.urineUrobilinogenIndex.toFixed(0)}% of normal`,
-      cls: 'caption',
-    },
-    {
-      type: 'text',
-      x: 40,
-      y: 304,
-      text: `total ${derived.totalBilirubinUmolL.toFixed(0)} µmol/L (${derived.fractionConjugatedPct.toFixed(0)}% conjugated)${derived.jaundiceVisible ? ' · jaundice visible' : ''}`,
-      cls: 'caption',
-    },
-    {
-      type: 'text',
-      x: 40,
-      y: 322,
-      text: `urine: bilirubin ${derived.urineBilirubinPresent ? 'present' : 'absent'} · ammonia ${derived.ammoniaUmolL.toFixed(0)} µmol/L${derived.encephalopathyGrade > 0 ? ` · encephalopathy grade ${derived.encephalopathyGrade}` : ''}`,
-      cls: 'caption',
-    },
+    ...prose(286, `stool colour ${derived.stoolColourPct.toFixed(0)}% · urobilinogen ${derived.urineUrobilinogenIndex.toFixed(0)}% of normal`, 'caption'),
+    ...prose(
+      304,
+      `total ${derived.totalBilirubinUmolL.toFixed(0)} µmol/L (${derived.fractionConjugatedPct.toFixed(0)}% conjugated)${derived.jaundiceVisible ? ' · jaundice visible' : ''}`,
+      'caption',
+    ),
+    ...prose(
+      322,
+      `urine: bilirubin ${derived.urineBilirubinPresent ? 'present' : 'absent'} · ammonia ${derived.ammoniaUmolL.toFixed(0)} µmol/L${derived.encephalopathyGrade > 0 ? ` · encephalopathy grade ${derived.encephalopathyGrade}` : ''}`,
+      'caption',
+    ),
     ...(derived.kernicterusRiskPct > 30
-      ? [{ type: 'text' as const, x: 40, y: 346, text: `Kernicterus risk ${derived.kernicterusRiskPct.toFixed(0)}% — unconjugated vs albumin binding`, cls: 'alarm' }]
+      ? prose(346, `Kernicterus risk ${derived.kernicterusRiskPct.toFixed(0)}% — unconjugated vs albumin binding`, 'alarm')
       : []),
-    { type: 'text', x: 40, y: 380, text: derived.classification, cls: 'verdict' },
-    { type: 'text', x: 40, y: 402, text: derived.patternSummary, cls: 'label' },
+    { type: 'text', x: SUMMARY_X, y: 380, text: derived.classification, cls: 'verdict' },
+    ...prose(402, derived.patternSummary, 'label'),
   ];
 
   return {
     diagram: [
       {
         type: 'frame',
-        viewBox: [26, 66, 552, 360],
+        viewBox: [20, 66, 560, 380],
         ariaLabel:
           'Bilirubin pathway: an unconjugated blood pool taken up into the liver — right and left lobes, falciform ligament, gallbladder and portal triad — where the conjugated pool fills the parenchyma, then out along the bile duct to the gut',
         defs: [
