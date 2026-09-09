@@ -51,7 +51,7 @@ function ReadoutItemBase({
   wide,
   revealsPattern,
 }: ReadoutItemProps) {
-  const { blinded } = useModuleShell();
+  const { blinded, moduleId } = useModuleShell();
   // Both, when both apply: the note a module wrote and the slider it drifted from.
   const hint = [secondary, setPointHint(value, setPoint)].filter(Boolean).join(' · ');
   const style = colorVar ? ({ '--tile-color': colorVar } as CSSProperties) : undefined;
@@ -59,9 +59,11 @@ function ReadoutItemBase({
 
   return (
     <div className={wide ? `${styles.tile} ${styles.wide}` : styles.tile}>
-      {/* Looks its own label up, so a module gains definitions without being touched. */}
+      {/* Looks its own label up, so a module gains definitions without being touched. The
+          module id goes with it because some labels are the module's own word — `State`,
+          micturition's `Volume` — and mean something different one page over. */}
       <span className={`label ${styles.label}`} style={style}>
-        <Term label={label} />
+        <Term label={label} moduleId={moduleId} />
       </span>
       <div className={styles.valueRow}>
         <span className={`numeral ${styles.value}`}>{withheld ? '—' : value}</span>

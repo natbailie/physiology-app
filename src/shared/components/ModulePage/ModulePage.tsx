@@ -120,7 +120,7 @@ export function ModulePage({
   const style = accentVar ? ({ '--accent': accentVar } as CSSProperties) : undefined;
 
   return (
-    <ModuleShellProvider blinded={blindControls}>
+    <ModuleShellProvider blinded={blindControls} moduleId={moduleId}>
       <LabAnchor labRef={labRef} topBarRef={topBarRef} />
       <div ref={pageRef} className={styles.page} style={style}>
         <header ref={topBarRef} className={styles.topBar}>

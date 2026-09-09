@@ -548,6 +548,12 @@ const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([
  * themselves, "hit Infect", "deposit an insult" — so on press the drawing is identical and correct.
  * They no longer settle alike, which is why they have come OFF the collisions list and stayed on
  * this one.
+ *
+ * This list grew by four modules when `Term` stopped taking its tooltip id from `useId`. That
+ * counter advances across every render in the process, so any module with at least one readout
+ * label the glossary defined painted a different id on every press and NO pair of its presets
+ * could ever compare equal — the check was passing vacuously for exactly the modules that had
+ * definitions. It does not any more, and the entries below are what it found once it could see.
  */
 const SAME_SCREEN_ON_PRESS_BY_DESIGN = new Set<string>([
   // Two modules whose scenarios are a HOST, waiting for an event. Nothing has happened yet when the
@@ -566,6 +572,29 @@ const SAME_SCREEN_ON_PRESS_BY_DESIGN = new Set<string>([
   'cellCycle.normal==hydroxyurea',
   'cellCycle.taxaneArrest==hydroxyurea',
   'cellCycle.irradiated==tp53Mutated',
+  // Every hypersensitivity scenario is an exposure that has not happened yet. The preset sets up
+  // who the patient is — sensitised, IgA deficient, ABO incompatible — and the reaction is the
+  // event; before it lands there is nothing to draw, which is why all 82 pairs collide here and
+  // none of them collide once settled.
+  ...(() => {
+    const hosts = ['naiveFirstExposure','typeIAnaphylaxis','typeIIHaemolysis','typeIIISerumSickness','typeIVContactDermatitis','treatedAnaphylaxis','compatibleTransfusion','aboIncompatible','anaphylacticIgaDeficient','febrileNonHaemolytic','delayedHaemolytic','taco','trali'];
+    const pairs: string[] = [];
+    for (let i = 0; i < hosts.length; i++) {
+      for (let j = i + 1; j < hosts.length; j++) pairs.push(`hypersensitivity.${hosts[i]}==${hosts[j]}`);
+    }
+    return pairs;
+  })(),
+  // Intracranial volume accumulates: CSF at 0.35 mL/min and oedema slower still, so hydrocephalus
+  // is a normal skull at the moment it is pressed. The two ventilation presets differ only in
+  // PaCO2, which moves vessel calibre over about a minute rather than instantly.
+  'cerebralPerfusion.normal==hydrocephalus',
+  'cerebralPerfusion.hyperventilated==hypoventilated',
+  // Persistent pulmonary hypertension IS a first breath that fails to drop pulmonary resistance,
+  // so the two are the same circulation until the resistance has had time not to fall.
+  'fetalCirculation.firstBreath==pphn',
+  // Treated glaucoma is a normal eye — that is the point of treating it. The two separate only
+  // in the cup-to-disc ratio the drawing does not carry at time zero.
+  'vision.normalDaylight==treatedGlaucoma',
 ]);
 
 /** Two scenarios that genuinely settle to the same physiology, one line of reason each. */

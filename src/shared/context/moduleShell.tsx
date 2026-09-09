@@ -9,6 +9,10 @@ export interface ScenarioRegistration {
 }
 
 interface ModuleShellValue {
+  /** Which module the page is showing, so a readout label can be looked up against the module
+   * that owns it — seventeen of them print a tile called `State` and mean something different
+   * by it. Empty outside a module page, where the shared table alone answers. */
+  moduleId: string;
   /** True while a pattern-discrimination question hides the inputs. Consumed by the diagram so
    * it can withhold the classification it would otherwise print in the corner. */
   blinded: boolean;
@@ -30,6 +34,7 @@ interface ModuleShellValue {
 }
 
 const ModuleShellContext = createContext<ModuleShellValue>({
+  moduleId: '',
   blinded: false,
   canStartPractice: false,
   startPractice: () => {},
@@ -55,7 +60,17 @@ const ModuleShellContext = createContext<ModuleShellValue>({
  * Storing a function in state would republish the context on every registration, re-running the
  * effect that registered it.
  */
-export function ModuleShellProvider({ blinded, children }: { blinded: boolean; children: ReactNode }) {
+export function ModuleShellProvider({
+  blinded,
+  moduleId = '',
+  children,
+}: {
+  blinded: boolean;
+  /** Optional so the tests that mount this provider alone keep working; a module page always
+   *  passes one. */
+  moduleId?: string;
+  children: ReactNode;
+}) {
   const starter = useRef<(() => void) | null>(null);
   const [canStartPractice, setCanStartPractice] = useState(false);
 
@@ -99,6 +114,7 @@ export function ModuleShellProvider({ blinded, children }: { blinded: boolean; c
 
   const value = useMemo(
     () => ({
+      moduleId,
       blinded,
       canStartPractice,
       startPractice,
@@ -111,6 +127,7 @@ export function ModuleShellProvider({ blinded, children }: { blinded: boolean; c
       registerRevealLab,
     }),
     [
+      moduleId,
       blinded,
       canStartPractice,
       startPractice,

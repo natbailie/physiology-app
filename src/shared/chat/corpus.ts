@@ -127,17 +127,30 @@ async function moduleChunks(moduleNames: Map<string, string>): Promise<Chunk[]> 
 }
 
 async function referenceChunks(): Promise<Chunk[]> {
-  const [{ GLOSSARY }, { MEDICATIONS }, { FORMULAS }] = await Promise.all([
+  const [{ GLOSSARY, MODULE_GLOSSARY }, { MEDICATIONS }, { FORMULAS }] = await Promise.all([
     import('@/shared/glossary/terms'),
     import('@/medications/drugs'),
     import('@/reference/formulas'),
   ]);
 
-  const glossary: Chunk[] = Object.entries(GLOSSARY).map(([label, entry]) => ({
-    id: `glossary:${label}`,
-    title: entry.expansion ? `${label} (${entry.expansion})` : label,
-    text: entry.definition,
-  }));
+  const glossary: Chunk[] = [
+    ...Object.entries(GLOSSARY).map(([label, entry]) => ({
+      id: `glossary:${label}`,
+      title: entry.expansion ? `${label} (${entry.expansion})` : label,
+      text: entry.definition,
+    })),
+    // The module-owned definitions too, tagged with the module that owns them: seventeen modules
+    // print a tile called `State`, and the tutor should be able to answer "what is the state
+    // tile on the thermoregulation page" with the thermoregulation one.
+    ...Object.entries(MODULE_GLOSSARY).flatMap(([moduleId, entries]) =>
+      Object.entries(entries).map(([label, entry]) => ({
+        id: `glossary:${moduleId}:${label}`,
+        moduleId,
+        title: entry.expansion ? `${label} (${entry.expansion})` : label,
+        text: entry.definition,
+      })),
+    ),
+  ];
 
   const drugs: Chunk[] = MEDICATIONS.map((drugClass) => ({
     id: `drug:${drugClass.id}`,

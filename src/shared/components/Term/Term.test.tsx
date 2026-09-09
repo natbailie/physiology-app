@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Term } from './Term';
-import { GLOSSARY, lookupTerm } from '@/shared/glossary/terms';
+import { GLOSSARY, MODULE_GLOSSARY, lookupTerm } from '@/shared/glossary/terms';
 
 afterEach(cleanup);
 
@@ -53,14 +53,28 @@ describe('the glossary itself', () => {
   it('says what an abnormal value would mean, not just what the acronym stands for', () => {
     // A definition that only expands the initials has told a learner nothing they could not
     // have guessed from context.
-    const thin = Object.entries(GLOSSARY)
-      .filter(([, entry]) => entry.definition.length < 80)
-      .map(([key]) => key);
+    const everyEntry = [
+      ...Object.entries(GLOSSARY),
+      ...Object.entries(MODULE_GLOSSARY).flatMap(([moduleId, entries]) =>
+        Object.entries(entries).map(([label, entry]) => [`${moduleId}.${label}`, entry] as const),
+      ),
+    ];
+    const thin = everyEntry.filter(([, entry]) => entry.definition.length < 80).map(([key]) => key);
     expect(thin.join(', ')).toBe('');
   });
 
   it('is keyed in the normalised form it looks up by', () => {
-    const badKeys = Object.keys(GLOSSARY).filter((key) => key !== key.trim().toLowerCase());
+    const badKeys = [
+      ...Object.keys(GLOSSARY),
+      ...Object.values(MODULE_GLOSSARY).flatMap((entries) => Object.keys(entries)),
+    ].filter((key) => key !== key.trim().toLowerCase());
     expect(badKeys.join(', ')).toBe('');
+  });
+
+  it('lets a module answer for a label it owns', () => {
+    // `Volume` is a bladder in micturition and nothing in particular anywhere else, so the
+    // module-scoped entry must win and the shared table must not have grown one.
+    expect(lookupTerm('Volume', 'micturition')?.definition).toContain('bladder');
+    expect(lookupTerm('Volume')).toBeUndefined();
   });
 });

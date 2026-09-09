@@ -1,9 +1,11 @@
-import { useCallback, useId, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { lookupTerm } from '@/shared/glossary/terms';
 import styles from './Term.module.css';
 
 interface TermProps {
   label: string;
+  /** The module asking, so a label that module owns wins over the shared definition. */
+  moduleId?: string;
 }
 
 /** Gap between the trigger and the bubble, and the margin kept from the viewport edges. */
@@ -39,9 +41,25 @@ const FALLBACK_TOPBAR_PX = 88;
  * Falls through to plain text for any label the glossary does not define, so adding a term is
  * the only work needed to cover a new readout anywhere in the app.
  */
-export function Term({ label }: TermProps) {
-  const entry = lookupTerm(label);
-  const id = useId();
+/**
+ * The bubble's id, derived from what it describes rather than from `useId`.
+ *
+ * `useId` would do the job and be unique by construction, but its counter advances across every
+ * render in a process, so two renders of the SAME readout grid produce different HTML. That is
+ * invisible in the app and load-bearing in `controls.test.tsx`, which detects a dead scenario
+ * button by painting two presets and comparing the markup — ids that never repeat make every
+ * pair of screens differ and the check stops finding anything.
+ *
+ * A readout grid never prints the same label twice, so label plus module is unique on the page.
+ */
+function bubbleId(label: string, moduleId: string | undefined): string {
+  const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `term-${moduleId ? `${moduleId}-` : ''}${slug}`;
+}
+
+export function Term({ label, moduleId }: TermProps) {
+  const entry = lookupTerm(label, moduleId);
+  const id = bubbleId(label, moduleId);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
 
