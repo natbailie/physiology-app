@@ -11,6 +11,7 @@
  */
 
 import type { WeakSpot } from '@/shared/assessment/weakness';
+import type { LiveReading } from './liveState';
 import type { Chunk } from './corpus';
 
 export interface ChatExcerpt {
@@ -27,6 +28,8 @@ export interface ChatContext {
   currentModule?: string;
   /** The study report, in prose, so "what am I weak at" is answered from the record. */
   weakness?: string;
+  /** The readout tiles as they stand on screen, so "why is this falling?" has a subject. */
+  liveState?: string;
 }
 
 export interface ChatTurn {
@@ -85,6 +88,26 @@ export function renderWeakness(
       const detail = REASON_PHRASE[spot.reason](spot);
       const due = spot.dueCount > 0 ? `, ${spot.dueCount} due for review` : '';
       return `- ${nameOf(spot.moduleId)} (#${spot.moduleId}): ${detail}${due}. Mastery ${Math.round(spot.mastery * 100)}%.`;
+    })
+    .join('\n');
+}
+
+/**
+ * The readout tiles as one line each, in the order the grid shows them.
+ *
+ * Values arrive already formatted by the module that owns them, so this only joins the label to
+ * the number and the unit — the tutor is quoting the tile, not rounding it a second time.
+ *
+ * Returns undefined for an empty screen rather than an empty block, so a learner who asks a
+ * question from the home page does not send the model a heading with nothing under it.
+ */
+export function renderLiveState(readings: readonly LiveReading[]): string | undefined {
+  if (readings.length === 0) return undefined;
+
+  return readings
+    .map((reading) => {
+      const value = reading.unit ? `${reading.value} ${reading.unit}` : reading.value;
+      return `- ${reading.label}: ${value}${reading.secondary ? ` (${reading.secondary})` : ''}`;
     })
     .join('\n');
 }

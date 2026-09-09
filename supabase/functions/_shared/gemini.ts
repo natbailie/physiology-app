@@ -93,7 +93,13 @@ What you answer from:
 - The EXCERPTS block below is this app's own written material. Prefer it. It is what the learner will see if they go and read the module.
 - When a module covers the question, name it and give its route, e.g. "open Venous return (#venousReturn)". The MODULES block lists every one.
 - When the excerpts do not cover something, say so plainly and answer from general physiology, flagging which part was not from the app's material.
-- Never invent a number. If you do not have a value from the excerpts, describe the direction instead.
+- Never invent a number. If you do not have a value from the excerpts or the READING block, describe the direction instead.
+
+About what is on their screen:
+- The READING block, when present, is the simulator's readout tiles AS THE LEARNER IS LOOKING AT THEM, right now. Those numbers are real output from the model they are running, so quote them.
+- Answer "why is this falling?" or "is this normal?" about those values directly, and say which reading you are working from so they can look at the same tile.
+- It is a snapshot from the moment they asked, not a live feed. If they say they have changed something, ask rather than assuming the numbers still hold.
+- A tile withheld during a practice question is absent from the block. Never guess at a value that is not there — if a reading they ask about is missing, say it is covered while the question is open.
 
 About the learner's record:
 - The RECORD block, when present, is their actual performance from the app's spaced-repetition store. Answer questions about what they are weak at from it, quoting its numbers rather than estimating.
@@ -119,6 +125,7 @@ export interface ChatContext {
   excerpts: ChatExcerpt[];
   currentModule?: string;
   weakness?: string;
+  liveState?: string;
 }
 
 export interface ChatRequest {
@@ -157,6 +164,7 @@ export function parseRequest(body: unknown): ChatRequest | null {
       excerpts: context.excerpts.slice(0, MAX_EXCERPTS),
       currentModule: typeof context.currentModule === 'string' ? context.currentModule : undefined,
       weakness: typeof context.weakness === 'string' ? context.weakness : undefined,
+      liveState: typeof context.liveState === 'string' ? context.liveState : undefined,
     },
   };
 }
@@ -175,6 +183,7 @@ export function contextBlock(context: ChatContext): string {
 
   if (context.weakness) parts.push(`<RECORD>\n${context.weakness}\n</RECORD>`);
   if (context.currentModule) parts.push(`The learner is currently looking at: ${context.currentModule}.`);
+  if (context.liveState) parts.push(`<READING>\n${context.liveState}\n</READING>`);
 
   return parts.join('\n\n');
 }

@@ -8,7 +8,11 @@ interface ReadoutGridViewProps<State, Derived, Inputs> {
 }
 
 /** The readout tile grid rendered from specs. The grid chrome is the same shared panel class the
- * hand-written grids used, so the schema grid sits in the page exactly where the old one did. */
+ * hand-written grids used, so the schema grid sits in the page exactly where the old one did.
+ *
+ * Nothing here tells the tutor what is on screen: each `ReadoutItem` registers itself, which is
+ * what lets the thirty-eight pages still rendering a hand-written panel be seen too. See
+ * `shared/chat/tileRegistry.ts`. */
 export function ReadoutGridView<State, Derived, Inputs>({ readouts, ctx }: ReadoutGridViewProps<State, Derived, Inputs>) {
   return (
     <div className={readoutGridStyles.grid}>

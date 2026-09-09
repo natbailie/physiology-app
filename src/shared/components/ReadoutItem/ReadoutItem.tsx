@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
+import { claimTile, releaseTile, setTile } from '@/shared/chat/tileRegistry';
 import { Term } from '@/shared/components/Term/Term';
 import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './ReadoutItem.module.css';
@@ -56,6 +57,7 @@ function ReadoutItemBase({
   const hint = [secondary, setPointHint(value, setPoint)].filter(Boolean).join(' · ');
   const style = colorVar ? ({ '--tile-color': colorVar } as CSSProperties) : undefined;
   const withheld = Boolean(revealsPattern && blinded);
+  usePublishedTile({ moduleId, label, value, unit, secondary: hint === '' ? undefined : hint, withheld });
 
   return (
     <div className={wide ? `${styles.tile} ${styles.wide}` : styles.tile}>
@@ -76,6 +78,34 @@ function ReadoutItemBase({
       )}
     </div>
   );
+}
+
+/**
+ * Offer this tile to the tutor for as long as it is on screen.
+ *
+ * Written from a commit effect with no dep array rather than during render: what the tutor can
+ * read should be what the learner can see, never a frame React rendered and discarded. See
+ * `tileRegistry.ts` for why the tile is the publisher rather than the page.
+ */
+function usePublishedTile(tile: {
+  moduleId: string;
+  label: string;
+  value: string;
+  unit?: string;
+  secondary?: string;
+  withheld: boolean;
+}): void {
+  const id = useRef<number | null>(null);
+  id.current ??= claimTile();
+
+  useEffect(() => {
+    setTile(id.current as number, tile);
+  });
+
+  useEffect(() => {
+    const claimed = id.current as number;
+    return () => releaseTile(claimed);
+  }, []);
 }
 
 export const ReadoutItem = memo(ReadoutItemBase);

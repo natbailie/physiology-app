@@ -6,7 +6,8 @@ import type { WeakSpot } from '@/shared/assessment/weakness';
 import { loadCorpus, type Chunk } from './corpus';
 import { buildIndex, retrieve, type RetrievalIndex } from './retrieve';
 import { corpusAnswer, type CorpusCitation } from './corpusAnswer';
-import { excerptsFrom, moduleCatalogue, renderWeakness, type ChatRequest } from './systemPrompt';
+import { readLiveState } from './liveState';
+import { excerptsFrom, moduleCatalogue, renderLiveState, renderWeakness, type ChatRequest } from './systemPrompt';
 
 /**
  * Talking to the tutor.
@@ -149,6 +150,14 @@ export function useChat({ moduleId, weakSpots }: UseChatOptions): UseChat {
               ...(() => {
                 const weakness = renderWeakness(weakSpots, (id) => moduleNames.get(id) ?? id);
                 return weakness ? { weakness } : {};
+              })(),
+              // Read at SEND time, not subscribed to. The engine runs at frame rate and the
+              // panel has no reason to re-render because a number moved; what the tutor needs
+              // is the screen as it stood when the learner pressed enter.
+              ...(() => {
+                const live = readLiveState();
+                const liveState = live ? renderLiveState(live.readings) : undefined;
+                return liveState ? { liveState } : {};
               })(),
             },
           };
