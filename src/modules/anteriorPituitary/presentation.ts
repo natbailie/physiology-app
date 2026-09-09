@@ -1,6 +1,7 @@
 import { clamp } from '@/shared/lib/math';
 import { MASS, PROLACTIN_AXIS } from './engine/constants';
 import type { PituitaryDerived, PituitaryHistoryPoint, PituitaryInputs, PituitaryInternalState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
 type Ctx = PresentationContext<PituitaryInternalState, PituitaryDerived, PituitaryInputs, PituitaryHistoryPoint>;
@@ -76,7 +77,10 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
           {
             type: 'path',
             d: roundedRect(158, 30, 184, 34, 12),
+            /* Washed: "Hypothalamus" is written across the middle of this block. */
             fill: 'pituitary',
+            fillOpacity: LABEL_WASH,
+            colorToken: 'pituitary',
             styleVars: { 'stain-strength': 0.2 },
           },
           { type: 'text', x: 250, y: 52, text: 'Hypothalamus', cls: 'anatomyStrong', anchor: 'middle' },
@@ -85,7 +89,10 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
             type: 'path',
             d: `M 226 64 C ${(250 - waist).toFixed(1)} 110, ${(250 - waist).toFixed(1)} 130, 234 ${SELLA.top}
                 L 266 ${SELLA.top} C ${(250 + waist).toFixed(1)} 130, ${(250 + waist).toFixed(1)} 110, 274 64 Z`,
+            /* Washed: the optic chiasm is drawn across the stalk and labelled there. */
             fill: 'pituitary',
+            fillOpacity: LABEL_WASH,
+            colorToken: 'pituitary',
             styleVars: { 'stain-strength': 0.2 },
           },
           { type: 'text', x: 292, y: 84, text: 'Stalk', cls: 'anatomy', anchor: 'start' },
@@ -172,7 +179,9 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
               { type: 'path', d: 'M 158 150 L 342 128', colorToken: 'retina' },
             ],
           },
-          { type: 'text', x: 250, y: 112, text: 'Optic chiasm', cls: 'anatomy', anchor: 'middle' },
+          // Halo: the chiasm's own crossing fibres run through this label, and moving it off
+          // the chiasm would lose the one thing the label is pointing at.
+          { type: 'text', x: 250, y: 112, text: 'Optic chiasm', cls: 'anatomy', anchor: 'middle', halo: 'bg' },
           ...(loss > 0.02
             ? [
                 {
@@ -221,8 +230,11 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
 
           // --- The gland itself ---
           { type: 'path', d: ellipsePath(GLAND.cx, GLAND.cy, 84, 42), fill: 'pituitary', colorToken: 'pituitary' },
-          { type: 'path', d: ellipsePath(GLAND.cx, GLAND.cy + 7, 27, 10), fill: 'adh', colorToken: 'adh' },
-          { type: 'text', x: GLAND.cx, y: GLAND.cy + 11, text: 'Posterior', cls: 'anatomy', anchor: 'middle' },
+          // Washed: "Posterior" is written across it.
+          { type: 'path', d: ellipsePath(GLAND.cx, GLAND.cy + 7, 27, 10), fill: 'adh', fillOpacity: LABEL_WASH, colorToken: 'adh' },
+          // The posterior lobe is smaller than the word naming it, so the lobe's own outline
+          // crossed it.
+          { type: 'text', x: GLAND.cx, y: GLAND.cy + 11, text: 'Posterior', cls: 'anatomy', anchor: 'middle', halo: 'bg' },
 
           ...CELLS.flatMap((cell) =>
             [-8, 0, 8].map((dx) => ({

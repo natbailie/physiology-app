@@ -84,9 +84,11 @@ function buildMichaelsMentenFrame(derived: KineticsDerived, inputs: KineticsInpu
         anchor: 'middle',
       },
       {
+        // Left of the y-axis, not across it: anchored `start` at x=20 the name ran over the axis
+        // line itself, which sits at MM.left.
         type: 'text',
-        x: 20,
-        y: MM.top + 30,
+        x: 14,
+        y: MM.top - 6,
         text: 'v (µmol/min)',
         cls: 'caption',
       },

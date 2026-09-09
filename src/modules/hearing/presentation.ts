@@ -112,7 +112,7 @@ export function buildHearingPresentation(ctx: Ctx): ModulePresentation<HearingIn
 
       // ---- The two windows ----
       { type: 'line', x1: 272, y1: 176, x2: 272, y2: 196, colorToken: 'text' },
-      { type: 'text', x: 276, y: 168, text: 'oval', cls: 'tickLabel' },
+      { type: 'text', x: 276, y: 168, text: 'oval', cls: 'tickLabel', halo: 'bg' },
       { type: 'line', x1: 272, y1: 214, x2: 272, y2: 230, colorToken: 'text' },
       { type: 'text', x: 266, y: 240, text: 'round', cls: 'tickLabel', anchor: 'end' },
 

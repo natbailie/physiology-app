@@ -69,7 +69,7 @@ export function buildCellCyclePresentation(ctx: Ctx): ModulePresentation<CellCyc
       colorToken: segment.colorToken,
       fill: 'none',
       strokeWidth: isCurrent ? STROKE + 8 : STROKE,
-      styleVars: { opacity: isCurrent ? 1 : 0.35 },
+      opacity: isCurrent ? 1 : 0.35,
     };
   });
 

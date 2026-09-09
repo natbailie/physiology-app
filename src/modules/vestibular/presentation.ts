@@ -120,7 +120,9 @@ export function buildVestibularPresentation(ctx: Ctx): ModulePresentation<Vestib
           { type: 'path', d: 'M 374 200 C 334 216, 316 226, 310 238', cls: 'nerve', markerEnd: 'url(#vestArrow)' },
           { type: 'rect', x: 246, y: 238, width: 68, height: 52, cls: 'brainstem' },
           { type: 'text', x: 280, y: 262, text: 'Brainstem', cls: 'anatomyStrong', anchor: 'middle' },
-          { type: 'text', x: 280, y: 278, text: 'reads the difference', cls: 'sideTick', anchor: 'middle' },
+          // BELOW the brainstem box rather than inside it: the phrase is half as wide again as
+          // the 68-unit box, so the box's own sides ran through it.
+          { type: 'text', x: 280, y: 304, text: 'reads the difference', cls: 'sideTick', anchor: 'middle' },
 
           // ---- Nystagmus direction indicator ----
           { type: 'text', x: 20, y: 318, text: 'Nystagmus', cls: 'label' },

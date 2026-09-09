@@ -23,6 +23,30 @@ function urineConcentrationStatus(urineOsm: number, plasmaOsm: number): string {
   return 'iso-osmotic';
 }
 
+/** The three medullary bands, deepening toward the papilla. */
+const BAND_DEPTHS = [
+  { y: 130, height: 56, depth: 0.5 },
+  { y: 186, height: 56, depth: 0.85 },
+  { y: 242, height: 58, depth: 1.3 },
+] as const;
+
+/**
+ * How strongly a medullary band is tinted: the gradient's current strength times how deep the
+ * band sits, against the app's soft wash.
+ *
+ * This used to be carried only by the web's `.medullaBand` CSS rule, which multiplies the same
+ * three terms through `color-mix`. The schema kept `fill: 'medulla'` and the two style variables
+ * but not the rule, so a renderer without CSS — the phone — painted all three bands in FULL
+ * medulla amber: an opaque slab across the bottom two thirds of the diagram with the gradient
+ * label, the descending limb, the collecting duct and the urine flow rate buried inside it.
+ *
+ * Stating it as data rather than as a class is what makes the two platforms agree. `--wash-soft`
+ * is 22%, and the cap keeps a fully-built gradient at the deepest band from going solid.
+ */
+function bandOpacity(gradientStrength: number, depth: number): number {
+  return Math.min(0.34, gradientStrength * 0.22 * depth);
+}
+
 export function buildRenalTubularPresentation(ctx: Ctx): ModulePresentation<RenalTubularState, RenalTubularDerived, RenalTubularInputs, RenalTubularHistoryPoint> {
   const { derived } = ctx;
   const urineFlowSpeed = clamp(derived.urineFlowRateMLPerMin / 6, 0.1, 3);
@@ -43,11 +67,16 @@ export function buildRenalTubularPresentation(ctx: Ctx): ModulePresentation<Rena
           {
             type: 'group',
             styleVars: { 'gradient-strength': derived.medullaryGradientStrength },
-            children: [
-              { type: 'rect', x: 0, y: 130, width: 480, height: 56, fill: 'medulla', styleVars: { depth: 0.5 } },
-              { type: 'rect', x: 0, y: 186, width: 480, height: 56, fill: 'medulla', styleVars: { depth: 0.85 } },
-              { type: 'rect', x: 0, y: 242, width: 480, height: 58, fill: 'medulla', styleVars: { depth: 1.3 } },
-            ],
+            children: BAND_DEPTHS.map(({ y, height, depth }) => ({
+              type: 'rect' as const,
+              x: 0,
+              y,
+              width: 480,
+              height,
+              fill: 'medulla',
+              fillOpacity: bandOpacity(derived.medullaryGradientStrength, depth),
+              styleVars: { depth },
+            })),
           },
           // Cortex–medulla boundary
           { type: 'line', x1: 0, y1: 130, x2: 480, y2: 130, cls: 'cortexDivider' },
@@ -82,7 +111,10 @@ export function buildRenalTubularPresentation(ctx: Ctx): ModulePresentation<Rena
               { type: 'path', d: 'M372,176 L392,172', markerEnd: 'adh-water-arrow', cls: 'aquaporinArrow' },
               { type: 'path', d: 'M372,204 L392,200', markerEnd: 'adh-water-arrow', cls: 'aquaporinArrow' },
               { type: 'path', d: 'M372,232 L392,228', markerEnd: 'adh-water-arrow', cls: 'aquaporinArrow' },
-              { type: 'text', x: 398, y: 196, text: 'H2O', cls: 'pathLabel', colorToken: 'adh', opacity: derived.effectiveADHAction },
+              /* Floored at 0.65, which is where it clears 3:1 against the deepest band. The label fades with ADH action, which is the teaching, but a
+                 resting 27% put it at 1.5:1 against the medullary wash — gone rather than faint.
+                 The ARROWS beside it still fade the whole way, so the signal is not lost. */
+              { type: 'text', x: 398, y: 196, text: 'H2O', cls: 'pathLabel', colorToken: 'adh', opacity: 0.65 + 0.35 * derived.effectiveADHAction },
             ],
           },
           // ADH feedback axis — from osmoreceptors to the posterior pituitary

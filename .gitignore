@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# The diagram audit's rendered frames — regenerate with `npx vitest run tools/diagram-audit`.
+tools/diagram-audit/out/

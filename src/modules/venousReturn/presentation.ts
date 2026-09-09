@@ -144,8 +144,11 @@ export function buildVenousReturnPresentation(ctx: Ctx): ModulePresentation<
       // Region labels: which curve is constraining the output on each side of the plot.
       { type: 'text', x: PLOT_AREA.left + 6, y: PLOT_AREA.top + 12, text: 'venous return', cls: 'caption', anchor: 'start', colorToken: 'venous' },
       { type: 'text', x: PLOT_AREA.right - 92, y: PLOT_AREA.top + 12, text: 'cardiac function', cls: 'caption', anchor: 'start', colorToken: 'artery' },
-      { type: 'text', x: PLOT_AREA.left + 58, y: PLOT_AREA.top + 44, text: 'preload-limited — the veins set output', cls: 'caption', anchor: 'middle' },
-      { type: 'text', x: PLOT_AREA.right - 46, y: PLOT_AREA.bottom - 12, text: 'pump-limited — the heart at its ceiling', cls: 'caption', anchor: 'middle' },
+      /* Anchored to the plot's edges rather than centred on a point inside it. Both of these are
+         wider than the space their centre left them: the first reached back over the y-axis ticks
+         and the second over the Pmsf marker. */
+      { type: 'text', x: PLOT_AREA.left + 8, y: PLOT_AREA.top + 44, text: 'preload-limited — the veins set output', cls: 'caption', anchor: 'start' },
+      { type: 'text', x: PLOT_AREA.right - 6, y: PLOT_AREA.bottom - 32, text: 'pump-limited — the heart at its ceiling', cls: 'caption', anchor: 'end' },
 
       // --- The venous reservoir: what actually sets the filling pressure ---
       { type: 'text', x: 314, y: 54, text: 'Venous reservoir', cls: 'anatomy' },

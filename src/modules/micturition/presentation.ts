@@ -54,7 +54,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       d: 'M30,40 L75,100',
       colorToken: 'danger',
       strokeWidth: parasympatheticWidth,
-      styleVars: { opacity: 0.6 + derived.parasympatheticActivity * 0.4 },
+      opacity: 0.6 + derived.parasympatheticActivity * 0.4,
     },
     { type: 'text' as const, x: 15, y: 35, text: 'Pelvic n.', cls: 'label', colorToken: 'danger', opacity: 0.8 },
 
@@ -64,7 +64,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       d: 'M170,40 L125,100',
       colorToken: 'o2',
       strokeWidth: sympatheticWidth,
-      styleVars: { opacity: 0.6 + derived.sympatheticActivity * 0.4 },
+      opacity: 0.6 + derived.sympatheticActivity * 0.4,
     },
     { type: 'text' as const, x: 148, y: 35, text: 'Hypogastric n.', cls: 'label', colorToken: 'o2', opacity: 0.8 },
 
@@ -74,7 +74,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       d: 'M50,185 L85,155',
       colorToken: 'cortisol',
       strokeWidth: 1 + derived.afferentFiringRate * 2,
-      styleVars: { opacity: 0.5 + derived.afferentFiringRate * 0.5 },
+      opacity: 0.5 + derived.afferentFiringRate * 0.5,
     },
     {
       type: 'circle' as const,
@@ -82,7 +82,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       cy: 190,
       r: afferentRadius,
       fill: 'cortisol',
-      styleVars: { opacity: 0.4 + derived.afferentFiringRate * 0.6 },
+      opacity: 0.4 + derived.afferentFiringRate * 0.6,
     },
     { type: 'text' as const, x: 15, y: 205, text: 'Stretch Rx', cls: 'label', colorToken: 'cortisol', opacity: 0.8 },
 
@@ -93,7 +93,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       colorToken: 'artery',
       fill: 'none',
       strokeWidth: detrusorWidth,
-      styleVars: { opacity: 0.5 + derived.detrusorTone * 0.5 },
+      opacity: 0.5 + derived.detrusorTone * 0.5,
     },
     { type: 'text' as const, x: 155, y: 140, text: 'Detrusor', cls: 'label', colorToken: 'artery', opacity: 0.8 },
 
@@ -103,7 +103,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       d: bladderLumen,
       colorToken: 'o2',
       fill: 'o2',
-      styleVars: { opacity: 0.15 + volumeFraction * 0.35 },
+      opacity: 0.15 + volumeFraction * 0.35,
     },
 
     // Volume text.
@@ -125,7 +125,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       width: sphincterGap,
       height: 6,
       fill: 'artery',
-      styleVars: { opacity: 0.4 + derived.externalSphincterTone * 0.6 },
+      opacity: 0.4 + derived.externalSphincterTone * 0.6,
     },
 
     // External sphincter (skeletal muscle ring).
@@ -136,7 +136,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       width: sphincterGap + 8,
       height: 8,
       fill: 'danger',
-      styleVars: { opacity: 0.3 + derived.externalSphincterTone * 0.7 },
+      opacity: 0.3 + derived.externalSphincterTone * 0.7,
     },
     {
       type: 'text' as const,
@@ -154,7 +154,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       d: `M100,${internalSphincterY + 12} L100,215`,
       colorToken: 'text',
       strokeWidth: 2 + (1 - derived.externalSphincterTone) * 3,
-      styleVars: { opacity: 0.4 },
+      opacity: 0.4,
     },
 
     // Pressure indicator.

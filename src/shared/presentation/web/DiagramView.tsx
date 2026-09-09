@@ -3,7 +3,6 @@ import { DiagramFrame } from '@/shared/components/DiagramFrame/DiagramFrame';
 import { VesselFlow } from '@/shared/components/VesselFlow/VesselFlow';
 import { HormoneArrow } from '@/shared/components/HormoneArrow/HormoneArrow';
 import type { DefNode, FrameNode, GradientStop, SceneNode } from '../types';
-import { ORGANS } from './organs';
 import type { ResolvedDiagramClasses } from './diagramClasses';
 
 /** `{ 'glucose': 0.7 }` → `{ '--glucose': 0.7 }`, exactly the style objects the hand-written
@@ -106,6 +105,8 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           className={resolveClass(classes, node.cls)}
           fill={paint(node.fill, node.fillGradientId)}
           fillOpacity={node.fillOpacity}
+          stroke={colorVar(node.stroke)}
+          strokeWidth={node.strokeWidth}
           opacity={node.opacity}
           style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
         />
@@ -121,6 +122,8 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           className={resolveClass(classes, node.cls)}
           fill={paint(node.fill, node.fillGradientId)}
           fillOpacity={node.fillOpacity}
+          stroke={colorVar(node.stroke)}
+          strokeWidth={node.strokeWidth}
           opacity={node.opacity}
           clipPath={node.clipPathId ? `url(#${node.clipPathId})` : undefined}
           style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
@@ -128,8 +131,8 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
       );
     case 'line':
       return <line key={index} x1={node.x1} y1={node.y1} x2={node.x2} y2={node.y2} className={resolveClass(classes, node.cls)} stroke={colorVar(node.colorToken)} />;
-    case 'text':
-      return (
+    case 'text': {
+      const label = (
         <text
           key={index}
           x={node.x}
@@ -143,6 +146,31 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           {node.text}
         </text>
       );
+      if (!node.halo) return label;
+      /* The halo is the SAME text stroked in the background colour, underneath. Two passes rather
+       * than `paint-order: stroke fill`, which react-native-svg does not support — and the two
+       * renderers have to agree, or a label is legible on one platform and not the other. */
+      return (
+        <g key={index}>
+          <text
+            x={node.x}
+            y={node.y}
+            className={resolveClass(classes, node.cls)}
+            textAnchor={node.anchor}
+            fill={colorVar(node.halo)}
+            stroke={colorVar(node.halo)}
+            strokeWidth={node.haloWidth ?? 3}
+            strokeLinejoin="round"
+            opacity={node.opacity}
+            aria-hidden="true"
+            style={node.styleVars ? toStyleVars(node.styleVars) : undefined}
+          >
+            {node.text}
+          </text>
+          {label}
+        </g>
+      );
+    }
     case 'vessel':
       return <VesselFlow key={index} path={node.path} speed={node.speed} colorVar={colorVar(node.colorToken) ?? ''} width={node.width} />;
     case 'axis':
@@ -158,10 +186,6 @@ function renderNode(node: SceneNode, classes: ResolvedDiagramClasses, index: num
           inhibitory={node.inhibitory}
         />
       );
-    case 'organ': {
-      const Organ = ORGANS[node.name];
-      return <Organ key={index} x={node.x} y={node.y} params={node.params} classes={classes} />;
-    }
   }
 }
 

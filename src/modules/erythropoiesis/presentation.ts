@@ -1,5 +1,5 @@
 import { clamp, scaleClamped } from '@/shared/lib/math';
-import { KIDNEY_PATH } from '@/shared/diagram/organShapes';
+import { kidneyScene } from '@/shared/diagram/organShapes';
 import { HEMOGLOBIN, OXYGEN_DELIVERY, RETICULOCYTE, SUBSTRATE } from './engine/constants';
 import type { ErythroDerived, ErythroHistoryPoint, ErythroInputs, ErythroState } from './engine/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
@@ -41,6 +41,16 @@ export function buildErythropoiesisPresentation(ctx: Ctx): ModulePresentation<Er
 
   const hypoproliferative = derived.isHypoproliferative;
 
+  /* A sectioned kidney rather than the first-generation blob: capsule, cortex, the six medullary
+   * pyramids, the calyces and pelvis, and the renal vessels. This module is ABOUT the kidney as
+   * an oxygen sensor, and the peritubular fibroblasts that make EPO sit in the cortex — which the
+   * blob had no way to show. The cortical wash carries renal function, so chronic kidney disease
+   * reads as a pale cortex as well as a small organ. */
+  const kidney = kidneyScene(
+    { x: 372, y: 132, scale: kidneyScale },
+    { gfrIntensity: renalFunction, colorToken: 'kidney', medullaToken: 'epo' },
+  );
+
   return {
     diagram: [
       {
@@ -48,25 +58,17 @@ export function buildErythropoiesisPresentation(ctx: Ctx): ModulePresentation<Er
         viewBox: [0, 0, 480, 300],
         ariaLabel:
           'Diagram of erythropoiesis: the kidney sensing tissue oxygen and releasing erythropoietin, the bone marrow producing red cells, and those cells carrying oxygen back to the tissues',
-        defs: [{ type: 'marker', id: 'epo-arrow', colorToken: 'epo' }],
+        defs: [{ type: 'marker', id: 'epo-arrow', colorToken: 'epo' }, ...kidney.defs],
         children: [
           // Kidney: the oxygen sensor and EPO source. Scaled by renal function so CKD
           // reads as a shrunken, dim organ.
+          kidney.node,
           {
             type: 'group',
             transform: 'translate(372,132)',
-            styleVars: { 'epo-level': epoLevel, 'renal-function': renalFunction },
             children: [
-              {
-                type: 'group',
-                transform: `scale(${kidneyScale})`,
-                styleVars: { 'epo-level': epoLevel },
-                children: [
-                  { type: 'path', d: KIDNEY_PATH, fill: 'epo', colorToken: 'kidney', strokeWidth: 2 },
-                ],
-              },
               { type: 'text', x: 0, y: 62, text: 'Kidney', cls: 'organLabel', anchor: 'middle' },
-              { type: 'text', x: -22, y: 76, text: 'O2 sensor', cls: 'pathLabel' },
+              { type: 'text', x: 0, y: 76, text: 'O2 sensor', cls: 'pathLabel', anchor: 'middle' },
             ],
           },
           {
@@ -86,8 +88,12 @@ export function buildErythropoiesisPresentation(ctx: Ctx): ModulePresentation<Er
             transform: 'translate(96,120)',
             styleVars: { 'marrow-output': marrowOutput, 'marrow-function': marrowFunction },
             children: [
-              { type: 'path', d: MARROW_PATH, fill: 'marrow', colorToken: 'marrow', strokeWidth: 2, styleVars: { 'marrow-output': marrowOutput } },
-              { type: 'path', d: MARROW_PATH, fill: 'none', colorToken: 'text-faint', strokeWidth: 1.5, styleVars: { 'marrow-function': marrowFunction } },
+              /* Density IS output: a marrow working flat out is dense, an aplastic one is an
+                 empty cavity with an outline. That was carried by `--marrow-output` alone, a
+                 custom property no renderer without a cascade reads, so the phone drew every
+                 marrow — failing, normal or driven — as the same solid brown block. */
+              { type: 'path', d: MARROW_PATH, fill: 'marrow', fillOpacity: 0.12 + marrowOutput * 0.62, colorToken: 'marrow', strokeWidth: 2 },
+              { type: 'path', d: MARROW_PATH, fill: 'none', colorToken: 'text-faint', strokeWidth: 1.5, opacity: 1 - marrowFunction * 0.6 },
               { type: 'text', x: 0, y: 52, text: 'Marrow', cls: 'organLabel', anchor: 'middle' },
             ],
           },

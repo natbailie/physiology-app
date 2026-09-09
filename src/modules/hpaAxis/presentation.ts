@@ -1,6 +1,7 @@
 import { clamp } from '@/shared/lib/math';
 import { CORTISOL } from './engine/constants';
 import type { HpaDerived, HpaHistoryPoint, HpaInputs, HpaState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
 type Ctx = PresentationContext<HpaState, HpaDerived, HpaInputs, HpaHistoryPoint>;
@@ -61,8 +62,11 @@ export function buildHpaPresentation(ctx: Ctx): ModulePresentation<HpaState, Hpa
 
           // ---- Pituitary, in its sella ----
           { type: 'path', d: 'M 78 148 C 78 184, 108 194, 128 194 C 150 194, 178 184, 178 148', colorToken: 'text-faint' },
-          { type: 'path', d: ellipse(110, 158, 26, 20), fill: 'pituitary', colorToken: 'pituitary', styleVars: { 'level': pituitaryFunction } },
-          { type: 'path', d: ellipse(152, 155, 14, 16), fill: 'adh', colorToken: 'adh' },
+          /* Washed rather than solid: this shape exists to hold the label written across it, and a
+             signal colour at full strength leaves that label at about 1.3:1. */
+          { type: 'path', d: ellipse(110, 158, 26, 20), fill: 'pituitary', fillOpacity: LABEL_WASH, colorToken: 'pituitary', styleVars: { 'level': pituitaryFunction } },
+          // The posterior lobe carries "post." across it, so it is washed like its neighbour.
+          { type: 'path', d: ellipse(152, 155, 14, 16), fill: 'adh', fillOpacity: LABEL_WASH, colorToken: 'adh' },
           { type: 'text', x: 110, y: 162, text: 'anterior', cls: 'caption', anchor: 'middle' },
           { type: 'text', x: 152, y: 159, text: 'post.', cls: 'caption', anchor: 'middle' },
           { type: 'text', x: 128, y: 210, text: 'Pituitary', cls: 'anatomyStrong', anchor: 'middle' },
@@ -97,7 +101,7 @@ export function buildHpaPresentation(ctx: Ctx): ModulePresentation<HpaState, Hpa
           { type: 'text', x: AXIS_GLAND.x, y: AXIS_GLAND.y + 52, text: 'Adrenal', cls: 'anatomyStrong', anchor: 'middle' },
 
           // ---- The circulation everything downstream shares ----
-          { type: 'path', d: roundedRect(64, 286, 432, 30, 15), fill: 'artery', colorToken: 'artery' },
+          { type: 'path', d: roundedRect(64, 286, 432, 30, 15), fill: 'artery', fillOpacity: LABEL_WASH, colorToken: 'artery' },
           { type: 'text', x: 72, y: 306, text: 'Circulation', cls: 'anatomy', anchor: 'start' },
           {
             type: 'axis',
@@ -155,14 +159,18 @@ export function buildHpaPresentation(ctx: Ctx): ModulePresentation<HpaState, Hpa
             markerId: 'axisInhibit',
             inhibitory: true,
           },
-          { type: 'text', x: 40, y: 200, text: 'negative', colorToken: 'text-dim' },
+          // 15 units apart: at 12 the two lines touched.
+          { type: 'text', x: 40, y: 197, text: 'negative', colorToken: 'text-dim' },
           { type: 'text', x: 40, y: 212, text: 'feedback', colorToken: 'text-dim' },
 
           // ---- What the hormone actually does (target tissue) ----
           { type: 'path', d: 'M 330 320 L 330 336', colorToken: 'text-faint', markerEnd: 'axisExcite' },
-          { type: 'path', d: roundedRect(252, 338, 244, 56, 9), fill: 'sarcomere', colorToken: 'sarcomere', styleVars: { 'level': cortisol } },
+          { type: 'path', d: roundedRect(252, 338, 244, 56, 9), fill: 'sarcomere', fillOpacity: LABEL_WASH, colorToken: 'sarcomere', styleVars: { 'level': cortisol } },
           { type: 'text', x: 374, y: 358, text: 'Liver · muscle · immune system', cls: 'anatomyStrong', anchor: 'middle' },
-          { type: 'text', x: 374, y: 372, text: 'gluconeogenesis up, protein broken down, inflammation damped', cls: 'caption', anchor: 'middle' },
+          /* Two lines. The band is 244 units wide and this sentence is wider than that at any
+             size worth reading it at, so on one line the band's own sides ran through it. */
+          { type: 'text', x: 374, y: 371, text: 'gluconeogenesis up, protein broken down,', cls: 'caption', anchor: 'middle' },
+          { type: 'text', x: 374, y: 385, text: 'inflammation damped', cls: 'caption', anchor: 'middle' },
 
           // ---- Readings summary ----
           {

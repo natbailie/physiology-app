@@ -1,5 +1,6 @@
 import { clamp } from '@/shared/lib/math';
 import type { AdrenalCortexDerived, AdrenalCortexHistoryPoint, AdrenalCortexInputs, AdrenalCortexInternalState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
 
 type Ctx = PresentationContext<AdrenalCortexInternalState, AdrenalCortexDerived, AdrenalCortexInputs, AdrenalCortexHistoryPoint>;
@@ -51,7 +52,13 @@ export function buildAdrenalCortexPresentation(ctx: Ctx): ModulePresentation<Adr
         {
           type: 'path' as const,
           d: roundedRect(x, 68, 62, 32, 6),
-          fill: blocked ? 'danger' : 'none',
+          /* Opaque, not `none`. Each enzyme is a station ON the steroidogenic spine, and that
+             spine is one straight line at y=84 — so with a transparent box it ran through the
+             middle of all four enzyme names. Filled in the panel colour the box occludes it and
+             reads as a gate on the pathway, which is what it is. Blocked, it is the same box
+             washed in danger rather than filled solid, so the name on it stays readable. */
+          fill: blocked ? 'danger' : 'panel',
+          fillOpacity: blocked ? LABEL_WASH : 1,
           colorToken: blocked ? 'danger' : 'text-dim',
           strokeWidth: blocked ? 2 : 1.5,
         },

@@ -1,7 +1,13 @@
 import { clamp } from '@/shared/lib/math';
 import type { PresentationContext, ModulePresentation, FrameNode, SceneNode } from '@/shared/presentation/types';
 import { airwayPressureAtPhase } from './engine/pressures';
+
 import type { MvDerived, MvHistoryPoint, MvInputs, MvState } from './engine/types';
+
+/** `--wash-faint` and `--wash-strong` from `index.css`, as the fractions they are. The alveolar
+ *  unit's tint is the first plus its deviation times the second, exactly as `.unitCircle` says. */
+const UNIT_WASH_FAINT = 0.14;
+const UNIT_WASH_STRONG = 0.48;
 
 /** The waveform window the "monitor" draws: a fixed stretch of real time, so a faster rate packs
  * more breaths into it — the one place a rate change is actually drawn, not merely counted. */
@@ -52,12 +58,30 @@ export function buildMechanicalVentilationPresentation(
    * with the shared V/Q circle whose intensity carries the recruitment level. */
   function lungUnit(x: number, label: string, recruitment: number, metric: string): SceneNode {
     const open = 1 - recruitment;
+    const deviation = clamp(open * 1.6, 0, 1);
     return {
       type: 'group',
       transform: `translate(${x}, ${132})`,
       children: [
-        { type: 'circle', cx: 0, cy: 0, r: 20, fill: 'vq', styleVars: { 'vq-deviation': clamp(open * 1.6, 0, 1) } },
-        { type: 'text', x: 0, y: 6, text: label, cls: 'organLabel', anchor: 'middle' },
+        {
+          type: 'circle',
+          cx: 0,
+          cy: 0,
+          r: 20,
+          fill: 'vq',
+          /* The tint `.unitCircle` describes — wash-faint plus deviation times wash-strong — and
+             the outline that goes with it. Both were CSS only, so a renderer without a cascade
+             drew a SOLID vq disc with the unit's own name in dark ink on top of it, which is
+             what the phone has been showing. */
+          fillOpacity: UNIT_WASH_FAINT + deviation * UNIT_WASH_STRONG,
+          stroke: 'vq',
+          strokeWidth: 1.5,
+          styleVars: { 'vq-deviation': deviation },
+        },
+        // ABOVE the disc, not across it. At full deviation the tint is 62% of the signal
+        // colour, and the unit's own name in body ink on top of that cannot be read on either
+        // platform — this was the worst of the diagram's legibility problems on a phone.
+        { type: 'text', x: 0, y: -28, text: label, cls: 'organLabel', anchor: 'middle' },
         { type: 'text', x: 0, y: 36, text: metric, cls: 'valueLabel', anchor: 'middle' },
       ],
     };
@@ -160,7 +184,13 @@ export function buildMechanicalVentilationPresentation(
       inspiredO2(354, 44),
       { type: 'text', x: 18, y: 276, text: `failure: ${derived.failureType}`, cls: 'verdict', colorToken: 'co2' },
       { type: 'text', x: 142, y: 276, text: `VILI risk ${derived.viliRisk}`, cls: 'pathLabel', colorToken: 'vq' },
-      { type: 'text', x: 276, y: 276, text: 'oxygen key: vq V/Q · compliance effort · co2 CO2', cls: 'caption' },
+      /* The colour key, as three words each painted in the colour it names. It was one run-on
+         caption — "oxygen key: vq V/Q · compliance effort · co2 CO2" — which named the tokens
+         instead of showing them and ran 53 units off the right edge of the frame. */
+      { type: 'text', x: 250, y: 276, text: 'key', cls: 'caption' },
+      { type: 'text', x: 274, y: 276, text: 'V/Q', cls: 'pathLabel', colorToken: 'vq' },
+      { type: 'text', x: 302, y: 276, text: 'effort', cls: 'pathLabel', colorToken: 'compliance' },
+      { type: 'text', x: 338, y: 276, text: 'CO₂', cls: 'pathLabel', colorToken: 'co2' },
     ],
   };
 

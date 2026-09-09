@@ -1,6 +1,7 @@
 import { clamp } from '@/shared/lib/math';
 import { T4 } from './engine/constants';
 import type { HptDerived, HptHistoryPoint, HptInputs, HptState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
 /* The HPT axis on the shared endocrine scaffold (viewBox 0 0 560 440) — see hpgAxis for the
@@ -95,8 +96,11 @@ export function buildHptPresentation(ctx: Ctx): ModulePresentation<HptState, Hpt
 
           /* ---- Pituitary in its sella ---- */
           { type: 'path', d: SELLA, colorToken: 'text-faint', strokeWidth: 3 },
-          { type: 'path', d: ANTERIOR, fill: 'pituitary', colorToken: 'pituitary', strokeWidth: 1.8 },
-          { type: 'path', d: POSTERIOR, fill: 'adh', colorToken: 'adh', strokeWidth: 1.5 },
+          /* Washed rather than solid: this shape exists to hold the label written across it, and a
+             signal colour at full strength leaves that label at about 1.3:1. */
+          { type: 'path', d: ANTERIOR, fill: 'pituitary', fillOpacity: LABEL_WASH, colorToken: 'pituitary', strokeWidth: 1.8 },
+          // The posterior lobe carries "post." across it, so it is washed like its neighbour.
+          { type: 'path', d: POSTERIOR, fill: 'adh', fillOpacity: LABEL_WASH, colorToken: 'adh', strokeWidth: 1.5 },
           { type: 'text', x: 110, y: 162, text: 'anterior', cls: 'tickLabel', anchor: 'middle', colorToken: 'text-faint' },
           { type: 'text', x: 152, y: 159, text: 'post.', cls: 'tickLabel', anchor: 'middle', colorToken: 'text-faint' },
           { type: 'text', x: 128, y: 210, text: 'Pituitary', cls: 'anatomyStrong', anchor: 'middle' },
@@ -120,7 +124,7 @@ export function buildHptPresentation(ctx: Ctx): ModulePresentation<HptState, Hpt
           { type: 'text', x: GLAND.x, y: GLAND.y + 52, text: 'Thyroid', cls: 'anatomyStrong', anchor: 'middle' },
 
           /* ---- The circulation everything downstream shares ---- */
-          { type: 'rect', x: 64, y: 286, width: 432, height: 30, fill: 'artery' },
+          { type: 'rect', x: 64, y: 286, width: 432, height: 30, fill: 'artery', fillOpacity: LABEL_WASH, stroke: 'artery' },
           { type: 'text', x: 72, y: 306, text: 'Circulation', cls: 'anatomy' },
 
           /* ---- Secretion into the circulation ---- */
@@ -129,8 +133,9 @@ export function buildHptPresentation(ctx: Ctx): ModulePresentation<HptState, Hpt
 
           /* ---- Peripheral deiodination, on the circulation where it happens ---- */
           { type: 'path', d: 'M 300 296 L 336 296', colorToken: 'thyroid', strokeWidth: 1.5 + conversion * 2, markerEnd: 'product-arrow' },
-          { type: 'text', x: 296, y: 286, text: 'T4', cls: 'label', colorToken: 'thyroid', anchor: 'end' },
-          { type: 'text', x: 340, y: 286, text: 'T3', cls: 'label', colorToken: 'thyroid' },
+          // Four units clear of the circulation band's top edge, which ran along their baseline.
+          { type: 'text', x: 296, y: 281, text: 'T4', cls: 'label', colorToken: 'thyroid', anchor: 'end' },
+          { type: 'text', x: 340, y: 281, text: 'T3', cls: 'label', colorToken: 'thyroid' },
           { type: 'text', x: 318, y: 312, text: `${(conversion * 100).toFixed(0)}%`, cls: 'tickLabel', anchor: 'middle', colorToken: 'text-faint' },
 
           /* ---- An exogenous hormone joins the circulation from outside the axis ---- */
@@ -164,14 +169,18 @@ export function buildHptPresentation(ctx: Ctx): ModulePresentation<HptState, Hpt
             markerId: 'feedback-arrow',
             inhibitory: true,
           },
-          { type: 'text', x: 40, y: 200, text: 'negative', cls: 'label', colorToken: 'text-dim' },
+          // 15 units apart: at 12 the two lines of the label touched.
+          { type: 'text', x: 40, y: 197, text: 'negative', cls: 'label', colorToken: 'text-dim' },
           { type: 'text', x: 40, y: 212, text: 'feedback', cls: 'label', colorToken: 'text-dim' },
 
           /* ---- What the hormone actually does ---- */
           { type: 'path', d: TO_TISSUE, colorToken: 'text-faint', strokeWidth: 2, markerEnd: 'tissue-arrow' },
-          { type: 'rect', x: 252, y: 338, width: 244, height: 56, fill: 'sarcomere' },
+          { type: 'rect', x: 252, y: 338, width: 244, height: 56, fill: 'sarcomere', fillOpacity: LABEL_WASH, stroke: 'sarcomere' },
           { type: 'text', x: 374, y: 358, text: 'Every tissue', cls: 'anatomyStrong', anchor: 'middle' },
-          { type: 'text', x: 374, y: 372, text: 'basal metabolic rate, heat production, gut and heart rate', cls: 'caption', anchor: 'middle', colorToken: 'text-faint' },
+          /* Two lines. The band is 244 units wide and this sentence is wider than that at any
+             size worth reading it at, so on one line the band's own sides ran through it. */
+          { type: 'text', x: 374, y: 371, text: 'basal metabolic rate, heat production,', cls: 'caption', anchor: 'middle', colorToken: 'text-faint' },
+          { type: 'text', x: 374, y: 385, text: 'gut and heart rate', cls: 'caption', anchor: 'middle', colorToken: 'text-faint' },
 
           /* ---- Header readout strip ---- */
           {

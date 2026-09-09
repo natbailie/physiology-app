@@ -2,6 +2,7 @@ import { clamp } from '@/shared/lib/math';
 import { TREMOR } from './engine/constants';
 import { dysmetriaPct } from './engine/motorMechanics';
 import type { MotorDerived, MotorHistoryPoint, MotorInputs, MotorInternalState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
 const DYSMETRIA_MAX = dysmetriaPct(0);
@@ -44,27 +45,29 @@ export function buildMotorControlPresentation(ctx: Ctx): ModulePresentation<Moto
         ],
         children: [
           /* ---- The loop ---- */
-          { type: 'rect', x: 190, y: 26, width: 150, height: 32, fill: 'basal-ganglia' },
+          /* Every box and nucleus here is washed rather than filled: each one carries its own name
+             across the middle of it, and at full strength the label read at 1.3:1. */
+          { type: 'rect', x: 190, y: 26, width: 150, height: 32, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia' },
           { type: 'text', x: 265, y: 47, text: 'Cortex', cls: 'label', anchor: 'middle' },
 
-          { type: 'rect', x: 190, y: 88, width: 150, height: 30, fill: 'basal-ganglia', styleVars: integrity(1 - striatalLoss) },
+          { type: 'rect', x: 190, y: 88, width: 150, height: 30, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia', styleVars: integrity(1 - striatalLoss) },
           { type: 'text', x: 265, y: 108, text: 'Striatum', cls: 'label', anchor: 'middle' },
 
           // Substantia nigra: the dopamine source, drawn so the number has an origin.
-          { type: 'circle', cx: 116, cy: 103, r: 18, fill: 'second-messenger', styleVars: integrity(clamp(dopamine, 0, 1)) },
+          { type: 'circle', cx: 116, cy: 103, r: 18, fill: 'second-messenger', fillOpacity: LABEL_WASH, stroke: 'second-messenger', styleVars: integrity(clamp(dopamine, 0, 1)) },
           { type: 'text', x: 116, y: 100, text: 'SNc', cls: 'label', anchor: 'middle' },
           { type: 'text', x: 116, y: 112, text: `${derived.effectiveDopaminePct.toFixed(0)}%`, cls: 'valueLabel', anchor: 'middle' },
 
-          { type: 'rect', x: 112, y: 152, width: 88, height: 28, fill: 'basal-ganglia' },
+          { type: 'rect', x: 112, y: 152, width: 88, height: 28, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia' },
           { type: 'text', x: 156, y: 171, text: 'GPe', cls: 'label', anchor: 'middle' },
 
-          { type: 'circle', cx: 156, cy: 222, r: 20, fill: 'basal-ganglia', styleVars: integrity(1 - stnLoss) },
+          { type: 'circle', cx: 156, cy: 222, r: 20, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia', styleVars: integrity(1 - stnLoss) },
           { type: 'text', x: 156, y: 226, text: 'STN', cls: 'label', anchor: 'middle' },
 
-          { type: 'rect', x: 262, y: 186, width: 98, height: 28, fill: 'basal-ganglia' },
+          { type: 'rect', x: 262, y: 186, width: 98, height: 28, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia' },
           { type: 'text', x: 311, y: 205, text: 'GPi / SNr', cls: 'label', anchor: 'middle' },
 
-          { type: 'rect', x: 206, y: 256, width: 134, height: 30, fill: 'basal-ganglia' },
+          { type: 'rect', x: 206, y: 256, width: 134, height: 30, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia' },
           { type: 'text', x: 273, y: 276, text: 'Thalamus', cls: 'label', anchor: 'middle' },
 
           /* ---- Connections. Arrowhead excites, crossbar inhibits (crossbars render as
@@ -86,7 +89,7 @@ export function buildMotorControlPresentation(ctx: Ctx): ModulePresentation<Moto
           { type: 'path', d: 'M 340 271 L 372 271 L 372 42 L 344 42', colorToken: 'basal-ganglia', strokeWidth: edgeWidth(thalamicOutput), markerEnd: 'motorExcite' },
 
           /* ---- Outside the loop: the two other places a preset lesions ---- */
-          { type: 'circle', cx: 462, cy: 120, r: 38, fill: 'basal-ganglia', styleVars: integrity(1 - cerebellarLoss) },
+          { type: 'circle', cx: 462, cy: 120, r: 38, fill: 'basal-ganglia', fillOpacity: LABEL_WASH, stroke: 'basal-ganglia', styleVars: integrity(1 - cerebellarLoss) },
           { type: 'text', x: 462, y: 116, text: 'Cerebellum', cls: 'label', anchor: 'middle' },
           { type: 'text', x: 462, y: 130, text: `dysmetria ${derived.dysmetriaPct.toFixed(0)}%`, cls: 'valueLabel', anchor: 'middle' },
           { type: 'path', d: 'M 406 138 C 384 160, 374 200, 372 236', colorToken: 'second-messenger', strokeWidth: edgeWidth(1 - cerebellarLoss), markerEnd: 'motorExcite' },
@@ -94,7 +97,7 @@ export function buildMotorControlPresentation(ctx: Ctx): ModulePresentation<Moto
           { type: 'path', d: 'M 340 34 L 534 34 L 534 282', colorToken: 'sarcomere', strokeWidth: edgeWidth(1 - corticospinalLoss), markerEnd: 'motorExcite' },
           { type: 'text', x: 532, y: 186, text: 'corticospinal', cls: 'pathLabel', anchor: 'end' },
 
-          { type: 'rect', x: 400, y: 288, width: 140, height: 32, fill: 'sarcomere', styleVars: integrity(clamp(derived.achievedAmplitudePct / 100, 0, 1)) },
+          { type: 'rect', x: 400, y: 288, width: 140, height: 32, fill: 'sarcomere', fillOpacity: LABEL_WASH, stroke: 'sarcomere', styleVars: integrity(clamp(derived.achievedAmplitudePct / 100, 0, 1)) },
           { type: 'text', x: 470, y: 302, text: 'Movement', cls: 'label', anchor: 'middle' },
           { type: 'text', x: 470, y: 314, text: `${derived.achievedAmplitudePct.toFixed(0)}% of command`, cls: 'valueLabel', anchor: 'middle' },
 

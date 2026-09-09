@@ -1,5 +1,5 @@
 import { clamp } from '@/shared/lib/math';
-import { KIDNEY_PATH, SMALL_INTESTINE_PATH } from '@/shared/diagram/organShapes';
+import { kidneyScene, smallIntestineScene } from '@/shared/diagram/organShapes';
 import { PRECIPITATION } from './engine/constants';
 import type { CalciumDerived, CalciumHistoryPoint, CalciumInputs, CalciumState } from './engine/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
@@ -37,10 +37,25 @@ export function buildCalciumHomeostasisPresentation(ctx: Ctx): ModulePresentatio
   // Serum calcium drives the feedback arrow's intensity — high calcium suppresses PTH.
   const calciumFeedbackIntensity = clamp((derived.serumCalciumMgDl - 6) / 6, 0, 1);
   const resorptionRate = clamp(derived.boneResorptionRate, 0, 1);
-  const calcitriolLevel = clamp(derived.calcitriolLevel, 0, 1);
   const renalFunction = clamp(derived.renalFunction, 0, 1);
   // Gut absorption is normalised to the top of the wash band the original CSS painted.
   const gutAbsorption = clamp(derived.gutCaAbsorptionFraction / 0.45, 0, 1);
+
+
+  /* A sectioned kidney and a real run of bowel, rather than the two first-generation blobs.
+   * Both are load-bearing here: PTH acts on the renal TUBULE and calcitriol is made in the
+   * proximal one, and calcium is absorbed in the duodenum and jejunum — neither of which a
+   * single Bézier silhouette could point at. The washes carry the same quantities the arrows do. */
+  const kidney = kidneyScene(
+    { x: 372, y: 176, scale: 0.82 },
+    // The medulla is washed by calcitriol activity, which is where the 1-alpha-hydroxylase
+    // step that makes it actually happens.
+    { gfrIntensity: renalFunction, colorToken: 'kidney', medullaToken: 'calcitriol' },
+  );
+  const gut = smallIntestineScene(
+    { x: 240, y: 244, scale: 0.5 },
+    { motility: gutAbsorption, colorToken: 'calcitriol' },
+  );
 
   return {
     diagram: [
@@ -53,6 +68,8 @@ export function buildCalciumHomeostasisPresentation(ctx: Ctx): ModulePresentatio
           { type: 'marker', id: 'pth-arrow', colorToken: 'pth' },
           { type: 'marker', id: 'calcitriol-arrow', colorToken: 'calcitriol' },
           { type: 'marker', id: 'calcium-feedback-arrow', colorToken: 'calcium' },
+          ...kidney.defs,
+          ...gut.defs,
         ],
         children: [
           {
@@ -121,22 +138,20 @@ export function buildCalciumHomeostasisPresentation(ctx: Ctx): ModulePresentatio
               { type: 'text', x: 0, y: 56, text: 'Bone', cls: 'organLabel' },
             ],
           },
+          kidney.node,
           {
             type: 'group',
             transform: 'translate(372, 176)',
-            styleVars: { 'calcitriol-level': calcitriolLevel, 'renal-function': renalFunction },
             children: [
-              { type: 'path', d: KIDNEY_PATH, fill: 'calcitriol', colorToken: 'kidney', strokeWidth: 2, styleVars: { 'calcitriol-level': calcitriolLevel, 'renal-function': renalFunction } },
               { type: 'text', x: 0, y: 58, text: 'Kidney', cls: 'organLabel' },
             ],
           },
+          gut.node,
           {
             type: 'group',
             transform: 'translate(240, 258)',
-            styleVars: { 'gut-absorption': gutAbsorption },
             children: [
-              { type: 'path', d: SMALL_INTESTINE_PATH, fill: 'calcitriol', colorToken: 'calcitriol', strokeWidth: 2, styleVars: { 'gut-absorption': gutAbsorption } },
-              { type: 'text', x: 0, y: 36, text: 'Gut', cls: 'organLabel' },
+              { type: 'text', x: 0, y: 44, text: 'Gut', cls: 'organLabel', anchor: 'middle' },
             ],
           },
         ],

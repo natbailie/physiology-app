@@ -135,7 +135,9 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
         colorToken: 'co2',
         label: 'Chemoreceptors',
         markerId: 'chemo-arrow',
-        labelX: 26,
+        // Centred, so this is the label's MIDDLE: at 26 the word began nine units left of the
+        // frame and arrived on the phone as "hemoreceptors".
+        labelX: 56,
         labelY: 72,
       },
       {

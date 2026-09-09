@@ -27,13 +27,26 @@ export function buildRespiratoryFailurePresentation(
   const patient = pointOfDy(derived.paO2, derived.paCO2);
   const labelY = patient.y - 8 < MAP.top + 16 ? patient.y + 10 : patient.y - 8;
 
+  /**
+   * One alveolar unit: a washed disc with its name BESIDE it and its reading below.
+   *
+   * The name used to be printed across the middle of the disc, where a 30-unit circle is
+   * narrower than the word `shunt`, so the circle's own outline cut the word in half. There was
+   * no room above it either, because the pair sat under the blood-gas row at the foot of the
+   * frame with three lines competing for the same forty units.
+   *
+   * So the pair moved UP, into the right-hand third the classification map does not reach: the
+   * map ends at x=300 and nothing but the inspired-oxygen pill was ever drawn beside it.
+   */
   function lungUnit(x: number, label: string, metric: string, fill: 'vq' | 'co2'): SceneNode {
     return {
       type: 'group',
-      transform: `translate(${x}, ${256})`,
+      transform: `translate(${x}, ${168})`,
       children: [
-        { type: 'circle', cx: 0, cy: 0, r: 15, fill },
-        { type: 'text', x: 0, y: 5, text: label, cls: 'organLabel', anchor: 'middle' },
+        // Washed with an outline rather than filled solid: dark text on a saturated signal
+        // colour cannot be read, and the reading below sits against the same ground.
+        { type: 'circle', cx: 0, cy: 0, r: 15, fill, fillOpacity: 0.22, stroke: fill, strokeWidth: 1.5 },
+        { type: 'text', x: 0, y: -22, text: label, cls: 'organLabel', anchor: 'middle' },
         { type: 'text', x: 0, y: 33, text: metric, cls: 'valueLabel', anchor: 'middle' },
       ],
     };
@@ -42,7 +55,10 @@ export function buildRespiratoryFailurePresentation(
   const frame: FrameNode = {
     type: 'frame',
     key: 'respiratoryFailure',
-    viewBox: [0, 0, 480, 300],
+    // 264 rather than 300: once the lung units moved up beside the map, the bottom fifth of
+    // the frame held nothing but the verdict, and on a phone that empty band is diagram height
+    // taken from the drawing above it.
+    viewBox: [0, 0, 480, 264],
     ariaLabel: `Respiratory failure classification map: PaO2 versus PaCO2 with a ventilated and a shunted lung unit, mode ${derived.failureType} failure`,
     children: [
       // The map.
@@ -53,16 +69,22 @@ export function buildRespiratoryFailurePresentation(
       { type: 'line', x1: mapX(80), y1: MAP.top, x2: mapX(80), y2: MAP.bottom, cls: 'axis', colorToken: 'vq' },
       { type: 'line', x1: MAP.left, y1: mapY(45), x2: MAP.right, y2: mapY(45), cls: 'axis', colorToken: 'co2' },
       // Quadrant names.
-      { type: 'text', x: mapX(30), y: mapY(22) + 4, text: 'type I', cls: 'organLabel', anchor: 'middle', colorToken: 'o2' },
-      { type: 'text', x: mapX(30), y: mapY(22) + 16, text: 'hypoxaemia', cls: 'caption', anchor: 'middle', colorToken: 'o2' },
-      { type: 'text', x: mapX(115), y: mapY(22) + 4, text: 'normal', cls: 'organLabel', anchor: 'middle' },
-      { type: 'text', x: mapX(115), y: mapY(22) + 16, text: 'gas exchange', cls: 'caption', anchor: 'middle' },
-      { type: 'text', x: mapX(115), y: mapY(67) - 14, text: 'type II', cls: 'organLabel', anchor: 'middle', colorToken: 'co2' },
-      { type: 'text', x: mapX(115), y: mapY(67) - 2, text: 'hypercapnia', cls: 'caption', anchor: 'middle', colorToken: 'co2' },
-      { type: 'text', x: mapX(30), y: mapY(67) - 14, text: 'mixed', cls: 'organLabel', anchor: 'middle', colorToken: 'co2' },
-      { type: 'text', x: mapX(30), y: mapY(67) - 2, text: 'failure', cls: 'caption', anchor: 'middle', colorToken: 'co2' },
+      // 16 units between the two lines of each quadrant name: at 12 they touched, and whether
+      // they read as one word or two depended on the size the frame happened to be drawn at.
+      { type: 'text', x: mapX(30), y: mapY(22) + 2, text: 'type I', cls: 'organLabel', anchor: 'middle', colorToken: 'o2' },
+      { type: 'text', x: mapX(30), y: mapY(22) + 18, text: 'hypoxaemia', cls: 'caption', anchor: 'middle', colorToken: 'o2' },
+      { type: 'text', x: mapX(115), y: mapY(22) + 2, text: 'normal', cls: 'organLabel', anchor: 'middle' },
+      { type: 'text', x: mapX(115), y: mapY(22) + 18, text: 'gas exchange', cls: 'caption', anchor: 'middle' },
+      { type: 'text', x: mapX(115), y: mapY(67) - 16, text: 'type II', cls: 'organLabel', anchor: 'middle', colorToken: 'co2' },
+      { type: 'text', x: mapX(115), y: mapY(67) - 0, text: 'hypercapnia', cls: 'caption', anchor: 'middle', colorToken: 'co2' },
+      { type: 'text', x: mapX(30), y: mapY(67) - 16, text: 'mixed', cls: 'organLabel', anchor: 'middle', colorToken: 'co2' },
+      { type: 'text', x: mapX(30), y: mapY(67) - 0, text: 'failure', cls: 'caption', anchor: 'middle', colorToken: 'co2' },
       // Axis ticks.
-      { type: 'text', x: MAP.left, y: MAP.bottom + 14, text: '0    150  PaO2', cls: 'tickLabel', anchor: 'middle' },
+      // Three labels rather than one string of padded spaces: centred on MAP.left, the old one
+      // began five units outside the frame, and the "150" it spelled sat nowhere near 150.
+      { type: 'text', x: MAP.left, y: MAP.bottom + 14, text: '0', cls: 'tickLabel', anchor: 'start' },
+      { type: 'text', x: MAP.right, y: MAP.bottom + 14, text: '150', cls: 'tickLabel', anchor: 'end' },
+      { type: 'text', x: (MAP.left + MAP.right) / 2, y: MAP.bottom + 14, text: 'PaO2', cls: 'tickLabel', anchor: 'middle' },
       { type: 'text', x: MAP.left - 4, y: mapY(90) + 3, text: '0', cls: 'tickLabel', anchor: 'end' },
       { type: 'text', x: MAP.left - 4, y: mapY(0) + 3, text: '90', cls: 'tickLabel', anchor: 'end' },
       { type: 'text', x: MAP.left - 4, y: mapY(45) + 3, text: '45', cls: 'tickLabel', anchor: 'end' },
@@ -75,6 +97,11 @@ export function buildRespiratoryFailurePresentation(
         y: labelY,
         text: `PaO2 ${derived.paO2.toFixed(0)} · PaCO2 ${derived.paCO2.toFixed(0)}`,
         cls: 'pathLabel',
+        /* This label follows the patient point around the map, so there is no static position
+           that clears the three classification gridlines — at a normal gas it lies straight
+           across the PaCO2-45 line. A halo lets it stay attached to the point it belongs to. */
+        halo: 'bg',
+        haloWidth: 3.5,
         anchor: anchorFor(patient),
       },
 
@@ -109,13 +136,15 @@ export function buildRespiratoryFailurePresentation(
       { type: 'text', x: 440, y: 222, text: `P/F ${derived.paO2FiO2Ratio.toFixed(0)}`, cls: 'valueLabel' },
 
       // Two lung units: the paired circle that keeps its oxygen, and the shunt that steals it.
-      { type: 'text', x: 250, y: 240, text: 'the two lungs of V/Q mismatch', cls: 'caption' },
-      { type: 'path', d: 'M270,256 L298,253', strokeWidth: 2, colorToken: 'vq', fill: 'none' },
-      { type: 'path', d: 'M420,256 L394,253', strokeWidth: 2, colorToken: 'co2', fill: 'none' },
-      lungUnit(306, 'open', `open ${Math.round((1 - derived.effectiveShuntFraction) * 100)}%`, 'vq'),
-      lungUnit(420, 'shunt', `shunt ${Math.round(derived.effectiveShuntFraction * 100)}%`, 'co2'),
+      { type: 'text', x: 393, y: 122, text: 'the two lungs of V/Q mismatch', cls: 'caption', anchor: 'middle' },
+      { type: 'path', d: 'M312,168 L330,168', strokeWidth: 2, colorToken: 'vq', fill: 'none' },
+      { type: 'path', d: 'M402,168 L420,168', strokeWidth: 2, colorToken: 'co2', fill: 'none' },
+      lungUnit(348, 'open', `open ${Math.round((1 - derived.effectiveShuntFraction) * 100)}%`, 'vq'),
+      lungUnit(438, 'shunt', `shunt ${Math.round(derived.effectiveShuntFraction * 100)}%`, 'co2'),
 
-      { type: 'text', x: 300, y: 294, text: `failure: ${derived.failureType}`, cls: 'verdict', colorToken: 'co2', anchor: 'middle' },
+      // Bottom LEFT, as in mechanicalVentilation: centred at 300 it lay across "open 98%", the
+      // reading belonging to the lung unit above it.
+      { type: 'text', x: 18, y: 254, text: `failure: ${derived.failureType}`, cls: 'verdict', colorToken: 'co2' },
     ],
   };
 

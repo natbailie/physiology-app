@@ -121,27 +121,6 @@ export interface AxisNode {
   inhibitory?: boolean;
 }
 
-/** A named organ drawn by the renderer's own registry, fed by `params` the way the old
- * organ components were fed by props. */
-export interface OrganNode {
-  type: 'organ';
-  name: OrganName;
-  x: number;
-  y: number;
-  params: Readonly<Record<string, number>>;
-}
-
-/**
- * The organs still drawn by the per-platform registries.
- *
- * This list SHRINKS. An `organ` node is drawn by two hand-written registries — one per platform —
- * so anatomy added here has to be written twice and drifts; the shared builders in
- * `src/shared/diagram/organShapes.ts` emit ordinary scene nodes instead and are drawn once. The
- * heart, the kidneys, the lungs and the renal-compensation kidneys have all moved there. These
- * two are what remains, and nothing should be added.
- */
-export type OrganName = 'pancreas' | 'liver';
-
 export interface GroupNode {
   type: 'group';
   cls?: string;
@@ -171,6 +150,20 @@ export interface PathNode {
   styleVars?: StyleVars;
 }
 
+/**
+ * Tint for a shape that exists to CARRY a label — a schematic box, a band, a nucleus.
+ *
+ * A signal colour at full strength is roughly 1.3:1 against the text ramp, so a label written
+ * across one is not dim, it is gone: a contrast sweep of the forty-seven diagrams found
+ * thirty-nine such labels, on the basal ganglia boxes, the circulation band under all three
+ * pituitary axes, the visual cortex, the brainstem. Every one of them was a shape whose only
+ * job was to hold the word inside it.
+ *
+ * `--wash-faint` from `index.css`. Pair it with `stroke` set to the same token: a wash with no
+ * edge reads as a smudge rather than as a structure.
+ */
+export const LABEL_WASH = 0.14;
+
 export interface CircleNode {
   type: 'circle';
   cx: number;
@@ -180,6 +173,16 @@ export interface CircleNode {
   fill?: ColorToken;
   fillGradientId?: string;
   fillOpacity?: number;
+  /**
+   * The outline, which a washed shape needs and a solid one does not.
+   *
+   * Until this existed a circle could take a stroke only from a CSS class, so a module without a
+   * stylesheet — every schema-only module — could not draw a tinted shape at all: it had a solid
+   * fill or nothing, and a solid signal colour with a dark label on top of it is the commonest
+   * unreadable thing in these diagrams.
+   */
+  stroke?: ColorToken;
+  strokeWidth?: number;
   opacity?: number;
   styleVars?: StyleVars;
 }
@@ -194,6 +197,9 @@ export interface RectNode {
   fill?: ColorToken;
   fillGradientId?: string;
   fillOpacity?: number;
+  /** As on `CircleNode`: the outline a washed rectangle needs. */
+  stroke?: ColorToken;
+  strokeWidth?: number;
   opacity?: number;
   clipPathId?: string;
   styleVars?: StyleVars;
@@ -219,6 +225,21 @@ export interface TextNode {
   anchor?: 'start' | 'middle' | 'end';
   /** `fill`. */
   colorToken?: ColorToken;
+  /**
+   * A halo behind the glyphs, in this token, so the label survives whatever it is drawn over.
+   *
+   * For a label that must sit ON the thing it names — the value tracking a point across a plot,
+   * the name of a vessel written along it — there is no static position that is always clear,
+   * and moving it away from its subject costs more than the collision does. This is the standard
+   * cartographic answer: the text is painted twice, once as a thick stroke in the background
+   * colour and once normally on top. `paint-order` would do it in one node, but `react-native-svg`
+   * does not support it, so the schema carries the intent and each renderer draws the two passes.
+   *
+   * Usually `bg`, or `panel` for a label inside a card.
+   */
+  halo?: ColorToken;
+  /** Halo width in user units. About 3 is enough to clear a 1-2px line. */
+  haloWidth?: number;
   opacity?: number;
   styleVars?: StyleVars;
 }
@@ -231,8 +252,7 @@ export type SceneNode =
   | LineNode
   | TextNode
   | VesselNode
-  | AxisNode
-  | OrganNode;
+  | AxisNode;
 
 export interface FrameNode {
   type: 'frame';

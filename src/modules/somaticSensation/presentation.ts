@@ -20,11 +20,21 @@ import type { FrameNode, ModulePresentation, PresentationContext } from '@/share
 const CORD = { cx: 146, cy: 150, r: 88 };
 const RAD = Math.PI / 180;
 
-/** A wedge of white matter between two radii, positioned by angle — 0° lateral, -90° dorsal,
- * +90° ventral. */
+/** `--wash-strong` from index.css, which is what a fully intact tract is shaded at. */
+const WASH_STRONG = 0.48;
+
+/**
+ * A wedge of white matter between two radii, positioned by angle — 0° lateral, -90° dorsal,
+ * +90° ventral.
+ *
+ * In CORD-LOCAL coordinates, like everything else in the cord group. It used to add `CORD.cx`
+ * and `CORD.cy` itself, and the group it sits in translates by them too, so all four tracts were
+ * drawn at twice the offset — outside the cord entirely and across the body maps below it. The
+ * grey matter and the dorsal horns beside them are local, which is why only the tracts moved.
+ */
 function sector(r0: number, r1: number, a0: number, a1: number): string {
   const p = (r: number, a: number) =>
-    `${(CORD.cx + r * Math.cos(a * RAD)).toFixed(1)} ${(CORD.cy + r * Math.sin(a * RAD)).toFixed(1)}`;
+    `${(r * Math.cos(a * RAD)).toFixed(1)} ${(r * Math.sin(a * RAD)).toFixed(1)}`;
   return `M ${p(r1, a0)} A ${r1} ${r1} 0 0 1 ${p(r1, a1)} L ${p(r0, a1)} A ${r0} ${r0} 0 0 0 ${p(r0, a0)} Z`;
 }
 
@@ -71,7 +81,12 @@ function bodyMapFrame(
     transform: `translate(${x}, ${y})`,
     children: [
       { type: 'text', x: 32, y: -8, text: title, cls: 'anatomy', anchor: 'middle' },
-      /* Patient's right is the viewer's left, matching the cord above. */
+      /* Patient's right is the viewer's left, matching the cord above.
+       *
+       * The loss wash is the node's OWN opacity, not a style variable. `styleVars: { opacity }`
+       * publishes a custom property called `--opacity`, and no rule in either project consumes
+       * one — so both halves painted at full strength whatever the readings were, and an intact
+       * patient was drawn as a solid red body: the exact opposite of what the shading means. */
       {
         type: 'rect',
         x: 0,
@@ -80,7 +95,7 @@ function bodyMapFrame(
         height: 120,
         fill: 'danger',
         clipPathId: clipId,
-        styleVars: { opacity: lossOpacity(rightPct) },
+        opacity: lossOpacity(rightPct),
       },
       {
         type: 'rect',
@@ -90,7 +105,7 @@ function bodyMapFrame(
         height: 120,
         fill: 'danger',
         clipPathId: clipId,
-        styleVars: { opacity: lossOpacity(leftPct) },
+        opacity: lossOpacity(leftPct),
       },
       { type: 'path', d: BODY, fill: 'none', colorToken: 'text-faint', strokeWidth: 1.2 },
       { type: 'text', x: 8, y: 132, text: `R ${rightPct.toFixed(0)}%`, cls: 'tickLabel' },
@@ -111,7 +126,20 @@ export function buildSomaticSensationPresentation(ctx: Ctx): ModulePresentation<
 
   const gate = clamp(derived.gateOpenFraction, 0, 1);
   const syrinx = clamp((100 - derived.segmentalPainTempPct) / 100, 0, 1);
-  const integrity = (pct: number) => ({ integrity: clamp(pct / 100, 0, 1) });
+
+  /** A white-matter tract, shaded by how much of it survives. */
+  const tract = (d: string, token: 'axon' | 'nociception', preservedPct: number) => {
+    const integrityFraction = clamp(preservedPct / 100, 0, 1);
+    return {
+      type: 'path' as const,
+      d,
+      fill: token,
+      fillOpacity: integrityFraction * WASH_STRONG,
+      colorToken: token,
+      strokeOpacity: integrityFraction * 0.6,
+      strokeWidth: 1,
+    };
+  };
 
   const dorsalHorn = (side: number) => ({
     type: 'path' as const,
@@ -125,15 +153,22 @@ export function buildSomaticSensationPresentation(ctx: Ctx): ModulePresentation<
   const cordGroup: FrameNode['children'][number] = {
     type: 'group',
     children: [
+      /* Shading IS integrity: a lost tract fades toward the surrounding white matter, which is
+         `.columnDC` / `.columnST` upstream — integrity times `--wash-strong` for the fill and
+         times 60% for the edge. Carried as data because `--integrity` is a custom property no
+         renderer without a cascade reads, and a tract whose shading never changes is this whole
+         diagram failing to say the one thing it exists to say. */
       // Dorsal columns: posteromedial, either side of the posterior median septum.
-      { type: 'path', d: sector(46, 84, -145, -95), fill: 'axon', styleVars: integrity(dcRight) },
-      { type: 'path', d: sector(46, 84, -85, -35), fill: 'axon', styleVars: integrity(dcLeft) },
+      tract(sector(46, 84, -145, -95), 'axon', dcRight),
+      tract(sector(46, 84, -85, -35), 'axon', dcLeft),
       // Spinothalamic: anterolateral.
-      { type: 'path', d: sector(48, 84, 105, 155), fill: 'nociception', styleVars: integrity(stRightCarriesLeftPain) },
-      { type: 'path', d: sector(48, 84, 25, 75), fill: 'nociception', styleVars: integrity(stLeftCarriesRightPain) },
-      // Grey matter, drawn as one half mirrored, with the commissure joining them.
+      tract(sector(48, 84, 105, 155), 'nociception', stRightCarriesLeftPain),
+      tract(sector(48, 84, 25, 75), 'nociception', stLeftCarriesRightPain),
+      /* Grey matter: one half, and the same half mirrored about the cord's own axis. The mirror
+         was written `styleVars: { sx: -1 }`, a custom property nothing reads, so both halves
+         drew on top of each other and the butterfly was a lopsided blob. */
       { type: 'path', d: GREY_HALF, fill: 'nociception' },
-      { type: 'path', d: GREY_HALF, fill: 'nociception', styleVars: { sx: -1 } },
+      { type: 'group', transform: 'scale(-1, 1)', children: [{ type: 'path', d: GREY_HALF, fill: 'nociception' }] },
       { type: 'rect', x: -6, y: -9, width: 12, height: 18, fill: 'nociception' },
       // The dorsal horn is where the gate acts.
       dorsalHorn(-24),
@@ -197,7 +232,8 @@ export function buildSomaticSensationPresentation(ctx: Ctx): ModulePresentation<
           { type: 'text', x: 530, y: 158, text: 'touch', cls: 'pathLabel', colorToken: 'axon' },
           {
             type: 'text',
-            x: 266,
+            // 246, not 266: the sentence is wider than the room left of the frame edge.
+            x: 246,
             y: 204,
             text: 'pain crosses at the segment · touch crosses in the medulla',
             cls: 'caption',

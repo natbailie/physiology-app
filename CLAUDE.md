@@ -418,6 +418,15 @@ Four modules have been through it — cardiorenal, respiratory, gastrointestinal
 liverPhysiology. They are the worked examples; the rest of the anatomy-bearing modules are the
 backlog, and `src/shared/diagram/organShapes.ts` is where the next organ goes.
 
+- **Reuse `organShapes.ts` rather than drawing an organ again.** Nine of the builders' consumers
+  were added by walking the modules that drew an organ a builder already covered — a heart as six
+  Bézier blobs, a kidney as one. Two things make a module a bad candidate even so, and both cost
+  a reverted conversion to find out: a diagram whose GEOMETRY carries data (cardiacElectro's left
+  ventricle is a circle whose radius IS the volume, and fetalCirculation and shockStates are
+  circuit diagrams whose chambers are boxes because the shunts have to connect to them), and a
+  page whose diagram slot holds more than the schema describes (ecgConduction also renders a live
+  strip and an INTERACTIVE twelve-lead grid, so pointing its page at `slots.diagram` would have
+  deleted both). Check the page's `diagram={…}` before converting it.
 - **Anatomical where the subject is an organ; schematic everywhere else.** This rule used to say
   "without atlas rendering", and that half is retired. A module whose subject is an ORGAN draws
   the organ — four chambers and a coronary tree, three lobes on the right and two on the left,
@@ -486,20 +495,54 @@ backlog, and `src/shared/diagram/organShapes.ts` is where the next organ goes.
   under `prefers-reduced-motion`, so anything a diagram says only by moving is lost for those
   readers. Say it with position, size or colour as well.
 
-Three ways to check the result, all cheap:
+### Checking the result
+
+`tools/diagram-audit` renders every module's diagram to a standalone SVG **the way the phone
+draws it** — same class tables, same colour precedence — and writes `out/index.html`:
+
+```
+npx vitest run tools/diagram-audit
+```
+
+Open that page and paste `tools/diagram-audit/sweep.js` into the console. It answers four
+questions, and all four found real faults the first time they were asked: labels leaving the
+frame, labels landing on each other, labels a LINE runs through, and labels that cannot be READ
+because they are written across a saturated fill. Run the geometry pass at the phone's width as
+well as desktop — a pair of labels twelve units apart collides at one size and clears at the
+other.
+
+**A label a line runs through has three answers, in this order.** Move it, if it is static and
+the space exists. Occlude the line, if the label sits inside a shape that ought to be solid —
+adrenalCortex's four enzyme names each had the steroidogenic spine running through them because
+their boxes were `fill: 'none'`, and the boxes are gates ON that spine. Or give the label a
+`halo`, if it must stay on the thing it names: a value tracking a point across a plot, a vessel's
+name written along it. The halo is painted as the same text stroked in the background colour
+underneath, in both renderers, because `paint-order` does not exist in `react-native-svg`.
+
+**A schema-only module has no stylesheet to fall back on.** Where a shape's tint lived in CSS and
+the schema kept only `fill`, the phone drew it SOLID: the medullary bands over four labels, both
+alveolar units under their own names, every basal ganglia nucleus, the circulation band beneath
+all three pituitary axes. State a wash as `fillOpacity` on the node — `LABEL_WASH` in
+`shared/presentation/types.ts` for anything that carries a label — and give it a `stroke`, which
+circles and rects now take. `styleVars` is NOT a way to do this: `--opacity`, `--integrity` and
+`--sx` were each set by a presentation and read by nothing in either project, so the shapes that
+depended on them were solid, unshaded, or drawn twice on top of themselves.
+
+Two more, both cheap:
 
 - Shape, before wiring anything up: `node --experimental-strip-types` can import
   `organShapes.ts` directly, because its only import is a type-only one and type stripping
   removes it. A twenty-line script that walks a builder's nodes into a standalone SVG will show
   you an organ in a second, which beats booting the app and clicking to a module. Every shape in
   that file was corrected two or three times that way; the heart took four.
-- Overlapping labels: in the browser pane, measure every `<text>` in `svg[role="img"]` with
-  **`getBoundingClientRect`, not `getBBox`** — `getBBox` ignores ancestor transforms, so labels
-  inside a translated `<g>` all report the same origin and every diagram looks 100% broken. That
-  sweep sees TEXT only: a hormone arrow's arrowhead is a path, and the one collision it missed
-  was a label sitting under one.
 - Contrast: `src/theme/palette.test.ts` checks all 93 signal colours against both themes. If a
   diagram needs a colour that is not in the palette, add a base and let it derive.
+
+**Look at the page as well as measuring it.** The sweep sees text against text and text against
+fills; it does not see a tract drawn outside the organ it belongs to. `sector()` in
+somaticSensation offset by the cord's centre inside a group that translated by it too, so all
+four white-matter tracts were painted across the body maps below — obvious in the picture and
+invisible to every check.
 
 ## The house style
 

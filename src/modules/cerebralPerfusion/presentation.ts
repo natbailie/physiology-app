@@ -49,13 +49,19 @@ export function buildCerebralPerfusionPresentation(ctx: Ctx): ModulePresentation
     children: [
       { type: 'path', d: `M ${BOX.x - 8} ${BOX.y - 10} h ${BOX.width + 16} v ${BOX.height + 20} h -${BOX.width + 16} z`, colorToken: 'text-dim', fill: 'none', strokeWidth: 2.5 },
       { type: 'text', x: BOX.x - 8, y: BOX.y - 18, text: 'A box that cannot expand', cls: 'label' },
-      { type: 'rect', x: BOX.x, y: BOX.y, width: brainWidth, height: BOX.height, fill: 'text-dim', styleVars: { opacity: 0.25 } },
-      { type: 'rect', x: BOX.x + brainWidth, y: BOX.y, width: bloodWidth, height: BOX.height, fill: 'artery', styleVars: { opacity: 0.45 } },
-      { type: 'rect', x: BOX.x + brainWidth + bloodWidth, y: BOX.y, width: csfWidth, height: BOX.height, fill: 'o2', styleVars: { opacity: 0.4 } },
-      { type: 'rect', x: BOX.x + brainWidth + bloodWidth + csfWidth, y: BOX.y, width: massWidth, height: BOX.height, fill: 'danger', styleVars: { opacity: 0.5 } },
+      /* These carry their tint as the node's own `opacity`, not as a style variable.
+       *
+       * They were written `styleVars: { opacity: 0.25 }`, which publishes a custom property
+       * called `--opacity` — and no rule in either project reads one, so every shape meant as a
+       * wash was painted at full strength on both platforms. The compartment bars were four
+       * solid blocks and the two pressure-curve regions were opaque slabs over the plot. */
+      { type: 'rect', x: BOX.x, y: BOX.y, width: brainWidth, height: BOX.height, fill: 'text-dim', opacity: 0.25 },
+      { type: 'rect', x: BOX.x + brainWidth, y: BOX.y, width: bloodWidth, height: BOX.height, fill: 'artery', opacity: 0.45 },
+      { type: 'rect', x: BOX.x + brainWidth + bloodWidth, y: BOX.y, width: csfWidth, height: BOX.height, fill: 'o2', opacity: 0.4 },
+      { type: 'rect', x: BOX.x + brainWidth + bloodWidth + csfWidth, y: BOX.y, width: massWidth, height: BOX.height, fill: 'danger', opacity: 0.5 },
       { type: 'text', x: BOX.x, y: BOX.y + BOX.height + 30, text: 'Brain · blood · CSF · mass', cls: 'label' },
-      { type: 'rect', x: PLOT.x, y: PLOT.y, width: kneeX - PLOT.x, height: PLOT.height, fill: 'o2', styleVars: { opacity: 0.08 } },
-      { type: 'rect', x: kneeX, y: PLOT.y, width: PLOT.x + PLOT.width - kneeX, height: PLOT.height, fill: 'danger', styleVars: { opacity: 0.08 } },
+      { type: 'rect', x: PLOT.x, y: PLOT.y, width: kneeX - PLOT.x, height: PLOT.height, fill: 'o2', opacity: 0.08 },
+      { type: 'rect', x: kneeX, y: PLOT.y, width: PLOT.x + PLOT.width - kneeX, height: PLOT.height, fill: 'danger', opacity: 0.08 },
       { type: 'line', x1: PLOT.x, y1: PLOT.y + PLOT.height, x2: PLOT.x + PLOT.width, y2: PLOT.y + PLOT.height, cls: 'axis' },
       { type: 'line', x1: PLOT.x, y1: PLOT.y, x2: PLOT.x, y2: PLOT.y + PLOT.height, cls: 'axis' },
       { type: 'path', d: curvePath(), colorToken: 'text-faint', fill: 'none', strokeWidth: 2 },

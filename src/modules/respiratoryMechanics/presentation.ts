@@ -141,7 +141,7 @@ export function buildRespiratoryMechanicsPresentation(ctx: Ctx): ModulePresentat
     viewBox: [0, 0, 480, 260],
     ariaLabel: `Flow-volume loop: expiratory flow ${derived.airflowMLPerSec.toFixed(0)} mL/s against lung volume ${derived.lungVolumeML.toFixed(0)} mL`,
     children: [
-      { type: 'text', x: 22, y: 20, text: 'Flow-volume loop', cls: 'pathLabel' },
+      { type: 'text', x: 22, y: 16, text: 'Flow-volume loop', cls: 'pathLabel' },
       ...VOL_TICKS.map((v) => {
         const { x } = project(v, FLOW_MIN);
         return {
@@ -164,7 +164,9 @@ export function buildRespiratoryMechanicsPresentation(ctx: Ctx): ModulePresentat
       }),
       { type: 'line', x1: PLOT.left, y1: PLOT.bottom, x2: PLOT.right, y2: PLOT.bottom, cls: 'axis' },
       { type: 'line', x1: PLOT.left, y1: PLOT.top, x2: PLOT.left, y2: PLOT.bottom, cls: 'axis' },
-      { type: 'text', x: PLOT.left - 26, y: PLOT.top + 6, text: 'flow (L/s)', cls: 'pathLabel' },
+      // Over the plot and above the axis. Beside the axis it landed in the tick column and sat
+      // on the "10".
+      { type: 'text', x: PLOT.left + 4, y: PLOT.top - 6, text: 'flow (L/s)', cls: 'pathLabel' },
       { type: 'text', x: PLOT.right + 14, y: PLOT.bottom + 13, text: 'volume (L)', cls: 'pathLabel' },
       ...(flowVolumeBaseline ? [{ type: 'path' as const, d: flowVolumeBaseline, cls: 'baselineTrail' }] : []),
       ...(flowVolumePoints ? [{ type: 'path' as const, d: flowVolumePoints, cls: 'trail' }] : []),

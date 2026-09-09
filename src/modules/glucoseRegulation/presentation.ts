@@ -1,4 +1,5 @@
 import { clamp, scaleClamped } from '@/shared/lib/math';
+import { liverScene, pancreasScene } from '@/shared/diagram/organShapes';
 import { HEPATIC } from './engine/constants';
 import type { GlucoseDerived, GlucoseHistoryPoint, GlucoseInputs, GlucoseState } from './engine/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
@@ -26,6 +27,36 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
   const bloodstreamSpeed = clamp(scaleClamped(derived.bloodGlucoseMgDl, 40, 300, 0.3, 2.2), 0.1, 2.5);
   const hepaticOutputNormalized = clamp(derived.hepaticGlucoseOutputRate / HEPATIC.MAX_OUTPUT_MGDL_PER_SECOND, 0, 1);
 
+  /* The last two users of the legacy `organ` node type, which is drawn by a hand-written registry
+   * PER PLATFORM — so this pancreas and this liver were two different drawings maintained twice,
+   * and CLAUDE.md says nothing may be added to either registry. The shared builders draw a real
+   * gland: head, body and tail with the duct and the islets along it; right and left lobes with
+   * the falciform ligament, the gallbladder and the IVC.
+   *
+   * Colours stay the module's own: the pancreas is drawn here because it makes INSULIN, so it is
+   * the insulin colour rather than the CCK colour it takes in gastrointestinal. */
+  const pancreas = pancreasScene(
+    { x: 132, y: 206, scale: 0.92 },
+    {
+      insulinLevel: Math.min(derived.insulinLevel, 1),
+      glucagonLevel: derived.glucagonLevel,
+      colorToken: 'insulin',
+      betaToken: 'insulin',
+      alphaToken: 'glucagon',
+      ductToken: 'insulin',
+    },
+  );
+  const liver = liverScene(
+    { x: 356, y: 196, scale: 0.78 },
+    {
+      // A liver that has spent its glycogen is drawn paler, which is the same quantity the
+      // reserve readout carries and the thing the glucagon arrow is acting on.
+      functionLevel: 0.4 + derived.hepaticGlycogenReserve * 0.6,
+      bileLoad: hepaticOutputNormalized,
+      colorToken: 'glucose',
+    },
+  );
+
   return {
     diagram: [
       {
@@ -37,6 +68,8 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
           { type: 'marker', id: 'insulin-arrow', colorToken: 'insulin' },
           { type: 'marker', id: 'glucagon-arrow', colorToken: 'glucagon' },
           { type: 'marker', id: 'counter-reg-arrow', colorToken: 'epinephrine' },
+          ...pancreas.defs,
+          ...liver.defs,
         ],
         children: [
           {
@@ -81,22 +114,12 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
             y: 128,
             text: 'bloodstream',
             cls: 'pathLabel',
+            // Written along the vessel it names, so it needs a halo rather than a new home.
+            halo: 'bg',
             anchor: 'middle',
           },
-          {
-            type: 'organ',
-            name: 'pancreas',
-            x: 110,
-            y: 200,
-            params: { insulinLevel: Math.min(derived.insulinLevel, 1), glucagonLevel: derived.glucagonLevel },
-          },
-          {
-            type: 'organ',
-            name: 'liver',
-            x: 368,
-            y: 190,
-            params: { glycogenReserve: derived.hepaticGlycogenReserve, hepaticOutput: hepaticOutputNormalized },
-          },
+          pancreas.node,
+          liver.node,
         ],
       },
     ],

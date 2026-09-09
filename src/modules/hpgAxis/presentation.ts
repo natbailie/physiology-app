@@ -1,5 +1,6 @@
 import { clamp } from '@/shared/lib/math';
 import type { HpgDerived, HpgHistoryPoint, HpgInputs, HpgState } from './engine/types';
+import { LABEL_WASH } from '@/shared/presentation/types';
 import type {
   ModulePresentation,
   PresentationContext,
@@ -168,8 +169,11 @@ export function buildHpgPresentation(ctx: Ctx): ModulePresentation<HpgState, Hpg
 
           /* ---- Pituitary in its sella ---- */
           { type: 'path', d: SELLA, colorToken: 'text-faint', strokeWidth: 3 },
-          { type: 'path', d: ANTERIOR, fill: 'pituitary', colorToken: 'pituitary', strokeWidth: 1.8 },
-          { type: 'path', d: POSTERIOR, fill: 'adh', colorToken: 'adh', strokeWidth: 1.5 },
+          /* Washed rather than solid: this shape exists to hold the label written across it, and a
+             signal colour at full strength leaves that label at about 1.3:1. */
+          { type: 'path', d: ANTERIOR, fill: 'pituitary', fillOpacity: LABEL_WASH, colorToken: 'pituitary', strokeWidth: 1.8 },
+          // The posterior lobe carries "post." across it, so it is washed like its neighbour.
+          { type: 'path', d: POSTERIOR, fill: 'adh', fillOpacity: LABEL_WASH, colorToken: 'adh', strokeWidth: 1.5 },
           { type: 'text', x: 110, y: 162, text: 'anterior', cls: 'tickLabel', anchor: 'middle', colorToken: 'text-faint' },
           { type: 'text', x: 152, y: 159, text: 'post.', cls: 'tickLabel', anchor: 'middle', colorToken: 'text-faint' },
           { type: 'text', x: 128, y: 210, text: 'Pituitary', cls: 'anatomyStrong', anchor: 'middle' },
@@ -197,7 +201,7 @@ export function buildHpgPresentation(ctx: Ctx): ModulePresentation<HpgState, Hpg
           { type: 'text', x: GLAND.x, y: GLAND.y + 52, text: isFemale ? 'Ovary' : 'Testis', cls: 'anatomyStrong', anchor: 'middle' },
 
           /* ---- The circulation everything downstream shares ---- */
-          { type: 'rect', x: 64, y: 286, width: 432, height: 30, fill: 'artery' },
+          { type: 'rect', x: 64, y: 286, width: 432, height: 30, fill: 'artery', fillOpacity: LABEL_WASH, stroke: 'artery' },
           { type: 'text', x: 72, y: 306, text: 'Circulation', cls: 'anatomy' },
 
           /* ---- Secretion into the circulation ---- */
@@ -236,12 +240,13 @@ export function buildHpgPresentation(ctx: Ctx): ModulePresentation<HpgState, Hpg
             markerId: 'feedback-arrow',
             inhibitory: !positive,
           },
-          { type: 'text', x: 40, y: 200, text: positive ? 'positive' : 'negative', cls: 'label', colorToken: feedbackToken },
+          // 15 units apart: at 12 the two lines of the label touched.
+          { type: 'text', x: 40, y: 197, text: positive ? 'positive' : 'negative', cls: 'label', colorToken: feedbackToken },
           { type: 'text', x: 40, y: 212, text: 'feedback', cls: 'label', colorToken: feedbackToken },
 
           /* ---- What the hormone actually does ---- */
           { type: 'path', d: TO_TISSUE, colorToken: 'text-faint', strokeWidth: 2, markerEnd: 'tissue-arrow' },
-          { type: 'rect', x: 252, y: 338, width: 244, height: 56, fill: 'sarcomere' },
+          { type: 'rect', x: 252, y: 338, width: 244, height: 56, fill: 'sarcomere', fillOpacity: LABEL_WASH, stroke: 'sarcomere' },
           {
             type: 'text',
             x: 374,
@@ -253,8 +258,20 @@ export function buildHpgPresentation(ctx: Ctx): ModulePresentation<HpgState, Hpg
           {
             type: 'text',
             x: 374,
-            y: 372,
-            text: isFemale ? 'proliferation then secretory change, and bone kept dense' : 'anabolism, bone density, and sperm production alongside FSH',
+            y: 371,
+            text: isFemale ? 'proliferation then secretory change,' : 'anabolism, bone density, and sperm',
+            /* Two lines, continued below. The band is 244 units wide and either sentence is wider
+               than that at any size worth reading it at, so on one line the band's own sides ran
+               through it. */
+            cls: 'caption',
+            anchor: 'middle',
+            colorToken: 'text-faint',
+          },
+          {
+            type: 'text',
+            x: 374,
+            y: 385,
+            text: isFemale ? 'and bone kept dense' : 'production alongside FSH',
             cls: 'caption',
             anchor: 'middle',
             colorToken: 'text-faint',

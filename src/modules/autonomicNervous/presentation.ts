@@ -1,13 +1,13 @@
 import { clamp, scaleClamped } from '@/shared/lib/math';
 import { BRONCHI, GI, HEART, PUPIL, SECRETION } from './engine/constants';
 import type { AnsDerived, AnsHistoryPoint, AnsInputs, AnsState } from './engine/types';
+import { heartScene, lungsScene, smallIntestineScene } from '@/shared/diagram/organShapes';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
-const HEART_PATH = 'M0,-12 C-8,-22 -24,-18 -24,-4 C-24,10 -8,20 0,26 C8,20 24,10 24,-4 C24,-18 8,-22 0,-12 Z';
-const LUNG_PATH = 'M0,-20 C10,-21 16,-7 15,7 C14,20 7,26 0,26 C-7,26 -14,20 -15,7 C-16,-7 -10,-21 0,-20 Z';
+/* The heart, the lungs and the gut are the shared builders now. They were a valentine, a leaf
+ * mirrored, and a ribbon — and this module is a page of EFFECTOR ORGANS, so what each one is
+ * has to be readable at a glance from the drawing rather than from the caption beneath it. */
 const GLAND_PATH = 'M-11,-8 C-11,-16 -1,-19 7,-14 C15,-9 14,2 6,8 C-2,14 -12,9 -11,-1 Z';
-const SMALL_INTESTINE_PATH =
-  'M-40,-10 C-30,-24 -10,-24 0,-10 C10,4 30,4 40,-10 C46,-2 46,10 38,16 C26,24 14,10 0,16 C-14,22 -26,8 -38,16 C-46,10 -46,-2 -40,-10 Z';
 const MESSENGER_BAR_WIDTH = 76;
 // A circle centred on (0,4) — the pupil's iris, stroked rather than filled.
 const IRIS_PATH = 'M0,4 m-17,0 a17,17 0 1,0 34,0 a17,17 0 1,0 -34,0';
@@ -33,6 +33,29 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
   const giTint = derived.giMotilityIndex >= GI.BASELINE_INDEX ? 'parasympathetic' : 'sympathetic';
   const secretionTint = derived.secretionIndex >= SECRETION.BASELINE_INDEX ? 'parasympathetic' : 'sympathetic';
 
+
+  /* Each effector at the scale its box allows. The COLOUR is the drive on it — sympathetic,
+   * parasympathetic or the resting neutral — which is what this page is about, so it overrides
+   * the builders' own anatomical defaults on both sides of the heart and both lungs. */
+  const heart = heartScene(
+    { x: 92, y: 88, scale: 0.62 },
+    {
+      heartRate: derived.heartRateBpm,
+      leftToken: heartTint,
+      rightToken: heartTint,
+      // Both ventricles shade with the drive on them, so the sympathetic and vagal cases are
+      // told apart by depth as well as by hue.
+      regionOpacity: { lv: 0.45 + clamp(heartDrive, 0, 1) * 0.5, rv: 0.45 + clamp(heartDrive, 0, 1) * 0.5 },
+    },
+  );
+  // `vqMismatch` is the builder's only per-lung dial and means something else here, so the
+  // bronchial drive is carried by the ventilation depth instead: constricted airways move less.
+  const lungs = lungsScene(
+    { x: 224, y: 92, scale: 0.4 },
+    { colorToken: bronchialTint, ventDepth: clamp(bronchialDrive, 0, 1) },
+  );
+  const gut = smallIntestineScene({ x: 140, y: 200, scale: 0.42 }, { motility: clamp(giDrive, 0, 1), colorToken: giTint });
+
   return {
     diagram: [
       {
@@ -40,30 +63,28 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
         viewBox: [0, 0, 480, 300],
         ariaLabel:
           'Diagram of autonomic control across five organ effectors — heart, bronchi, pupil, gut and glands — each tinted by whether sympathetic or parasympathetic activity currently dominates it, alongside the cAMP and IP3 second-messenger levels',
+        defs: [...heart.defs, ...lungs.defs, ...gut.defs],
         children: [
           // The central neuraxis the two branches run down.
           { type: 'line', x1: 240, y1: 36, x2: 240, y2: 270, colorToken: 'text-faint' },
           { type: 'text', x: 16, y: 22, text: 'Sympathetic', cls: 'pathLabel', colorToken: 'sympathetic' },
           { type: 'text', x: 378, y: 22, text: 'Parasympathetic', cls: 'pathLabel', colorToken: 'parasympathetic' },
 
+          heart.node,
           {
             type: 'group',
             transform: 'translate(92,92)',
-            styleVars: { 'organ-drive': clamp(heartDrive, 0, 1), 'hr-bpm': derived.heartRateBpm },
             children: [
-              { type: 'path', d: HEART_PATH, fill: heartTint, colorToken: heartTint, strokeWidth: 2 },
               { type: 'text', x: 0, y: 42, text: 'Heart', cls: 'organLabel' },
               { type: 'text', x: 0, y: 55, text: `${derived.heartRateBpm.toFixed(0)} bpm`, cls: 'valueLabel', anchor: 'middle' },
             ],
           },
 
+          lungs.node,
           {
             type: 'group',
             transform: 'translate(224,92)',
-            styleVars: { 'organ-drive': clamp(bronchialDrive, 0, 1) },
             children: [
-              { type: 'group', transform: 'translate(-13,0)', children: [{ type: 'path', d: LUNG_PATH, fill: bronchialTint, colorToken: bronchialTint, strokeWidth: 2 }] },
-              { type: 'group', transform: 'translate(13,0) scale(-1,1)', children: [{ type: 'path', d: LUNG_PATH, fill: bronchialTint, colorToken: bronchialTint, strokeWidth: 2 }] },
               { type: 'text', x: 0, y: 42, text: 'Bronchi', cls: 'organLabel' },
               { type: 'text', x: 0, y: 55, text: `${derived.bronchialDiameterPercent.toFixed(0)}%`, cls: 'valueLabel', anchor: 'middle' },
             ],
@@ -75,23 +96,20 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
             styleVars: { 'organ-drive': clamp(pupilIntensity, 0, 1) },
             children: [
               { type: 'path', d: IRIS_PATH, colorToken: 'sympathetic', fill: 'none', strokeWidth: 2 },
-              { type: 'circle', cx: 0, cy: 4, r: pupilRadius, fill: 'bg' },
+              // The aperture, in ink. It was filled in `bg` — the page's own colour — so the one
+              // thing this effector is measuring was invisible against the background it sat on.
+              { type: 'circle', cx: 0, cy: 4, r: pupilRadius, fill: 'text' },
               { type: 'text', x: 0, y: 42, text: 'Pupil', cls: 'organLabel' },
               { type: 'text', x: 0, y: 55, text: `${derived.pupilDiameterMm.toFixed(1)} mm`, cls: 'valueLabel', anchor: 'middle' },
             ],
           },
 
           // Gut motility (sympathetic INHIBITS, muscarinic STIMULATES — opposite sign to the heart).
+          gut.node,
           {
             type: 'group',
             transform: 'translate(140,212)',
-            styleVars: { 'organ-drive': clamp(giDrive, 0, 1) },
             children: [
-              {
-                type: 'group',
-                transform: 'scale(0.72)',
-                children: [{ type: 'path', d: SMALL_INTESTINE_PATH, fill: giTint, colorToken: giTint, strokeWidth: 2 }],
-              },
               { type: 'text', x: 0, y: 42, text: 'Gut motility', cls: 'organLabel' },
               { type: 'text', x: 0, y: 55, text: derived.giMotilityIndex.toFixed(0), cls: 'valueLabel', anchor: 'middle' },
             ],

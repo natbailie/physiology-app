@@ -1,6 +1,5 @@
 import text from '@/shared/styles/diagramText.module.css';
 import anatomy from '@/shared/styles/anatomy.module.css';
-import glucoseClasses from '@/modules/glucoseRegulation/components/Diagram.module.css';
 import cardiorenalClasses from '@/modules/cardiorenal/components/Diagram.module.css';
 import respiratoryClasses from '@/modules/respiratory/components/Diagram.module.css';
 
@@ -78,16 +77,6 @@ const shared: Partial<ResolvedDiagramClasses> = {
  * component's `styles.x` did — spreading a CSS-module object copies nothing, which is why each
  * owned key is named explicitly rather than merged. */
 const MODULE_CLASS_KEYS: Record<string, ClassKey[]> = {
-  glucoseRegulation: [
-    'pathLabel',
-    'organLabel',
-    'pancreasShape',
-    'betaIslet',
-    'alphaIslet',
-    'isletLabel',
-    'liverShape',
-    'glycogenFill',
-  ],
   cardiorenal: ['urineFlow'],
   respiratory: [
     'plotAxis',
@@ -107,7 +96,6 @@ const MODULE_CLASS_KEYS: Record<string, ClassKey[]> = {
 };
 
 const MODULE_STYLES: Record<string, Record<string, string>> = {
-  glucoseRegulation: glucoseClasses,
   cardiorenal: cardiorenalClasses,
   respiratory: respiratoryClasses,
 };

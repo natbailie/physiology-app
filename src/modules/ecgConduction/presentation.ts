@@ -1,4 +1,5 @@
 import { clamp } from '@/shared/lib/math';
+import { heartScene, type HeartRegion } from '@/shared/diagram/organShapes';
 import { LEAD_AXES, PRECORDIAL_AXES } from './engine/constants';
 import { sampleBeat } from './engine/beatSample';
 import type {
@@ -14,82 +15,109 @@ import type {
 } from './engine/types';
 import type { FrameNode, ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
 
-/* --- Conduction-system anatomy (translated from HeartConduction.tsx) --- */
+/* --- Conduction-system anatomy ------------------------------------- */
+/*
+ * The heart is the shared `heartScene`: four chambers, the great vessels and the coronary tree,
+ * in an anterior view. It was six detached Bézier blobs with no silhouette, no vessels and no
+ * coronaries — a drawing that could show which region was depolarising and nothing else, on a
+ * page whose whole subject is where in the heart the wavefront currently is.
+ *
+ * The conduction system is drawn ON TOP of it in the builder's own coordinates, where the
+ * chambers span about x -42..45 and y -30..60: the AV node at the base of the interatrial
+ * septum just above the AV groove, and the bundles either side of the interventricular groove,
+ * which is exactly where that groove marks the septum on the surface.
+ *
+ * NOTE: the web page still renders `components/EcgDiagram.tsx`, because its diagram slot also
+ * carries a live rolling strip and an INTERACTIVE twelve-lead grid that this schema does not
+ * describe. Until it does, this builder improves the phone and the two platforms draw different
+ * hearts here.
+ */
 
-const CHAMBER_PATHS: Partial<Record<RegionId, string>> = {
-  rightAtrium: 'M-64,-64 C-30,-76 -6,-70 -4,-44 C-3,-26 -22,-18 -44,-22 C-62,-25 -72,-44 -64,-64 Z',
-  leftAtrium: 'M64,-64 C30,-76 6,-70 4,-44 C3,-26 22,-18 44,-22 C62,-25 72,-44 64,-64 Z',
-  rvFreeWall: 'M-58,-14 C-30,-20 -12,-10 -10,16 C-9,44 -24,66 -44,62 C-62,58 -70,26 -58,-14 Z',
-  lvFreeWall: 'M18,-4 C48,-12 72,10 70,42 C68,72 44,88 22,80 C4,73 2,40 8,16 C11,4 14,-1 18,-4 Z',
-  lvBase: 'M14,-24 C40,-32 62,-22 64,-6 C65,6 46,10 30,6 C20,3 14,-8 14,-24 Z',
-  septum: 'M-6,-16 C2,-18 8,-6 8,18 C8,44 2,64 -6,62 C-12,60 -14,38 -14,20 C-14,2 -12,-14 -6,-16 Z',
-};
-
-const CHAMBER_LABELS: Partial<Record<RegionId, { x: number; y: number; text: string }>> = {
-  rightAtrium: { x: -36, y: -46, text: 'RA' },
-  leftAtrium: { x: 36, y: -46, text: 'LA' },
-  rvFreeWall: { x: -40, y: 28, text: 'RV' },
-  lvFreeWall: { x: 42, y: 50, text: 'LV' },
-  septum: { x: -2, y: 88, text: 'Septum' },
+/** Which of the builder's four chambers each modelled region paints. `lvBase` and `lvFreeWall`
+ *  are both the left ventricle; the builder does not separate them and neither does the ECG —
+ *  what it distinguishes is atrium from ventricle and left from right. */
+const REGION_TO_CHAMBER: Partial<Record<RegionId, HeartRegion>> = {
+  rightAtrium: 'ra',
+  leftAtrium: 'la',
+  rvFreeWall: 'rv',
+  lvFreeWall: 'lv',
+  lvBase: 'lv',
 };
 
 const CONDUCTION_PATHS: Partial<Record<RegionId, string>> = {
-  hisBundle: 'M-2,-18 L-2,4',
-  rightBundle: 'M-2,4 C-10,16 -20,28 -30,44',
-  leftBundle: 'M-2,4 C10,16 24,28 38,44',
+  // His bundle: from the AV node down through the membranous septum.
+  hisBundle: 'M-1,1 L4,12',
+  // Right bundle branch: a single cord down the right side of the septum to the RV free wall.
+  rightBundle: 'M4,12 C0,24 -6,34 -12,44',
+  // Left bundle branch: fanning over the LV septal surface, following the anterior IV groove.
+  leftBundle: 'M4,12 C13,26 22,40 30,52',
 };
 
 const NODE_POSITIONS: Partial<
-  Record<RegionId, { cx: number; cy: number; r: number; label: string; labelX: number; labelY: number }>
+  Record<RegionId, { cx: number; cy: number; r: number; label: string; labelX: number; labelY: number; leader: string }>
 > = {
-  saNode: { cx: -50, cy: -60, r: 5, label: 'SA', labelX: -50, labelY: -74 },
-  avNode: { cx: -2, cy: -24, r: 4.5, label: 'AV', labelX: 16, labelY: -24 },
+  // High in the right atrium at the SVC junction, which is where it is and why it paces.
+  saNode: { cx: -22, cy: -25, r: 3.5, label: 'SA', labelX: -50, labelY: -34, leader: 'M-46,-31 L-25,-26' },
+  // At the base of the interatrial septum, just above the AV groove.
+  avNode: { cx: -1, cy: 1, r: 3, label: 'AV', labelX: -52, labelY: 6, leader: 'M-48,3 L-4,1' },
 };
 
-/** Waist order for the heart drawing — chambers first, conduction tissue on top. */
-const CHAMBER_ORDER: RegionId[] = ['rightAtrium', 'leftAtrium', 'rvFreeWall', 'lvBase', 'lvFreeWall', 'septum'];
+const CHAMBER_LABELS: { x: number; y: number; text: string }[] = [
+  { x: -26, y: -8, text: 'RA' },
+  { x: 16, y: -14, text: 'LA' },
+  { x: -22, y: 32, text: 'RV' },
+  { x: 30, y: 36, text: 'LV' },
+  // The interventricular groove IS the septum's surface marking, so the label sits at its foot.
+  { x: 34, y: 76, text: 'Septum' },
+];
 
-/** Map a region's membrane state onto the module's two signal colours, so the wavefront
- *  depolarising sweep is visible on the heart while its wave is written on the strip. */
-function regionVisual(state: RegionState): { fill: string; stroke: string } {
+/** Map a region's membrane state onto the module's two signal colours, so the depolarising
+ *  sweep is visible on the heart while its wave is written on the strip. A resting region takes
+ *  no override, so the builder paints it with its own body gradient. */
+function regionToken(state: RegionState): string | undefined {
   switch (state) {
     case 'depolarizing':
     case 'depolarized':
-      return { fill: 'depolarized', stroke: 'depolarized' };
+      return 'depolarized';
     case 'repolarizing':
-      return { fill: 'repolarizing', stroke: 'repolarizing' };
+      return 'repolarizing';
     default:
-      return { fill: 'text-faint', stroke: 'text-faint' };
+      return undefined;
   }
 }
 
-function buildHeartConduction(regions: RegionActivation[], x: number, y: number): SceneNode {
+/** The heart plus its conduction system, and the gradient defs the builder needs. */
+function buildHeartConduction(
+  regions: RegionActivation[],
+  x: number,
+  y: number,
+): { node: SceneNode; defs: FrameNode['defs'] } {
   const byId = new Map(regions.map((region) => [region.id, region]));
-  const children: SceneNode[] = [];
 
-  for (const id of CHAMBER_ORDER) {
-    const path = CHAMBER_PATHS[id];
-    const region = byId.get(id);
-    if (!path || !region) continue;
-    const visual = regionVisual(region.state);
-    children.push({
-      type: 'path',
-      d: path,
-      fill: visual.fill,
-      colorToken: visual.stroke,
-      strokeWidth: 2,
-    });
+  /* One token per chamber. Where two modelled regions share a chamber — the LV base and its free
+   * wall — an ACTIVE one wins, so the chamber lights as soon as any part of it does. */
+  const regionTokens: Partial<Record<HeartRegion, string>> = {};
+  for (const [id, chamber] of Object.entries(REGION_TO_CHAMBER) as [RegionId, HeartRegion][]) {
+    const token = regionToken(byId.get(id)?.state ?? 'resting');
+    if (token && !regionTokens[chamber]) regionTokens[chamber] = token;
   }
 
+  /* Scale 1: the whole assembly is scaled by the group below, so the conduction paths and the
+   * chamber labels stay in the SAME coordinates as the chambers they sit on. Scaling only the
+   * heart would leave the His bundle a third of the way up the atria. */
+  const heart = heartScene({ x: 0, y: 0 }, { regionTokens, leftToken: 'text-faint', rightToken: 'text-faint' });
+
+  const children: SceneNode[] = [heart.node];
+
   for (const [id, path] of Object.entries(CONDUCTION_PATHS) as [RegionId, string][]) {
-    const region = byId.get(id);
-    const active = region?.state === 'depolarizing';
+    const active = byId.get(id)?.state === 'depolarizing';
     children.push({
       type: 'path',
       d: path,
       fill: 'none',
       colorToken: 'conduction-path',
       strokeWidth: active ? 2.5 : 2,
+      strokeLinecap: 'round',
     });
   }
 
@@ -98,32 +126,22 @@ function buildHeartConduction(regions: RegionActivation[], x: number, y: number)
     NonNullable<(typeof NODE_POSITIONS)[RegionId]>,
   ][]) {
     children.push(
-      {
-        type: 'circle',
-        cx: node.cx,
-        cy: node.cy,
-        r: node.r,
-        fill: 'conduction-path',
-      },
-      {
-        type: 'text',
-        x: node.labelX,
-        y: node.labelY,
-        text: node.label,
-        cls: 'pathLabel',
-        anchor: 'middle',
-      },
+      { type: 'path', d: node.leader, cls: 'leader' },
+      { type: 'circle', cx: node.cx, cy: node.cy, r: node.r, fill: 'conduction-path' },
+      // Out to the left of the heart on a leader: the node is three units across and sits ON a
+      // chamber, so a label beside it would be unreadable whatever colour it took.
+      { type: 'text', x: node.labelX, y: node.labelY, text: node.label, cls: 'pathLabel', anchor: 'end' },
     );
   }
 
-  for (const [, label] of Object.entries(CHAMBER_LABELS) as [
-    RegionId,
-    NonNullable<(typeof CHAMBER_LABELS)[RegionId]>,
-  ][]) {
-    children.push({ type: 'text', x: label.x, y: label.y, text: label.text, cls: 'organLabel' });
+  for (const label of CHAMBER_LABELS) {
+    children.push({ type: 'text', x: label.x, y: label.y, text: label.text, cls: 'organLabel', anchor: 'middle' });
   }
 
-  return { type: 'group', transform: `translate(${x}, ${y})`, children };
+  return {
+    node: { type: 'group', transform: `translate(${x}, ${y}) scale(1.5)`, children },
+    defs: heart.defs,
+  };
 }
 
 /* --- The two reference-plane insets (translated from Hexaxial/HorizontalPlaneInset) --- */
@@ -353,14 +371,17 @@ type Ctx = PresentationContext<EcgState, EcgDerived, EcgInputs, EcgHistoryPoint>
 export function buildEcgConductionPresentation(ctx: Ctx): ModulePresentation<EcgState, EcgDerived, EcgInputs, EcgHistoryPoint> {
   const { derived, inputs, state } = ctx;
 
+  const heart = buildHeartConduction(derived.regions, 128, 126);
+
   const anatomyFrame: FrameNode = {
     type: 'frame',
     key: 'ecg-conduction',
     viewBox: [0, 0, 480, 300],
     ariaLabel:
       'Animated diagram of cardiac activation: the depolarisation wavefront sweeping the atria, conduction system and ventricles, alongside a hexaxial reference and a horizontal-plane reference showing the instantaneous electrical vector and the selected lead axis',
+    defs: heart.defs,
     children: [
-      buildHeartConduction(derived.regions, 128, 126),
+      heart.node,
       buildHexaxial(derived, 306, 84, 42),
       buildHorizontalPlane(derived, 422, 84, 42),
       { type: 'text', x: 306, y: 152, text: 'Frontal · limb', cls: 'pathLabel', anchor: 'middle' },

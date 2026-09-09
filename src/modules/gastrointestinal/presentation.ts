@@ -91,7 +91,9 @@ export function buildGastrointestinalPresentation(ctx: Ctx): ModulePresentation<
             colorToken: 'gastrin',
             label: 'Gastrin',
             labelX: 300,
-            labelY: 240,
+            // Six units higher: the secretin arrow, which is routed below the stomach, passed
+            // straight through the word naming the other hormone.
+            labelY: 234,
             markerId: 'gastrin-arrow',
           },
           {
@@ -111,8 +113,10 @@ export function buildGastrointestinalPresentation(ctx: Ctx): ModulePresentation<
             activation: derived.cckDrive,
             colorToken: 'cck',
             label: 'CCK',
-            labelX: 306,
-            labelY: 164,
+            // Over the duodenal end of its own arrow, clear of the pancreas: on the gland the
+            // organ's outline ran through the word.
+            labelX: 250,
+            labelY: 196,
             markerId: 'cck-arrow',
           },
           {

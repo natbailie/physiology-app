@@ -109,8 +109,9 @@ export function buildCardiorenalPresentation(ctx: Ctx): ModulePresentation<SimSt
           { type: 'text', x: 490, y: 122, text: 'Cortex', cls: 'anatomy', anchor: 'start' },
           { type: 'path', d: 'M486,212 L450,192', cls: 'leader' },
           { type: 'text', x: 490, y: 218, text: 'Medulla', cls: 'anatomy', anchor: 'start' },
-          { type: 'text', x: 282, y: 124, text: 'Artery', cls: 'pathLabel', anchor: 'middle' },
-          { type: 'text', x: 282, y: 232, text: 'Vein', cls: 'pathLabel', anchor: 'middle' },
+          // Written ALONG the vessels they name, so they take a halo rather than a new home.
+          { type: 'text', x: 282, y: 124, text: 'Artery', cls: 'pathLabel', anchor: 'middle', halo: 'bg' },
+          { type: 'text', x: 282, y: 232, text: 'Vein', cls: 'pathLabel', anchor: 'middle', halo: 'bg' },
           { type: 'text', x: 400, y: 300, text: 'urine', cls: 'pathLabel', anchor: 'start' },
         ] as SceneNode[],
       },

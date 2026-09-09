@@ -140,7 +140,7 @@ export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation
             d: roundedRect(TISSUE.left, TISSUE.top, TISSUE.right - TISSUE.left, TISSUE.baselineHeight, 0),
             fill: 'none',
             colorToken: 'text',
-            styleVars: { opacity: 0.7, 'stroke-dasharray': '4 3' },
+            opacity: 0.7, styleVars: { 'stroke-dasharray': '4 3' },
           },
           {
             type: 'rect',
@@ -172,7 +172,7 @@ export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation
           }),
           { type: 'text', x: 404, y: TISSUE.top - 34, text: 'Lymphatic', cls: 'anatomy', anchor: 'end' },
           { type: 'text', x: 22, y: TISSUE.top + 74, text: `lymph ${derived.lymphFlowMlPerMin.toFixed(2)} of ${derived.lymphaticCapacityMlPerMin.toFixed(1)} mL/min`, cls: 'pathLabel' },
-          { type: 'rect', x: 22, y: TISSUE.top + 82, width: 64, height: 7, fill: 'text', styleVars: { opacity: 0.25 } },
+          { type: 'rect', x: 22, y: TISSUE.top + 82, width: 64, height: 7, fill: 'text', opacity: 0.25 },
           {
             type: 'rect',
             x: 22,

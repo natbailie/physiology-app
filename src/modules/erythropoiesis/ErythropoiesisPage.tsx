@@ -1,13 +1,11 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { ErythropoiesisDiagram } from './components/ErythropoiesisDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildErythropoiesisPresentation } from './presentation';
 import { ERYTHROPOIESIS_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
@@ -19,7 +17,7 @@ import { erythropoiesisContent } from './content';
 import { erythroLoopConfig } from './engine/loopConfig';
 import { perturbAcuteBloodLoss } from './engine/engine';
 import { DEFAULT_ERYTHRO_INPUTS, ERYTHRO_PRESETS, ERYTHRO_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { ErythroInputs } from './engine/types';
+import type { ErythroDerived, ErythroHistoryPoint, ErythroInputs, ErythroState } from './engine/types';
 
 export function ErythropoiesisPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ErythroInputs>('erythropoiesis', DEFAULT_ERYTHRO_INPUTS);
@@ -48,6 +46,14 @@ export function ErythropoiesisPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  const ctx = getPresentationContext<ErythroState, ErythroDerived, ErythroInputs, ErythroHistoryPoint>(
+    snapshot,
+    history,
+    baseline,
+    inputs,
+  );
+  const slots = usePresentationSlots('erythropoiesis', buildErythropoiesisPresentation(ctx), ctx, inputs, handleChange);
+
   const applyPreset = useScenarioPreset({
     setInputs,
     defaults: DEFAULT_ERYTHRO_INPUTS,
@@ -58,13 +64,6 @@ export function ErythropoiesisPage() {
   function triggerAcuteBleed() {
     perturb((state) => perturbAcuteBloodLoss(state));
   }
-
-  const hbHistory = useSeries(history, (h) => h.hemoglobin);
-  const hbHistoryBaseline = useSeries(baseline.history, (h) => h.hemoglobin);
-  const epoHistory = useSeries(history, (h) => h.epo * 100);
-  const epoHistoryBaseline = useSeries(baseline.history, (h) => h.epo * 100);
-  const reticHistory = useSeries(history, (h) => h.reticulocyteIndex);
-  const reticHistoryBaseline = useSeries(baseline.history, (h) => h.reticulocyteIndex);
 
   return (
     <ModulePage
@@ -83,19 +82,13 @@ export function ErythropoiesisPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<ErythropoiesisDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       practice={<QuizPanel session={session} summary={summary} presetLabels={ERYTHRO_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline label="Hemoglobin" unit="g/dL" data={hbHistory} baselineData={hbHistoryBaseline} domainMin={3} domainMax={22} colorVar="var(--hemoglobin)" />
-  <Sparkline label="EPO" unit="%" data={epoHistory} baselineData={epoHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--epo)" />
-  <Sparkline label="Retic index" data={reticHistory} baselineData={reticHistoryBaseline} domainMin={0} domainMax={6} colorVar="var(--marrow)" />
-        </>
-      }
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={erythropoiesisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of red cell production and iron regulation — not a clinical or diagnostic tool. Compare the presets on MCV and reticulocyte index together rather than on haemoglobin alone: that pair is what classifies an anemia, and the iron studies (saturation, TIBC, ferritin) separate the patterns MCV cannot. Ferritin carries an acute-phase veil under inflammation by design — read it alongside the hepcidin row. Simulated time is heavily compressed, since erythropoiesis plays out over weeks; store depletion and overload move faster here than in life. For where dietary iron actually comes from, see Digestion & Absorption.'}
     />

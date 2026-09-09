@@ -11,18 +11,6 @@ import type {
 export const KIDNEY_PATH =
   'M-8,-32 C10,-36 24,-22 22,-4 C21,6 10,4 6,13 C2,21 10,26 18,24 C26,34 14,44 -2,42 C-20,39 -26,18 -22,-2 C-19,-20 -18,-28 -8,-32 Z';
 
-/** Small rounded blob representing the hypothalamus, sized to sit above PITUITARY_PATH. */
-export const HYPOTHALAMUS_PATH =
-  'M-14,-6 C-14,-16 -2,-20 8,-14 C18,-8 16,4 6,10 C-4,16 -16,10 -16,-2 C-16,-4 -15,-5 -14,-6 Z';
-
-/** Small teardrop gland representing the (anterior) pituitary, hanging below the hypothalamus. */
-export const PITUITARY_PATH = 'M-8,-10 C-8,-16 -2,-18 4,-14 C10,-10 10,-2 4,4 C0,8 -6,8 -8,2 C-10,-3 -9,-7 -8,-10 Z';
-
-/** J-shaped sac representing the stomach — fundus/body at the top, antrum narrowing toward
- * the pylorus at bottom-right. */
-export const STOMACH_PATH =
-  'M-30,-40 C-10,-46 20,-40 28,-18 C34,-2 30,14 14,26 C-2,38 -22,34 -30,18 C-38,2 -40,-20 -30,-40 Z';
-
 /** A loosely coiled ribbon representing a run of small intestine (duodenum onward) —
  * stylized, not anatomically literal, matching the rest of the app's hand-drawn organs. */
 export const SMALL_INTESTINE_PATH =
@@ -125,7 +113,7 @@ export function bodyGradient(organ: string, colorToken: string, light?: LightSou
  * introducing a colour, and the wash above it lands on the same neutral it would have landed on
  * had nothing been behind at all.
  */
-function opaqueUnderlay(d: string): PathNode {
+export function opaqueUnderlay(d: string): PathNode {
   return { type: 'path', d, fill: 'panel' };
 }
 
@@ -225,6 +213,9 @@ const LAD_BRANCH_PATHS = ['M11,25 L23,20', 'M21,41 L32,36'] as const;
 
 const HEART_LIGHT: LightSource = { x: -14, y: -18, r: 96 };
 
+/** The four chambers, for a caller that needs to colour or shade them one at a time. */
+export type HeartRegion = 'ra' | 'rv' | 'la' | 'lv';
+
 export interface HeartParams {
   /** Beats per minute, driving the beat animation on the web. */
   heartRate?: number;
@@ -234,6 +225,19 @@ export interface HeartParams {
   rightToken?: string;
   /** The left heart's colour. */
   leftToken?: string;
+  /**
+   * One chamber's colour, overriding the side it belongs to.
+   *
+   * Some modules are ABOUT a chamber rather than about a side. ecgConduction lights each region
+   * as the wavefront reaches it, so the atria and ventricles are coloured by what the conduction
+   * system is doing rather than by which blood is in them; fetalCirculation and shockStates tint
+   * individual chambers for shunt and for filling. Without this they could not use this builder
+   * at all, and all three drew their own chambers as rectangles instead.
+   */
+  regionTokens?: Partial<Record<HeartRegion, string>>;
+  /** One chamber's fill strength, 0-1. The same three callers use it to show activation or
+   *  filling as a depth rather than as a hue. */
+  regionOpacity?: Partial<Record<HeartRegion, number>>;
 }
 
 /**
@@ -245,7 +249,18 @@ export interface HeartParams {
 export function heartScene(placement: OrganPlacement, params: HeartParams = {}): OrganDrawing {
   const right = params.rightToken ?? 'venous';
   const left = params.leftToken ?? 'artery';
-  const chamber = (d: string, token: string): PathNode => ({ type: 'path', d, fillGradientId: gradientId('heart', token) });
+
+  /* A chamber takes the side's gradient unless the caller named a colour for that chamber, in
+   * which case it is a flat fill: a gradient is depth, and a per-region colour is DATA, so the
+   * two must not be carried by the same paint. `regionOpacity` shades it without changing hue. */
+  const chamber = (d: string, region: HeartRegion, sideToken: string): PathNode => {
+    const token = params.regionTokens?.[region];
+    const opacity = params.regionOpacity?.[region];
+    if (token === undefined && opacity === undefined) {
+      return { type: 'path', d, fillGradientId: gradientId('heart', sideToken) };
+    }
+    return { type: 'path', d, fill: token ?? sideToken, fillOpacity: opacity ?? 1 };
+  };
 
   const node = placed(placement, undefined, [
     {
@@ -273,10 +288,10 @@ export function heartScene(placement: OrganPlacement, params: HeartParams = {}):
              * the left atrium rather than behind it. */
             opaqueUnderlay(HEART_OUTLINE_PATH),
 
-            chamber(HEART_RA_PATH, right),
-            chamber(HEART_RV_PATH, right),
-            chamber(HEART_LA_PATH, left),
-            chamber(HEART_LV_PATH, left),
+            chamber(HEART_RA_PATH, 'ra', right),
+            chamber(HEART_RV_PATH, 'rv', right),
+            chamber(HEART_LA_PATH, 'la', left),
+            chamber(HEART_LV_PATH, 'lv', left),
 
             /* Grooves, then the silhouette, then the coronaries on top of both. */
             { type: 'path', d: HEART_AV_GROOVE, fill: 'none', colorToken: left, strokeWidth: 1.6, strokeOpacity: 0.75 },
@@ -603,11 +618,35 @@ export interface IntestineParams {
 export function smallIntestineScene(placement: OrganPlacement, params: IntestineParams = {}): OrganDrawing {
   const token = params.colorToken ?? 'secretin';
   const wash = 0.2 + clamp01(params.motility ?? 0.5) * 0.4;
+
+  /* Each segment is occluded before it is drawn.
+   *
+   * This was the one builder of the seven with no underlay, and a run of bowel is exactly where
+   * that shows: `tubeNodes` paints a panel lumen, but only as wide as the INNER stroke, so the
+   * wall itself stayed translucent and whatever the diagram had drawn behind the bowel — a duct,
+   * the pancreas, the next coil of the same intestine — read straight through it. The organs
+   * with a fill get this from `opaqueUnderlay`; a stroked organ needs the stroke equivalent.
+   *
+   * The calibre taper is the anatomy the drawing does carry: duodenum widest, ileum narrowest,
+   * which is the order they are in and the order they lose it in disease. */
+  const occlude = (d: string, width: number): PathNode => ({
+    type: 'path',
+    d,
+    fill: 'none',
+    colorToken: 'panel',
+    strokeWidth: width,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  });
+
+  const segment = (d: string, width: number): PathNode[] => [occlude(d, width), ...tubeNodes(d, token, width, wash)];
+
   const node = placed(placement, undefined, [
-    ...tubeNodes(ILEUM_PATH, token, 12, wash),
-    ...tubeNodes(JEJUNUM_PATH, token, 14, wash),
-    ...tubeNodes(DUODENUM_PATH, token, 16, wash),
+    ...segment(ILEUM_PATH, 12),
+    ...segment(JEJUNUM_PATH, 14),
+    ...segment(DUODENUM_PATH, 16),
   ]);
+
   return { node, defs: [] };
 }
 

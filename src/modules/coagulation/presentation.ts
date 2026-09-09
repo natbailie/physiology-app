@@ -159,9 +159,10 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
             type: 'group',
             transform: 'translate(330, 68)',
             children: [
-              { type: 'text', x: -46, y: -25, text: 'Extrinsic', anchor: 'middle', colorToken: 'text-dim' },
+              // 15 units apart, not 12: at 12 the two lines of each pair touched.
+              { type: 'text', x: -46, y: -28, text: 'Extrinsic', anchor: 'middle', colorToken: 'text-dim' },
               { type: 'text', x: -46, y: -13, text: '(PT)', anchor: 'middle', colorToken: 'text-faint' },
-              { type: 'text', x: 46, y: -25, text: 'Intrinsic', anchor: 'middle', colorToken: 'text-dim' },
+              { type: 'text', x: 46, y: -28, text: 'Intrinsic', anchor: 'middle', colorToken: 'text-dim' },
               { type: 'text', x: 46, y: -13, text: '(APTT)', anchor: 'middle', colorToken: 'text-faint' },
 
               // Both limbs converge on factor Xa.

@@ -107,9 +107,10 @@ export function buildImmuneResponsePresentation(ctx: Ctx): ModulePresentation<Im
             children: [
               { type: 'path', d: circlePath(0, 0, nodeRadius), colorToken: 'adaptive', strokeWidth: 2, fill: 'none' },
               { type: 'path', d: circlePath(-18, -8, 7), colorToken: 'adaptive', strokeWidth: 1.2, fill: 'none' },
-              { type: 'text', x: -18, y: -20, text: 'Th', cls: 'pathLabel', anchor: 'middle' },
+              // Haloed: these name the cells they sit inside, and the cell outlines cross them.
+              { type: 'text', x: -18, y: -20, text: 'Th', cls: 'pathLabel', anchor: 'middle', halo: 'panel' },
               { type: 'path', d: circlePath(16, -12, 7), colorToken: 'antibody', strokeWidth: 1.2, fill: 'none' },
-              { type: 'text', x: 16, y: -24, text: 'B', cls: 'pathLabel', anchor: 'middle' },
+              { type: 'text', x: 16, y: -24, text: 'B', cls: 'pathLabel', anchor: 'middle', halo: 'panel' },
               ...memoryCells.map((cell) => ({ type: 'path' as const, d: circlePath(cell.x, cell.y, 5), colorToken: 'memory', strokeWidth: 1.2, fill: 'none' })),
             ],
           },
