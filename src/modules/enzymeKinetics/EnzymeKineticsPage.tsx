@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ReactionCurveChart } from './components/ReactionCurveChart';
@@ -66,6 +67,7 @@ export function EnzymeKineticsPage() {
 
   return (
     <ModulePage
+      historyCapacity={kineticsLoopConfig.historyCapacity}
       moduleId="enzymeKinetics"
       title="Enzyme Kinetics & Inhibition"
       subtitle="one equation explains saturation, competition and why dose escalation stops working"
@@ -82,7 +84,17 @@ export function EnzymeKineticsPage() {
       }
       diagram={<ReactionCurveChart inputs={inputs} derived={snapshot.derived} />}
       readouts={<KineticsReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={KINETICS_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={KINETICS_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={KINETICS_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

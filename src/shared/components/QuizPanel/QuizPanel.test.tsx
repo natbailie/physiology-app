@@ -240,20 +240,13 @@ describe('explain-the-miss', () => {
     correct: false,
   };
 
-  it('names the frozen baseline when the learner got it wrong', () => {
-    // The counterfactual is already drawn; the learner just has no way to know what the second
-    // series means.
+  /**
+   * The panel renders nowhere near a trace since practice moved off the Lab tab, so a wrong
+   * answer explains itself without pointing at one.
+   */
+  it('explains the miss without naming traces that are not on screen', () => {
     render(<QuizPanel session={makeSession(wrongAnswer)} summary={NO_HISTORY} />);
-    expect(screen.getByText(/dashed trace/)).toBeTruthy();
-  });
-
-  it('stays quiet when they got it right', () => {
-    render(
-      <QuizPanel
-        session={makeSession({ ...wrongAnswer, answer: 'rises', correct: true })}
-        summary={NO_HISTORY}
-      />,
-    );
+    expect(screen.getByText(QUESTION.explanation)).toBeTruthy();
     expect(screen.queryByText(/dashed trace/)).toBeNull();
   });
 
@@ -279,6 +272,26 @@ describe('explain-the-miss', () => {
 
       // DIRECTION_CHOICES order: rises, falls, unchanged.
       expect(session.commit).toHaveBeenCalledWith('falls');
+    });
+
+    /**
+     * The listener is on WINDOW, and a module page hides its tabs rather than unmounting them.
+     * Without this guard a learner who leaves a question open, switches to the lessons to read,
+     * and then types anything would commit an answer to a question they cannot see — straight
+     * into the persisted review ladder.
+     */
+    it('refuses a keypress when the panel is inside an inert subtree', () => {
+      const session = makeSession();
+      const { container } = render(
+        <div inert>
+          <QuizPanel session={session} summary={NO_HISTORY} />
+        </div>,
+      );
+      expect(container.querySelector('[inert]')).not.toBeNull();
+
+      fireEvent.keyDown(window, { key: '2' });
+
+      expect(session.commit).not.toHaveBeenCalled();
     });
 
     it('commits by letter, matching the key shown on each choice', () => {

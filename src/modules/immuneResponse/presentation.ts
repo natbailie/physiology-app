@@ -42,10 +42,33 @@ const MEMORY_CELLS = [
 
 const TRAFFICKING_PATH = 'M178,110 C230,92 270,92 306,102';
 
+/* Tissue macrophages already living at the site, as opposed to the neutrophils recruited into it.
+ * Drawn FILLED where the recruited cells are outlined, so the two populations are told apart by
+ * more than position. */
+const RESIDENT_MACROPHAGES = [
+  { x: 16, y: 26 },
+  { x: -36, y: 4 },
+  { x: 34, y: 18 },
+];
+
 type Ctx = PresentationContext<ImmuneState, ImmuneDerived, ImmuneInputs, ImmuneHistoryPoint>;
 
 export function buildImmuneResponsePresentation(ctx: Ctx): ModulePresentation<ImmuneState, ImmuneDerived, ImmuneInputs, ImmuneHistoryPoint> {
   const { derived } = ctx;
+
+  /* The HOST, as distinct from the response.
+   *
+   * Every quantity this diagram drew was a running one, and an unchallenged patient's response is
+   * at rest — so a neutropenic host, a CD4-depleted host and an agammaglobulinaemic one all painted
+   * the same empty site and the same unswollen node. What separates them is standing in `derived`
+   * the whole time, and three lines of this file drew the Th and B cells at a fixed radius of seven
+   * while the CD4 count is the single most important number in the module.
+   */
+  const helperT = clamp(derived.helperTCellCount, 0, 1.5);
+  const bCells = clamp(derived.bCellFunction, 0, 1.5);
+  const innateReserve = clamp(derived.innateImmuneFunction, 0, 1.5);
+  const suppression = clamp(derived.immunosuppression / 100, 0, 1);
+  const intracellular = derived.pathogenType === 'intracellular';
 
   const load = clamp(derived.pathogenLoad, 0, 1);
   const innate = clamp(derived.innateActivity, 0, 1);
@@ -79,7 +102,30 @@ export function buildImmuneResponsePresentation(ctx: Ctx): ModulePresentation<Im
             transform: 'translate(112, 118)',
             children: [
               { type: 'path', d: circlePath(0, 0, 55), colorToken: 'pathogen', strokeWidth: 2, fill: 'none' },
-              ...pathogenDots.map((dot) => ({ type: 'path' as const, d: circlePath(dot.x, dot.y, 4), colorToken: 'pathogen', fill: 'none' })),
+              /* Resident macrophages: the first line that is already there. A count, and the only
+               * thing that distinguishes a neutropenic host from a healthy one before anything
+               * infects either of them. */
+              ...RESIDENT_MACROPHAGES.slice(0, Math.round(clamp(innateReserve, 0, 1) * RESIDENT_MACROPHAGES.length)).map((cell) => ({
+                type: 'circle' as const,
+                cx: cell.x,
+                cy: cell.y,
+                r: 5,
+                fill: 'innate',
+                fillOpacity: 0.6,
+              })),
+              /* An intracellular organism sits INSIDE a host cell, which is the whole reason
+               * antibody cannot reach it — so the drawing puts it there rather than saying so in a
+               * caption. Drawn whether or not a challenge has landed, because the scenario is the
+               * kind of organism, not the infection. */
+              ...(intracellular
+                ? [{ type: 'path' as const, d: circlePath(0, -4, 24), colorToken: 'text-dim', strokeWidth: 1.2, fill: 'none' }]
+                : []),
+              ...pathogenDots.map((dot) => ({
+                type: 'path' as const,
+                d: intracellular ? circlePath(dot.x * 0.4, dot.y * 0.4 - 4, 4) : circlePath(dot.x, dot.y, 4),
+                colorToken: 'pathogen',
+                fill: 'none',
+              })),
               ...innateCells.map((cell) => ({ type: 'path' as const, d: circlePath(cell.x, cell.y, 7), colorToken: 'innate', strokeWidth: 1.2, fill: 'none' })),
               ...antibodyMarks.map((d) => ({ type: 'path' as const, d, colorToken: 'antibody', strokeWidth: 1.6, fill: 'none' })),
             ],
@@ -106,12 +152,18 @@ export function buildImmuneResponsePresentation(ctx: Ctx): ModulePresentation<Im
             transform: 'translate(356, 116)',
             children: [
               { type: 'path', d: circlePath(0, 0, nodeRadius), colorToken: 'adaptive', strokeWidth: 2, fill: 'none' },
-              { type: 'path', d: circlePath(-18, -8, 7), colorToken: 'adaptive', strokeWidth: 1.2, fill: 'none' },
+              // Radius is the CD4 count, not a constant seven.
+              { type: 'path', d: circlePath(-18, -8, 3 + helperT * 5), colorToken: 'adaptive', strokeWidth: 1.2, fill: 'none' },
               // Haloed: these name the cells they sit inside, and the cell outlines cross them.
               { type: 'text', x: -18, y: -20, text: 'Th', cls: 'pathLabel', anchor: 'middle', halo: 'panel' },
-              { type: 'path', d: circlePath(16, -12, 7), colorToken: 'antibody', strokeWidth: 1.2, fill: 'none' },
+              { type: 'path', d: circlePath(16, -12, 3 + bCells * 5), colorToken: 'antibody', strokeWidth: 1.2, fill: 'none' },
               { type: 'text', x: 16, y: -24, text: 'B', cls: 'pathLabel', anchor: 'middle', halo: 'panel' },
               ...memoryCells.map((cell) => ({ type: 'path' as const, d: circlePath(cell.x, cell.y, 5), colorToken: 'memory', strokeWidth: 1.2, fill: 'none' })),
+              /* Pharmacological suppression damps every arm at once, so it is drawn across the
+               * whole node rather than on any one cell in it. A wash, stated on the node. */
+              ...(suppression > 0
+                ? [{ type: 'circle' as const, cx: 0, cy: 0, r: nodeRadius, fill: 'text-dim', fillOpacity: suppression * 0.45 }]
+                : []),
             ],
           },
           { type: 'text', x: 300, y: 172, text: `Memory ${(derived.memoryLevel * 100).toFixed(0)}%`, cls: 'pathLabel' },

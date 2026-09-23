@@ -4,6 +4,8 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
+import { CAPILLARY_CONTROLS } from './presentation';
 import { CapillaryDiagram } from './components/CapillaryDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -14,10 +16,11 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { capillaryExchangeContent } from './content';
 import { capillaryLoopConfig } from './engine/loopConfig';
-import { perturbAlbuminInfusion, perturbStandUp } from './engine/engine';
+import { perturbAlbuminInfusion } from './engine/engine';
 import {
   CAPILLARY_PRESETS,
   CAPILLARY_PRESET_LABELS,
@@ -58,6 +61,10 @@ export function CapillaryExchangePage() {
   const capillaryPressureHistory = useSeries(history, (h) => h.capillaryPressure);
 
   const handleChange = useInputSetter(setInputs);
+  // You stay standing, and what standing does is raise the venous pressure at the ankle — which is
+  // what `perturbStandUp`'s own docblock says it does. The code added to the interstitial volume
+  // instead: the oedema rather than its cause, so the pressure it came from was never on the rail.
+  const nudge = useInputNudge(setInputs, CAPILLARY_CONTROLS);
 
   function handleSelectBed(bed: TissueBed) {
     setInputs((prev) => ({ ...prev, ...bedDefaults(bed) }));
@@ -72,6 +79,7 @@ export function CapillaryExchangePage() {
 
   return (
     <ModulePage
+      historyCapacity={capillaryLoopConfig.historyCapacity}
       moduleId="capillaryExchange"
       title="Capillary Exchange & Oedema"
       subtitle="Starling forces, the interstitium & lymphatic reserve"
@@ -83,7 +91,7 @@ export function CapillaryExchangePage() {
           onApply={applyPreset}
           actions={[
             { label: 'Albumin infusion', onClick: () => perturb((s) => perturbAlbuminInfusion(s)), variant: 'impulse' },
-            { label: 'Stand up', onClick: () => perturb((s) => perturbStandUp(s)), variant: 'danger' },
+            { label: 'Stand up', onClick: () => nudge({ venousOutflowPressure: 25 }), variant: 'danger' },
           ]}
           onShare={shareLink}
           onReset={resetScenario}
@@ -91,7 +99,17 @@ export function CapillaryExchangePage() {
       }
       diagram={<CapillaryDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={CAPILLARY_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -127,6 +145,7 @@ export function CapillaryExchangePage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} onSelectBed={handleSelectBed} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={capillaryExchangeContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of capillary fluid exchange — not a clinical tool. This is Starling\'s law of the CAPILLARY, not the Frank-Starling relationship between preload and stroke volume in the cardiorenal and PV loop modules; same physiologist, different law. One second of real time is about half a simulated hour, so oedema that takes a day or two to build appears over roughly a minute.'

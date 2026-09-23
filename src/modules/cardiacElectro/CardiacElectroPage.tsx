@@ -15,6 +15,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { cardiacElectroContent } from './content';
 import { cardiacLoopConfig } from './engine/loopConfig';
@@ -62,6 +63,7 @@ export function CardiacElectroPage() {
 
   return (
     <ModulePage
+      historyCapacity={cardiacLoopConfig.historyCapacity}
       moduleId="cardiacElectro"
       title="Cardiac Cycle & PV Loop"
       subtitle="preload, afterload, contractility & the pressure-volume loop"
@@ -77,7 +79,17 @@ export function CardiacElectroPage() {
       }
       diagram={<CardiacDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={CARDIAC_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -95,6 +107,7 @@ export function CardiacElectroPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={cardiacElectroContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of cardiac mechanics — not a clinical or diagnostic tool. The ECG trace here is a schematic of timing and sequence only, included to show when in the cycle each event falls; for a trace actually computed from the depolarisation sequence, see the ECG & Cardiac Conduction module. Change one lever at a time and watch which corner of the pressure-volume loop moves: preload widens it, afterload raises and narrows it, contractility lets it empty further left. Simulated time runs slower than real time so the four phases are distinguishable as the loop is traced.'}
     />

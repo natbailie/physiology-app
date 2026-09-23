@@ -33,7 +33,8 @@ interface PresetBarProps<T extends string> {
   onShare?: () => string;
   onReset: () => void;
   /** Locks the bar while a pattern question is open. Loading a different scenario mid-question
-   * would silently replace the one being asked about. */
+   * would silently replace the one being asked about. The shell's blindness ORs in beside it,
+   * so a page that never passed this is still covered while its own session runs. */
   disabled?: boolean;
 }
 
@@ -50,7 +51,16 @@ function PresetBarBase<T extends string>({
   disabled = false,
 }: PresetBarProps<T>) {
   const [copied, setCopied] = useState(false);
-  const { registerScenarios } = useModuleShell();
+  const { registerScenarios, blinded } = useModuleShell();
+
+  /**
+   * Locked while a pattern question is open — from this bar's own `disabled` prop, or from the
+   * shell, which carries the blindness of whichever tab owns the session. Reading the shell
+   * closes the pages that never passed `disabled`: a blinded learner crossing to the lab could
+   * otherwise silently replace the scenario being asked about. Loading a different scenario
+   * mid-question would answer it from the preset row.
+   */
+  const locked = disabled || blinded;
 
   /**
    * Publish the scenarios so the explainer can offer "show me" buttons beside the prose that
@@ -58,7 +68,7 @@ function PresetBarBase<T extends string>({
    * registering here is what keeps this feature out of all 45 module pages.
    *
    * `labels` and `onApply` are module-level constants and a `useCallback`, so this settles after
-   * the first commit; `disabled` re-registers only on a practice phase change.
+   * the first commit; `locked` re-registers only on a practice phase change.
    */
   useEffect(() => {
     // A `Record<T, string>` over a union has no index signature, so it needs the widening
@@ -66,10 +76,10 @@ function PresetBarBase<T extends string>({
     registerScenarios({
       labels: labels as Record<string, string>,
       apply: onApply as (id: string) => void,
-      disabled,
+      disabled: locked,
     });
     return () => registerScenarios(null);
-  }, [registerScenarios, labels, onApply, disabled]);
+  }, [registerScenarios, labels, onApply, locked]);
 
   /**
    * Copy, then say so for a moment.
@@ -103,7 +113,7 @@ function PresetBarBase<T extends string>({
                 key={name}
                 type="button"
                 className={styles.preset}
-                disabled={disabled}
+                disabled={locked}
                 onClick={() => onApply(name)}
               >
                 {labels[name]}
@@ -118,7 +128,7 @@ function PresetBarBase<T extends string>({
           <button
             type="button"
             className={styles.share}
-            disabled={disabled}
+            disabled={locked}
             onClick={() => void handleShare()}
           >
             {copied ? 'Link copied' : 'Share'}
@@ -129,13 +139,13 @@ function PresetBarBase<T extends string>({
             key={action.label}
             type="button"
             className={action.variant === 'danger' ? styles.danger : styles.impulse}
-            disabled={disabled}
+            disabled={locked}
             onClick={action.onClick}
           >
             {action.label}
           </button>
         ))}
-        <button type="button" className={styles.reset} disabled={disabled} onClick={onReset}>
+        <button type="button" className={styles.reset} disabled={locked} onClick={onReset}>
           Reset
         </button>
       </div>

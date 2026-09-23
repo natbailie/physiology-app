@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { AdrenalCortexDiagram } from './components/AdrenalCortexDiagram';
@@ -68,6 +69,7 @@ export function AdrenalCortexPage() {
 
   return (
     <ModulePage
+      historyCapacity={adrenalLoopConfig.historyCapacity}
       moduleId="adrenalCortex"
       title="Adrenal Cortex: Steroidogenesis & CAH"
       subtitle="one pathway, four enzymes, and a fingerprint at every block"
@@ -84,7 +86,17 @@ export function AdrenalCortexPage() {
       }
       diagram={<AdrenalCortexDiagram derived={snapshot.derived} inputs={inputs} />}
       readouts={<AdrenalCortexReadoutPanel derived={snapshot.derived} inputs={inputs} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={ADRENAL_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={ADRENAL_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={ADRENAL_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

@@ -39,6 +39,16 @@ export function buildDigestionAbsorptionPresentation(ctx: Ctx): ModulePresentati
         ariaLabel: 'The digestive chain from pancreas and liver to stool, showing the lumen filling with a meal, the absorbed fringe along the jejunum, bile and enzyme feeding the tube, ileal reclaim of bile salts, and the stool bucket filling with the day\'s water',
         children: [
           { type: 'text', x: 40, y: 54, text: 'The chain', cls: 'label' },
+          /* The lactose in the meal, beside the chain that has to handle it.
+           *
+           * Lactose reaches `derived` as a passthrough nothing drew, so the slider that decides
+           * whether a lactase-deficient gut has anything to fail on moved no picture. It is drawn
+           * at the mouth end, because an unsplit disaccharide is a property of what was EATEN
+           * before it is a property of what happens downstream. */
+          { type: 'text', x: 440, y: 54, text: 'meal lactose', cls: 'caption' },
+          { type: 'path', d: 'M440,64 h90', colorToken: 'text-faint', strokeWidth: 8, strokeLinecap: 'butt', fill: 'none', opacity: 0.25 },
+          { type: 'path', d: `M440,64 h${(clamp(derived.mealLactoseGrams / 50, 0, 1) * 90).toFixed(1)}`, colorToken: 'glucose', strokeWidth: 8, strokeLinecap: 'butt', fill: 'none' },
+          { type: 'text', x: 440, y: 86, text: `${derived.mealLactoseGrams.toFixed(0)} g`, cls: 'caption' },
 
           { type: 'path', d: rectPath(40, 64, 110, 70), fill: 'none', colorToken: 'text' },
           { type: 'path', d: rectPath(160, 64, 110, 70), fill: 'none', colorToken: 'text' },

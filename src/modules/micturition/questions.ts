@@ -1,44 +1,9 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { MicturitionDerived, MicturitionInputs, MicturitionInternalState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { MicturitionInputs } from './engine/types';
 import type { MicturitionPresetName } from './engine/presets';
+import { BLADDER_PANEL as PANEL, type MicturitionSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: MicturitionInternalState; derived: MicturitionDerived };
 export type MicturitionQuestion = ModuleQuestion<MicturitionInputs, MicturitionPresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  {
-    label: 'Volume',
-    unit: 'mL',
-    value: (s) => s.derived.bladderVolumeML,
-    decimals: 0,
-    tolerance: 0.08,
-  },
-  {
-    label: 'Pressure',
-    unit: 'cmH₂O',
-    value: (s) => s.derived.intravesicalPressureCmH2O,
-    decimals: 1,
-    tolerance: 0.12,
-  },
-  {
-    label: 'Detrusor',
-    value: (s) => s.derived.detrusorTone,
-    decimals: 2,
-    tolerance: 0.15,
-  },
-  {
-    label: 'Sphincter',
-    value: (s) => s.derived.externalSphincterTone,
-    decimals: 2,
-    tolerance: 0.15,
-  },
-  {
-    label: 'Afferent',
-    value: (s) => s.derived.afferentFiringRate,
-    decimals: 2,
-    tolerance: 0.2,
-  },
-];
 
 /** Settle long enough for filling dynamics to produce a measurable pattern. */
 const SETTLE = 3600;

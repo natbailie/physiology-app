@@ -21,6 +21,7 @@ export type ModuleLoader = () => Promise<Record<string, unknown>>;
 export const MODULE_IDS: readonly string[] = [
   'adrenalCortex',
   'adrenalMedulla',
+  'anaesthesia',
   'anteriorPituitary',
   'autonomicNervous',
   'bloodGroups',
@@ -31,6 +32,7 @@ export const MODULE_IDS: readonly string[] = [
   'cellCycle',
   'cerebralPerfusion',
   'coagulation',
+  'cognitiveNeuroscience',
   'coronaryCirculation',
   'digestionAbsorption',
   'ecgConduction',
@@ -51,6 +53,7 @@ export const MODULE_IDS: readonly string[] = [
   'liverPhysiology',
   'mechanicalVentilation',
   'membranePotentials',
+  'metabolism',
   'micturition',
   'motorControl',
   'muscleContraction',
@@ -63,6 +66,7 @@ export const MODULE_IDS: readonly string[] = [
   'shockStates',
   'somaticSensation',
   'thermoregulation',
+  'toxicology',
   'venousReturn',
   'vestibular',
   'vision',
@@ -71,6 +75,7 @@ export const MODULE_IDS: readonly string[] = [
 export const questionModules: Readonly<Record<string, ModuleLoader>> = {
   adrenalCortex: () => import('./adrenalCortex/questions'),
   adrenalMedulla: () => import('./adrenalMedulla/questions'),
+  anaesthesia: () => import('./anaesthesia/questions'),
   anteriorPituitary: () => import('./anteriorPituitary/questions'),
   autonomicNervous: () => import('./autonomicNervous/questions'),
   bloodGroups: () => import('./bloodGroups/questions'),
@@ -81,6 +86,7 @@ export const questionModules: Readonly<Record<string, ModuleLoader>> = {
   cellCycle: () => import('./cellCycle/questions'),
   cerebralPerfusion: () => import('./cerebralPerfusion/questions'),
   coagulation: () => import('./coagulation/questions'),
+  cognitiveNeuroscience: () => import('./cognitiveNeuroscience/questions'),
   coronaryCirculation: () => import('./coronaryCirculation/questions'),
   digestionAbsorption: () => import('./digestionAbsorption/questions'),
   ecgConduction: () => import('./ecgConduction/questions'),
@@ -101,6 +107,7 @@ export const questionModules: Readonly<Record<string, ModuleLoader>> = {
   liverPhysiology: () => import('./liverPhysiology/questions'),
   mechanicalVentilation: () => import('./mechanicalVentilation/questions'),
   membranePotentials: () => import('./membranePotentials/questions'),
+  metabolism: () => import('./metabolism/questions'),
   micturition: () => import('./micturition/questions'),
   motorControl: () => import('./motorControl/questions'),
   muscleContraction: () => import('./muscleContraction/questions'),
@@ -113,6 +120,7 @@ export const questionModules: Readonly<Record<string, ModuleLoader>> = {
   shockStates: () => import('./shockStates/questions'),
   somaticSensation: () => import('./somaticSensation/questions'),
   thermoregulation: () => import('./thermoregulation/questions'),
+  toxicology: () => import('./toxicology/questions'),
   venousReturn: () => import('./venousReturn/questions'),
   vestibular: () => import('./vestibular/questions'),
   vision: () => import('./vision/questions'),
@@ -121,6 +129,7 @@ export const questionModules: Readonly<Record<string, ModuleLoader>> = {
 export const contentModules: Readonly<Record<string, ModuleLoader>> = {
   adrenalCortex: () => import('./adrenalCortex/content'),
   adrenalMedulla: () => import('./adrenalMedulla/content'),
+  anaesthesia: () => import('./anaesthesia/content'),
   anteriorPituitary: () => import('./anteriorPituitary/content'),
   autonomicNervous: () => import('./autonomicNervous/content'),
   bloodGroups: () => import('./bloodGroups/content'),
@@ -131,6 +140,7 @@ export const contentModules: Readonly<Record<string, ModuleLoader>> = {
   cellCycle: () => import('./cellCycle/content'),
   cerebralPerfusion: () => import('./cerebralPerfusion/content'),
   coagulation: () => import('./coagulation/content'),
+  cognitiveNeuroscience: () => import('./cognitiveNeuroscience/content'),
   coronaryCirculation: () => import('./coronaryCirculation/content'),
   digestionAbsorption: () => import('./digestionAbsorption/content'),
   ecgConduction: () => import('./ecgConduction/content'),
@@ -151,6 +161,7 @@ export const contentModules: Readonly<Record<string, ModuleLoader>> = {
   liverPhysiology: () => import('./liverPhysiology/content'),
   mechanicalVentilation: () => import('./mechanicalVentilation/content'),
   membranePotentials: () => import('./membranePotentials/content'),
+  metabolism: () => import('./metabolism/content'),
   micturition: () => import('./micturition/content'),
   motorControl: () => import('./motorControl/content'),
   muscleContraction: () => import('./muscleContraction/content'),
@@ -163,7 +174,30 @@ export const contentModules: Readonly<Record<string, ModuleLoader>> = {
   shockStates: () => import('./shockStates/content'),
   somaticSensation: () => import('./somaticSensation/content'),
   thermoregulation: () => import('./thermoregulation/content'),
+  toxicology: () => import('./toxicology/content'),
   venousReturn: () => import('./venousReturn/content'),
   vestibular: () => import('./vestibular/content'),
   vision: () => import('./vision/content'),
+};
+
+/**
+ * Modules that carry patient cases — a SUBSET of `MODULE_IDS`, unlike the two maps above.
+ *
+ * Most modules have no bed and should not. Half the catalogue is cellular or molecular, and a
+ * patient admitted with Michaelis-Menten kinetics would be the same lie about scale that
+ * CLAUDE.md already refuses in the diagrams.
+ */
+export const caseModules: Readonly<Record<string, ModuleLoader>> = {
+  cardiorenal: () => import('./cardiorenal/cases'),
+  electrolyteBalance: () => import('./electrolyteBalance/cases'),
+  exercisePhysiology: () => import('./exercisePhysiology/cases'),
+  gastrointestinal: () => import('./gastrointestinal/cases'),
+  hearing: () => import('./hearing/cases'),
+  micturition: () => import('./micturition/cases'),
+  renalTubular: () => import('./renalTubular/cases'),
+  respiratory: () => import('./respiratory/cases'),
+  shockStates: () => import('./shockStates/cases'),
+  thermoregulation: () => import('./thermoregulation/cases'),
+  vestibular: () => import('./vestibular/cases'),
+  vision: () => import('./vision/cases'),
 };

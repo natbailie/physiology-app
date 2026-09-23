@@ -4,6 +4,15 @@
   flex-direction: column;
 }
 
+/* WCAG 2.2 2.4.11 Focus Not Obscured: anything tabbed to must not scroll underneath the
+ * sticky top bar. `scroll-margin-top` makes the browser's own scroll-into-view leave the
+ * bar's measured height plus the rail's breathing room, on every focusable descendant.
+ * Zero-specificity `:where`, so a component that needs its own margin still wins.
+ * (The bottom dock is cleared the other way: `.main` already pads 4.5rem past it.) */
+.page :where(a, button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin-top: calc(var(--topbar-h) + var(--s-4));
+}
+
 /* --- Sticky header + preset bar --- */
 
 .topBar {
@@ -19,12 +28,107 @@
   border-bottom: 1px solid var(--panel-border);
 }
 
+/* Lab / Patients. A joined segmented run, following ThemeToggle: the members overlap by a
+   hairline and the selected one lifts above the seam, which is what the `z-index: 1` on
+   `[aria-pressed='true']` in button.module.css is for. */
+.tabStrip {
+  display: inline-flex;
+  align-self: flex-start;
+}
+
+.tab {
+  composes: segment from '../../styles/button.module.css';
+  border-radius: 0;
+  padding: var(--s-2) var(--s-5);
+}
+
+.tab:not(:first-child) {
+  margin-left: -1px;
+}
+
+.tab:first-child {
+  border-top-left-radius: var(--r-sm);
+  border-bottom-left-radius: var(--r-sm);
+}
+
+.tab:last-child {
+  border-top-right-radius: var(--r-sm);
+  border-bottom-right-radius: var(--r-sm);
+}
+
+/* Two reasons a wrapper needs its own rule here, and both are easy to get wrong.
+   `.lab` and `.lessons` are `display: grid`, so the user agent's `[hidden] { display: none }`
+   loses on specificity — the attribute would toggle and both views would stay on screen. And
+   `.presetSlot` wraps a bar whose own `.bar { display: flex }` is an AUTHOR rule, which beats
+   the UA rule outright however the wrapper is declared. */
+.lab[hidden],
+.lessons[hidden],
+.clinic[hidden],
+.questions[hidden],
+.presetSlot[hidden] {
+  display: none;
+}
+
+/* Arriving on a tab.
+ *
+ * OPACITY only, and that is not a style preference. `LabAnchor` measures the lab's
+ * `getBoundingClientRect()` in a layout effect the moment the tab becomes visible — a
+ * `display: none` element measures as an all-zero rect, so the scroll has to happen in the very
+ * commit that reveals it — and anything that moved the panel would be measured mid-flight and
+ * scroll to the wrong place.
+ *
+ * An animation rather than a transition, because `display: none` cannot be transitioned out of:
+ * the panel has no box at all until the tab changes, which is also what restarts this each time.
+ * There is no exit half for the same reason — the outgoing panel is gone in the same frame — so
+ * this is an arrival, not a crossfade. A crossfade would need both panels laid out at once, and
+ * these are hidden rather than unmounted precisely so that only one of them is live: two mounted
+ * `QuizPanel`s would answer the same keypress twice. */
+@keyframes panelEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lab:not([hidden]),
+.lessons:not([hidden]),
+.clinic:not([hidden]),
+.questions:not([hidden]),
+.presetSlot:not([hidden]) {
+  animation: panelEnter var(--dur) var(--ease);
+}
+
+.clinic,
+.questions {
+  max-width: 1040px;
+  padding: var(--s-5) 0 var(--s-7);
+}
+
 .titleRow {
   display: flex;
   /* Centre, not baseline: the lockup is two lines and would drag the row's baseline with it. */
   align-items: center;
   gap: var(--s-4);
   flex-wrap: wrap;
+}
+
+/* Pushed to the far end of the row, so it never sits between the title and the tabs. It wraps
+   with everything else on a narrow viewport rather than being hidden: a learner who prefers the
+   light theme should not have to leave the module to get it. */
+.themeSlot {
+  margin-left: auto;
+  display: flex;
+}
+
+/* Below 1024px the tutor launcher leaves the bottom edge to the control dock and moves to the
+   top-right, into the very corner `margin-left: auto` puts this control in. Let the toggle flow
+   inline with the rest of the row instead of fighting a fixed element for that corner. */
+@media (max-width: 1024px) {
+  .themeSlot {
+    margin-left: 0;
+  }
 }
 
 /* Its own element rather than styling the lockup from here: reaching into another
@@ -69,12 +173,7 @@
   color: var(--text-dim);
 }
 
-.practiceCta {
-  composes: primary from '../../styles/button.module.css';
-  margin-left: auto;
-}
-
-/* --- Lab region: diagram / readouts / practice / charts, beside the control rail --- */
+/* --- Lab region: diagram / readouts / charts, beside the control rail --- */
 
 .lab {
   display: grid;
@@ -140,9 +239,28 @@
   min-height: 0;
 }
 
+.labDisclaimer {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+
+/* A button that reads as a link: this navigates within the page rather than to a URL, so an
+   anchor with no href would be the lie. */
+.inlineLink {
+  font: inherit;
+  color: var(--brand);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* --- Study region: full width, below the rail --- */
 
-.study {
+.lessons {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
   gap: var(--s-6) var(--s-8);
@@ -184,11 +302,11 @@
 
 @media (max-width: 1024px) {
   .lab,
-  .study {
+  .lessons {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .study {
+  .lessons {
     max-width: none;
     padding-top: var(--s-5);
   }
@@ -214,7 +332,7 @@
     z-index: 5;
     background: var(--panel);
     border-top: 1px solid var(--panel-border);
-    box-shadow: 0 -4px 16px rgba(20, 32, 46, 0.1);
+    box-shadow: var(--shadow-up);
   }
 
   /* The dock's own surface supplies the chrome, so the head stands down to a plain row. */

@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { CoronaryDiagram } from './components/CoronaryDiagram';
@@ -71,6 +72,7 @@ export function CoronaryCirculationPage() {
 
   return (
     <ModulePage
+      historyCapacity={coronaryLoopConfig.historyCapacity}
       moduleId="coronaryCirculation"
       title="Coronary Circulation"
       subtitle="supply, demand & the reserve in between"
@@ -91,7 +93,17 @@ export function CoronaryCirculationPage() {
       }
       diagram={<CoronaryDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={CORONARY_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={CORONARY_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={CORONARY_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

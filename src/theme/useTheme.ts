@@ -6,15 +6,31 @@ export type ResolvedTheme = 'light' | 'dark';
 const STORAGE_KEY = 'theme';
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
-/** Matches the ground colours in index.css, so the browser chrome tracks the page. */
-const THEME_COLOR: Record<ResolvedTheme, string> = { light: '#f2f5f8', dark: '#10161d' };
+/** The ground colours from index.css, so the browser chrome tracks the page.
+ *
+ * Literals rather than a read of the cascade: this runs to set a `<meta>` the browser has
+ * already consumed by the time a computed style would be available. They are stated twice more
+ * in index.html's pre-paint script, which cannot import anything — and all three drifted from
+ * --bg at some point, which is why themeColor.test.ts now binds them to the generated tokens. */
+const THEME_COLOR: Record<ResolvedTheme, string> = { light: '#f6f8fb', dark: '#050a13' };
+
+/**
+ * The default when nothing is stored.
+ *
+ * Dark, deliberately: this is an instrument console and most of the studying it is built for
+ * happens at night. A learner who wants their machine's setting can say so — see below for why
+ * that is a stored value now rather than an empty slot.
+ */
+const DEFAULT_PREFERENCE: ThemePreference = 'dark';
 
 function readStored(): ThemePreference {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'dark' || stored === 'light' ? stored : 'system';
+    return stored === 'dark' || stored === 'light' || stored === 'system'
+      ? stored
+      : DEFAULT_PREFERENCE;
   } catch {
-    return 'system';
+    return DEFAULT_PREFERENCE;
   }
 }
 
@@ -31,9 +47,14 @@ function apply(resolved: ResolvedTheme) {
  * Theme preference, persisted.
  *
  * The inline script in index.html has already stamped `data-theme` before React mounted — this
- * hook owns changes to it, not the initial value. 'system' is a real third state rather than
- * an absent preference: a learner who has not chosen should follow their machine, including
- * when their machine changes at dusk.
+ * hook owns changes to it, not the initial value.
+ *
+ * 'system' is a real third state, and since the default became dark it is a real STORED state
+ * too. It used to be the absence of a key, which worked only while absence also meant "follow
+ * the machine". With dark as the default those two readings collide: an absent key now means
+ * dark, so removing the key on "Auto" would hand the learner dark and quietly take away the
+ * only route back to their machine. So `choose('system')` writes it, and both this hook and the
+ * pre-paint script in index.html have to recognise the value.
  */
 export function useTheme() {
   const [preference, setPreference] = useState<ThemePreference>(readStored);
@@ -63,8 +84,8 @@ export function useTheme() {
   const choose = useCallback((next: ThemePreference) => {
     setPreference(next);
     try {
-      if (next === 'system') localStorage.removeItem(STORAGE_KEY);
-      else localStorage.setItem(STORAGE_KEY, next);
+      // All three states are written, 'system' included — see the docblock above.
+      localStorage.setItem(STORAGE_KEY, next);
     } catch {
       /* Private mode. The choice still applies for this session. */
     }

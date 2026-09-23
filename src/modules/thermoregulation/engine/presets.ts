@@ -57,3 +57,18 @@ export const THERMO_PRESET_ORDER: ThermoPresetName[] = [
   'mildHypothermia',
   'deepHypothermia',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const THERMO_PRESET_GLOSS: Partial<Record<ThermoPresetName, string>> = {
+  normothermic: 'the body holding its own heat balance with nothing asked of its defences',
+  feverViral: 'the thermostat itself turned up by pyrogens',
+  feverOnAntipyretic: 'the raised thermostat brought back down by drug',
+  heatStrokeExertional: 'defences overwhelmed while the thermostat never moved',
+  mildHypothermia: 'heat lost faster than the body can make it',
+  deepHypothermia: 'so cold that the defences have themselves failed',
+};

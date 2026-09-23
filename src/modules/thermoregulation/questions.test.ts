@@ -1,12 +1,14 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { thermoLoopConfig } from './engine/loopConfig';
 import {
   DEFAULT_THERMO_INPUTS,
   THERMO_PRESETS,
   type ThermoPresetName,
+  THERMO_PRESET_GLOSS,
 } from './engine/presets';
 import { THERMO_QUESTIONS } from './questions';
 import type { ThermoDerived, ThermoInputs, ThermoInternalState } from './engine/types';
@@ -25,3 +27,5 @@ describe('thermoregulation pattern questions', () => {
 describe('thermoregulation predict questions', () => {
   describeQuestionSet(thermoLoopConfig, DEFAULT_THERMO_INPUTS, THERMO_PRESETS, predictions);
 });
+
+describeGlossSet(THERMO_PRESET_GLOSS, THERMO_PRESETS, patterns);

@@ -74,6 +74,19 @@ export function questionIdsFor(moduleId: string): string[] {
   return index?.[moduleId] ?? [];
 }
 
+/**
+ * Whether the index has landed, as distinct from having landed empty.
+ *
+ * `questionIdsFor` cannot tell those apart — both are `[]` — and for the study strip that was
+ * harmless, because it renders nothing until something has been attempted. The ward round has
+ * to distinguish them: acuity derived from an empty index makes every bed a NEW ADMISSION, so
+ * without this the board paints a full ward of identical grey chips and then rewrites itself
+ * once the questions arrive.
+ */
+export function questionIndexReady(): boolean {
+  return index !== null;
+}
+
 /** Test/SSR escape hatch: resolves with the full index once every module has been loaded. */
 export async function loadQuestionIndex(): Promise<Record<string, string[]>> {
   startLoad();

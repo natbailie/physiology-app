@@ -55,14 +55,18 @@ describe('auth gate', () => {
     expect(screen.queryByRole('heading', { name: 'Physiology Lab' })).toBeTruthy();
   });
 
-  it('lets a signed-out visitor read the pricing page', () => {
+  it.each([
+    ['pricing', 'the pricing page'],
+    ['accessibility', 'the accessibility statement'],
+    ['review-h', 'the accessibility review'],
+  ])('lets a signed-out visitor read %s', (route, text) => {
     mockState.configured = true;
     render(
-      <AuthGate route={'pricing' as never}>
-        <p>the pricing page</p>
+      <AuthGate route={route as never}>
+        <p>{text}</p>
       </AuthGate>,
     );
-    expect(screen.queryByText('the pricing page')).toBeTruthy();
+    expect(screen.queryByText(text)).toBeTruthy();
   });
 
   it('shows neither while the session lookup is still in flight', () => {

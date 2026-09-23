@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D — Clinical day / Monitor night (A+B fusion) · Physiology Lab preview</title>
+<style>
+  /* ---- Fusion tokens: A chrome in light, B instruments in dark ---- */
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --panel-raised:#eef2f7; --border:#dfe6ef;
+    --text:#0f1f33; --dim:#4b5d75; --faint:#7c8da6;
+    --brand:#0f62d6; --brand-ink:#0b1b33; --on-ink:#fff; --ink-dim:#9db1c9;
+    --danger:#c02828; --warn:#8a5f00; --ok:#0e7c6b;
+    --artery:#c02828; --o2:#0a72b8; --kidney:#7a5c00;
+    --well:#0a1526; --well2:#0f1e35; --well-border:#1d3352; --well-grid:rgba(110,168,254,.12);
+    --glow-green:#3ddc97; --glow-cyan:#4cc3ff; --amber:#ffb224; --alarm-red:#ff5d5d;
+    --r:16px; --r-sm:10px;
+    --shadow:0 1px 2px rgba(15,31,51,.06),0 8px 24px -12px rgba(15,31,51,.18);
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text","Segoe UI",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#060b14; --panel:#0b1526; --panel-raised:#0f1e35; --border:#1d3352;
+    --text:#e8f1ff; --dim:#a9bdd6; --faint:#6f87a5;
+    --brand:#4cc3ff; --brand-ink:#020610; --on-ink:#dff0ff; --ink-dim:#8ba0b9;
+    --danger:#ff7b7b; --artery:#ff6b6b; --o2:#4cc3ff; --kidney:#e8c547;
+    --shadow:0 18px 50px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  [data-theme="dark"] body,body.dark-grid{background-image:linear-gradient(var(--well-grid) 1px,transparent 1px),linear-gradient(90deg,var(--well-grid) 1px,transparent 1px);background-size:28px 28px}
+  .proto-bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 20px;background:#0b1b33;color:#fff;font-size:13px;border-bottom:1px solid #1d3352}
+  [data-theme="dark"] .proto-bar{background:#020610}
+  .proto-bar .pill{border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:2px 10px;font-size:12px}
+  .proto-bar nav{display:flex;gap:14px;margin-left:auto}
+  .proto-bar nav a{color:#fff;opacity:.85;text-decoration:none}
+  .theme-seg{display:flex;background:rgba(255,255,255,.12);border-radius:9px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#fff;font:inherit;font-size:12px;padding:5px 10px;border-radius:7px;cursor:pointer;opacity:.7}
+  .theme-seg button[aria-pressed="true"]{background:#fff;color:#0b1b33;opacity:1;font-weight:800}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:flex;flex-direction:column;gap:36px}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
+  [data-theme="dark"] .kicker{font-family:var(--mono);letter-spacing:.18em}
+  h1{font-size:32px;letter-spacing:-.02em;margin:6px 0 8px;line-height:1.15}
+  h2{font-size:21px;margin:0;letter-spacing:-.01em} h3{font-size:14px;margin:0}
+  .lede{color:var(--dim);max-width:70ch;margin:6px 0 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+  /* ---- Home: A structure + B census ---- */
+  .app-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+  .brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),#22a0ff);display:grid;place-items:center;color:#fff}
+  .brand small{display:block;font-size:10px;letter-spacing:.1em;color:var(--faint);font-weight:700}
+  .account{border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:12px;background:var(--panel)}
+  .account span{display:block;font-size:10px;letter-spacing:.08em;color:var(--faint)}
+  .census{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 20px;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 60%,var(--panel));font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--alarm-red);box-shadow:0 0 10px var(--alarm-red);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  .census b{color:var(--text)}
+  .study-band{display:grid;grid-template-columns:1.1fr auto;gap:16px;align-items:center;background:var(--brand-ink);color:var(--on-ink);border-radius:12px;padding:16px 18px;margin:12px 20px 0}
+  [data-theme="dark"] .study-band{background:#020610;border:1px solid var(--well-border)}
+  .study-band p{margin:4px 0 0;color:var(--ink-dim);font-size:13px}
+  .stats{display:flex;gap:18px}.stats b{display:block;font-family:var(--mono);font-size:20px}.stats span{font-size:10px;letter-spacing:.08em;color:var(--ink-dim)}
+  .btn{font:inherit;font-size:13px;font-weight:700;border-radius:10px;padding:10px 16px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#fff}
+  [data-theme="dark"] .btn.primary{color:#03101f;box-shadow:0 0 22px rgba(76,195,255,.45)}
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 20px 18px}
+  /* wells: dark instrument tiles in BOTH themes — the fusion signature */
+  .vital{background:linear-gradient(180deg,var(--well2),var(--well));border:1px solid var(--well-border);border-radius:12px;padding:10px 12px;position:relative;overflow:hidden;color:#e8f1ff}
+  .vital::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 13px,var(--well-grid) 13px 14px);pointer-events:none}
+  .vital span{font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:#8ba0b9;position:relative}
+  .vital b{font-family:var(--mono);font-size:25px;font-variant-numeric:tabular-nums;position:relative;text-shadow:0 0 16px currentColor}
+  .vital small{font-family:var(--mono);font-size:11px;color:#a9bdd6;position:relative}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:0 20px 20px}
+  .tile{padding:15px;border:1px solid var(--border);border-radius:12px;background:var(--panel);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+  .tile::before{content:"";position:absolute;inset:0;background:radial-gradient(140px 90px at 100% 0%,color-mix(in srgb,var(--accent,#0f62d6) 15%,transparent),transparent 70%);pointer-events:none}
+  .tile p{margin:0;color:var(--dim);font-size:13px}
+  .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:999px;padding:2px 9px;background:var(--panel-raised);color:var(--dim)}
+  .badge.blue{color:var(--brand);border-color:color-mix(in srgb,var(--brand) 40%,var(--border));background:color-mix(in srgb,var(--brand) 9%,var(--panel))}
+  .badge.hot{font-family:var(--mono);background:var(--amber);border-color:var(--amber);color:#231600}
+  .meter{height:4px;border-radius:99px;background:var(--panel-raised);overflow:hidden}.meter i{display:block;height:100%;background:var(--brand);border-radius:99px}
+  /* ---- Simulator ---- */
+  .sim-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .sim-top .back{font-size:12px;font-weight:700;color:var(--dim);text-decoration:none}
+  .sim-top .sub{font-size:12px;color:var(--faint)}
+  .alarms{display:flex;gap:8px;margin-left:auto;font-family:var(--mono);font-size:11px}
+  .alarm{border-radius:7px;padding:5px 10px;border:1px solid}
+  .alarm.red{color:#ffb3b3;border-color:var(--alarm-red);background:rgba(255,93,93,.12)}
+  [data-theme="light"] .alarm.red{color:var(--danger);background:rgba(192,40,40,.07);box-shadow:none}
+  .alarm.amber{color:#ffe1a8;border-color:var(--amber);background:rgba(255,178,36,.12)}
+  [data-theme="light"] .alarm.amber{color:#7a5200;background:rgba(138,95,0,.08)}
+  [data-theme="dark"] .alarm.red{box-shadow:0 0 16px rgba(255,93,93,.35)}
+  .preset{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--panel-raised) 55%,var(--panel))}
+  .chip{font-size:12px;font-weight:700;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:999px;padding:7px 12px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+  [data-theme="dark"] .chip[aria-pressed="true"]{color:#03101f}
+  .chip.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,var(--border))}
+  .lab{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+  .lab-main{padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .scope{background:linear-gradient(180deg,var(--well2),var(--well));border:1px solid var(--well-border);border-radius:12px;padding:10px;color:#e8f1ff;position:relative;overflow:hidden}
+  .scope::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(76,195,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(76,195,255,.07) 1px,transparent 1px);background-size:22px 22px}
+  .scope-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:#8ba0b9;position:relative;margin-bottom:4px}
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .ro{background:linear-gradient(180deg,var(--well2),var(--well));border:1px solid var(--well-border);border-top:3px solid var(--accent,var(--glow-cyan));border-radius:10px;padding:9px 11px;color:#e8f1ff}
+  .ro span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:#8ba0b9;display:block}
+  .ro b{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums;text-shadow:0 0 14px currentColor}
+  .ro small{font-family:var(--mono);font-size:10.5px;color:#a9bdd6}
+  .quiz{border:1px solid var(--border);border-left:4px solid var(--brand);border-radius:10px;padding:13px 14px;background:var(--panel)}
+  .quiz p{color:var(--dim);font-size:13.5px;margin:6px 0}
+  .rail{border-left:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:12px;background:color-mix(in srgb,var(--panel-raised) 40%,var(--panel))}
+  .transport{display:flex;gap:8px}
+  .icon-btn{flex:1;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:10px;padding:9px;cursor:pointer;font-weight:800}
+  .slider{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--panel)}
+  .slider label{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+  .slider output{font-family:var(--mono);color:var(--brand)}
+  .slider small{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+  input[type=range]{width:100%;accent-color:var(--brand);margin:8px 0 2px}
+  /* ---- Reference / phones / tokens ---- */
+  .ref-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;padding:0 20px 20px}
+  .inner{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel)}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border)}
+  .calc-row:first-of-type{border-top:none}
+  .calc-row input{width:100px;font-family:var(--mono);padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--panel-raised);color:var(--text)}
+  .result{font-family:var(--mono);font-weight:800;color:var(--brand)}
+  .range-tag{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--dim)}
+  .range-tag.low{border-color:var(--amber);color:var(--warn)}
+  [data-theme="dark"] .range-tag.low{color:var(--amber)}
+  .drug{padding:12px 16px;border-top:1px solid var(--border)}.drug:first-of-type{border-top:none}.drug small{color:var(--dim)}
+  .phones{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start;padding:0 20px 20px}
+  .phone{width:390px;max-width:100%;border:1px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel)}
+  [data-theme="dark"] .phone{border-color:var(--well-border);background:#040b16}
+  .phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--faint);padding:10px 16px 0}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel-raised);border-radius:12px;padding:3px;margin:10px 12px;font-size:12px;font-weight:700}
+  .seg span{text-align:center;padding:8px;border-radius:9px;color:var(--dim)}
+  .seg .on{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  [data-theme="dark"] .seg .on{background:var(--brand);color:#03101f}
+  .m-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px}
+  .m-ro{background:linear-gradient(180deg,var(--well2),var(--well));border:1px solid var(--well-border);border-top:3px solid var(--accent,var(--glow-cyan));border-radius:10px;padding:8px;color:#e8f1ff;font-family:var(--mono)}
+  .m-ro span{font-size:9px;letter-spacing:.1em;color:#8ba0b9;display:block}
+  .m-ro b{font-size:17px;text-shadow:0 0 12px currentColor}
+  .m-diag{margin:10px 12px;border:1px solid var(--well-border);border-radius:14px;padding:8px;background:linear-gradient(180deg,var(--well2),var(--well))}
+  .dock{margin:0 12px 12px;border:1px solid var(--border);border-radius:14px;padding:10px;background:color-mix(in srgb,var(--panel-raised) 55%,var(--panel))}
+  .tabs{display:flex;border-top:1px solid var(--border)}
+  .tabs span{flex:1;text-align:center;font-size:10px;color:var(--faint);padding:10px 0 14px}
+  .tabs .on{color:var(--brand);font-weight:800}
+  .token-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .token-table th,.token-table td{text-align:left;padding:8px 10px;border-top:1px solid var(--border)}
+  .swatch{display:inline-block;width:12px;height:12px;border-radius:4px;border:1px solid rgba(0,0,0,.25);margin-right:8px;vertical-align:-1px}
+  .mono{font-family:var(--mono)}
+  @media(max-width:960px){.lab,.ref-grid,.phones{grid-template-columns:1fr}.readouts,.vitals{grid-template-columns:repeat(2,1fr)}.study-band{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>D · Clinical day / Monitor night</b><span class="pill">A+B fusion</span>
+<nav><a href="#home">Census</a><a href="#sim">Bedside</a><a href="#ref">Labs</a><a href="#tokens">Tokens</a></nav>
+<span class="theme-seg" role="group" aria-label="Theme">
+<button data-t="auto" aria-pressed="true">Auto</button><button data-t="light" aria-pressed="false">Light</button><button data-t="dark" aria-pressed="false">Dark</button>
+</span></div>
+<div class="wrap">
+<header><div class="kicker">Direction D · A+B fusion · static mock — no app code changed</div>
+<h1>Trusted by day, alive by night.</h1>
+<p class="lede">A’s calm chrome carries the page — one blue action, slate text, hairline cards. B’s instruments carry the physiology — dark scope wells, glowing mono vitals, red/amber alarm hierarchy. Light is the default; dark follows the system unless you override it above (remembered).</p></header>
+
+<section id="home" class="card">
+<div class="app-head"><div class="brand"><span class="brand-mark">♡</span><span>Physiology Lab<small>Bentara Medical</small></span></div>
+<div class="account"><span>Account · MRCP</span>amina.k@medschool.ac.uk</div></div>
+<div class="census"><span class="live-dot"></span><span>WARD CENSUS · BED <b>A04</b></span><span>STREAK <b>6d</b></span><span>DUE <b>14</b></span><span style="margin-left:auto">UKMLA · USMLE · MRCP · MRCS · FRCA</span></div>
+<div class="study-band"><div><h3 style="color:#fff;font-size:16px">Good evening, Amina — 14 reviews due</h3><p>Shock states · ECG conduction · Acid–base. Predict-then-run, blinded where it counts.</p></div>
+<div style="display:flex;gap:16px;align-items:center"><div class="stats"><div><b style="color:#fff">14</b><span>Due</span></div><div><b style="color:#fff">6</b><span>Streak</span></div><div><b style="color:#fff">68%</b><span>Known</span></div></div><button class="btn primary">Review now</button></div></div>
+<div class="vitals">
+<div class="vital" style="color:var(--glow-green)"><span>SINUS · HR /min</span><b>112</b><br><small>▲ tachy · shock</small></div>
+<div class="vital" style="color:var(--alarm-red)"><span>ART · MAP mmHg</span><b>62</b><br><small>▼ target ≥ 65</small></div>
+<div class="vital" style="color:var(--glow-cyan)"><span>SpO₂ %</span><b>94</b><br><small>V/Q mismatch</small></div>
+<div class="vital" style="color:var(--amber)"><span>UO mL/h</span><b>18</b><br><small>oliguria &lt; 30</small></div>
+</div>
+<div class="grid">
+<div class="tile" style="--accent:#c02828"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3>Shock states</h3><span class="badge hot">DUE 8</span></div><p>Venous return meets arterial load. Haemorrhage, tamponade, sepsis.</p><div class="badges"><span class="badge blue">UKMLA</span><span class="badge blue">MRCP</span></div><div class="meter"><i style="width:62%"></i></div></div>
+<div class="tile" style="--accent:#0a72b8"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3>ECG conduction</h3><span class="badge hot">DUE 4</span></div><p>Einthoven vectors, 12-lead grid, blocks and axes.</p><div class="badges"><span class="badge blue">USMLE</span><span class="badge">MRCP</span></div><div class="meter"><i style="width:41%"></i></div></div>
+<div class="tile" style="--accent:#7a5c00"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3>Renal fluids</h3><span class="badge">DUE 2</span></div><p>Clearance, Starling forces, RAAS vs ANP balance.</p><div class="badges"><span class="badge blue">UKMLA</span></div><div class="meter"><i style="width:28%"></i></div></div>
+<div class="tile" style="--accent:#6a3fc9"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3>Acid–base</h3><span class="badge">STABLE</span></div><p>Henderson–Hasselbalch, Winters, Davenport diagram.</p><div class="badges"><span class="badge">FRCA</span></div><div class="meter"><i style="width:74%"></i></div></div>
+</div>
+</section>
+
+<section id="sim" class="card">
+<div class="sim-top"><a class="back" href="#home">‹ Renal fluids</a><div><h2>Shock states — haemorrhagic vs cardiogenic</h2><div class="sub">Interactive simulator · predicts before it reveals · UKMLA / MRCP · <span class="mono">SIM 00:04:32 · 6× · BASELINE FROZEN</span></div></div>
+<div class="alarms"><span class="alarm red">■ MAP 62 LOW</span><span class="alarm amber">■ LACTATE 4.2 HIGH</span></div></div>
+<div class="preset"><button class="chip" aria-pressed="true">Resting</button><button class="chip">Haemorrhage 800 mL</button><button class="chip">Tamponade</button><button class="chip">Sepsis</button><button class="chip danger">Apply insult</button><button class="btn primary" style="margin-left:auto;padding:7px 14px">Practise</button></div>
+<div class="lab"><div class="lab-main">
+<div class="scope"><div class="scope-head"><span>II · 25 mm/s · 10 mm/mV · LIVE</span><span>HR 112 · MAP 62</span></div>
+<svg viewBox="0 0 560 96" width="100%" height="84" style="position:relative"><path d="M0 52 H90 L98 52 103 28 110 70 116 52 H200 L208 52 213 32 220 68 226 52 H320 L328 52 333 27 340 71 346 52 H560" fill="none" stroke="#3ddc97" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #3ddc97)"/></svg></div>
+<div class="scope"><div class="scope-head"><span>CIRCUIT · AFTER 800 ML LOSS</span><span class="mono">CO 3.1 · CVP 2</span></div>
+<svg viewBox="0 0 560 130" width="100%" height="112" style="position:relative">
+<rect x="30" y="28" width="120" height="74" rx="12" fill="rgba(255,107,107,.14)" stroke="#ff6b6b" stroke-width="2"/><text x="90" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Heart</text><text x="90" y="78" text-anchor="middle" font-size="11" font-family="monospace" fill="#c9d6ea">CO 3.1 L/min</text>
+<rect x="220" y="28" width="120" height="74" rx="12" fill="rgba(76,195,255,.12)" stroke="#4cc3ff" stroke-width="2"/><text x="280" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Lungs</text><text x="280" y="78" text-anchor="middle" font-size="11" font-family="monospace" fill="#c9d6ea">SaO₂ 94%</text>
+<rect x="410" y="28" width="120" height="74" rx="12" fill="rgba(232,197,71,.12)" stroke="#e8c547" stroke-width="2"/><text x="470" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Kidney</text><text x="470" y="78" text-anchor="middle" font-size="11" font-family="monospace" fill="#c9d6ea">GFR 62</text>
+<path d="M150 65 H220 M340 65 H410" stroke="#ff6b6b" stroke-width="3"/><circle cx="185" cy="65" r="4" fill="#ff6b6b"><animate attributeName="cx" values="150;220" dur="1.2s" repeatCount="indefinite"/></circle></svg>
+<div class="badges" style="position:relative;padding-top:6px"><span class="badge">■ Arterial</span><span class="badge">■ Respiratory</span><span class="badge">■ Renal</span></div></div>
+<div class="readouts">
+<div class="ro" style="--accent:#ff6b6b;color:#ff8a8a"><span>MAP mmHg</span><b>62 ▼</b><br><small>target ≥ 65</small></div>
+<div class="ro" style="--accent:#ff6b6b;color:#ff8a8a"><span>CO L/min</span><b>3.1</b><br><small>baseline 5.0</small></div>
+<div class="ro" style="--accent:#4cc3ff;color:#4cc3ff"><span>Lactate mmol/L</span><b>4.2 ▲</b><br><small>shock ≥ 2.0</small></div>
+<div class="ro" style="--accent:#e8c547;color:#e8c547"><span>CVP mmHg</span><b>2 ↓</b><br><small>cf. tamponade ↑</small></div>
+</div>
+<div class="scope"><div class="scope-head"><span>MAP · NOW vs FROZEN BASELINE</span><span>−28 mmHg</span></div>
+<svg viewBox="0 0 560 64" width="100%" height="56" style="position:relative"><path d="M0 16 H560" stroke="#8ba0b9" stroke-dasharray="6 5"/><path d="M0 30 C100 29 180 35 260 48 S440 58 560 54" fill="none" stroke="#4cc3ff" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #4cc3ff)"/></svg></div>
+<div class="quiz"><span class="badge blue">Predict then run</span> <span class="badge hot">BLINDED</span><p><b>After 800 mL haemorrhage, what happens to CVP and pulse pressure?</b> Traces keep scrolling; the verdict is withheld until you run — the discipline of a real resus room.</p><div style="display:flex;gap:8px"><button class="btn primary">Run in simulator</button><button class="btn">Show explanation</button></div></div>
+</div>
+<aside class="rail"><div class="transport"><button class="icon-btn">❚❚</button><button class="icon-btn">Step</button><button class="icon-btn">1×</button><button class="icon-btn">Reset</button></div>
+<div class="slider"><label>Blood loss <output>800 mL</output></label><input type="range" value="55"><small>CORRELATE: CVP ↓ + PULSE PRESSURE NARROWS</small></div>
+<div class="slider"><label>Noradrenaline <output>0.04 µg/kg/min</output></label><input type="range" value="20"><small>CORRELATE: DIASTOLIC LIFT ON ART TRACE</small></div>
+<div class="slider"><label>Fluid bolus <output>250 mL</output></label><input type="range" value="30"><small>SEE IT ACT IN STARLING FORCES →</small></div></aside></div>
+<div style="padding:18px 20px"><h3 style="margin-bottom:8px">Native parity — same bedside at 390 pt (follows the same theme)</h3>
+<div class="phones"><div class="phone"><div class="phone-status"><span>02:14</span><span>● REC · A04</span></div>
+<div class="seg"><span class="on">Simulate</span><span>Practice</span><span>Learn</span></div>
+<div class="m-strip"><div class="m-ro" style="--accent:#ff6b6b"><span>MAP</span><b>62</b></div><div class="m-ro" style="--accent:#3ddc97"><span>HR</span><b>112</b></div><div class="m-ro" style="--accent:#4cc3ff"><span>SpO₂</span><b>94</b></div></div>
+<div class="m-diag"><svg viewBox="0 0 340 64" width="100%" height="56"><path d="M0 36 H60 L66 14 72 54 78 36 H340" fill="none" stroke="#3ddc97" stroke-width="2" style="filter:drop-shadow(0 0 5px #3ddc97)"/></svg></div>
+<div class="dock"><label style="font-size:12px;font-weight:700">Blood loss · <span class="mono" style="color:var(--brand)">800 mL</span></label><input type="range" value="55"><div style="display:flex;gap:8px;margin-top:6px"><button class="icon-btn">❚❚</button><button class="icon-btn">Step</button><button class="icon-btn">Reset</button></div></div>
+<div class="tabs"><span class="on">Study</span><span>Formulas</span><span>Drugs</span><span>Account</span></div></div>
+<div><h3>Why this fusion works</h3><p class="lede">Light page, dark instruments: the eye rests on calm chrome, then locks onto glowing numbers — exactly how a drug chart sits next to a monitor. On native the wells are identical hexes to web (<span class="mono">--well #0a1526</span>), so web ↔ phone feel like one rota, not two apps. Toggle Auto above, or change your OS appearance — the page follows like the real app will via <span class="mono">useColorScheme()</span>.</p></div></div></div>
+</section>
+
+<section id="ref" class="card"><div class="app-head"><div><div class="kicker">Reference + medications</div><h2>Formulas that calculate. Drugs that link back.</h2></div><span class="badge blue">UK top-100 classes</span></div>
+<div class="ref-grid"><div class="inner"><div class="calc-row"><div><h3>Corrected calcium</h3><small class="lede">Ca<sub>corr</sub> = measured + 0.02 × (40 − albumin)</small></div><div style="display:flex;gap:8px;align-items:center"><input value="2.05"><input value="28" style="width:64px"><span class="result">2.29</span><span class="range-tag">2.2–2.6</span></div></div>
+<div class="calc-row"><div><h3>MAP</h3><small class="lede">⅓ systolic + ⅔ diastolic</small></div><div style="display:flex;gap:8px;align-items:center"><input value="88/54"><span class="result">65</span><span class="range-tag low">LOW-NORM</span></div></div>
+<div class="calc-row"><div><h3>Winters formula</h3><small class="lede">Expected PaCO₂ in metabolic acidosis</small></div><button class="btn">Watch it move in Acid–base →</button></div></div>
+<div class="inner"><div class="drug"><h3>ACE inhibitors <span class="badge">· pril</span></h3><small>Enalapril · Ramipril · Lisinopril — ↓ angiotensin II. See it act in <b>Shock states</b>.</small></div>
+<div class="drug"><h3>Loop diuretics <span class="badge">· ol</span></h3><small>Furosemide · Bumetanide — block NKCC2. See it act in <b>Renal tubular</b>.</small></div>
+<div class="drug"><h3>Beta-blockers <span class="badge">· olol</span></h3><small>Metoprolol · Atenolol — ↓ HR, ↓ contractility. See it act in <b>Cardiac output</b>.</small></div></div></div></section>
+
+<section id="tokens" class="card" style="padding:18px 20px"><h2>Token delta (D)</h2><p class="lede">Page chrome from A, instrument wells + alarms from B. Signal hues kept; only their surfaces change.</p>
+<table class="token-table"><tr><th>Token</th><th>Light (default)</th><th>Dark (system)</th></tr>
+<tr><td><span class="swatch" style="background:#ffffff"></span><span class="mono">--panel / --bg</span></td><td class="mono">#ffffff / #f6f8fb (A)</td><td class="mono">#0b1526 / #060b14 (B)</td></tr>
+<tr><td><span class="swatch" style="background:#0f62d6"></span><span class="mono">--brand</span></td><td class="mono">#0f62d6 · NHS blue, white text</td><td class="mono">#4cc3ff · phosphor, #03101f text</td></tr>
+<tr><td><span class="swatch" style="background:#0a1526"></span><span class="mono">--well (new)</span></td><td class="mono" colspan="2">#0a1526 scopes/vitals/readouts in BOTH themes — the fusion signature</td></tr>
+<tr><td><span class="swatch" style="background:#c02828"></span><span class="mono">--artery → alarm</span></td><td class="mono">#c02828 tile rule + red pill text</td><td class="mono">#ff6b6b glow + pill bg rgba(255,93,93,.12)</td></tr></table></section>
+</div>
+<script>
+(function(){
+  const root=document.documentElement, btns=[...document.querySelectorAll('.theme-seg button')];
+  const mq=matchMedia('(prefers-color-scheme: dark)');
+  function current(){ return localStorage.getItem('physio-preview-theme')||'auto'; }
+  function apply(mode){
+    const theme = mode==='auto' ? (mq.matches?'dark':'light') : mode;
+    root.dataset.theme=theme;
+    document.body.classList.toggle('dark-grid', theme==='dark');
+    btns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.t===mode)));
+  }
+  btns.forEach(b=>b.onclick=()=>{ const m=b.dataset.t; if(m==='auto')localStorage.removeItem('physio-preview-theme'); else localStorage.setItem('physio-preview-theme',m); apply(m); });
+  mq.addEventListener?.('change',()=>{ if(current()==='auto')apply('auto'); });
+  apply(current());
+})();
+</script>
+</body>
+</html>

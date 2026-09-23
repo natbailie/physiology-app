@@ -228,6 +228,23 @@ function settle(config: AnyConfig, inputs: unknown, seconds: number, stepCap: nu
 /** Steps a single settle may spend. `SWEEP_STEPS` is the quick pass every control gets;
  * `FULL_STEPS` is the retry a control gets before being called dead, and buys the longest run this
  * suite can afford — 200,000 of them across every control of every module is a coffee break. */
+/**
+ * Modules that open on a TRAJECTORY rather than on a resting state, and so declare no settle: this
+ * is the list `settleSeconds` being absent used to assert silently.
+ *
+ * Each is a module whose subject IS the progression — cerebral perfusion accumulates CSF,
+ * inflammation resolves an insult, micturition fills a bladder — so settling one would jump past
+ * the thing it exists to show. cellCycle and cognitiveNeuroscience are NOT here and do not need to
+ * be: cellCycle's progression is carried by a phase key, which this check excludes the way the
+ * drift check does, and cognitiveNeuroscience is input-pure and streams a constant readout.
+ *
+ * The other twelve unsettled modules are not here either, and that was measured rather than
+ * assumed. Every one of them opens on values it holds — their `createInitialState()` genuinely IS
+ * the resting state, which is why they never needed a settle and why adding one would have been
+ * twelve calibrations in search of a problem.
+ */
+const OPENS_ON_A_TRAJECTORY: readonly string[] = ['cerebralPerfusion', 'inflammation', 'micturition'];
+
 const SWEEP_STEPS = 2500;
 const FULL_STEPS = 60_000;
 
@@ -266,6 +283,36 @@ function maxRelDiff(a: Record<string, number>, b: Record<string, number>, floor 
   }
   return worst;
 }
+/**
+ * How far the OPENING of a module falls outside the band it occupies once it is running, as a
+ * fraction. Asked as containment rather than as a difference of two settles, because a module that
+ * opens onto a limit cycle shows a different slice of that cycle in every window — the question is
+ * whether the opening values are ones the module goes on to hold, not whether two windows match.
+ */
+function worstEscape(opening: Settled, band: Settled): { key: string; value: number } {
+  let worst = { key: 'none', value: 0 };
+  for (const key of Object.keys(opening.low)) {
+    if (/phase|cycleday|ramp/i.test(key) || band.low[key] === undefined) continue;
+    const scale = Math.max(Math.abs(band.low[key]!), Math.abs(band.high[key]!), band.high[key]! - band.low[key]!, 0.01);
+    for (const [edge, over] of [
+      ['low', band.low[key]! - opening.low[key]!],
+      ['high', opening.high[key]! - band.high[key]!],
+    ] as const) {
+      const escape = Math.max(0, over) / scale;
+      if (escape > worst.value) worst = { key: `${key}.${edge} ${opening.low[key]}..${opening.high[key]} vs ${band.low[key]}..${band.high[key]}`, value: escape };
+    }
+  }
+  return worst;
+}
+
+/** Whether a resolved scenario is the module's own baseline wearing a name. Compared key by key
+ * rather than by `JSON.stringify`, which answers a question about key order as well. */
+function sameInputs(a: Inputs, b: Inputs): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const key of keys) if (a[key] !== b[key]) return false;
+  return true;
+}
+
 function differs(a: Settled, b: Settled, tolerance = 0.01): boolean {
   return maxRelDiff(a.mean, b.mean) > tolerance || a.labels !== b.labels;
 }
@@ -487,25 +534,24 @@ function expectExactly(actual: string[], allowed: string[], what: string) {
  */
 const NO_DIAGRAM_CORRELATE = new Set<string>([
   // Fixed cascade drawings: the whole control rail feeds tiles, not the picture.
-  ...['factorVIIIActivity', 'factorIXActivity', 'vitaminKDependentFactors', 'vonWillebrandFactor', 'plateletCount', 'fibrinogenLevel', 'heparinDose', 'aspirinDose', 'fibrinolyticActivity'].map((k) => `coagulation.${k}`),
-  ...['pathogenVirulence', 'innateImmuneFunction', 'helperTCellCount', 'bCellFunction', 'immunosuppression', 'pathogenType'].map((k) => `immuneResponse.${k}`),
-  ...['antigenDose', 'igeSensitisation', 'iggAgainstCellSurface', 'circulatingIggForComplexes', 'sensitisedTCells', 'complementFunction', 'mastCellStabilisation', 'aboCompatibility', 'recipientIgaDeficiency', 'productLeukocyteLoad', 'donorAntileukocyteAntibody', 'anamnesticRecall', 'cardiacReserve'].map((k) => `hypersensitivity.${k}`),
-  ...['insultSeverityPct', 'antibioticEfficacyPct', 'sourceControlPct'].map((k) => `inflammation.${k}`),
-  // The nephron schematic draws flow and transport, not the drugs and tones acting on them.
-  ...['acetazolamideDose', 'enacBlockade', 'aldosteroneTone', 'distalAcidSecretion', 'proximalAcidReclaim'].map((k) => `renalTubular.${k}`),
-  // Single quantities the drawing has no structure for yet.
-  'digestionAbsorption.mealLactoseGrams',
-  'gastrointestinal.mealFatGrams',
-  'gastrointestinal.mealCarbGrams',
-  'fetalCirculation.prostaglandinLevel',
-  'liverPhysiology.albuminGPerL',
-  'muscleContraction.extracellularCalcium',
-  'micturition.cortexInhibitsMicturition',
-  // Cell-cycle controls act over whole 24-hour cycles; see the readings note below.
-  ...['dnaDamage', 'p53Function', 'spindlePoisonPct', 'replicationBlockPct'].map((k) => `cellCycle.${k}`),
-  // Delivered as events, not settings; see the readings note below.
-  'glucoseRegulation.mealCarbLoadGrams',
-  'glucoseRegulation.exogenousInsulinUnits',
+  /* Coagulation is down to one: the cascade ladder now carries factor AVAILABILITY as a ring
+   * around each node's activation, the lumen carries the platelet count, the breach carries vWF,
+   * and the two drugs are drawn where they act. Fibrinolysis is the exception — plasmin dissolves
+   * a mesh that does not exist until something is injured, so there is nothing for it to act on in
+   * the resting picture. */
+  'coagulation.fibrinolyticActivity',
+  /* Down to one. The lymph node now draws the CD4 count as the helper cell's own radius, the B
+   * cell's as its own, the resident macrophages at the site as a count, and pharmacological
+   * suppression as a wash over the whole node — so a host is visibly a host before anything
+   * infects it. Virulence is the exception and correctly so: it is a property of an organism that
+   * has not arrived yet, and there is nothing in an uninfected tissue for it to describe. */
+  'immuneResponse.pathogenVirulence',
+  /* Down to one, from thirteen. The four mechanism cards now draw the HOST — IgE already on the
+   * mast cell, antibody the patient already carries, the circulating pool, resident memory T cells
+   * — and a strip below them draws the unit and the recipient, which is what the seven transfusion
+   * scenarios are actually about. Antigen dose is the exception: it is the size of an exposure that
+   * has not happened, and the challenge button is what delivers it. */
+  'hypersensitivity.antigenDose',
 ]);
 
 /**
@@ -537,6 +583,21 @@ const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([
   // to read alike once hypercapnia appears. The backgrounds sweep proves they separate under the
   // type-II presets (acute-on-chronic HCO3 34.4 vs 26.6 without compensation), and the module's
   // own engine test pins the separation down.
+  /* Lighting the right eye and lighting the left read alike on a patient with two normal eyes, and
+   * that is the finding rather than a gap: the consensual reflex means a normal pupil pair responds
+   * the same way whichever eye the torch is in. The asymmetry IS the abnormality — swing the torch
+   * with `leftOpticNerveAfferent` down and the afferent defect appears, which is the manoeuvre this
+   * module's own questions stage. Judged against the defaults, so a healthy examination is what it
+   * measures.
+   */
+  /* A stimulator changes nothing in a patient who has nothing wrong with them, which is the whole
+   * reason it is implanted in the ones who do. Deep brain stimulation eases bradykinesia, damps
+   * resting tremor and quietens chorea and ballism — and the default patient has none of those, so
+   * off and on settle identically. Judged against the defaults; under `advancedParkinson` or
+   * `hemiballismus` the two separate, which is what the module teaches.
+   */
+  'motorControl.deepBrainStimulation:off==on',
+  'vision.torchEye:right==left',
   'respiratoryFailure.course:acute==chronic',
 ]);
 
@@ -556,45 +617,25 @@ const TOGGLE_OPTION_TIES_BY_DESIGN = new Set<string>([
  * definitions. It does not any more, and the entries below are what it found once it could see.
  */
 const SAME_SCREEN_ON_PRESS_BY_DESIGN = new Set<string>([
-  // Two modules whose scenarios are a HOST, waiting for an event. Nothing has happened yet when the
-  // button is pressed, so the drawing is rightly identical; the host differences appear the moment
-  // an infection or an insult lands, and they now show up in the settle test below.
-  ...['healthyHost==intracellularPathogen','healthyHost==neutropenia','healthyHost==hivCd4Depletion','healthyHost==bCellDeficiency','healthyHost==transplantImmunosuppression','intracellularPathogen==neutropenia','intracellularPathogen==hivCd4Depletion','intracellularPathogen==bCellDeficiency','intracellularPathogen==transplantImmunosuppression','neutropenia==hivCd4Depletion','neutropenia==bCellDeficiency','neutropenia==transplantImmunosuppression','hivCd4Depletion==bCellDeficiency','hivCd4Depletion==transplantImmunosuppression','bCellDeficiency==transplantImmunosuppression'].map((pair) => `immuneResponse.${pair}`),
-  ...['normal==acuteCellulitis','normal==severeBacterialLoad','normal==steroidsOverInfection','acuteCellulitis==severeBacterialLoad','acuteCellulitis==steroidsOverInfection','severeBacterialLoad==steroidsOverInfection'].map((pair) => `inflammation.${pair}`),
-  // The meal and the insulin are events, not settings: a fasting pancreas and a failed one look the
-  // same until something is eaten.
-  'glucoseRegulation.normal==fasting',
-  'glucoseRegulation.normal==insulinOverdose',
-  'glucoseRegulation.fasting==insulinOverdose',
-  // A cell population takes whole 24-hour cycles to reach the phase an arrest acts in, and an
-  // irradiated cell and a p53-null one are both undamaged at time zero.
-  'cellCycle.normal==taxaneArrest',
-  'cellCycle.normal==hydroxyurea',
-  'cellCycle.taxaneArrest==hydroxyurea',
-  'cellCycle.irradiated==tp53Mutated',
-  // Every hypersensitivity scenario is an exposure that has not happened yet. The preset sets up
-  // who the patient is — sensitised, IgA deficient, ABO incompatible — and the reaction is the
-  // event; before it lands there is nothing to draw, which is why all 82 pairs collide here and
-  // none of them collide once settled.
-  ...(() => {
-    const hosts = ['naiveFirstExposure','typeIAnaphylaxis','typeIIHaemolysis','typeIIISerumSickness','typeIVContactDermatitis','treatedAnaphylaxis','compatibleTransfusion','aboIncompatible','anaphylacticIgaDeficient','febrileNonHaemolytic','delayedHaemolytic','taco','trali'];
-    const pairs: string[] = [];
-    for (let i = 0; i < hosts.length; i++) {
-      for (let j = i + 1; j < hosts.length; j++) pairs.push(`hypersensitivity.${hosts[i]}==${hosts[j]}`);
-    }
-    return pairs;
-  })(),
-  // Intracranial volume accumulates: CSF at 0.35 mL/min and oedema slower still, so hydrocephalus
-  // is a normal skull at the moment it is pressed. The two ventilation presets differ only in
-  // PaCO2, which moves vessel calibre over about a minute rather than instantly.
-  'cerebralPerfusion.normal==hydrocephalus',
+  /* immuneResponse and inflammation used to hold twenty-one entries between them here, on the
+   * grounds that nothing has happened yet when the button is pressed. Both came off by DRAWING THE
+   * HOST instead of the reaction: a neutropenic patient differs from a healthy one in the cell
+   * counts a diagram of cells ought to carry, and a severe insult is a bigger thing at the moment
+   * it lands than a mild one. "Nothing has happened yet" was true of the reaction and false of the
+   * patient, which is worth remembering against the entries that remain below.
+   */
+  // The two ventilation presets differ only in PaCO2, which moves vessel calibre over about a
+  // minute rather than instantly.
   'cerebralPerfusion.hyperventilated==hypoventilated',
   // Persistent pulmonary hypertension IS a first breath that fails to drop pulmonary resistance,
   // so the two are the same circulation until the resistance has had time not to fall.
   'fetalCirculation.firstBreath==pphn',
-  // Treated glaucoma is a normal eye — that is the point of treating it. The two separate only
-  // in the cup-to-disc ratio the drawing does not carry at time zero.
-  'vision.normalDaylight==treatedGlaucoma',
+  /* The last hypersensitivity pair, and the only one that survived drawing the host: both of these
+   * resolve to the module's DEFAULTS, byte for byte. A naive patient meeting an antigen for the
+   * first time and a patient receiving a compatible unit are the same person with the same
+   * immunology, and the absence of a reaction in both is the teaching. Its sibling entry on
+   * PRESET_COLLISIONS_BY_DESIGN says the same thing about where they settle. */
+  'hypersensitivity.naiveFirstExposure==compatibleTransfusion',
 ]);
 
 /** Two scenarios that genuinely settle to the same physiology, one line of reason each. */
@@ -610,6 +651,89 @@ const PRESET_COLLISIONS_BY_DESIGN = new Set<string>([
   'cellCycle.normal==taxaneArrest',
   'cellCycle.normal==hydroxyurea',
   'cellCycle.taxaneArrest==hydroxyurea',
+]);
+
+/**
+ * Scenarios that EVAPORATE: distinguishable from a healthy patient the moment they are pressed, and
+ * indistinguishable two minutes later. One line of reason each.
+ *
+ * This is the complaint the module pages are actually judged on — press "Haemorrhage", watch the
+ * cardiac output fall, and watch it climb back while the insult is still applied. It is a different
+ * question from the collision check above, which asks whether two scenarios differ from EACH OTHER;
+ * two scenarios can stay perfectly distinct from one another while both quietly return to normal.
+ *
+ * Where the reason is a genuine compensation — a reflex correcting the insult, which is the
+ * teaching rather than a bug — the entry comes off this list by exposing that compensation as a
+ * CONTROL, so the learner can watch the insult bare and then switch the reflex on. It does not come
+ * off by deleting the mechanism.
+ */
+const SETTLES_BACK_TO_NORMAL_BY_DESIGN = new Set<string>([]);
+
+/**
+ * Individual readings that return to normal while the insult is still applied.
+ *
+ * The finer backlog, and the one that does the work: a scenario may legitimately keep one
+ * abnormality and lose another — a compensated haemorrhage holds its pressure by raising the heart
+ * rate, and the pressure coming back IS the teaching as long as the rate stays up. Recorded
+ * quantity by quantity so that distinction survives.
+ */
+const READINGS_THAT_RETURN_TO_NORMAL = new Set<string>([
+  // Baroreceptors RESET: `baroreflexSetpointMmHg` chases the pressure it is actually seeing over
+  // 900 s, so by the time a learner looks up, the reflex has accepted the failing kidney's pressure
+  // as normal, the drive has returned to zero, and the vascular tone and reabsorption it was
+  // holding go with it. That is why chronic hypertension persists rather than being reflexively
+  // corrected away, and it is the module's own teaching.
+  //
+  // These two stay on the list BECAUSE THE DEFAULT PATIENT HAS AN INTACT REFLEX, and the default
+  // has to remain the calibrated one — every band in `engine/references.ts` and the committed Pulse
+  // trace are measured against it. What has changed is that the learner can now see it happen and
+  // opt out: `baroreflexGain` is a control, and the "Heart failure, no reflex" scenario is one
+  // press. Deleting the resetting would be deleting the lesson.
+  'cardiorenal.kidneyFailure.effectiveSVR',
+  'cardiorenal.kidneyFailure.reabsorptionFraction',
+  // Wash-in COMPLETING is the module. A slow agent and a low flow both reach the same effect-site
+  // partial pressure eventually, which is exactly what "slow" means; the separation this module
+  // teaches is in the trajectory, which the charts carry, not in the endpoint.
+  'anaesthesia.halothaneSlowWashin.effectSiteAgentPct',
+  'anaesthesia.lowFlowRebreathing.classification',
+  'anaesthesia.lowFlowRebreathing.washInProgress',
+  // The lymphatic safety factor: lymph flow rises to carry the extra filtrate and then stops
+  // rising once it is carrying it. Oedema is what happens when it cannot, and `oedemaRisk` holds.
+  'capillaryExchange.liverFailure.lymphFlowMlPerMin',
+  // Instantaneous waveform samples, not readings a learner holds a value against. Both are
+  // documented as such in `EcgDerived` ("net voltage in the selected lead", "net instantaneous
+  // dipole"), and their windowed mean over a cardiac cycle converges for any rhythm. The reading
+  // that matters here is `meanVentricularRateBpm` — "the number a bedside monitor displays" — and
+  // it holds under all three scenarios.
+  'ecgConduction.atrialFibrillation.dipoleMagnitude',
+  'ecgConduction.atrialFibrillation.ecgVoltageMv',
+  'ecgConduction.atrialFibrillation.heartRateBpm',
+  'ecgConduction.firstDegreeBlock.dipoleMagnitude',
+  'ecgConduction.firstDegreeBlock.ecgVoltageMv',
+  'ecgConduction.longQt.ecgVoltageMv',
+  // Same class: `iK` is an instantaneous ionic current, and a cold axon at rest carries the same
+  // resting potassium current as a warm one. The scenario holds where the module teaches it —
+  // the action potential's shape and duration.
+  'membranePotentials.hypothermia.iK',
+]);
+
+/**
+ * Scenarios the DRAWING does not show — the preset-level half of CLAUDE.md's "every control needs a
+ * visible correlate".
+ *
+ * `NO_DIAGRAM_CORRELATE` asks this of sliders. Nothing asked it of the scenario buttons, because
+ * both preset checks compare `visible` markup — the diagram PLUS the readout tiles — so a preset
+ * that moves a number and leaves the picture alone passes them both. A learner presses "Septic" and
+ * looks at a healthy body.
+ *
+ * Asked against normal rather than pairwise: whether two scenarios draw each other is the collision
+ * question, and it is already asked twice above.
+ */
+const PRESET_NOT_IN_THE_PICTURE = new Set<string>([
+  // The four fixed-cascade drawings, and the same four `NO_DIAGRAM_CORRELATE` already names for
+  // their sliders: each draws an invariant cascade with every reading living in the tiles beside
+  // it, so no input reaches the picture and no scenario can move it. Working one backlog works
+  // both, and these are the diagrams to convert first.
 ]);
 
 /** Renders the given components against a settled scenario and returns their markup. Everything a
@@ -670,14 +794,126 @@ function paint(components: ComponentType<Record<string, unknown>>[], inputs: Inp
   return html;
 }
 
-/** A scenario as the page shows it on press, and as it looks after the longest run the budget
- * allows — a preset only counts as dead if it is indistinguishable at both. */
-function scenarioAt(module: ModuleUnderTest, name: string, long: boolean): Settled {
-  const inputs = { ...module.defaults, ...module.presets[name] };
-  const shown = (module.config.settleSeconds ?? 0) + (module.settleOverrides[name] ?? 0);
-  return long
-    ? settle(module.config, inputs, FULL_STEPS * module.config.maxDtSeconds, FULL_STEPS)
-    : settle(module.config, inputs, shown, FULL_STEPS);
+/**
+ * When a scenario is judged: the moment the button is pressed, or after a learner has watched it.
+ *
+ * `watched` used to be `FULL_STEPS * maxDtSeconds`, which is a step budget rather than a horizon
+ * and is SHORTER than the shown one for every fast-`timeScale` module — electrolyteBalance settles
+ * 10000 simulated seconds and was then compared against 3000, so its "later" run happened earlier.
+ * Deriving it from the shown horizon plus real watching time makes it monotonic by construction.
+ */
+type Phase = 'shown' | 'watched';
+
+/**
+ * Real seconds of watching a scenario is judged over.
+ *
+ * A learner who presses "Septic" and reads the panel is not going to sit there for an hour: this is
+ * the window in which "it stayed" either is or is not true. Converted to simulated time by the
+ * module's own `timeScale`, and capped by a step budget, because at 3600x two real minutes is five
+ * simulated days.
+ */
+const WATCHED_REAL_SECONDS = 120;
+const REVERT_STEPS = 120_000;
+
+/** Simulated seconds and the step cap a phase is measured over. Always `watched >= shown`. */
+function horizonOf(module: ModuleUnderTest, name: string | null, phase: Phase): [number, number] {
+  const shown = (module.config.settleSeconds ?? 0) + (name ? (module.settleOverrides[name] ?? 0) : 0);
+  if (phase === 'shown') return [shown, FULL_STEPS];
+  return [shown + WATCHED_REAL_SECONDS * module.config.timeScale, REVERT_STEPS];
+}
+
+/**
+ * `settle`, memoised on the run it describes.
+ *
+ * Five `it` blocks now settle every preset of every module, and several of them settle the same
+ * scenario at the same horizon — the defaults alone are re-run once per preset by `normalAt`. The
+ * cache is the same device `shared/engine/settle.ts` uses on the app's own opening state, and it
+ * makes this suite faster than it was before the revert checks were added rather than slower.
+ */
+const settleCache = new Map<string, Settled>();
+function settledAt(module: ModuleUnderTest, inputs: Inputs, seconds: number, stepCap: number): Settled {
+  const key = `${module.id}|${JSON.stringify(inputs)}|${seconds}|${stepCap}`;
+  let hit = settleCache.get(key);
+  if (!hit) {
+    hit = settle(module.config, inputs, seconds, stepCap);
+    settleCache.set(key, hit);
+  }
+  return hit;
+}
+
+/** A scenario as the page shows it on press, or after a learner has watched it for two minutes. */
+function scenarioAt(module: ModuleUnderTest, name: string, phase: Phase): Settled {
+  const [seconds, cap] = horizonOf(module, name, phase);
+  return settledAt(module, { ...module.defaults, ...module.presets[name] }, seconds, cap);
+}
+
+/**
+ * The same module with nothing wrong with it, at the same horizon.
+ *
+ * Subtracting this is what lets a TRAJECTORY module be asked whether its scenario held: cellCycle,
+ * micturition, inflammation and cerebralPerfusion have all moved on by the far horizon under every
+ * scenario including the healthy one, and comparing a scenario against its own earlier self would
+ * read that shared progression as universal reversion.
+ */
+function normalAt(module: ModuleUnderTest, phase: Phase): Settled {
+  const [seconds, cap] = horizonOf(module, null, phase);
+  return settledAt(module, module.defaults, seconds, cap);
+}
+
+/**
+ * How much of a scenario's departure from normal SURVIVES, per reading.
+ *
+ * Unsigned on purpose. A value that overshoots and comes back has not reverted, and neither has one
+ * that crosses normal on its way somewhere else — what is left, not which way it went.
+ */
+function departures(scenario: Settled, normal: Settled): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const key of Object.keys(scenario.mean)) {
+    const scale = Math.max(Math.abs(normal.mean[key] ?? 0), Math.abs(scenario.mean[key]!), 1e-9);
+    out[key] = Math.abs(scenario.mean[key]! - (normal.mean[key] ?? 0)) / scale;
+  }
+  return out;
+}
+
+/**
+ * Where in a cycle the sampler landed, which is not a reading.
+ *
+ * The same exclusion the drift check above already applies, and for the same reason: a phase
+ * fraction, a cycle day or a pacemaker ramp is a sawtooth saying where the sampling grid fell, not
+ * what the physiology is doing. Without it five mechanicalVentilation and respiratoryMechanics
+ * scenarios were reported as reverting on `breathPhaseFraction` alone, while every pressure and
+ * volume in the same module held.
+ */
+const CLOCK_POSITION = /phase|cycleday|ramp/i;
+
+/** A reading counts as having DEPARTED when it sits this far from normal, as a fraction of its own
+ * size. Above `differs`'s 0.02, so a scenario that barely moved a number is not then judged on
+ * whether it held it. */
+const DEPARTED = 0.05;
+/** …and as having COME BACK when this little of that departure is left. */
+const HELD = 0.25;
+
+/** The readings of one scenario that departed on press and had returned to normal by the time a
+ * learner looked up. The third clause is what stops a reading that went from 300% of normal to 140%
+ * being called a reversion: most of the departure is gone, but the patient is still abnormal. */
+function readingsThatReturned(module: ModuleUnderTest, name: string): string[] {
+  const onPress = departures(scenarioAt(module, name, 'shown'), normalAt(module, 'shown'));
+  const later = departures(scenarioAt(module, name, 'watched'), normalAt(module, 'watched'));
+  const returned = Object.keys(onPress).filter(
+    (key) =>
+      !CLOCK_POSITION.test(key) &&
+      onPress[key]! > DEPARTED &&
+      later[key]! < HELD * onPress[key]! &&
+      later[key]! < DEPARTED,
+  );
+  // The classification strings a numeric pass cannot see, and the sharpest evidence there is: the
+  // module has stopped calling it shock.
+  const shown = scenarioAt(module, name, 'shown');
+  const watched = scenarioAt(module, name, 'watched');
+  if (shown.labels !== normalAt(module, 'shown').labels && watched.labels === normalAt(module, 'watched').labels) {
+    returned.push('classification');
+  }
+  return returned.sort();
 }
 
 describe('every control moves the model', () => {
@@ -749,9 +985,35 @@ describe('every control moves the model', () => {
       expectExactly(ties, [...TOGGLE_OPTION_TIES_BY_DESIGN].filter((e) => e.startsWith(`${id}.`)), `${id}: toggle options that read alike`);
     });
 
+    /**
+     * The unsettled half of the question above, and it used to be an early `return`.
+     *
+     * A module that declares no settle opens on `createInitialState()`, which the loop hook's own
+     * docblock calls a plausible starting point rather than a steady state — so "no settle" was an
+     * unchecked claim that the raw initial state is good enough, and a module that simply never had
+     * one calibrated was indistinguishable from one that does not need it. This asks the claim
+     * directly: is every value the module opens on one it goes on to hold?
+     */
+    it('opens on values it holds, or says it is a trajectory', () => {
+      if (module.config.settleSeconds) return;
+      // The module's own opening window — the simulated time its chart shows — measured against
+      // eight more of them.
+      const window = module.config.historyCapacity * Math.min(module.config.maxDtSeconds, module.config.timeScale / 60);
+      const opening = settle(module.config, module.defaults, window, FULL_STEPS, 1);
+      const band = settle(module.config, module.defaults, window * 9, FULL_STEPS, 8 / 9);
+      const escape = worstEscape(opening, band);
+      const trajectory = OPENS_ON_A_TRAJECTORY.includes(id);
+      expect(
+        escape.value < 0.05,
+        trajectory
+          ? `${id}: listed as opening on a trajectory but opens steady; take it off OPENS_ON_A_TRAJECTORY`
+          : `${id}: opens on a transient and declares no settle (worst: ${escape.key})`,
+      ).toBe(!trajectory);
+    });
+
     it('opens on a state that is already steady', () => {
       const seconds = module.config.settleSeconds;
-      if (!seconds) return; // Modules whose baseline is a trajectory declare no settle; see loopConfig.
+      if (!seconds) return; // Covered by the trajectory check above.
       // Half of each run is sampled, and the comparison is of ENVELOPES rather than instants, so a
       // module that opens onto a limit cycle rather than a fixed point — a cardiac cycle, a breath,
       // a circadian day — is judged on where the cycle sits and not on the phase it was caught at.
@@ -779,8 +1041,8 @@ describe('every control moves the model', () => {
         names.map((name) => [
           name,
           module.buildPresentation
-            ? paintSchema(module, 'visible', { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, false))
-            : paint(module.visible, { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, false)),
+            ? paintSchema(module, 'visible', { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, 'shown'))
+            : paint(module.visible, { ...module.defaults, ...module.presets[name] }, scenarioAt(module, name, 'shown')),
         ]),
       );
       const identical: string[] = [];
@@ -799,8 +1061,8 @@ describe('every control moves the model', () => {
 
     it('settles each preset to a scenario of its own', () => {
       const names = Object.keys(module.presets);
-      const shown = new Map(names.map((name) => [name, scenarioAt(module, name, false)]));
-      const later = new Map(names.map((name) => [name, scenarioAt(module, name, true)]));
+      const shown = new Map(names.map((name) => [name, scenarioAt(module, name, 'shown')]));
+      const later = new Map(names.map((name) => [name, scenarioAt(module, name, 'watched')]));
       const collisions: string[] = [];
       for (let i = 0; i < names.length; i++) {
         for (let j = i + 1; j < names.length; j++) {
@@ -816,6 +1078,66 @@ describe('every control moves the model', () => {
         collisions.map((entry) => entry.replace(' (separates later)', '')),
         [...PRESET_COLLISIONS_BY_DESIGN].filter((entry) => entry.startsWith(`${id}.`)),
         `${id}: presets that settle to the same scenario`,
+      );
+    });
+
+    /**
+     * Does the scenario still exist by the time the learner has finished reading the panel?
+     *
+     * Every check above measures a scenario AT ONE MOMENT. This is the only one that asks whether
+     * it lasts, and it is the question a learner asks by doing nothing at all for two minutes.
+     */
+    it('keeps each preset a scenario for as long as a learner watches', () => {
+      const evaporated = Object.keys(module.presets)
+        .filter(
+          (name) =>
+            differs(scenarioAt(module, name, 'shown'), normalAt(module, 'shown'), 0.02) &&
+            !differs(scenarioAt(module, name, 'watched'), normalAt(module, 'watched'), 0.02),
+        )
+        .map((name) => `${id}.${name}`);
+      expectExactly(
+        evaporated,
+        [...SETTLES_BACK_TO_NORMAL_BY_DESIGN].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: scenarios that settle back to normal`,
+      );
+    });
+
+    it('holds every reading that departed when the preset was pressed', () => {
+      const [seconds] = horizonOf(module, null, 'watched');
+      const returned = Object.keys(module.presets).flatMap((name) =>
+        readingsThatReturned(module, name).map((key) => `${id}.${name}.${key}`),
+      );
+      expectExactly(
+        returned,
+        [...READINGS_THAT_RETURN_TO_NORMAL].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: readings that return to normal while the scenario is still applied` +
+          ` (watched over ${seconds.toFixed(0)} simulated seconds` +
+          ` — ${(seconds / module.config.timeScale).toFixed(0)} real)`,
+      );
+    });
+
+    it('draws a different picture for each preset', () => {
+      const normal = paintSchema(module, 'diagram', module.defaults, normalAt(module, 'shown'));
+      const unseen = Object.keys(module.presets)
+        // A module's healthy scenario IS the defaults — 48 of the 51 ship one, under a name of its
+        // own ("Normal daylight", "Healthy host", "Euthyroid"). Asking it to draw something other
+        // than a healthy body is asking it to lie, so it is excluded by COMPARISON rather than by
+        // name: a preset that resolves to the defaults is normal whatever its author called it.
+        .filter((name) => !sameInputs({ ...module.defaults, ...module.presets[name] }, module.defaults))
+        .filter(
+          (name) =>
+            paintSchema(
+              module,
+              'diagram',
+              { ...module.defaults, ...module.presets[name] },
+              scenarioAt(module, name, 'shown'),
+            ) === normal,
+        )
+        .map((name) => `${id}.${name}`);
+      expectExactly(
+        unseen,
+        [...PRESET_NOT_IN_THE_PICTURE].filter((entry) => entry.startsWith(`${id}.`)),
+        `${id}: scenarios the diagram does not show`,
       );
     });
   });

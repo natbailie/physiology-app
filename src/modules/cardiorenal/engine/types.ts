@@ -9,6 +9,15 @@ export interface SimInputs {
   kidneyFunction: number;
   /** Sodium/fluid intake rate, normalized units where 100 = baseline (0-300) */
   sodiumIntake: number;
+  /**
+   * Baroreflex gain, fraction of normal (0-1.5).
+   *
+   * One is the intact reflex and the calibrated baseline. Zero is the blocked or exhausted one —
+   * a beta blockade, an autonomic neuropathy, a reflex that has run out of headroom — and it is
+   * what lets an insult be watched BARE: with no drive, the heart rate and vascular tone stay
+   * exactly where the sliders put them instead of being quietly corrected away.
+   */
+  baroreflexGain: number;
 }
 
 export interface SimState {

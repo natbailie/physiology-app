@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { SomaticDiagram } from './components/SomaticDiagram';
@@ -69,6 +70,7 @@ export function SomaticSensationPage() {
 
   return (
     <ModulePage
+      historyCapacity={somaticLoopConfig.historyCapacity}
       moduleId="somaticSensation"
       title="Somatosensation & Pain Pathways"
       subtitle="one gate decides what you feel, and two crossing tracts decide where you lose it"
@@ -89,7 +91,17 @@ export function SomaticSensationPage() {
       }
       diagram={<SomaticDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={SOMATIC_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={SOMATIC_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={SOMATIC_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

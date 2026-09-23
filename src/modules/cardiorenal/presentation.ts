@@ -122,6 +122,7 @@ export function buildCardiorenalPresentation(ctx: Ctx): ModulePresentation<SimSt
       { kind: 'slider', label: 'Vascular tone', key: 'vascularTone', min: 0.5, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
       { kind: 'slider', label: 'Kidney function', key: 'kidneyFunction', min: 0, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
       { kind: 'slider', label: 'Sodium intake', key: 'sodiumIntake', min: 0, max: 300, step: 5, unit: '%' },
+      { kind: 'slider', label: 'Baroreflex gain', key: 'baroreflexGain', min: 0, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
     ],
     readouts: [
       { label: 'MAP', value: (c) => c.derived.meanArterialPressure.toFixed(0), unit: 'mmHg', colorToken: 'artery' },

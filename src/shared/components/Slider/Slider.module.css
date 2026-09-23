@@ -91,3 +91,20 @@
   font-size: 0.625rem;
   color: var(--text-faint);
 }
+
+/* Forced colours: the gradient fill is painted in signal colours the OS just replaced, so
+ * the filled-versus-empty distinction would go with it. Fall back to system surfaces —
+ * the thumb's POSITION still shows the value, and `aria-valuetext` says it. */
+@media (forced-colors: active) {
+  .range::-webkit-slider-runnable-track,
+  .range::-moz-range-track {
+    background: Canvas;
+    border: 1px solid ButtonText;
+  }
+
+  .range::-webkit-slider-thumb,
+  .range::-moz-range-thumb {
+    background: ButtonText;
+    border-color: ButtonText;
+  }
+}

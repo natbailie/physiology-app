@@ -14,6 +14,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hpaAxisContent } from './content';
 import { hpaLoopConfig } from './engine/loopConfig';
@@ -68,6 +69,7 @@ export function HpaPage() {
 
   return (
     <ModulePage
+      historyCapacity={hpaLoopConfig.historyCapacity}
       moduleId="hpaAxis"
       title="HPA Axis"
       subtitle="cortisol, stress response & adrenal insufficiency simulator"
@@ -85,7 +87,17 @@ export function HpaPage() {
       }
       diagram={<HpaDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={HPA_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={HPA_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={HPA_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

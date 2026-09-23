@@ -26,7 +26,6 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
   const bronchialDrive = scaleClamped(derived.bronchialDiameterPercent, BRONCHI.MIN_PERCENT, BRONCHI.MAX_PERCENT, 0, 1);
   const secretionDrive = scaleClamped(derived.secretionIndex, SECRETION.MIN_INDEX, SECRETION.MAX_INDEX, 0, 1);
   const pupilRadius = scaleClamped(derived.pupilDiameterMm, PUPIL.MIN_MM, PUPIL.MAX_MM, 3, 13);
-  const pupilIntensity = scaleClamped(derived.pupilDiameterMm, PUPIL.MIN_MM, PUPIL.MAX_MM, 0, 1);
 
   const heartTint = derived.heartRateBpm >= 70 ? 'sympathetic' : 'parasympathetic';
   const bronchialTint = derived.bronchialDiameterPercent >= BRONCHI.BASELINE_PERCENT ? 'sympathetic' : 'parasympathetic';
@@ -93,7 +92,6 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
           {
             type: 'group',
             transform: 'translate(356,92)',
-            styleVars: { 'organ-drive': clamp(pupilIntensity, 0, 1) },
             children: [
               { type: 'path', d: IRIS_PATH, colorToken: 'sympathetic', fill: 'none', strokeWidth: 2 },
               // The aperture, in ink. It was filled in `bg` — the page's own colour — so the one
@@ -118,9 +116,11 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
           {
             type: 'group',
             transform: 'translate(308,212)',
-            styleVars: { 'organ-drive': clamp(secretionDrive, 0, 1) },
             children: [
-              { type: 'path', d: GLAND_PATH, fill: secretionTint, colorToken: secretionTint, strokeWidth: 2 },
+              /* Density IS secretion, stated on the node. It was carried by `--organ-drive` on the
+                 parent group — a custom property no renderer reads — so a dry mouth and a
+                 streaming one were the same solid gland on both platforms. */
+              { type: 'path', d: GLAND_PATH, fill: secretionTint, fillOpacity: 0.18 + secretionDrive * 0.62, colorToken: secretionTint, strokeWidth: 2 },
               { type: 'text', x: 0, y: 42, text: 'Secretions', cls: 'organLabel' },
               { type: 'text', x: 0, y: 55, text: derived.secretionIndex.toFixed(0), cls: 'valueLabel', anchor: 'middle' },
             ],

@@ -81,7 +81,6 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
             fill: 'pituitary',
             fillOpacity: LABEL_WASH,
             colorToken: 'pituitary',
-            styleVars: { 'stain-strength': 0.2 },
           },
           { type: 'text', x: 250, y: 52, text: 'Hypothalamus', cls: 'anatomyStrong', anchor: 'middle' },
 
@@ -93,7 +92,6 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
             fill: 'pituitary',
             fillOpacity: LABEL_WASH,
             colorToken: 'pituitary',
-            styleVars: { 'stain-strength': 0.2 },
           },
           { type: 'text', x: 292, y: 84, text: 'Stalk', cls: 'anatomy', anchor: 'start' },
           ...(stalk > 0.12
@@ -218,7 +216,7 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
             fill: 'bone',
             colorToken: 'text-dim',
           },
-          { type: 'path', d: `M 186 ${SELLA.floor + 2} L 314 ${SELLA.floor + 2} L 292 322 L 208 322 Z`, fill: 'panel', colorToken: 'text-faint', styleVars: { 'dash': 1 } },
+          { type: 'path', d: `M 186 ${SELLA.floor + 2} L 314 ${SELLA.floor + 2} L 292 322 L 208 322 Z`, fill: 'panel', colorToken: 'text-faint', },
           { type: 'text', x: 250, y: 306, text: 'Sphenoid sinus', cls: 'anatomy', anchor: 'middle' },
 
           // --- Cavernous sinuses and the carotid arteries running through them ---
@@ -254,7 +252,6 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
                   d: ellipsePath(GLAND.cx, massCy, massRx, massRy),
                   fill: dominant.colorToken,
                   colorToken: dominant.colorToken,
-                  styleVars: { 'dash': 1 },
                 },
               ]
             : []),

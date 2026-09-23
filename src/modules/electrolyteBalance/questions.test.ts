@@ -1,9 +1,10 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { electrolyteLoopConfig } from './engine/loopConfig';
-import { DEFAULT_ELECTROLYTE_INPUTS, ELECTROLYTE_PRESETS } from './engine/presets';
+import { DEFAULT_ELECTROLYTE_INPUTS, ELECTROLYTE_PRESETS, ELECTROLYTE_PRESET_GLOSS } from './engine/presets';
 import { ELECTROLYTE_QUESTIONS } from './questions';
 import type { ElectrolyteDerived, ElectrolyteInputs, ElectrolyteState } from './engine/types';
 import type { ElectrolytePresetName } from './engine/presets';
@@ -24,3 +25,5 @@ describe('electrolyte pattern questions', () => {
 describe('electrolyte predict questions', () => {
   describeQuestionSet(electrolyteLoopConfig, DEFAULT_ELECTROLYTE_INPUTS, ELECTROLYTE_PRESETS, predictions);
 });
+
+describeGlossSet(ELECTROLYTE_PRESET_GLOSS, ELECTROLYTE_PRESETS, patterns);

@@ -10,7 +10,7 @@
 
 .activeCurve {
   fill: none;
-  stroke: var(--ecg-trace, #c33);
+  stroke: var(--ecg-trace);
   stroke-width: 2.5;
 }
 
@@ -22,20 +22,20 @@
 }
 
 .asymptote {
-  stroke: var(--repolarizing, #a6a);
+  stroke: var(--repolarizing);
   stroke-width: 1;
   stroke-dasharray: 3 3;
 }
 
 .guide {
-  stroke: var(--conduction-path, #7aa);
+  stroke: var(--conduction-path);
   stroke-width: 0.8;
   stroke-dasharray: 4 3;
 }
 
 .guideDot {
   fill: none;
-  stroke: var(--conduction-path, #7aa);
+  stroke: var(--conduction-path);
 }
 
 .markerLabel,
@@ -45,13 +45,13 @@
 }
 
 .operatingGuide {
-  stroke: var(--potassium, #ca8);
+  stroke: var(--potassium);
   stroke-width: 0;
 }
 
 .operatingPoint {
-  fill: var(--potassium, #ca8);
-  stroke: var(--text, #222);
+  fill: var(--potassium);
+  stroke: var(--text);
   stroke-width: 1;
 }
 

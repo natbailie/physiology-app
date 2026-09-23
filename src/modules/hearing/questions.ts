@@ -1,24 +1,10 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { HearingDerived, HearingInputs, HearingInternalState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { HearingInputs } from './engine/types';
 import type { HearingPresetName } from './engine/presets';
 import { perturbNoiseExposure } from './engine/engine';
+import { AUDIOGRAM_PANEL as PANEL, type HearingSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: HearingInternalState; derived: HearingDerived };
 export type HearingQuestion = ModuleQuestion<HearingInputs, HearingPresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'PTA', unit: 'dB', value: (s) => s.derived.ptaDb, decimals: 0 },
-  { label: 'Air-bone gap', unit: 'dB', value: (s) => s.derived.airBoneGapDb, decimals: 0 },
-  { label: 'Speech discrimination', unit: '%', value: (s) => s.derived.speechDiscriminationPct, decimals: 0 },
-  {
-    label: 'Recruitment',
-    unit: '×',
-    value: (s) => s.derived.recruitmentIndex,
-    decimals: 2,
-    tolerance: 0.15,
-  },
-  { label: 'Weber', value: (s) => s.derived.weberCode, decimals: 0, tolerance: 0.5 },
-];
 
 const SETTLE = 3000;
 

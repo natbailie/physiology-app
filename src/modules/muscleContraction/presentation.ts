@@ -120,6 +120,23 @@ export function buildMuscleContractionPresentation(ctx: Ctx): ModulePresentation
   const tTubuleGlow = state.excitationPulse > 0.05 ? 4 : 1.5;
 
   const diagramChildren: SceneNode[] = [];
+  /* Extracellular calcium, OUTSIDE the membrane where it belongs.
+   *
+   * It reached `derived` as a passthrough nothing drew, which is a strange omission in a module
+   * about calcium: cardiac and smooth muscle depend on the outside pool in a way skeletal muscle
+   * does not, and that contrast is the point of the muscle-type toggle beside it. Drawn as a band
+   * of ions along the top of the cell rather than a number. */
+  diagramChildren.push(
+    { type: 'text', x: 20, y: 18, text: 'extracellular Ca²⁺', cls: 'pathLabel' },
+    ...Array.from({ length: Math.round(clamp(derived.extracellularCalcium / 2.5, 0, 1) * 9) }, (_, k) => ({
+      type: 'circle' as const,
+      cx: 150 + k * 22,
+      cy: 14,
+      r: 3.2,
+      fill: 'calcium',
+      fillOpacity: 0.8,
+    })),
+  );
   // --- Sarcoplasmic reticulum with its calcium-store fill level ---
   diagramChildren.push(
     { type: 'rect', x: 30, y: 62, width: 26, height: 38, fill: 'calcium' },

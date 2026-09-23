@@ -1,0 +1,160 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+/* --- The bed picker --- */
+
+.picker {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* Links, not buttons: the bed lives in the hash, so this is navigation. Middle-click and
+   copy-link then work, and it is what RoundBoard already does to reach the same place. */
+.bed {
+  composes: segment from '../../styles/button.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  text-decoration: none;
+}
+
+.bedAcuity {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+}
+
+.crash {
+  color: var(--danger);
+}
+
+.due {
+  color: var(--warn);
+}
+
+.check {
+  color: var(--ok);
+}
+
+.newAdmission {
+  color: var(--text-faint);
+}
+
+/* --- Identity and history --- */
+
+.identity {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.who {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+.oneLiner {
+  color: var(--text-dim);
+}
+
+.presentation {
+  font-family: var(--serif);
+  font-size: var(--fs-base);
+  line-height: var(--lh-prose);
+  color: var(--text);
+  max-width: 68ch;
+  margin: 0;
+}
+
+.task {
+  font-weight: 700;
+  max-width: 68ch;
+  margin: 0;
+}
+
+/* --- The observation chart ---
+   The ink ground is restated here rather than inherited, and that is load-bearing: palette.test.ts
+   measures every signal colour against --readout-ink, and holds --readout-ink-dim to 4.5:1 on that
+   ink and nothing else. Put these rows on --panel instead and both the labels and the units land
+   on a surface no assertion covers. */
+.chart {
+  display: flex;
+  gap: var(--s-5);
+  overflow-x: auto;
+  max-width: 100%;
+  padding: var(--s-4) var(--s-5);
+  background: var(--readout-ink);
+  border: 1px solid var(--readout-ink-border);
+  border-radius: var(--r-md);
+  color: var(--on-readout-ink);
+}
+
+.chartCaption {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  --micro-label-color: var(--readout-ink-dim);
+  font-size: var(--fs-micro);
+}
+
+/* 28px bold mono, and that size is load-bearing rather than decorative: palette.test.ts holds
+   the signal colours to the 3:1 LARGE-text floor on this ground, which is only the right floor
+   while the numeral is actually large. ClinicPanel.style.test.ts asserts it for that reason. */
+.rowValue {
+  /* Composed, not restated: `.figure` owns the mono face, the tabular figures and the 700 that
+     the 3:1 contrast floor on this ground depends on. readoutInkLargeText.style.test.ts reads
+     this rule, so the binding has to be here rather than in the JSX className. */
+  composes: figure from '../../styles/text.module.css';
+  font-size: var(--fs-2xl);
+  color: var(--row-color, var(--on-readout-ink));
+  /* Phosphor. Decoration only — the value is carried by the digits, and this says nothing a
+     reader who cannot see the halo would miss. Tuned from the same knob as every other glow. */
+  text-shadow: 0 0 calc(14px * var(--glow-blur)) color-mix(in srgb, currentColor var(--glow-mix), transparent);
+}
+
+/* Forced colours: the halo is painted in the signal colour the OS just replaced. */
+@media (forced-colors: active) {
+  .rowValue {
+    text-shadow: none;
+  }
+}
+
+.rowUnit {
+  font-size: var(--fs-micro);
+  font-weight: 400;
+  color: var(--readout-ink-dim);
+  margin-left: 3px;
+}
+
+/* --- The payoff, after the questions --- */
+
+.teaching {
+  border-left: 3px solid var(--accent, var(--brand));
+  padding: var(--s-3) 0 var(--s-3) var(--s-5);
+  font-family: var(--serif);
+  line-height: var(--lh-prose);
+  max-width: 68ch;
+  margin: 0;
+}
+
+.teachingLabel {
+  display: block;
+  margin-bottom: var(--s-2);
+}

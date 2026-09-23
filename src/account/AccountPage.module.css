@@ -136,3 +136,35 @@
   color: var(--text-dim);
   line-height: 1.6;
 }
+
+/* --- Exam and stage. Two selects, saved on change. ------------------------- */
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.6rem;
+}
+
+.fieldLabel {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-dim);
+  min-width: 3.5rem;
+}
+
+.select {
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.6rem;
+  min-width: 12rem;
+}
+
+.select:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}

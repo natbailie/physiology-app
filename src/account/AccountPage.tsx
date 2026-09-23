@@ -5,14 +5,20 @@ import { useProgressStore } from '@/shared/assessment/useProgressStore';
 import { MODULES } from '@/home/moduleRegistry';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useEntitlement } from '@/billing/useEntitlement';
+import { EXAMS, TRAINING_LEVELS, isExamId, isTrainingLevelId } from '@/home/exams';
+import { setExamFilter } from '@/home/examFilter';
+import { useExamProfile } from './examProfile';
 import styles from './AccountPage.module.css';
+import { useRole } from '@/teacher/useTeacher';
 import { ThemeToggle } from '@/theme/ThemeToggle';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference');
 
 export function AccountPage() {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <h1 className={styles.title}>Your account</h1>
       </header>
@@ -25,6 +31,10 @@ export function AccountPage() {
       <a href="#privacy" className={styles.footerLink}>
         What data do we hold?
       </a>
+      <a href="#methodology" className={styles.footerLink}>
+        How the physiology is checked
+      </a>
+      <TeacherLink />
     </div>
   );
 }
@@ -98,6 +108,89 @@ function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; messa
 }
 
 /**
+ * The learner's exam and training stage, editable for as long as they have the account.
+ *
+ * The home page asks this once and can be dismissed forever; this is where it lives afterwards.
+ * Both matter beyond the filter — they are the RevenueCat subscriber attributes that make the
+ * audience segmentable — so both need somewhere permanent to be corrected when a learner moves
+ * from finals to the MRCP.
+ *
+ * Saved on change rather than behind a Save button. There are two fields, neither is destructive,
+ * and a form that can be left in an unsaved state is a form somebody leaves in an unsaved state.
+ */
+function ExamSettings() {
+  const { targetExam, trainingLevel, ready, canSave, save } = useExamProfile();
+  const [failed, setFailed] = useState(false);
+
+  if (!ready) return <p className={styles.muted}>Loading…</p>;
+
+  const update = (next: Parameters<typeof save>[0]) => {
+    setFailed(false);
+    void save(next).then((ok) => setFailed(!ok));
+  };
+
+  return (
+    <>
+      <p className={styles.muted}>
+        Filters the catalogue to what is high-yield for your exam, and nothing else changes — every
+        module stays open. Leave it on “Not sure yet” to see all of them.
+      </p>
+
+      <div className={styles.fieldRow}>
+        <label className={styles.fieldLabel} htmlFor="target-exam">
+          Exam
+        </label>
+        <select
+          id="target-exam"
+          className={styles.select}
+          value={targetExam ?? ''}
+          disabled={!canSave}
+          onChange={(event) => {
+            const value = event.target.value;
+            // Empty string is "not sure yet", stored as null — see `examProfile.ts` for why
+            // there is no sentinel string for it.
+            update({ targetExam: isExamId(value) ? value : null });
+            setExamFilter(isExamId(value) ? value : null);
+          }}
+        >
+          <option value="">Not sure yet</option>
+          {EXAMS.map((exam) => (
+            <option key={exam.id} value={exam.id}>
+              {exam.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.fieldRow}>
+        <label className={styles.fieldLabel} htmlFor="training-level">
+          Stage
+        </label>
+        <select
+          id="training-level"
+          className={styles.select}
+          value={trainingLevel ?? ''}
+          disabled={!canSave}
+          onChange={(event) => {
+            const value = event.target.value;
+            update({ trainingLevel: isTrainingLevelId(value) ? value : null });
+          }}
+        >
+          <option value="">Prefer not to say</option>
+          {TRAINING_LEVELS.map((level) => (
+            <option key={level.id} value={level.id}>
+              {level.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {failed && <p className={styles.error}>That did not save. Check your connection and try again.</p>}
+    </>
+  );
+}
+
+/**
  * Which of the two revenue streams is paying for this learner.
  *
  * Worth saying out loud rather than just showing a padlock or not: a student whose school has
@@ -162,6 +255,9 @@ function SignedInView({ email, onSignOut }: { email: string; onSignOut: () => vo
         across devices.
       </p>
 
+      <h2 className={styles.sectionTitle}>Revising for</h2>
+      <ExamSettings />
+
       <h2 className={styles.sectionTitle}>Access</h2>
       <AccessSummary />
 
@@ -194,5 +290,17 @@ function SignedInView({ email, onSignOut }: { email: string; onSignOut: () => vo
         Sign out
       </button>
     </section>
+  );
+}
+
+/** Shown only to teaching accounts: a link a student cannot use is clutter, and the page behind
+ * it would only tell them so. */
+function TeacherLink() {
+  const role = useRole();
+  if (role !== 'teacher') return null;
+  return (
+    <a href="#teacher" className={styles.footerLink}>
+      Your classes
+    </a>
   );
 }

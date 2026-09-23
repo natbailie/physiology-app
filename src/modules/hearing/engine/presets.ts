@@ -53,3 +53,18 @@ export const HEARING_PRESET_ORDER: HearingPresetName[] = [
   'menieres',
   'severeCochlearLoss',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const HEARING_PRESET_GLOSS: Partial<Record<HearingPresetName, string>> = {
+  normal: 'both ears conducting sound in and sensing it properly',
+  otosclerosis: 'the stapes fixed in place, so sound cannot get in',
+  noiseNotch: 'hair cells killed at one frequency by loud exposure',
+  presbycusis: 'hair cells lost from the base of the cochlea with age',
+  severeCochlearLoss: 'most of the cochlea gone, not just its quiet end',
+  menieres: 'an inner ear periodically overfilled with fluid, in attacks that come and go',
+};

@@ -1,0 +1,45 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+}
+
+.legend {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-right: 0.15rem;
+}
+
+.chip {
+  font: inherit;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-pill);
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--text);
+  border-color: var(--text-faint);
+}
+
+/* The selected chip is the one place a catalogue control is painted in the house accent: it is
+   the only thing on the page telling a learner why modules are missing. */
+.chip[aria-pressed='true'] {
+  color: var(--on-solid);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.count {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+  margin-left: auto;
+}

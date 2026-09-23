@@ -14,6 +14,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hptAxisContent } from './content';
 import { hptLoopConfig } from './engine/loopConfig';
@@ -68,6 +69,7 @@ export function HptPage() {
 
   return (
     <ModulePage
+      historyCapacity={hptLoopConfig.historyCapacity}
       moduleId="hptAxis"
       title="Thyroid (HPT) Axis"
       subtitle="TSH, T4/T3 & thyroid function test interpretation simulator"
@@ -85,7 +87,17 @@ export function HptPage() {
       }
       diagram={<HptDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={HPT_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={HPT_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={HPT_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

@@ -14,6 +14,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hpgAxisContent } from './content';
 import { hpgLoopConfig } from './engine/loopConfig';
@@ -64,6 +65,7 @@ export function HpgAxisPage() {
 
   return (
     <ModulePage
+      historyCapacity={hpgLoopConfig.historyCapacity}
       moduleId="hpgAxis"
       title="HPG Axis"
       subtitle="GnRH, LH/FSH & the ovulatory LH surge"
@@ -79,7 +81,17 @@ export function HpgAxisPage() {
       }
       diagram={<HpgDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={HPG_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -96,6 +108,7 @@ export function HpgAxisPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={hpgAxisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of reproductive endocrinology — not a clinical or diagnostic tool. Leave the normal female cycle running and the LH surge will fire on its own once follicular estrogen has been high for long enough: the surge is emergent, not scheduled on a fixed day. Watch the feedback arrow flip from inhibitory to stimulatory as it happens, then try the Combined OCP preset, where the surge never comes. One simulated cycle takes roughly a minute of real time.'}
     />

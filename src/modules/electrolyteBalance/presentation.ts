@@ -126,7 +126,11 @@ export function buildElectrolyteBalancePresentation(ctx: Ctx): ModulePresentatio
         fill: 'potassium',
         styleVars: { visible: totalBodyPotassiumPct / 100 >= threshold ? 1 : 0 },
       })),
-      { type: 'text', x: 408, y: 136, text: `total body ${totalBodyPotassiumPct.toFixed(0)}%`, cls: 'valueLabel' },
+      // Inside the solid cell block, so --on-solid. Same fault as cardiacElectro's atrium:
+      // a label on a filled signal colour defaulting to --text, surviving on a margin the
+      // navy palette removed. The alternative is a LABEL_WASH on the rect, but the block is
+      // solid to say the cell holds 98% of body potassium — that solidity is the point.
+      { type: 'text', x: 408, y: 136, text: `total body ${totalBodyPotassiumPct.toFixed(0)}%`, cls: 'valueLabel', colorToken: 'on-solid' },
 
       {
         type: 'line',

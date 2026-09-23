@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { DISCIPLINES, THEMES } from '@/home/moduleRegistry';
+import { PAGES } from '@/pages';
+import { prefersReducedMotion } from '@/shared/lib/prefersReducedMotion';
 import { MEDICATION_INVALID, resolveMedicationRoute } from '@/medications/drugs';
 import { routeIdFromHash } from './scenarioUrl';
 
@@ -18,8 +21,12 @@ export type MedicationRouteId = `medications/${string}`;
 
 export type RouteId =
   | 'home'
+  | 'accessibility'
   | 'account'
   | 'privacy'
+  | 'methodology'
+  | 'review-h'
+  | 'teacher'
   | 'pricing'
   | 'cardiorenal'
   | 'respiratory'
@@ -29,6 +36,10 @@ export type RouteId =
   | 'glucoseRegulation'
   | 'calciumHomeostasis'
   | 'membranePotentials'
+  | 'metabolism'
+  | 'toxicology'
+  | 'anaesthesia'
+  | 'cognitiveNeuroscience'
   | 'autonomicNervous'
   | 'renalTubular'
   | 'cardiacElectro'
@@ -76,8 +87,12 @@ export type RouteId =
 
 /** Exported so `moduleRegistry.test.ts` can assert every available module has a route. */
 export const VALID_ROUTES: RouteId[] = [
+  'accessibility',
   'account',
   'privacy',
+  'methodology',
+  'review-h',
+  'teacher',
   'pricing',
   'cardiorenal',
   'respiratory',
@@ -87,6 +102,10 @@ export const VALID_ROUTES: RouteId[] = [
   'glucoseRegulation',
   'calciumHomeostasis',
   'membranePotentials',
+  'metabolism',
+  'toxicology',
+  'anaesthesia',
+  'cognitiveNeuroscience',
   'autonomicNervous',
   'renalTubular',
   'cardiacElectro',
@@ -153,13 +172,51 @@ function resolveHash(): RouteId {
   return VALID_ROUTES.includes(id as RouteId) ? (id as RouteId) : 'home';
 }
 
+/**
+ * How long a navigation will wait for the next page's chunk before committing anyway.
+ *
+ * Almost every navigation in the app is warmed by `useLinkPrefetch` on hover or pointer-down, so
+ * this budget is for the ones that are not: the back button, a typed URL, a keyboard activation
+ * that skipped the pointer entirely. Waiting unboundedly would leave the OLD page on screen with
+ * the new URL in the bar, which reads as a frozen app; the transition runs either way and the
+ * worst case is the blank fallback fading in, which is what every navigation did before.
+ */
+const CHUNK_WAIT_MS = 250;
+
 /** Minimal hash-based router: gives URL persistence and browser back/forward support
  * across the app's module pages with zero new dependencies. */
 export function useHashRoute(): RouteId {
   const [route, setRoute] = useState<RouteId>(() => resolveHash());
 
   useEffect(() => {
-    const onChange = () => setRoute(resolveHash());
+    const onChange = () => {
+      const next = resolveHash();
+      const commit = () => {
+        // `flushSync`, because `startViewTransition` captures the page as it is when its callback
+        // RETURNS. A batched update would land in a later frame, after the snapshot, and the
+        // transition would cross-fade the old page into itself.
+        flushSync(() => setRoute(next));
+        // Inside the same callback, so the scroll reset is part of the change being captured
+        // rather than a jump after it. There was no scroll reset at all before: crossing from a
+        // module page to the home grid left the viewport wherever the module had been scrolled to,
+        // which is most of why navigation read as broken.
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      };
+
+      // Progressive enhancement, and the reduced-motion guard has to be here rather than in CSS:
+      // the blanket `@media (prefers-reduced-motion: reduce)` rule in `index.css` is written
+      // against `*`, and the view-transition pseudo-elements are not elements.
+      if (prefersReducedMotion() || typeof document.startViewTransition !== 'function') {
+        commit();
+        return;
+      }
+
+      const ready = PAGES[next]?.preload() ?? Promise.resolve();
+      void Promise.race([
+        ready.catch(() => undefined),
+        new Promise((resolve) => setTimeout(resolve, CHUNK_WAIT_MS)),
+      ]).then(() => document.startViewTransition(commit));
+    };
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);

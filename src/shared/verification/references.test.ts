@@ -127,7 +127,7 @@ describe('every module says where its numbers came from', () => {
    *
    * The floor only ever moves up: a module that gains a citation should never quietly lose one.
    *
-   * It currently stands at 196 of 219 bands. The 23 that name no source are not an oversight — they
+   * It currently stands at 236 of 265 bands. The 29 that name no source are not an oversight — they
    * are the quantities this app expresses as a 0-1 or 0-100 index, where no published reference
    * interval CAN be applied until the engine changes units. Each one says so, and says what would
    * settle it. Reading those `needs` strings end to end is the most useful validation backlog in

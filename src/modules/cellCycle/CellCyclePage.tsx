@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { CellCycleRing } from './components/CellCycleRing';
@@ -66,6 +67,7 @@ export function CellCyclePage() {
 
   return (
     <ModulePage
+      historyCapacity={cellCycleLoopConfig.historyCapacity}
       moduleId="cellCycle"
       title="Cell Cycle & Checkpoints"
       subtitle="four phases, three checkpoints, and every cancer drug names one of them"
@@ -82,7 +84,17 @@ export function CellCyclePage() {
       }
       diagram={<CellCycleRing derived={snapshot.derived} />}
       readouts={<CellCycleReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={CELL_CYCLE_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={CELL_CYCLE_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={CELL_CYCLE_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

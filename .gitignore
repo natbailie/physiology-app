@@ -25,3 +25,8 @@ dist-ssr
 
 # The diagram audit's rendered frames — regenerate with `npx vitest run tools/diagram-audit`.
 tools/diagram-audit/out/
+
+# Diagram reference images — third-party material, informs the drawings but is never
+# traced or shipped. The README stays tracked.
+docs/diagrams/references/*
+!docs/diagrams/references/README.md

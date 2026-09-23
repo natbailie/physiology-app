@@ -1,0 +1,58 @@
+/* Reads as a document, not as an instrument panel: this is the page a buyer prints.
+ * Same idiom as MethodologyPage and HReviewPage — a centred column of prose. */
+.page {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-5) var(--s-8);
+}
+
+.header {
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--s-3);
+}
+
+.standfirst {
+  margin: 0;
+  font-size: var(--fs-base);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+}
+
+.body {
+  padding-top: var(--s-5);
+}
+
+.sectionTitle {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: var(--s-7) 0 var(--s-3);
+}
+
+.sectionTitle:first-child {
+  margin-top: 0;
+}
+
+.prose {
+  margin: 0 0 var(--s-4);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+}
+
+.list {
+  margin: 0 0 var(--s-5);
+  padding-left: var(--s-5);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+  display: grid;
+  gap: var(--s-2);
+}

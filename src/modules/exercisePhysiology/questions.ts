@@ -1,22 +1,9 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type {
-  ExerciseDerived,
-  ExerciseInputs,
-  ExerciseInternalState,
-} from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { ExerciseInputs } from './engine/types';
 import type { ExercisePresetName } from './engine/presets';
+import { EFFORT_PANEL as PANEL, type ExerciseSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: ExerciseInternalState; derived: ExerciseDerived };
 export type ExerciseQuestion = ModuleQuestion<ExerciseInputs, ExercisePresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'VO2', unit: 'L/min', value: (s) => s.derived.vo2MlMin / 1000, decimals: 2 },
-  { label: 'Heart rate', unit: 'bpm', value: (s) => s.derived.heartRateBpm, decimals: 0 },
-  { label: 'Cardiac output', unit: 'L/min', value: (s) => s.derived.cardiacOutputLMin, decimals: 1 },
-  { label: 'Lactate', unit: 'mmol/L', value: (s) => s.derived.lactateMmolL, decimals: 1, tolerance: 0.25 },
-  { label: 'Ventilation', unit: 'L/min', value: (s) => s.derived.ventilationLMin, decimals: 0 },
-  { label: 'Fatigue', unit: '%', value: (s) => s.derived.fatiguePct, decimals: 0, tolerance: 0.35 },
-];
 
 const SETTLE = 80000;
 

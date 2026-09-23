@@ -1,35 +1,48 @@
 # Physiology Lab
 
-Twenty-six interactive physiology simulators for medical students, plus an interactive formula
-reference. Every module runs a real quantitative model — named equations, constants calibrated so
-baseline lands on textbook values — and each carries verified practice questions.
+Fifty-one interactive physiology simulators for medical students, plus an interactive formula
+reference and a pharmacology hub. Every module runs a real quantitative model — named equations,
+constants calibrated so baseline lands on textbook values — and each carries verified practice
+questions.
 
-Aimed at pre-clinical medicine (UKMLA, USMLE Step 1, MBBS).
+Aimed at pre-clinical medicine (UKMLA, USMLE Step 1, MBBS), with modules tagged for MRCP Part 1,
+MRCS Part A and FRCA Primary.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm test             # 779 tests
+npm test             # 2,900 tests across 211 files
 npm run build        # tsc -b && vite build
 npm run lint         # oxlint
+npm run verify       # all four, in CI order
 ```
 
 ## What is in here
 
-**Simulators.** Cardiorenal, respiratory and acid-base, respiratory mechanics, ECG and cardiac
-conduction, cardiac cycle and PV loop, venous return, capillary exchange, shock states, fetal and
-neonatal circulation, cerebral perfusion and ICP, renal tubular, electrolyte balance, coagulation,
-erythropoiesis, immune response, hypersensitivity, muscle and EC coupling, the neuromuscular
-junction, membrane potentials, autonomic nervous system, GI physiology, and the HPA, HPT, HPG,
-calcium and glucose axes.
+**Simulators**, in twelve themes:
+
+| Theme | Modules |
+| --- | --- |
+| Cardiovascular | cardiorenal, ECG conduction, cardiac cycle & PV loop, coronary circulation, capillary exchange, venous return, shock states |
+| Respiratory | respiratory & acid-base, respiratory mechanics, mechanical ventilation, respiratory failure |
+| Renal & fluids | renal tubular, electrolyte balance, micturition |
+| Endocrine | HPA, HPT, HPG, glucose regulation, calcium homeostasis, anterior pituitary, adrenal cortex, adrenal medulla |
+| Gastrointestinal | GI physiology, liver physiology, digestion & absorption |
+| Haematology & immunity | coagulation, erythropoiesis, immune response, hypersensitivity, blood groups, inflammation |
+| Neuro & muscle | membrane potentials, autonomic nervous system, muscle contraction, neuromuscular junction, cerebral perfusion, cognitive neuroscience, somatic sensation, motor control |
+| Special senses | vision, hearing, vestibular |
+| Reproduction & development | fetal circulation, pregnancy |
+| Integrative | thermoregulation, exercise physiology |
+| Metabolism | metabolism, toxicology, anaesthesia |
+| Cell & molecular | enzyme kinetics, cell cycle |
 
 The physiology is not decorative. Guyton's two-curve analysis, Suga-Sagawa time-varying
 elastance, the Edelman relation, Landis-Pappenheimer, Hodgkin-Huxley gating, Severinghaus,
 Gordon-Huxley length-tension, Hill force-velocity, Henderson-Hasselbalch, Winter's formula,
-Bazett, Monro-Kellie, Gell and Coombs — all implemented and unit-tested against textbook
-baselines.
+Bazett, Monro-Kellie, Watson & Yellott, Steinhausen, Gell and Coombs — all implemented and
+unit-tested against textbook baselines.
 
 Findings are emergent rather than drawn. R-wave progression across the chest leads falls out of
 the activation sequence projected onto twelve lead axes; a posterior infarct shows ST depression
@@ -44,6 +57,31 @@ the controls hidden and you name it from the readouts.
 **Progress.** Scores persist to localStorage by default. Signing in moves them to Postgres via
 Supabase, behind the same `ProgressStore` interface, so the quiz code is identical either way —
 and the app works fully without an account.
+
+## Where the numbers come from
+
+Every module carries `engine/references.ts`, pairing each asserted physiological band with a
+provenance record saying where it came from. Three kinds, in descending order of how hard they
+are to fake:
+
+- **Analytic** — the reference is a published *equation*, written out inside the test and
+  importing nothing from the engine. Thirteen modules have one. Some are identities that must
+  hold for any input at all: `ecgConduction` checks Einthoven's law against arbitrary dipoles and
+  it holds to ten decimal places.
+- **Trace** — the reference is a committed trace from the [Pulse Physiology
+  Engine](https://pulse.kitware.com/), an independently built and separately validated model of
+  the same physiology. Five modules and nineteen traces. See `tools/pulse-oracle/`.
+- **Reference range** — the reference is a published interval. Every module has this.
+
+Of 265 asserted bands, 236 (89%) name an external source; the remaining 29 say so explicitly and
+record what would settle them. That percentage is asserted as a ratchet in
+`src/shared/verification/references.test.ts` and should only ever rise.
+
+This matters more than it looks. `shockStates` agreed with Pulse almost exactly at baseline —
+MAP 95.0 against 95.3, HR 71.7 against 72.0 — and was still teaching the *inverse* of its own
+lesson: pressure falling linearly from the first millilitre, where the whole point of ATLS
+classification is that pressure is defended and then collapses. A reference-range check passed
+that module. Only the trace oracle caught it. `tools/pulse-oracle/README.md` records the fix.
 
 ## Architecture
 

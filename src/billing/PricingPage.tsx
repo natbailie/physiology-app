@@ -3,10 +3,12 @@ import { useAuth } from '@/auth/AuthContext';
 import { MODULES } from '@/home/moduleRegistry';
 import { FALLBACK_PACKAGES, FREE_MODULE_IDS, PLAN_FEATURES, PLAN_NAME, type PlanPackage } from './config';
 import { useEntitlement } from './useEntitlement';
+import { useExamProfile } from '@/account/examProfile';
 import { startCheckout } from './startCheckout';
-import { fetchOfferedPackages, type OfferedPackage } from './revenuecat';
+import { fetchOfferedPackages, setExamAttributes, type OfferedPackage } from './revenuecat';
 import { redeemLicence } from './licence';
 import styles from './PricingPage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference' && m.status === 'available');
 const FREE_SIMULATOR_COUNT = SIMULATORS.filter((m) => FREE_MODULE_IDS.has(m.id)).length;
@@ -21,13 +23,22 @@ function hasRcPackage(plan: PlanPackage | OfferedPackage): plan is OfferedPackag
 export function PricingPage() {
   const { user } = useAuth();
   const { status, source, institutionName } = useEntitlement();
-  const [notice, setNotice] = useState<string | null>(null);
+  /**
+   * One message, tagged with which action produced it.
+   *
+   * The licence-code form sits ABOVE the plan card now, so a single untagged notice rendered in
+   * one fixed place would report the result of redeeming a code somewhere the person who typed
+   * it is no longer looking. Two independent notice states would be the other way to do this,
+   * and would allow both to be on screen at once saying different things.
+   */
+  const [notice, setNotice] = useState<{ where: 'plan' | 'code'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [code, setCode] = useState('');
 
   /** Live prices when RevenueCat answers; last known prices when it does not. */
   const [packages, setPackages] = useState<readonly (PlanPackage | OfferedPackage)[]>(FALLBACK_PACKAGES);
   const [selected, setSelected] = useState<string>(DEFAULT_PACKAGE_ID);
+  const { targetExam, trainingLevel, ready: profileReady } = useExamProfile();
 
   useEffect(() => {
     if (!user) return;
@@ -40,12 +51,27 @@ export function PricingPage() {
     };
   }, [user]);
 
+  /**
+   * Send the learner's exam to RevenueCat, from the one page that loads the SDK anyway.
+   *
+   * This is the whole reason the attribute is set here rather than at sign-in: the SDK is an
+   * 840 kB dynamic chunk and pulling it for every signed-in learner would undo that. See the
+   * docblock on `setExamAttributes`.
+   *
+   * Fire-and-forget, and after the offering rather than before it — the prices have to render
+   * whatever an analytics call does.
+   */
+  useEffect(() => {
+    if (!user || !profileReady) return;
+    void setExamAttributes(user.id, { targetExam, trainingLevel });
+  }, [user, profileReady, targetExam, trainingLevel]);
+
   const chosen = packages.find((plan) => plan.id === selected) ?? packages[0];
 
   const subscribe = async () => {
     if (!user || !chosen) return;
     if (!hasRcPackage(chosen)) {
-      setNotice('Payments are not configured on this deployment yet.');
+      setNotice({ where: 'plan', text: 'Payments are not configured on this deployment yet.' });
       return;
     }
 
@@ -55,7 +81,7 @@ export function PricingPage() {
       const result = await startCheckout(user.id, chosen.rcPackage, user.email ?? undefined);
       // A closed payment sheet is a decision, not a failure, and says nothing back.
       if ('cancelled' in result) return;
-      if (!result.ok) setNotice(result.message);
+      if (!result.ok) setNotice({ where: 'plan', text: result.message });
     } finally {
       setBusy(false);
     }
@@ -69,9 +95,9 @@ export function PricingPage() {
       const result = await redeemLicence(code);
       if (result.ok) {
         setCode('');
-        setNotice(`Access granted through ${result.institutionName}.`);
+        setNotice({ where: 'code', text: `Access granted through ${result.institutionName}.` });
       } else {
-        setNotice(result.message);
+        setNotice({ where: 'code', text: result.message });
       }
     } finally {
       setBusy(false);
@@ -80,6 +106,7 @@ export function PricingPage() {
 
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <a href="#" className={styles.backLink}>
         ← All modules
       </a>
@@ -88,6 +115,33 @@ export function PricingPage() {
         {FREE_SIMULATOR_COUNT} of the {SIMULATORS.length} simulators are free on any account, questions
         included. Full access opens the rest.
       </p>
+
+      {/* Above the cards, not in small print below them.
+       *
+       * UK medical schools buy by purchase order, so for a large share of the people who reach
+       * this page the correct action is not to choose a billing period at all — it is to type a
+       * code somebody has emailed them. Making them read past two prices first asks them to
+       * consider paying personally for something their school has already bought, and an
+       * institutional seat beats a personal subscription anyway (`v_entitlement`). */}
+      {status === 'active' && source === 'institution' ? null : (
+        <form className={styles.codeRow} onSubmit={(event) => void submitCode(event)}>
+          <label className={styles.codeLabel} htmlFor="licence-code">
+            Has your institution given you a code?
+          </label>
+          <input
+            id="licence-code"
+            className={styles.codeInput}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button type="submit" className={styles.codeButton} disabled={busy || code.trim() === ''}>
+            Apply
+          </button>
+        </form>
+      )}
+      {notice?.where === 'code' && <p className={styles.notice}>{notice.text}</p>}
 
       <section className={styles.card}>
         <h2 className={styles.planName}>{PLAN_NAME}</h2>
@@ -147,26 +201,8 @@ export function PricingPage() {
           </a>
         )}
 
-        {notice && <p className={styles.notice}>{notice}</p>}
+        {notice?.where === 'plan' && <p className={styles.notice}>{notice.text}</p>}
 
-        {status === 'active' && source === 'institution' ? null : (
-          <form className={styles.codeRow} onSubmit={(event) => void submitCode(event)}>
-            <label className={styles.codeLabel} htmlFor="licence-code">
-              Has your institution given you a code?
-            </label>
-            <input
-              id="licence-code"
-              className={styles.codeInput}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button type="submit" className={styles.codeButton} disabled={busy || code.trim() === ''}>
-              Apply
-            </button>
-          </form>
-        )}
       </section>
 
       <p className={styles.freeNote}>

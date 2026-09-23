@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Concept preview: home-F ward-round style with WCAG 2.2 AA colour and focus fixes for UK university use. Fictional patients. Simplified teaching models, not clinical tools.">
+<title>H — Ward-round style, university-accessible · concept preview</title>
+<style>
+  /* ============ H: home-F look, fixed to pass WCAG 2.2 AA (text 4.5:1, non-text 3:1) ============
+     Dark-first (university use has no mandated light theme). Light theme kept as a choice,
+     with the same floors. Fixes vs home-F noted inline as FIX. */
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --raised:#e9eef5; --border:#687d95;
+    --text:#0f1f33; --dim:#33475f; --faint:#5a6f88; /* FIX: was #4b5d75/#7c8da6 (~3.2:1); both now ≥4.5:1 on white */
+    --brand:#0f62d6; --brand-text:#ffffff; --accent:#b91c1c;
+    --link:#0f62d6; --link-visited:#5b21b6;
+    --chip-red-text:#b91c1c; --chip-red-bg:#fdecec; --chip-red-border:#b91c1c;
+    --chip-amber-text:#6b4400; --chip-amber-bg:#fff4d6; --chip-amber-border:#6b4400;
+    --chip-green-text:#046c4e; --chip-green-bg:#e6f4ed; --chip-green-border:#046c4e;
+    --chip-grey-text:#33475f; --chip-grey-bg:#eef2f7; --chip-grey-border:#33475f;
+    --vital-bg:#02070f; --vital-border:#5a7a9e; --vital-label:#b9c9dd;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#5a7a9e; /* FIX: was #1d3352 (~1.4:1); now ≥3:1 on panel */
+    --text:#e8f1ff; --dim:#b9c9dd; --faint:#9db4cc; /* FIX: raised so 12px secondary text passes 4.5:1 */
+    --brand:#4cc3ff; --brand-text:#03101f; --accent:#ff8f8f;
+    --link:#7fd0ff; --link-visited:#c4a4ff;
+    --chip-red-text:#ffc9c9; --chip-red-bg:#2a1215; --chip-red-border:#ff8f8f;
+    --chip-amber-text:#ffdf8e; --chip-amber-bg:#2a2108; --chip-amber-border:#ffcf5c;
+    --chip-green-text:#8ff2c6; --chip-green-bg:#0a2620; --chip-green-border:#5eeab0;
+    --chip-grey-text:#c4d3e6; --chip-grey-bg:transparent; --chip-grey-border:#9db4cc;
+    --vital-bg:#02070f; --vital-border:#5a7a9e; --vital-label:#b9c9dd;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  /* FIX: skip link (was absent entirely). */
+  .skip-link{position:absolute;left:-9999px;top:0;background:var(--brand);color:var(--brand-text);padding:10px 18px;font-weight:800;font-size:15px;z-index:100;border-radius:0 0 8px 0}
+  .skip-link:focus{left:0}
+  /* FIX: no opacity on text anywhere (home-F dimmed nav/buttons/cards with opacity:.65–.8). */
+  .proto-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 20px;background:#020610;color:#e8f1ff;border-bottom:2px solid #5a7a9e;font-size:13px}
+  [data-theme="light"] .proto-bar{background:#0f1f33}
+  .proto-bar nav{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap}
+  .proto-bar nav a{color:#e8f1ff}
+  .theme-seg{display:flex;background:#0f2a4d;border:1px solid #5a7a9e;border-radius:8px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#e8f1ff;font:inherit;font-size:12px;padding:6px 12px;min-height:36px;border-radius:6px;cursor:pointer}
+  .theme-seg button[aria-pressed="true"]{background:#4cc3ff;color:#03101f;font-weight:800}
+  /* FIX: visible focus on everything (home-F had hover-only). 3px + offset, ≥3:1 vs adjacent. */
+  :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 20px 90px;display:flex;flex-direction:column;gap:32px}
+  /* FIX: kickers 11px/.18em → 12px/700/.12em; still sentence case, still cyan-on-navy. */
+  .kicker{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--brand)}
+  h1{font-size:34px;letter-spacing:-.02em;margin:8px 0;line-height:1.12}
+  h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .demo-label{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--faint);font-weight:700}
+  .lede{color:var(--dim);max-width:70ch}
+  a{color:var(--link);text-underline-offset:.15em}
+  a:visited{color:var(--link-visited)}
+  .card{background:var(--panel);border:1.5px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+  [data-theme="light"] .card{box-shadow:0 8px 28px rgba(15,31,51,.14)}
+  .pad{padding:20px}
+  .mono{font-family:var(--mono)}
+  .btn{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:12px 20px;min-height:48px;border:1.5px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--brand);border-color:transparent;color:var(--brand-text)}
+  .trace path{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 2.2s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @media(prefers-reduced-motion:reduce){.trace path{animation:none;stroke-dashoffset:0}*{scroll-behavior:auto!important}}
+  @media(prefers-contrast:more){.vital b{text-shadow:none!important}.chip{border-width:2px}}
+  .pair{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+  .phone{width:390px;max-width:100%;border:1.5px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column}
+  .phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--dim);padding:10px 16px 0}
+  .phone-list{padding:10px 12px;display:flex;flex-direction:column;gap:10px;max-height:600px;overflow:auto}
+  .apptabs{display:flex;border-top:1.5px solid var(--border);margin-top:auto}
+  .apptabs span{flex:1;text-align:center;font-size:12px;color:var(--dim);padding:12px 0 14px}
+  /* FIX: current tab is underline + weight, not colour alone. */
+  .apptabs .on{color:var(--text);font-weight:800;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
+  .pt{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+  .pt:visited{color:inherit}
+  a.pt:hover{border-color:var(--brand)}
+  /* FIX: acuity chips — solid grounds, 12px/800, bordered ≥3:1, icon + word (never colour alone).
+     Light red/amber/green previously rendered ~2:1 on translucent washes. */
+  .acuity{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.04em;border-radius:7px;padding:5px 9px;white-space:nowrap;border:1.5px solid}
+  .acuity.red{background:var(--chip-red-bg);color:var(--chip-red-text);border-color:var(--chip-red-border)}
+  .acuity.amber{background:var(--chip-amber-bg);color:var(--chip-amber-text);border-color:var(--chip-amber-border)}
+  .acuity.green{background:var(--chip-green-bg);color:var(--chip-green-text);border-color:var(--chip-green-border)}
+  .acuity.grey{background:var(--chip-grey-bg);color:var(--chip-grey-text);border-color:var(--chip-grey-border)}
+  .pt small{color:var(--dim);display:block;font-size:13px}
+  .pt .mod{font-family:var(--mono);font-size:12px;color:var(--dim);display:block;margin-top:2px} /* FIX: was 10px faint */
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .vital{background:var(--vital-bg);border:1.5px solid var(--vital-border);border-radius:12px;padding:10px 12px;color:#e8f1ff}
+  .vital span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--vital-label)} /* FIX: was 10px */
+  .vital b{font-family:var(--mono);font-size:24px;text-shadow:0 0 16px currentColor;display:block} /* glow is decoration only; the word beside it carries meaning */
+  .vital small{font-family:var(--mono);font-size:12px;color:var(--vital-label)}
+  .rx-row{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:flex-start}
+  .rx-row + .rx-row{margin-top:10px}
+  .rx-row small{color:var(--dim);display:block;font-size:13px}
+  /* FIX: meters 6px borderless (~1.1:1 track) → 8px + 1px border + visible % text + progressbar role. */
+  .meter{height:8px;border-radius:999px;background:var(--raised);border:1px solid var(--border);margin-top:8px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--brand);border-radius:999px}
+  .rx-meta{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+  .referrals{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;color:var(--dim);font-size:13px;margin-top:12px}
+  .referrals a{font-weight:700;text-decoration:underline}
+  .disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .disc{border:1.5px solid var(--border);border-radius:14px;padding:16px;background:var(--panel)}
+  .disc h3{margin:0 0 4px;font-size:16px}
+  .disc p{margin:0;color:var(--dim);font-size:13px}
+  .disc .count{font-family:var(--mono);font-size:12px;color:var(--dim);display:block;margin-top:8px} /* FIX: was 11px faint */
+  .disc.soon{border-style:dashed} /* FIX: no opacity dimming; dashed + tag carries "soon" */
+  .tag-roadmap{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;border:1.5px solid var(--border);border-radius:999px;padding:2px 10px;color:var(--dim);text-transform:uppercase}
+  .note{font-size:13px;color:var(--dim)} /* FIX: was 12.5px faint */
+  /* Module demos */
+  .modetabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 0;padding:0;list-style:none}
+  .modetabs button{font:inherit;font-size:15px;font-weight:700;background:var(--raised);border:1.5px solid var(--border);border-radius:10px 10px 0 0;padding:10px 18px;min-height:48px;cursor:pointer;color:var(--text)}
+  .modetabs button[aria-pressed="true"]{background:var(--panel);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
+  .casebanner{border:1.5px solid var(--border);border-left:8px solid var(--chip-amber-border);border-radius:12px;padding:12px 16px;margin-top:14px;background:var(--panel)}
+  .casebanner h3{margin:0;font-size:16px}
+  .casebanner p{margin:4px 0 0;color:var(--dim);font-size:14px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .chip{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--border);background:var(--panel);color:var(--text);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--bg);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+  .lab-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;margin-top:14px}
+  .diagram{border:1.5px solid var(--border);border-radius:12px;background:var(--panel);padding:12px}
+  .diagram .fig-head{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--dim);padding:2px 4px 8px}
+  dl.obs{margin:12px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  dl.obs div{border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--raised)}
+  dl.obs dt{font-size:12px;color:var(--dim);font-weight:700}
+  dl.obs dd{margin:2px 0 0;font-family:var(--mono);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  dl.obs dd small{font-size:12px;color:var(--dim);font-weight:400}
+  .field{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--panel);margin-top:10px}
+  .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;gap:10px}
+  .field output{font-family:var(--mono)}
+  input[type="range"]{width:100%;min-height:44px;accent-color:var(--brand)}
+  fieldset{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin:16px 0;max-width:70ch}
+  legend{font-weight:700;padding:0 6px}
+  .radio{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+  .radio input{width:26px;height:26px;margin-top:2px;accent-color:var(--brand);flex:none}
+  details{border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin:10px 0;max-width:70ch}
+  summary{font-weight:700;cursor:pointer;min-height:44px}
+  table{border-collapse:collapse;width:100%;max-width:70ch;margin:10px 0;font-size:13px}
+  th,td{border:1.5px solid var(--border);padding:8px 10px;text-align:left}
+  th{background:var(--raised)}
+  .disclaimer{border-left:8px solid var(--chip-amber-border);padding:8px 0 8px 16px;margin:16px 0;color:var(--dim);font-size:14px}
+  .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  footer.pagefoot{border-top:1.5px solid var(--border);margin-top:8px;padding:14px 20px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+  /* Demo sections below 960px dock their control rail like the shipped ModulePage. */
+  @media(max-width:960px){.pair{grid-template-columns:1fr}.vitals{grid-template-columns:repeat(2,1fr)}.disc-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:1fr}.lab-grid>aside{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:52svh;overflow:auto;background:var(--panel);border-top:1.5px solid var(--border);padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))}.wrap{padding-bottom:56svh}dl.obs{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="proto-bar"><b>H · Ward-round style, university-accessible</b><span style="border:1px solid #5a7a9e;border-radius:999px;padding:2px 10px;font-size:12px">concept — same beds, links and module names as home-F; counts and acuity illustrative</span><nav aria-label="Preview sections"><a href="#round">Round</a><a href="#shock">Shock</a><a href="#resp">Respiratory</a><a href="#cardio">Cardiorenal</a><a href="#subjects">Subjects</a><a href="#notes">Fix log</a></nav><span class="theme-seg" role="group" aria-label="Theme"><button type="button" data-t="dark" aria-pressed="true">Dark (default)</button><button type="button" data-t="light" aria-pressed="false">Light</button><button type="button" data-t="auto" aria-pressed="false">Auto</button></span></div>
+<div class="wrap">
+<main id="main" aria-labelledby="previewTitle">
+
+  <header>
+    <div class="kicker">Ward-round concept H · the home-F look, fixed for UK university use</div>
+    <h1 id="previewTitle">Physiology Lab <svg class="trace" viewBox="0 0 220 40" width="180" height="34" style="vertical-align:-6px" aria-hidden="true"><path d="M0 22 H70 L76 22 80 8 86 34 90 22 H130 L136 22 140 10 146 32 150 22 H220" fill="none" stroke="#4cc3ff" stroke-width="2.5" stroke-linecap="round"/></svg></h1>
+    <p class="lede">Home is a <b>ward round</b>. Reviews are <b>patients to see</b>. Weak spots get <b>prescribed</b>. Locked content is a <b>referral</b>. Progress is a <b>competency map of the human body</b>. Bentara Medical. This preview keeps that identity and repairs the colour, focus and structure failures that would block use in a UK university (Public Sector Bodies Accessibility Regulations 2018, WCAG 2.2 AA). What changed is logged at the <a href="#notes">bottom</a>.</p>
+  </header>
+
+  <!-- WARD ROUND HOME : real beds -->
+  <section id="round" class="card" aria-labelledby="roundTitle"><div class="pad">
+    <div class="kicker">Ward-round home · maps to HomePage + RoundBoard + StudyStrip + StudyReport</div>
+    <h2 id="roundTitle">Good evening — 8 patients are waiting.</h2>
+    <p class="lede">Due reviews arrive as cases with acuity, not as a question count. Acuity below is illustrative — in the app it is derived from your review ladder (<span class="mono">crash · due · check · new</span>), never hand-typed. Links are the real routes. Every tag pairs a word and an icon with its colour, so nothing is carried by colour alone.</p>
+  </div>
+  <div class="pair" style="padding:0 20px 20px">
+    <div class="phone" role="region" aria-label="Round list preview, 390 point width">
+      <div class="phone-status"><span>21:47</span><span><span aria-hidden="true">●</span> on shift</span></div>
+      <div class="phone-list">
+        <a class="pt" href="#shockStates?case=amina-trauma"><span class="acuity red"><span aria-hidden="true">▲</span> Crash</span><span><b>Amina, 24</b><small>Motorcycle collision, cool peripheries, heart rate 112</small><span class="mod">Bed A04 · Shock States</span></span></a>
+        <a class="pt" href="#shockStates?case=george-post-mi"><span class="acuity amber"><span aria-hidden="true">●</span> Due</span><span><b>George, 68</b><small>Breathless four days after an anterior MI, systolic 84</small><span class="mod">Bed A07 · Shock States</span></span></a>
+        <a class="pt" href="#shockStates?case=ruth-warm-shock"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Ruth, 71</b><small>Two days of fever, warm and vasodilated, lactate climbing</small><span class="mod">Bed B02 · Shock States</span></span></a>
+        <a class="pt" href="#respiratory?case=nadia-dka"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Nadia, 19</b><small>Vomiting, breathing deeply, three days of thirst</small><span class="mod">Bed C01 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#respiratory?case=brian-copd"><span class="acuity green"><span aria-hidden="true">✓</span> Check</span><span><b>Brian, 74</b><small>Long-standing COPD, PaCO2 raised, pH nearly normal</small><span class="mod">Bed C05 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#respiratory?case=colin-salicylate"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Colin, 34</b><small>Confused and hyperventilating, ringing in the ears</small><span class="mod">Bed C09 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#cardiorenal?case=margaret-heart-failure"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Margaret, 79</b><small>Ankles swelling, breathless on stairs, passing little urine</small><span class="mod">Bed D03 · Cardiorenal</span></span></a>
+        <a class="pt" href="#cardiorenal?case=derek-kidney-failure"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Derek, 61</b><small>Long-standing hypertension, creatinine doubled, oedematous</small><span class="mod">Bed D08 · Cardiorenal</span></span></a>
+        <a class="btn primary" href="#round" style="text-align:center">Start round →</a>
+      </div>
+      <div class="apptabs" aria-hidden="true"><span class="on">Round</span><span>Body map</span><span>Drugs</span><span>Account</span></div>
+    </div>
+    <div>
+      <div class="vitals" role="group" aria-label="Study progress">
+        <div class="vital" style="color:#5eeab0"><span>Shift · day</span><b>6</b><small>illustrative streak</small></div>
+        <div class="vital" style="color:#ffdf8e"><span>Due today</span><b>6</b><small>1 crash · 1 due · 4 new</small></div>
+        <div class="vital" style="color:#4cc3ff"><span>Known</span><b>48/412</b><small>absolute count, not %</small></div>
+        <div class="vital" style="color:#ff9d9d"><span>Weakest</span><b>! Shock</b><small>prescribed below</small></div>
+      </div>
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start">
+        <div style="border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;background:var(--panel)">
+          <div class="mono" style="font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--dim)">Competency map</div>
+          <svg viewBox="0 0 120 170" width="130" height="180" role="img" aria-label="Competency map of the human body. Shock needs work (solid red), cardio and acid-base partly retained (dashed amber), limbs locked (dotted grey).">
+            <circle cx="60" cy="20" r="13" fill="none" stroke="#5eeab0" stroke-width="7"/>
+            <rect x="42" y="40" width="36" height="60" rx="14" fill="none" stroke="#ffcf5c" stroke-width="7" stroke-dasharray="10 5"/>
+            <path d="M44 52 L44 110 M76 52 L76 110" stroke="#ff8f8f" stroke-width="5" stroke-linecap="round"/>
+            <path d="M42 104 L28 150 M78 104 L92 150" stroke="#5a7a9e" stroke-width="6" stroke-linecap="round" stroke-dasharray="3 5"/>
+            <path d="M44 60 L24 84 M76 60 L96 84" stroke="#ffcf5c" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 5"/>
+          </svg>
+          <div class="mono" style="font-size:12px;color:var(--dim)">! shock · ~ cardio · ~ acid-base · <span aria-hidden="true">○</span> limbs locked</div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 6px"><span aria-hidden="true">℞</span> Prescribed for you</h3>
+          <div class="rx-row"><span class="acuity amber"><span aria-hidden="true">℞</span></span><div style="flex:1"><b>Shock States</b><small>A question here has come back round and caught you twice.</small><div class="meter" role="progressbar" aria-label="Shock States retained" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"><i style="width:38%"></i></div></div><span class="rx-meta">38% · 3 due</span></div>
+          <div class="rx-row"><span class="acuity amber"><span aria-hidden="true">℞</span></span><div style="flex:1"><b>Respiratory &amp; Acid-Base</b><small>4 of 9 right so far.</small><div class="meter" role="progressbar" aria-label="Respiratory and Acid-Base retained" aria-valuenow="44" aria-valuemin="0" aria-valuemax="100"><i style="width:44%"></i></div></div><span class="rx-meta">44% · 2 due</span></div>
+          <div class="rx-row"><span class="acuity green"><span aria-hidden="true">✓</span></span><div style="flex:1"><b>Cardiorenal</b><small>3 of 8 questions still unseen.</small><div class="meter" role="progressbar" aria-label="Cardiorenal seen" aria-valuenow="61" aria-valuemin="0" aria-valuemax="100"><i style="width:61%"></i></div></div><span class="rx-meta">61% seen</span></div>
+          <p class="lede note" style="font-size:13px">Same <span class="mono">StudyReport</span> ranking as today. Deliberately no expiry — a weak spot stops being listed when it stops being weak, and at no other time.</p>
+        </div>
+      </div>
+      <div class="referrals"><span><span aria-hidden="true">◔</span> Paywalled state: locked cases appear here as referrals with no acuity tag — e.g. “2 more patients are on wards you do not have access to”.</span><a href="#pricing">See who →</a></div>
+    </div>
+  </div>
+  <footer class="pagefoot"><a href="#accessibility">Accessibility statement</a><span>Fictional patients. Simplified teaching models — not clinical tools.</span></footer>
+  </section>
+
+  <!-- SHOCK MODULE -->
+  <section id="shock" class="card" aria-labelledby="shockTitle"><div class="pad">
+    <div class="kicker">Module page · Shock States · Lab tab with Amina bedside</div>
+    <h2 id="shockTitle">Shock States — four ways to fail, and the numbers that separate them</h2>
+    <ul class="modetabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="casebanner"><h3>Bedside: Amina, 24 · Bed A04 · <span class="acuity red"><span aria-hidden="true">▲</span> Crash</span></h3><p>Motorcycle collision, cool peripheries, heart rate 112. <b>Decide whether the blood pressure is telling you what you think it is.</b> If you change the scenario below, this banner goes stale honestly rather than claiming her name over different physiology.</p></div>
+    <h3 style="margin:16px 0 4px">Scenario</h3>
+    <div class="chips" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">Haemorrhagic</button>
+      <button class="chip" type="button" aria-pressed="false">Cardiogenic</button>
+      <button class="chip" type="button" aria-pressed="false">Septic</button>
+      <button class="chip" type="button" aria-pressed="false">Tamponade</button>
+    </div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified circuit diagram: low cardiac output, empty filling pressures, raised resistance. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Circulatory circuit (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 130" width="100%" height="130" aria-hidden="true">
+          <rect x="150" y="15" width="120" height="60" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="210" y="41" text-anchor="middle" font-size="14" fill="currentColor">Heart</text>
+          <text x="210" y="59" text-anchor="middle" font-size="12" fill="currentColor">low output</text>
+          <rect x="20" y="30" width="90" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+          <text x="65" y="47" text-anchor="middle" font-size="12" fill="currentColor">Venous</text>
+          <text x="65" y="61" text-anchor="middle" font-size="12" fill="currentColor">empty</text>
+          <rect x="310" y="30" width="90" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="355" y="47" text-anchor="middle" font-size="12" fill="currentColor">Arterial</text>
+          <text x="355" y="61" text-anchor="middle" font-size="12" fill="currentColor">clamped</text>
+          <text x="210" y="105" text-anchor="middle" font-size="13" fill="currentColor">Resistance raised · both filling pressures empty</text>
+        </svg>
+      </div>
+      <h3 style="margin:14px 0 4px">Observations</h3>
+      <dl class="obs" aria-label="Shock observations">
+        <div><dt>Cardiac index</dt><dd>1.8 <small>L/min/m²</small></dd></div>
+        <div><dt>CVP</dt><dd>2 <small>mmHg</small></dd></div>
+        <div><dt>Wedge</dt><dd>4 <small>mmHg</small></dd></div>
+        <div><dt>SvO₂</dt><dd>58 <small>%</small></dd></div>
+        <div><dt>Lactate</dt><dd>4.2 <small>mmol/L</small></dd></div>
+        <div><dt>SVR</dt><dd>1.62 <small>units</small></dd></div>
+      </dl>
+      <div class="diagram" style="margin-top:12px"><div class="fig-head"><span>MAP, mmHg · live, illustrative</span><span>Trend</span></div>
+        <svg viewBox="0 0 300 60" width="100%" height="60" aria-hidden="true"><polyline points="0,20 40,22 80,26 120,30 160,36 200,40 240,44 300,48" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+        <details><summary>Data table for MAP trend</summary><table><thead><tr><th scope="col">Time</th><th scope="col">MAP (mmHg)</th></tr></thead><tbody><tr><td>0 min</td><td>82</td></tr><tr><td>10 min</td><td>78</td></tr><tr><td>20 min</td><td>72</td></tr></tbody></table></details>
+      </div>
+      <div class="disclaimer">A simplified, conceptual model of circulatory shock — not a clinical or diagnostic tool. <a href="#shock-lessons">Where these numbers came from</a>.</div>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="sh-blood">Blood loss <output id="sh-blood-v" for="sh-blood">30%</output></label><input id="sh-blood" type="range" min="0" max="100" value="30" aria-valuetext="30%"><div class="note">Model parameter. Moving it changes the diagram and every readout.</div></div>
+      <div class="field"><label for="sh-contract">Contractility <output for="sh-contract">100%</output></label><input id="sh-contract" type="range" min="0" max="200" value="100" aria-valuetext="100%"></div>
+      <div class="field"><label for="sh-tone">Vascular tone <output for="sh-tone">130%</output></label><input id="sh-tone" type="range" min="0" max="200" value="130" aria-valuetext="130%"></div>
+    </aside></div>
+    <h3>Practice</h3>
+    <fieldset><legend>Cool, tachycardic trauma patient. Pressures below. Which shock state?</legend>
+      <div class="radio"><input id="sh-q1" type="radio" name="sh-q"><label for="sh-q1"><b>Haemorrhagic</b> — empty on both sides, clamped resistance</label></div>
+      <div class="radio"><input id="sh-q2" type="radio" name="sh-q"><label for="sh-q2"><b>Cardiogenic</b> — pump failing, full on both sides</label></div>
+      <div class="radio"><input id="sh-q3" type="radio" name="sh-q"><label for="sh-q3"><b>Septic</b> — warm, vasodilated, high output</label></div>
+      <div class="radio"><input id="sh-q4" type="radio" name="sh-q"><label for="sh-q4"><b>Obstructive</b> — blocked filling, high CVP, low wedge</label></div>
+      <p><button class="btn primary" type="button">Check answer</button></p>
+      <details><summary>Explanation (shown after answering in the app)</summary><p>Both filling pressures are empty and the resistance is up — there is simply not enough blood in the circuit. Note the low mixed venous saturation: extraction is intact, unlike the septic pattern. Compensation hides the severity until it fails, which is why a normal pressure must never reassure you here.</p></details>
+    </fieldset>
+  </div>
+  <footer class="pagefoot"><a href="#accessibility">Accessibility statement</a><span>Provenance: asserted bands with literature and oracle sources; unsourced gaps listed honestly.</span></footer>
+  </section>
+
+  <!-- RESPIRATORY MODULE -->
+  <section id="resp" class="card" aria-labelledby="respTitle"><div class="pad">
+    <div class="kicker">Module page · Respiratory &amp; Acid-Base · Lab tab with Nadia bedside</div>
+    <h2 id="respTitle">Respiratory &amp; Acid-Base — ventilation, gas exchange and reading a blood gas</h2>
+    <ul class="modetabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="casebanner"><h3>Bedside: Nadia, 19 · Bed C01 · <span class="acuity grey"><span aria-hidden="true">○</span> New</span></h3><p>Vomiting, breathing deeply, three days of thirst. <b>Say what the breathing is doing, and whether to slow it down.</b></p></div>
+    <div class="chips" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">DKA metabolic acidosis</button>
+      <button class="chip" type="button" aria-pressed="false">COPD chronic retainer</button>
+      <button class="chip" type="button" aria-pressed="false">Salicylate poisoning</button>
+    </div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified Davenport diagram: low bicarbonate, low carbon dioxide, acid pH. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Davenport diagram (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 130" width="100%" height="130" aria-hidden="true">
+          <line x1="40" y1="10" x2="40" y2="110" stroke="currentColor" stroke-width="2"/>
+          <line x1="40" y1="110" x2="400" y2="110" stroke="currentColor" stroke-width="2"/>
+          <circle cx="120" cy="80" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="120" y="100" text-anchor="middle" font-size="12" fill="currentColor">DKA</text>
+          <circle cx="300" cy="50" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/>
+          <text x="300" y="68" text-anchor="middle" font-size="12" fill="currentColor">Normal</text>
+        </svg>
+      </div>
+      <h3 style="margin:14px 0 4px">Blood gas</h3>
+      <dl class="obs" aria-label="Arterial blood gas">
+        <div><dt>pH</dt><dd>7.28</dd></div>
+        <div><dt>PaCO2</dt><dd>22 <small>mmHg</small></dd></div>
+        <div><dt>HCO3−</dt><dd>12 <small>mEq/L</small></dd></div>
+      </dl>
+      <div class="disclaimer"><b>Do not slow this breathing down.</b> The low PaCO2 is compensation holding the pH up — check Winter's formula before acting. Simplified teaching model, not a clinical tool.</div>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="re-vent">Alveolar ventilation <output for="re-vent">8.5 L/min</output></label><input id="re-vent" type="range" min="2" max="20" step="0.1" value="8.5" aria-valuetext="8.5 L/min"></div>
+      <div class="field"><label for="re-acid">Metabolic acid load <output for="re-acid">High</output></label><input id="re-acid" type="range" min="0" max="100" value="80" aria-valuetext="High"></div>
+    </aside></div>
+    <h3>Practice</h3>
+    <fieldset><legend>Nadia is breathing deeply at 32/min with a clear chest. What is the breathing doing?</legend>
+      <div class="radio"><input id="re-q1" type="radio" name="re-q"><label for="re-q1"><b>Compensating</b> — Kussmaul breathing blowing off CO2 to defend pH</label></div>
+      <div class="radio"><input id="re-q2" type="radio" name="re-q"><label for="re-q2"><b>Causing</b> — primary hyperventilation driving the alkalosis</label></div>
+      <div class="radio"><input id="re-q3" type="radio" name="re-q"><label for="re-q3"><b>Failing</b> — tiring chest needing ventilation now</label></div>
+      <p><button class="btn primary" type="button">Check answer</button></p>
+    </fieldset>
+  </div>
+  <footer class="pagefoot"><a href="#accessibility">Accessibility statement</a><span>Equations checked against Henderson–Hasselbalch, alveolar gas and Winter's formula.</span></footer>
+  </section>
+
+  <!-- CARDIORENAL MODULE -->
+  <section id="cardio" class="card" aria-labelledby="cardioTitle"><div class="pad">
+    <div class="kicker">Module page · Cardiorenal · Lab tab with Margaret bedside</div>
+    <h2 id="cardioTitle">Cardiorenal — heart and kidney feedback simulator</h2>
+    <ul class="modetabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="casebanner"><h3>Bedside: Margaret, 79 · Bed D03 · <span class="acuity grey"><span aria-hidden="true">○</span> New</span></h3><p>Ankles swelling, breathless on stairs, passing little urine. <b>Work out which organ is failing, and what the RAAS axis is responding to.</b> Compare with Derek (D08) next door: same RAAS, opposite lesion.</p></div>
+    <div class="chips" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">Heart failure</button>
+      <button class="chip" type="button" aria-pressed="false">Kidney failure</button>
+      <button class="chip" type="button" aria-pressed="false">Salt load</button>
+    </div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified heart and kidney loop: low cardiac output, low filtration, high RAAS. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Heart–kidney loop (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 130" width="100%" height="130" aria-hidden="true">
+          <path d="M90 60 c0-24 26-38 39-26 c13-12 39 2 39 26 c0 22-19 41-39 53 c-20-12-39-31-39-53" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="129" y="65" text-anchor="middle" font-size="12" fill="currentColor">Pump ↓</text>
+          <rect x="270" y="25" width="70" height="70" rx="24" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="305" y="60" text-anchor="middle" font-size="12" fill="currentColor">Kidney</text>
+          <text x="305" y="75" text-anchor="middle" font-size="12" fill="currentColor">GFR ↓</text>
+          <text x="205" y="45" text-anchor="middle" font-size="12" fill="currentColor">flow ↓</text>
+          <text x="205" y="105" text-anchor="middle" font-size="12" fill="currentColor">RAAS ↑ retains salt + water</text>
+        </svg>
+      </div>
+      <h3 style="margin:14px 0 4px">Observations</h3>
+      <dl class="obs" aria-label="Cardiorenal observations">
+        <div><dt>Cardiac output</dt><dd>3.1 <small>L/min</small></dd></div>
+        <div><dt>MAP</dt><dd>78 <small>mmHg</small></dd></div>
+        <div><dt>GFR</dt><dd>48 <small>mL/min</small></dd></div>
+        <div><dt>RAAS</dt><dd>2.40</dd></div>
+        <div><dt>Urine</dt><dd>0.40 <small>mL/min</small></dd></div>
+        <div><dt>Blood volume</dt><dd>5.80 <small>L</small></dd></div>
+      </dl>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="cr-pump">Pump strength <output for="cr-pump">55%</output></label><input id="cr-pump" type="range" min="10" max="120" value="55" aria-valuetext="55%"></div>
+      <div class="field"><label for="cr-kidney">Kidney function <output for="cr-kidney">Intact</output></label><input id="cr-kidney" type="range" min="0" max="100" value="90" aria-valuetext="Intact"><div class="note">Lower this to turn Margaret into Derek: same oedema, opposite pressure.</div></div>
+    </aside></div>
+    <h3>Practice</h3>
+    <fieldset><legend>Margaret's creatinine is rising on a diuretic. The team ask whether to stop it. What is the kidney doing?</legend>
+      <div class="radio"><input id="cr-q1" type="radio" name="cr-q"><label for="cr-q1"><b>Underperfused, not diseased</b> — defending pressure it cannot see</label></div>
+      <div class="radio"><input id="cr-q2" type="radio" name="cr-q"><label for="cr-q2"><b>Primarily failing</b> — the lesion is in the nephron</label></div>
+      <p><button class="btn primary" type="button">Check answer</button></p>
+      <details><summary>Explanation</summary><p>Output is down and everything follows from that one fact. The kidney reads low flow as low volume and turns RAAS on; retaining more volume loads a ventricle that could not cope with the last litre. The creatinine is a consequence, not a second diagnosis — the loop breaks by treating the pump.</p></details>
+    </fieldset>
+  </div>
+  <footer class="pagefoot"><a href="#accessibility">Accessibility statement</a><span>Simplified conceptual model — not a clinical or diagnostic tool.</span></footer>
+  </section>
+
+  <!-- SUBJECTS : real disciplines -->
+  <section id="subjects" class="card" aria-labelledby="subjTitle"><div class="pad">
+    <div class="kicker">Subjects · maps to disciplineGrid in HomePage</div>
+    <h2 id="subjTitle">Pick a subject to explore.</h2>
+    <p class="lede">Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE, MRCP). Counts illustrative of shape; simulators exclude reference pages.</p>
+    <div class="disc-grid" style="margin-top:14px">
+      <div class="disc"><h3>Physiology</h3><p>The feedback-loop simulators, one organ system at a time.</p><span class="count">~50 simulators</span></div>
+      <div class="disc"><h3>Pharmacology</h3><p>The high-yield drug classes of the UK top-100, and the diagrams that show how each works.</p><span class="count">100+ classes</span></div>
+      <div class="disc soon"><h3>Microbiology · <span class="tag-roadmap">Roadmap</span></h3><p>The organisms, what they infect and the drugs that reach them.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Biochemistry · <span class="tag-roadmap">Roadmap</span></h3><p>The pathways underneath the physiology, and where each one fails.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Anatomy · <span class="tag-roadmap">Roadmap</span></h3><p>Structure and the relationships that make the clinical signs make sense.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Pathology · <span class="tag-roadmap">Roadmap</span></h3><p>How disease processes begin, spread and show themselves.</p><span class="count">roadmap</span></div>
+    </div>
+    <p class="lede note" style="margin-top:12px">Tools row below this in the app: Formula Reference (pinned). Footnote throughout: simplified conceptual models for teaching mechanism — not clinical or diagnostic tools.</p>
+  </div>
+  <footer class="pagefoot"><a href="#accessibility">Accessibility statement</a><a href="#methodology">Methodology</a><a href="#privacy">Privacy</a></footer>
+  </section>
+
+  <section id="notes" class="card" aria-labelledby="notesTitle"><div class="pad">
+    <div class="kicker">Fix log · home-F → H (nothing else restyled)</div>
+    <h2 id="notesTitle">What changed for university use, and what deliberately did not</h2>
+    <ul class="lede" style="font-size:14px">
+      <li><b>Text contrast:</b> light <span class="mono">--faint #7c8da6 → #5a6f88</span>, dark faint raised to <span class="mono">#9db4cc</span>; secondary sizes 10–11px → 12px. Borders <span class="mono">#dfe6ef/#1d3352 → #687d95/#5a7a9e</span> for the 3:1 non-text floor.</li>
+      <li><b>Opacity removed from text:</b> nav, theme buttons and roadmap cards no longer dim via <span class="mono">opacity</span>; “soon” is dashed border + Roadmap tag.</li>
+      <li><b>Acuity:</b> word + icon + bordered solid tag in both themes (<span aria-hidden="true">▲</span> Crash, <span aria-hidden="true">●</span> Due, <span aria-hidden="true">✓</span> Check, <span aria-hidden="true">○</span> New, <span aria-hidden="true">℞</span> prescription). No translucent washes; referrals carry an <span aria-hidden="true">◔</span> icon and underlined link.</li>
+      <li><b>Vitals/competency glow kept as decoration:</b> values stay large mono; meaning now also carried by words (<span class="mono">! Shock</span>), solid/dashed/dotted map strokes, and a text caption. <span class="mono">prefers-contrast:more</span> drops the glow.</li>
+      <li><b>Meters:</b> 8px + border + visible <span class="mono">38% · 3 due</span> text + <span class="mono">progressbar</span> roles. Trends gain details-table alternatives.</li>
+      <li><b>Focus:</b> new <span class="mono">:focus-visible</span> 3px outline + offset on every link, button, chip, slider and radio. Skip link added; landmarks, one h1 per demo, labelled sliders, fieldset quizzes.</li>
+      <li><b>Unchanged:</b> ward-round metaphor, dark default, cyan brand, layout, real beds/routes/panels, no XP/leaderboards/sounds/streak punishment/expiry/paywalled reference.</li>
+    </ul>
+    <p class="lede note">Port notes if greenlit: apply the H token deltas to <span class="mono">index.css</span> neutrals and chips only; signals already held by <span class="mono">palette.test.ts</span>. Still required outside this preview: publish the accessibility statement, keyboard + screen-reader audit at beta, and keep fictional-patient / not-a-clinical-tool disclosures on every page.</p>
+  </div></section>
+
+</main>
+</div>
+<script>
+(function(){const root=document.documentElement,btns=[...document.querySelectorAll('.theme-seg button')];const mq=matchMedia('(prefers-color-scheme: dark)');const store=()=>{try{return localStorage.getItem('physio-preview-h-theme')||'dark'}catch(e){return 'dark'}};function apply(m){const t=m==='auto'?(mq.matches?'dark':'light'):m;root.dataset.theme=t;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===m)));}btns.forEach(b=>b.onclick=()=>{const m=b.dataset.t;try{if(m==='auto')localStorage.removeItem('physio-preview-h-theme');else localStorage.setItem('physio-preview-h-theme',m)}catch(e){}apply(m);});if(mq.addEventListener)mq.addEventListener('change',()=>{if(store()==='auto')apply('auto');});apply(store());})();
+</script>
+</body>
+</html>

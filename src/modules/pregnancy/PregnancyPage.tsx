@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { PregnancyDiagram } from './components/PregnancyDiagram';
@@ -71,6 +72,7 @@ export function PregnancyPage() {
 
   return (
     <ModulePage
+      historyCapacity={pregnancyLoopConfig.historyCapacity}
       moduleId="pregnancy"
       title="Maternal Physiology, Labour & Lactation"
       subtitle="every maternal number changes, and most of the changes look like disease"
@@ -91,7 +93,17 @@ export function PregnancyPage() {
       }
       diagram={<PregnancyDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={PREGNANCY_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={PREGNANCY_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={PREGNANCY_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

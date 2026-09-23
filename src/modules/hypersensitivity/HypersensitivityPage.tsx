@@ -1,22 +1,20 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { ReactionTimeline } from './components/ReactionTimeline';
-import { MechanismDiagram } from './components/MechanismDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { HYPERSENSITIVITY_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { hypersensitivityContent } from './content';
+import { buildHypersensitivityPresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
 import { hypersensitivityLoopConfig } from './engine/loopConfig';
 import { perturbAdrenaline, perturbChallenge, perturbDiurese, perturbTransfuse } from './engine/engine';
 import {
@@ -27,7 +25,7 @@ import {
   PRESET_ORDER,
   TRANSFUSION_PRESET_ORDER,
 } from './engine/presets';
-import type { HypersensitivityInputs } from './engine/types';
+import type { HypersensitivityDerived, HypersensitivityHistoryPoint, HypersensitivityInputs, HypersensitivityState } from './engine/types';
 
 export function HypersensitivityPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HypersensitivityInputs>('hypersensitivity', DEFAULT_HYPERSENSITIVITY_INPUTS);
@@ -56,6 +54,18 @@ export function HypersensitivityPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* One drawing, not two — and this module is where the duplication had visibly failed: the
+   * hand-written MechanismDiagram published `--arm-i` … `--arm-iv` and its stylesheet turned them
+   * into a colour wash, while the schema stated four dead `styleVars: { opacity }` that nothing in
+   * either project reads. The web showed arm activity and the phone never did. */
+  const ctx = getPresentationContext<HypersensitivityState, HypersensitivityDerived, HypersensitivityInputs, HypersensitivityHistoryPoint>(
+    snapshot,
+    history,
+    baseline,
+    inputs,
+  );
+  const slots = usePresentationSlots('hypersensitivity', buildHypersensitivityPresentation(ctx), ctx, inputs, handleChange);
+
   const applyPreset = useScenarioPreset({
     setInputs,
     defaults: DEFAULT_HYPERSENSITIVITY_INPUTS,
@@ -63,15 +73,10 @@ export function HypersensitivityPage() {
     resetEngine: reset,
   });
 
-  const injuryHistory = useSeries(history, (h) => h.tissueInjury * 100);
-  const injuryBaseline = useSeries(baseline.history, (h) => h.tissueInjury * 100);
-  const typeIHistory = useSeries(history, (h) => h.typeI * 100);
-  const typeIBaseline = useSeries(baseline.history, (h) => h.typeI * 100);
-  const typeIVHistory = useSeries(history, (h) => h.typeIV * 100);
-  const typeIVBaseline = useSeries(baseline.history, (h) => h.typeIV * 100);
 
   return (
     <ModulePage
+      historyCapacity={hypersensitivityLoopConfig.historyCapacity}
       moduleId="hypersensitivity"
       title="Hypersensitivity"
       subtitle="four mechanisms, four timescales, and every transfusion reaction among them"
@@ -100,48 +105,23 @@ export function HypersensitivityPage() {
           disabled={session.blinded}
         />
       }
-      diagram={
-        <>
-          <ReactionTimeline derived={snapshot.derived} history={history} />
-          <MechanismDiagram derived={snapshot.derived} />
-        </>
+      diagram={slots.diagram}
+      readouts={slots.readouts}
+      questions={
+        <QuestionSet
+          count={HYPERSENSITIVITY_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={HYPERSENSITIVITY_PRESET_LABELS} />
+        </QuestionSet>
       }
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={HYPERSENSITIVITY_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-          <Sparkline
-            label="Tissue injury"
-            unit="%"
-            data={injuryHistory}
-            baselineData={injuryBaseline}
-            domainMin={0}
-            domainMax={100}
-            colorVar="var(--danger)"
-          />
-          <Sparkline
-            label="Type I activity"
-            unit="%"
-            data={typeIHistory}
-            baselineData={typeIBaseline}
-            domainMin={0}
-            domainMax={100}
-            colorVar="var(--ige)"
-          />
-          <Sparkline
-            label="Type IV activity"
-            unit="%"
-            data={typeIVHistory}
-            baselineData={typeIVBaseline}
-            domainMin={0}
-            domainMax={100}
-            colorVar="var(--delayed-type)"
-          />
-        </>
-      }
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={hypersensitivityContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of hypersensitivity — not a clinical or diagnostic tool. The best way to use it: pick a MECHANISM preset and press "Challenge", or a TRANSFUSION preset and press "Transfuse", then watch the reaction timeline. Its time axis is LOGARITHMIC because a type I reaction peaks in minutes and a type IV in days, and no linear axis can hold both. Start with the naive host, where a maximal dose does nothing at all, then challenge the sensitised one on an identical dose — and note that blood is the exception to that rule, since anti-A and anti-B need no prior exposure. Each preset isolates a single arm so the timings and labs read cleanly; a real patient can have more than one at once. Two simplifications worth knowing: hypotension in this model tracks histamine only, so the ABO reaction here is less shocked than a real one; and only the injury of an infarcting reaction is modelled, not the marrow response to it. One simulated second is about one hour. For how sensitisation is laid down in the first place, see the Immune Response module.'

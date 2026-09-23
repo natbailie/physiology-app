@@ -49,3 +49,16 @@
   color: var(--text-faint);
   line-height: var(--lh-snug);
 }
+
+/* Shown when a filter empties a theme. Reads as an explanation with a way out, not as an error:
+   nothing has gone wrong, and the learner is one chip away from the full list. */
+.empty {
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--panel);
+}

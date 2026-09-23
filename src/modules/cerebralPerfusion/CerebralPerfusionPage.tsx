@@ -4,10 +4,13 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
+import { CEREBRAL_CONTROLS } from './presentation';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { CerebralDiagram } from './components/CerebralDiagram';
@@ -17,7 +20,7 @@ import { CEREBRAL_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { cerebralPerfusionContent } from './content';
 import { cerebralLoopConfig } from './engine/loopConfig';
-import { perturbAcuteBleed, perturbDrainCsf } from './engine/engine';
+import { perturbDrainCsf } from './engine/engine';
 import {
   CEREBRAL_PRESETS,
   CEREBRAL_PRESET_LABELS,
@@ -52,6 +55,10 @@ export function CerebralPerfusionPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+  // A haematoma is a MASS in the box, and it stays there — it does not resorb over the minutes a
+  // learner watches. It used to be added to the CSF volume instead, which is the wrong compartment
+  // and left the intracranial-mass slider reading zero through an intracranial bleed.
+  const nudge = useInputNudge(setInputs, CEREBRAL_CONTROLS);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -71,6 +78,7 @@ export function CerebralPerfusionPage() {
 
   return (
     <ModulePage
+      historyCapacity={cerebralLoopConfig.historyCapacity}
       moduleId="cerebralPerfusion"
       title="Cerebral Perfusion, ICP & CSF"
       subtitle="a box that cannot expand, and the pressure that gets you perfused"
@@ -82,7 +90,7 @@ export function CerebralPerfusionPage() {
           onApply={applyPreset}
           actions={[
             { label: 'Drain CSF', onClick: () => perturb((s) => perturbDrainCsf(s, 12)), variant: 'impulse' },
-            { label: 'Acute bleed', onClick: () => perturb((s) => perturbAcuteBleed(s, 20)), variant: 'danger' },
+            { label: 'Acute bleed', onClick: () => nudge({ massVolumeMl: 20 }), variant: 'danger' },
           ]}
           onShare={shareLink}
           onReset={resetScenario}
@@ -91,7 +99,17 @@ export function CerebralPerfusionPage() {
       }
       diagram={<CerebralDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={CEREBRAL_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={CEREBRAL_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={CEREBRAL_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

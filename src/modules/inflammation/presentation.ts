@@ -28,6 +28,21 @@ export function buildInflammationPresentation(ctx: Ctx): ModulePresentation<Infl
   const midX = TISSUE.x + TISSUE.w / 2;
   const midY = TISSUE.y + TISSUE.h / 2;
 
+  /* The cardinal signs, which this diagram's own first readout names — "rubor · calor · tumor ·
+   * dolor" — and which the picture did not carry at all. Rubor is the tissue's own colour getting
+   * denser; tumor is the oedematous margin the leaky capillary produces. Both are stated as data
+   * on the node, because a schema-only renderer has no stylesheet to fall back on.
+   *
+   * They are also what the three remaining scenarios needed: severity, antibiotic and source
+   * control reached `derived` only as passthroughs nothing read, so acute cellulitis and a severe
+   * bacterial load painted the same untouched rectangle as a healthy tissue. */
+  const rubor = clamp(derived.vasodilationIndex, 0, 1.6);
+  const oedema = clamp(derived.permeabilityIndex, 0, 1.6);
+  const severity = clamp(derived.insultSeverityPct / 100, 0, 1);
+  const antibiotic = clamp(derived.antibioticEfficacyPct / 100, 0, 1);
+  const sourceControl = clamp(derived.sourceControlPct / 100, 0, 1);
+  const steroid = clamp(derived.steroidDosePct / 100, 0, 1);
+
   const neutH = (clamp(derived.neutrophilPopulation, 0, BAR_MAX) / BAR_MAX) * BAR.height;
   const monoH = (clamp(derived.monocyteMacrophageActivity, 0, BAR_MAX) / BAR_MAX) * BAR.height;
   const pusH = (clamp(derived.pusBurden, 0, BAR_MAX) / BAR_MAX) * BAR.height;
@@ -62,6 +77,25 @@ export function buildInflammationPresentation(ctx: Ctx): ModulePresentation<Infl
         children: [
           { type: 'text', x: TISSUE.x, y: TISSUE.y - 12, text: 'Tissue site', cls: 'label' },
           { type: 'rect', x: TISSUE.x, y: TISSUE.y, width: TISSUE.w, height: TISSUE.h, cls: 'tissue' },
+          // Rubor: the site's own colour deepening with vasodilation.
+          { type: 'rect', x: TISSUE.x, y: TISSUE.y, width: TISSUE.w, height: TISSUE.h, fill: 'danger', fillOpacity: rubor * 0.22 },
+          /* Tumor: an oedematous margin inside the tissue border, its width the permeability. The
+           * capillary leak is what swells the part, so the swelling is drawn as thickness. */
+          {
+            type: 'rect',
+            x: TISSUE.x,
+            y: TISSUE.y,
+            width: TISSUE.w,
+            height: TISSUE.h,
+            fill: 'none',
+            stroke: 'capillary',
+            strokeWidth: Math.max(0.5, oedema * 7),
+            fillOpacity: 0,
+          },
+          /* The insult as the size it was DEPOSITED at, not only the size it has grown to. A
+           * severe insult is a bigger thing at the moment it lands, which is the difference between
+           * acute cellulitis and a severe bacterial load before either has had time to run. */
+          { type: 'circle', cx: midX, cy: midY, r: 3 + severity * 14, fill: 'danger', fillOpacity: 0.18, stroke: 'danger', strokeWidth: 1 },
           ...(derived.insultType === 'bacterial'
             ? [{ type: 'circle' as const, cx: midX, cy: midY, r: insultR, cls: 'insultBacteria' }]
             : []),
@@ -91,6 +125,34 @@ export function buildInflammationPresentation(ctx: Ctx): ModulePresentation<Infl
           })),
           ...(derived.pusBurden > 0.1
             ? [{ type: 'circle' as const, cx: midX, cy: midY + 30, r: clamp(derived.pusBurden * 25, 5, 60), cls: 'pusPool' }]
+            : []),
+          /* The three therapies, drawn as what they DO to the site rather than as numbers beside
+           * it: an antibiotic wash across the insult, a drain leaving the pus pool, and a steroid
+           * band damping the recruitment ring the cells arrive on. */
+          ...(antibiotic > 0
+            ? [{ type: 'circle' as const, cx: midX, cy: midY, r: 34, fill: 'ok', fillOpacity: antibiotic * 0.3 }]
+            : []),
+          ...(sourceControl > 0
+            ? [{
+                type: 'path' as const,
+                d: `M${midX},${midY + 30} L${midX + 40 + sourceControl * 40},${midY + 66}`,
+                colorToken: 'ok',
+                strokeWidth: 1 + sourceControl * 3,
+                strokeLinecap: 'round' as const,
+                fill: 'none' as const,
+              }]
+            : []),
+          ...(steroid > 0
+            ? [{
+                type: 'circle' as const,
+                cx: midX,
+                cy: midY,
+                r: 62,
+                fill: 'none' as const,
+                stroke: 'text-dim',
+                strokeWidth: 1 + steroid * 4,
+                opacity: 0.5,
+              }]
             : []),
           { type: 'text', x: TISSUE.x + 4, y: TISSUE.y + TISSUE.h + 18, text: '\u25CF neutrophils \u00B7 \u25CF macrophages', cls: 'caption' },
           { type: 'text', x: BAR.x - 10, y: BAR.y - 24, text: 'Cells & pus', cls: 'label' },

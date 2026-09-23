@@ -10,6 +10,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryFailureContent } from './content';
 import { respiratoryFailureLoopConfig } from './engine/loopConfig';
@@ -57,6 +58,7 @@ export function RespiratoryFailurePage() {
 
   return (
     <ModulePage
+      historyCapacity={respiratoryFailureLoopConfig.historyCapacity}
       moduleId="respiratoryFailure"
       title="Respiratory Failure & V/Q Mismatch"
       subtitle="the oxygen axis, the CO2 axis, and knowing which one is failing"
@@ -72,10 +74,21 @@ export function RespiratoryFailurePage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={RF_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       controls={slots.controls}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={respiratoryFailureContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of respiratory failure — not a clinical or diagnostic tool. The patient is a point on the PaO2-vs-PaCO2 map, so where the point sits IS the diagnosis: low PaO2 alone is type I, high PaCO2 alone is type II, both is mixed. Oxygen and ventilation fix different axes — the COPD preset shows that raising FiO2 moves the oxygen and leaves the CO2 sitting exactly where it was, while ventilation clears the CO2 and leaves a big shunt still stealing oxygen. Flip the Course toggle on a hypercapnic preset to see why the pH, not the CO2, tells acute from chronic. Use the quiz and the baseline PaO2 trace to compare a patient against normal gas exchange.'}
     />

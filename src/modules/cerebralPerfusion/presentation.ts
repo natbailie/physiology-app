@@ -2,7 +2,7 @@ import { clamp } from '@/shared/lib/math';
 import { CRANIUM, CLASSIFICATION, FLOW } from './engine/constants';
 import { intracranialPressure } from './engine/cerebralMechanics';
 import type { CerebralDerived, CerebralHistoryPoint, CerebralInputs, CerebralInternalState } from './engine/types';
-import type { ModulePresentation, PresentationContext, FrameNode } from '@/shared/presentation/types';
+import type { ModulePresentation, PresentationContext, FrameNode, ControlSpec } from '@/shared/presentation/types';
 
 const BOX = { x: 40, y: 90, width: 210, height: 74 };
 const PLOT = { x: 300, y: 60, width: 230, height: 170 };
@@ -22,6 +22,23 @@ function curvePath(): string {
 }
 
 type Ctx = PresentationContext<CerebralInternalState, CerebralDerived, CerebralInputs, CerebralHistoryPoint>;
+
+/**
+ * The control rail, hoisted so the page can read the same ranges the schema declares —
+ * `useInputNudge` clamps a button's delta to the slider it writes, and restating that range at
+ * the call site would be a second place to be wrong.
+ */
+export const CEREBRAL_CONTROLS: ReadonlyArray<ControlSpec<CerebralInputs>> = [
+  { kind: 'slider', label: 'Mean arterial pressure', key: 'meanArterialPressureMmHg', min: 40, max: 170, step: 1, unit: ' mmHg' },
+  { kind: 'slider', label: 'Intracranial mass', key: 'massVolumeMl', min: 0, max: 150, step: 1, unit: ' mL' },
+  { kind: 'slider', label: 'PaCO₂', key: 'paCO2MmHg', min: 15, max: 80, step: 1, unit: ' mmHg' },
+  { kind: 'slider', label: 'PaO₂', key: 'paO2MmHg', min: 25, max: 150, step: 1, unit: ' mmHg' },
+  { kind: 'slider', label: 'CSF production', key: 'csfProductionRate', min: 0, max: 2.5, step: 0.05, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'CSF absorption', key: 'csfAbsorptionCapacity', min: 0, max: 1.5, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Autoregulation', key: 'autoregulationIntegrity', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Venous outflow pressure', key: 'venousOutflowPressureMmHg', min: 0, max: 25, step: 0.5, unit: ' mmHg' },
+  { kind: 'slider', label: 'BBB permeability', key: 'bbbPermeabilityPct', min: 0, max: 200, step: 5, unit: '%' },
+];
 
 export function buildCerebralPerfusionPresentation(ctx: Ctx): ModulePresentation<
   CerebralInternalState,
@@ -60,6 +77,33 @@ export function buildCerebralPerfusionPresentation(ctx: Ctx): ModulePresentation
       { type: 'rect', x: BOX.x + brainWidth + bloodWidth, y: BOX.y, width: csfWidth, height: BOX.height, fill: 'o2', opacity: 0.4 },
       { type: 'rect', x: BOX.x + brainWidth + bloodWidth + csfWidth, y: BOX.y, width: massWidth, height: BOX.height, fill: 'danger', opacity: 0.5 },
       { type: 'text', x: BOX.x, y: BOX.y + BOX.height + 30, text: 'Brain · blood · CSF · mass', cls: 'label' },
+      /* The CSF circuit the compartment bar abstracts away.
+       *
+       * Hydrocephalus is a drain that has stopped draining — its only edit is
+       * `csfAbsorptionCapacity` — and the bar could not show that, because the excess volume it
+       * measures takes many minutes to accumulate at 0.35 mL/min. Production and absorption are
+       * both computed from the inputs, so both are true the instant the scenario is chosen: a
+       * blocked granulation is visible before a single millilitre has banked up behind it.
+       */
+      { type: 'text', x: BOX.x, y: BOX.y + BOX.height + 62, text: 'CSF circuit', cls: 'label' },
+      { type: 'text', x: BOX.x, y: BOX.y + BOX.height + 80, text: 'plexus', cls: 'caption' },
+      {
+        type: 'path',
+        d: `M ${BOX.x + 46} ${BOX.y + BOX.height + 76} h 54`,
+        colorToken: 'o2',
+        strokeWidth: 1 + clamp(derived.csfProductionRate, 0, 2) * 4,
+        strokeLinecap: 'round',
+        fill: 'none',
+      },
+      {
+        type: 'path',
+        d: `M ${BOX.x + 112} ${BOX.y + BOX.height + 76} h 54`,
+        colorToken: 'o2',
+        strokeWidth: 1 + clamp(derived.csfAbsorptionCapacity, 0, 2) * 4,
+        strokeLinecap: 'round',
+        fill: 'none',
+      },
+      { type: 'text', x: BOX.x + 172, y: BOX.y + BOX.height + 80, text: 'granulations', cls: 'caption' },
       { type: 'rect', x: PLOT.x, y: PLOT.y, width: kneeX - PLOT.x, height: PLOT.height, fill: 'o2', opacity: 0.08 },
       { type: 'rect', x: kneeX, y: PLOT.y, width: PLOT.x + PLOT.width - kneeX, height: PLOT.height, fill: 'danger', opacity: 0.08 },
       { type: 'line', x1: PLOT.x, y1: PLOT.y + PLOT.height, x2: PLOT.x + PLOT.width, y2: PLOT.y + PLOT.height, cls: 'axis' },
@@ -86,17 +130,7 @@ export function buildCerebralPerfusionPresentation(ctx: Ctx): ModulePresentation
 
   return {
     diagram: [summary],
-    controls: [
-      { kind: 'slider', label: 'Mean arterial pressure', key: 'meanArterialPressureMmHg', min: 40, max: 170, step: 1, unit: ' mmHg' },
-      { kind: 'slider', label: 'Intracranial mass', key: 'massVolumeMl', min: 0, max: 150, step: 1, unit: ' mL' },
-      { kind: 'slider', label: 'PaCO₂', key: 'paCO2MmHg', min: 15, max: 80, step: 1, unit: ' mmHg' },
-      { kind: 'slider', label: 'PaO₂', key: 'paO2MmHg', min: 25, max: 150, step: 1, unit: ' mmHg' },
-      { kind: 'slider', label: 'CSF production', key: 'csfProductionRate', min: 0, max: 2.5, step: 0.05, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'CSF absorption', key: 'csfAbsorptionCapacity', min: 0, max: 1.5, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Autoregulation', key: 'autoregulationIntegrity', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Venous outflow pressure', key: 'venousOutflowPressureMmHg', min: 0, max: 25, step: 0.5, unit: ' mmHg' },
-      { kind: 'slider', label: 'BBB permeability', key: 'bbbPermeabilityPct', min: 0, max: 200, step: 5, unit: '%' },
-    ],
+    controls: CEREBRAL_CONTROLS,
     readouts: [
       {
         label: 'ICP',

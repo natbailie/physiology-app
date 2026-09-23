@@ -76,3 +76,24 @@
   border-radius: 2px;
   background: var(--card-accent, var(--text-dim));
 }
+
+/* --- Exam badges. Which papers this module is high-yield for. --------------- */
+
+.exams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+/* Quieter than `.badge` on purpose: this is provenance, not a status. Five of them on one card
+   must not out-shout the module's own name. */
+.exam {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-faint);
+  background: var(--panel-raised);
+  border-radius: var(--r-sm);
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}

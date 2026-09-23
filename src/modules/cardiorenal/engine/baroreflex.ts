@@ -16,10 +16,19 @@ import { clamp } from '@/shared/lib/math';
  * out to 40 mmHg put nearly all of the gain in territory nobody survives. Symmetric, because this
  * reflex also has to slow a heart when pressure runs high.
  */
-export function baroreflexDrive(map: number, setpointMmHg: number = HEMODYNAMICS.MAP_SETPOINT): number {
+export function baroreflexDrive(
+  map: number,
+  setpointMmHg: number = HEMODYNAMICS.MAP_SETPOINT,
+  gain = 1,
+): number {
   const error = setpointMmHg - map;
   const magnitude = Math.abs(error) / (Math.abs(error) + BAROREFLEX.HALF_ACTIVATION_ERROR_MMHG);
-  return clamp(Math.sign(error) * magnitude, -1, 1);
+  // The gain scales the reflex's DEPARTURE from its unstimulated output, which here is zero by
+  // construction — so it is a plain product. It does not touch `TAU_SECONDS`: gain is how hard the
+  // reflex pulls, tau is how fast, and tau is also the damping that stops the loop oscillating
+  // between per-tick extremes. Scaling the time constant instead would make a weak reflex a slow
+  // one, which is a different patient.
+  return clamp(Math.sign(error) * magnitude * clamp(gain, 0, 1.5), -1, 1);
 }
 
 export function effectiveHeartRate(sliderHeartRate: number, drive: number): number {

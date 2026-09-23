@@ -2,13 +2,13 @@ import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
-import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
+import { useModuleCases } from '@/shared/hooks/useModuleCases';
+import { HEARING_CASES } from './cases';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
-import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
-import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { HearingDiagram } from './components/HearingDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -21,6 +21,7 @@ import { perturbNoiseExposure } from './engine/engine';
 import {
   HEARING_PRESETS,
   HEARING_PRESET_LABELS,
+  HEARING_PRESET_GLOSS,
   HEARING_PRESET_ORDER,
   DEFAULT_HEARING_INPUTS,
 } from './engine/presets';
@@ -28,38 +29,52 @@ import type { HearingInputs } from './engine/types';
 import { Audiogram } from './components/Audiogram';
 
 export function HearingPage() {
-  const { inputs, setInputs, shareLink } = useShareableInputs<HearingInputs>('hearing', DEFAULT_HEARING_INPUTS);
+  // Opened from the ward round, or null for the catalogue route. The seed means the engine
+  // settles the patient directly rather than settling a healthy body and then jumping.
+  const patient = useModuleCase(HEARING_CASES);
+  const { inputs, setInputs, shareLink } = useShareableInputs<HearingInputs>(
+    'hearing',
+    DEFAULT_HEARING_INPUTS,
+    caseInputs(patient, DEFAULT_HEARING_INPUTS, HEARING_PRESETS),
+  );
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, hearingLoopConfig);
   const resetScenario = useScenarioReset({
     setInputs,
-    defaults: DEFAULT_HEARING_INPUTS,
+    // At a bedside, Reset means "back to this patient". Returning a learner who is mid-case to
+    // a healthy volunteer would discard the thing they came to look at.
+    defaults: caseInputs(patient, DEFAULT_HEARING_INPUTS, HEARING_PRESETS) ?? DEFAULT_HEARING_INPUTS,
     resetEngine: reset,
     baseline,
     transport,
   });
 
-  const { session, summary } = useModulePractice({
+  // Tab, question sets, session, bedside and the three bedded nodes. Everything downstream of
+  // the engine that every bedded page repeats lives in the hook; what stays here is this
+  // module's physiology and its presentation.
+  const cases = useModuleCases({
     moduleId: 'hearing',
+    patient,
+    cases: HEARING_CASES,
     questions: HEARING_QUESTIONS,
     presets: HEARING_PRESETS,
-    inputs,
     defaultInputs: DEFAULT_HEARING_INPUTS,
+    inputs,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
+    shareLink,
+    snapshot,
+    transport,
+    baselineFrozen: baseline.history !== null,
+    presetLabels: HEARING_PRESET_LABELS,
+    presetGloss: HEARING_PRESET_GLOSS,
   });
+  const { session } = cases;
 
   const handleChange = useInputSetter(setInputs);
-
-  const applyPreset = useScenarioPreset({
-    setInputs,
-    defaults: DEFAULT_HEARING_INPUTS,
-    presets: HEARING_PRESETS,
-    resetEngine: reset,
-  });
 
   const ptaHistory = useSeries(history, (h) => h.pta);
   const ptaBaseline = useSeries(baseline.history, (h) => h.pta);
@@ -70,6 +85,7 @@ export function HearingPage() {
 
   return (
     <ModulePage
+      historyCapacity={hearingLoopConfig.historyCapacity}
       moduleId="hearing"
       title="Hearing & Cochlear Mechanics"
       subtitle="two tuning forks tell you where the ear failed, and loudness tells you how"
@@ -78,18 +94,18 @@ export function HearingPage() {
         <PresetBar
           order={HEARING_PRESET_ORDER}
           labels={HEARING_PRESET_LABELS}
-          onApply={applyPreset}
+          onApply={cases.applyPreset}
           actions={[
             { label: 'Loud concert (no plugs)', onClick: () => perturb(perturbNoiseExposure), variant: 'danger' },
           ]}
-          onShare={shareLink}
+          onShare={cases.shareLink}
           onReset={resetScenario}
           disabled={session.blinded}
         />
       }
+      {...cases.page}
       diagram={<HearingDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={HEARING_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

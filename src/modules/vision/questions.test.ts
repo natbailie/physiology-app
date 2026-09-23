@@ -1,9 +1,10 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { visionLoopConfig } from './engine/loopConfig';
-import { DEFAULT_VISION_INPUTS, VISION_PRESETS, type VisionPresetName } from './engine/presets';
+import { DEFAULT_VISION_INPUTS, VISION_PRESETS, type VisionPresetName, VISION_PRESET_GLOSS } from './engine/presets';
 import { VISION_QUESTIONS } from './questions';
 import type { VisionDerived, VisionInputs, VisionInternalState } from './engine/types';
 
@@ -21,3 +22,5 @@ describe('vision pattern questions', () => {
 describe('vision predict questions', () => {
   describeQuestionSet(visionLoopConfig, DEFAULT_VISION_INPUTS, VISION_PRESETS, predictions);
 });
+
+describeGlossSet(VISION_PRESET_GLOSS, VISION_PRESETS, patterns);

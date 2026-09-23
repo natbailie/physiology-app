@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B — Dark monitor / ICU · Physiology Lab preview</title>
+<style>
+  :root{
+    --bg:#060b14; --panel:#0b1526; --panel2:#0f1e35; --border:#1d3352;
+    --grid:rgba(110,168,254,.10);
+    --text:#e8f1ff; --dim:#a9bdd6; --faint:#6f87a5;
+    --brand:#4cc3ff; --brand2:#7CFFB2; --amber:#ffb224; --danger:#ff5d5d; --ok:#3ddc97;
+    --artery:#ff6b6b; --o2:#4cc3ff; --kidney:#e8c547;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text",sans-serif;
+  }
+  [data-theme="light"]{ --bg:#eef3fa; --panel:#ffffff; --panel2:#f1f6fd; --border:#d4e0f0; --text:#0a1a30; --dim:#3d5470; --faint:#7188a5; --grid:rgba(15,98,214,.08); }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.5;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+  .proto-bar{position:sticky;top:0;z-index:20;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 20px;background:#020610;color:#cfe6ff;border-bottom:1px solid #163154;font-size:13px}
+  .proto-bar .pill{border:1px solid #2a4d7d;border-radius:999px;padding:2px 10px;font-size:12px;color:var(--brand)}
+  .proto-bar nav{display:flex;gap:14px;margin-left:auto}.proto-bar nav a{color:#cfe6ff;text-decoration:none;opacity:.8}
+  .proto-bar button{background:#0f2a4d;color:#dff;border:1px solid #2a4d7d;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:12px}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:flex;flex-direction:column;gap:36px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--brand)}
+  h1{font-size:32px;letter-spacing:-.02em;margin:6px 0 8px} h2{font-size:20px;margin:0} h3{margin:0;font-size:14px}
+  .lede{color:var(--dim);max-width:70ch;margin:6px 0 0}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:14px;box-shadow:0 0 0 1px rgba(76,195,255,.06),0 18px 50px rgba(0,0,0,.5)}
+  .monitor-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .live-dot{width:9px;height:9px;border-radius:50%;background:#ff5d5d;box-shadow:0 0 12px #ff5d5d;animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .bed{font-family:var(--mono);font-size:12px;color:var(--dim);border:1px solid var(--border);border-radius:8px;padding:6px 10px}
+  .bed b{color:var(--text)}
+  .study-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 18px}
+  .vital{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:rgba(2,8,18,.5);position:relative;overflow:hidden}
+  .vital::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 13px,var(--grid) 13px 14px);pointer-events:none}
+  .vital span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint)}
+  .vital b{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;text-shadow:0 0 18px currentColor}
+  .vital small{font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:0 18px 18px}
+  .tile{padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(2,8,18,.45)}
+  .tile p{color:var(--dim);font-size:13px;margin:6px 0}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--dim)}
+  .tag.hot{color:#03101f;background:var(--amber);border-color:var(--amber);font-weight:800}
+  .tag.blue{color:var(--brand);border-color:color-mix(in srgb,var(--brand) 45%,transparent)}
+  .btn{font:inherit;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;border-radius:9px;padding:10px 14px;border:1px solid var(--border);background:#0a1a30;color:var(--text);cursor:pointer}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#03101f;box-shadow:0 0 22px rgba(76,195,255,.45)}
+  .sim-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .alarms{display:flex;gap:8px;margin-left:auto;font-family:var(--mono);font-size:11px}
+  .alarm{border-radius:7px;padding:5px 10px;border:1px solid}
+  .alarm.red{color:#ffb3b3;border-color:#ff5d5d;background:rgba(255,93,93,.12);box-shadow:0 0 16px rgba(255,93,93,.35)}
+  .alarm.amber{color:#ffe1a8;border-color:var(--amber);background:rgba(255,178,36,.1)}
+  .lab{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+  .lab-main{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .scope{border:1px solid var(--border);border-radius:12px;background:#02070f;padding:10px;position:relative;overflow:hidden}
+  .scope::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(76,195,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(76,195,255,.07) 1px,transparent 1px);background-size:22px 22px}
+  .scope-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);position:relative}
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .ro{border:1px solid var(--border);border-radius:10px;background:#02070f;padding:10px}
+  .ro span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint)}
+  .ro b{font-family:var(--mono);font-size:22px;display:block;font-variant-numeric:tabular-nums}
+  .trend{border:1px solid var(--border);border-radius:10px;background:#02070f;padding:10px}
+  .quiz{border:1px solid color-mix(in srgb,var(--amber) 55%,var(--border));border-radius:10px;padding:12px;background:rgba(255,178,36,.06)}
+  .quiz p{color:var(--dim);font-size:13.5px}
+  .rail{border-left:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:12px;background:rgba(2,8,18,.4)}
+  .slider{border:1px solid var(--border);border-radius:10px;padding:10px;background:#02070f}
+  .slider label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px}
+  input[type=range]{width:100%;accent-color:var(--brand)}
+  .phones{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start;padding:0 18px 18px}
+  .phone{width:390px;max-width:100%;border-radius:28px;border:1px solid #2a4d7d;background:#040b16;overflow:hidden}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);background:#0a1a30;border:1px solid var(--border);border-radius:11px;margin:10px 12px;padding:3px;font-family:var(--mono);font-size:11px}
+  .seg .on{background:var(--brand);color:#03101f;border-radius:8px;text-align:center;padding:7px;font-weight:800}.seg span{text-align:center;padding:7px;color:var(--dim)}
+  .m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px}
+  .m-vital{border:1px solid var(--border);border-radius:10px;background:#02070f;padding:8px;font-family:var(--mono)}
+  .m-vital b{font-size:18px}.m-vital span{font-size:9px;letter-spacing:.12em;color:var(--faint);display:block}
+  .tabs{display:flex;border-top:1px solid var(--border)}.tabs span{flex:1;text-align:center;font-family:var(--mono);font-size:10px;color:var(--faint);padding:10px 0 14px}.tabs .on{color:var(--brand)}
+  .ref-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;padding:0 18px 18px}
+  .calc{border-top:1px solid var(--border);padding:12px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .mono{font-family:var(--mono)}
+  @media(max-width:960px){.lab,.ref-grid,.phones{grid-template-columns:1fr}.readouts{grid-template-columns:repeat(2,1fr)}.study-strip{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>B · Dark monitor / ICU</b><span class="pill">bedside-monitor inspired</span><nav><a href="#home"> Census</a><a href="#sim">Bedside</a><a href="#ref">Labs</a></nav><button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Toggle dark / light</button></div>
+<div class="wrap">
+<header><div class="kicker">DIRECTION B · STATIC MOCK · DEFAULT DARK</div>
+<h1>The ward at 02:00 — every number glows for a reason.</h1>
+<p class="lede">For residents who live on monitors: phosphor traces, tabular mono vitals, alarm hierarchy (red / amber / silent). Light theme exists for daylight teaching, but dark is home. Exam tags become bed labels; progress becomes trend lines.</p></header>
+
+<section id="home" class="card"><div class="monitor-head"><span class="live-dot"></span><b class="mono">PHYSIOLOGY · WARD CENSUS</b><span class="bed">BED <b>A04</b> · AMINA K · MRCP</span><span class="bed mono">STREAK <b>6d</b> · DUE <b style="color:var(--amber)">14</b></span><button class="btn primary" style="margin-left:auto">▸ START ROUNDS</button></div>
+<div class="study-strip">
+<div class="vital" style="color:var(--brand2)"><span>SINUS · HR /min</span><b>112</b><small>▲ tachy · shock</small></div>
+<div class="vital" style="color:var(--artery)"><span>ART · MAP mmHg</span><b>62</b><small>▼ target ≥ 65</small></div>
+<div class="vital" style="color:var(--o2)"><span>SpO₂ %</span><b>94</b><small>V/Q mismatch</small></div>
+<div class="vital" style="color:var(--kidney)"><span>UO mL/h</span><b>18</b><small>oliguria</small></div>
+</div>
+<div class="grid">
+<div class="tile"><div style="display:flex;justify-content:space-between"><b>SHOCK STATES</b><span class="tag hot">DUE 8</span></div><p>Haemorrhage · tamponade · sepsis. Venous return vs arterial load.</p><div><span class="tag blue">UKMLA</span> <span class="tag blue">MRCP</span></div></div>
+<div class="tile"><div style="display:flex;justify-content:space-between"><b>ECG CONDUCTION</b><span class="tag hot">DUE 4</span></div><p>Einthoven vectors · 12-lead grid · blocks &amp; axes.</p><div><span class="tag blue">USMLE</span> <span class="tag">MRCP</span></div></div>
+<div class="tile"><div style="display:flex;justify-content:space-between"><b>RENAL FLUIDS</b><span class="tag">DUE 2</span></div><p>Clearance · Starling · RAAS/ANP tug-of-war.</p><div><span class="tag blue">UKMLA</span></div></div>
+<div class="tile"><div style="display:flex;justify-content:space-between"><b>ACID–BASE</b><span class="tag">STABLE</span></div><p>Henderson–Hasselbalch · Winters · Davenport.</p><div><span class="tag">FRCA</span></div></div>
+</div></section>
+
+<section id="sim" class="card"><div class="sim-top"><span class="live-dot"></span><div><h2>SHOCK · A04 — haemorrhagic vs cardiogenic</h2><div class="mono" style="font-size:11px;color:var(--faint)">SIM TIME 00:04:32 · 6× · BASELINE FROZEN 00:00:00</div></div><div class="alarms"><span class="alarm red">■ MAP 62 LOW</span><span class="alarm amber">■ LACTATE 4.2 HIGH</span></div></div>
+<div class="lab"><div class="lab-main">
+<div class="scope"><div class="scope-head"><span>II · 25 mm/s · 10 mm/mV</span><span>HR 112 · MAP 62</span></div>
+<svg viewBox="0 0 560 120" width="100%" height="105" style="position:relative"><path d="M0 70 H90 L100 70 105 45 112 88 118 70 H200 L210 70 215 50 222 86 228 70 H320 L330 70 335 44 342 89 348 70 H560" fill="none" stroke="#3ddc97" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #3ddc97)"/><path d="M0 70 H560" stroke="#1d3352" stroke-dasharray="4 5"/></svg></div>
+<div class="readouts"><div class="ro" style="color:var(--artery)"><span>MAP mmHg</span><b>62 ▼</b></div><div class="ro" style="color:var(--artery)"><span>CO L/min</span><b>3.1</b></div><div class="ro" style="color:var(--o2)"><span>LAC mmol/L</span><b>4.2 ▲</b></div><div class="ro" style="color:var(--kidney)"><span>CVP mmHg</span><b>2 ↓</b></div></div>
+<div class="trend"><div class="scope-head" style="margin-bottom:6px"><span>MAP · NOW vs FROZEN BASELINE (dashed)</span><span>−28 mmHg</span></div><svg viewBox="0 0 560 70" width="100%" height="60"><path d="M0 20 H560" stroke="#6f87a5" stroke-dasharray="6 5"/><path d="M0 35 C100 34 180 40 260 55 S440 66 560 62" fill="none" stroke="#4cc3ff" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #4cc3ff)"/></svg></div>
+<div class="quiz"><span class="tag hot">BLINDED · PREDICT</span><p><b style="color:var(--text)">800 mL loss: CVP ↓, pulse pressure ↓?</b> Traces keep scrolling; verdict withheld until you run. Wrong answers trend red, right answers trend green.</p><div style="display:flex;gap:8px"><button class="btn primary">RUN IN SIMULATOR</button><button class="btn">REVEAL</button></div></div>
+</div>
+<aside class="rail"><div style="display:flex;gap:8px"><button class="btn" style="flex:1">❚❚</button><button class="btn" style="flex:1">STEP</button><button class="btn" style="flex:1">1×</button></div>
+<div class="slider"><label>BLOOD LOSS <output style="color:var(--artery)">800 mL</output></label><input type="range" value="55"><div class="mono" style="font-size:10px;color:var(--faint)">CORRELATE: CVP + PP NARROWING</div></div>
+<div class="slider"><label>NORAD <output style="color:var(--brand)">0.04 µg/kg/min</output></label><input type="range" value="20"><div class="mono" style="font-size:10px;color:var(--faint)">CORRELATE: DIASTOLIC LIFT</div></div>
+<div class="slider"><label>BOLUS <output>250 mL</output></label><input type="range" value="30"></div>
+<div class="mono" style="font-size:10px;color:var(--faint)">PRESETS: RESTING · HAEMORRHAGE · TAMPONADE · SEPSIS</div></aside></div>
+<div class="phones"><div class="phone"><div class="mono" style="display:flex;justify-content:space-between;padding:12px 14px 0;font-size:10px;color:var(--faint)"><span>02:14</span><span>● REC</span></div>
+<div class="seg"><span class="on">SIMULATE</span><span>PRACTICE</span><span>LEARN</span></div>
+<div class="m-grid"><div class="m-vital" style="color:var(--artery)"><span>MAP</span><b>62</b></div><div class="m-vital" style="color:#3ddc97"><span>HR</span><b>112</b></div><div class="m-vital" style="color:var(--o2)"><span>SpO₂</span><b>94</b></div></div>
+<div style="margin:10px 12px;border:1px solid var(--border);border-radius:12px;background:#02070f;padding:8px"><svg viewBox="0 0 340 70" width="100%" height="60"><path d="M0 40 H60 L66 18 72 58 78 40 H340" fill="none" stroke="#3ddc97" stroke-width="2" style="filter:drop-shadow(0 0 5px #3ddc97)"/></svg></div>
+<div style="margin:0 12px 12px;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0a1a30"><div class="mono" style="font-size:10px">BLOOD LOSS · 800 mL</div><input type="range" value="55"><div style="display:flex;gap:8px"><button class="btn" style="flex:1">❚❚</button><button class="btn" style="flex:1">STEP</button></div></div>
+<div class="tabs"><span class="on">Study</span><span>Formulas</span><span>Drugs</span><span>Account</span></div></div>
+<div><h3>Why residents may love / hate this</h3><p class="lede">Love: zero-light bedroom revision, traces readable at arm's length, alarm hierarchy teaches triage. Risk: glow fatigue in daylight, signal colours must still pass 4.5:1 on near-black — palette test stays. Native haptics on alarm transitions (iOS) would sell it.</p></div></div></section>
+
+<section id="ref" class="card"><div class="monitor-head"><b class="mono">LABS + PHARMACY</b><span class="tag blue">UK TOP-100</span></div>
+<div class="ref-grid"><div><div class="calc"><div><b>Corrected Ca²⁺</b><div class="mono" style="font-size:11px;color:var(--dim)">2.05 + 0.02×(40−28) = <b style="color:var(--brand)">2.29 mmol/L</b></div></div><span class="tag">RANGE 2.2–2.6</span></div>
+<div class="calc"><div><b>MAP</b><div class="mono" style="font-size:11px;color:var(--dim)">⅓×88 + ⅔×54 = <b style="color:var(--artery)">65 mmHg</b></div></div><span class="tag hot">LOW-NORMAL</span></div>
+<div class="calc"><div><b>Winters</b><div class="mono" style="font-size:11px;color:var(--dim)">expected PaCO₂ → compare in Acid–base sim</div></div><button class="btn">TRACE →</button></div></div>
+<div><div class="calc"><div><b>ACE-i</b><div class="mono" style="font-size:11px;color:var(--dim)">ramipril · ↓ AII → see Shock sim</div></div><span class="tag blue">RAAS</span></div>
+<div class="calc"><div><b>Loop</b><div class="mono" style="font-size:11px;color:var(--dim)">furosemide · NKCC2 → see Tubular sim</div></div><span class="tag blue">RENAL</span></div></div></div></section>
+</div>
+</body>
+</html>

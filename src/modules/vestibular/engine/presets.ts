@@ -55,3 +55,18 @@ export const VESTIBULAR_PRESET_ORDER: VestibularPresetName[] = [
   'bppvPosterior',
   'meniereIrritative',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const VESTIBULAR_PRESET_GLOSS: Partial<Record<VestibularPresetName, string>> = {
+  normal: 'both labyrinths matched, neither one outvoting the other',
+  acuteNeuritis: 'one nerve suddenly silent, with the other still firing',
+  compensatedNeuritis: 'the same dead nerve, with the brain no longer complaining',
+  bilateralLoss: 'both nerves poisoned, so there is nothing left to compare',
+  bppvPosterior: 'a loose crystal moving in a canal that should hold only fluid',
+  meniereIrritative: 'an ear swollen with fluid and firing too much rather than too little',
+};

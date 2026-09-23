@@ -1,0 +1,7 @@
+/* Right-aligned and out of the reading column: the control is chrome, not content, and it
+   should not be the first thing a screen reader or a sighted eye meets on the page. It stays
+   in DOM order before the header so it is reachable early by keyboard without a skip. */
+.bar {
+  display: flex;
+  justify-content: flex-end;
+}

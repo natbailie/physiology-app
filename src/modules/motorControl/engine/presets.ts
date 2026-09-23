@@ -1,6 +1,7 @@
 import type { MotorInputs } from './types';
 
 export const DEFAULT_MOTOR_INPUTS: MotorInputs = {
+  deepBrainStimulation: 'off',
   movementCommandAmplitude: 55,
   dopamineFraction: 100,
   striatalOutputLoss: 0,

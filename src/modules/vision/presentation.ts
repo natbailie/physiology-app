@@ -1,6 +1,7 @@
+import { clamp } from '@/shared/lib/math';
 import { AQUEOUS, PUPIL } from './engine/constants';
 import type { EyeFieldSectors, FieldLesionSite, VisionDerived, VisionHistoryPoint, VisionInputs, VisionInternalState } from './engine/types';
-import type { FrameNode, SceneNode } from '@/shared/presentation/types';
+import type { FrameNode, SceneNode, ControlSpec } from '@/shared/presentation/types';
 import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
 
 type Ctx = PresentationContext<VisionInternalState, VisionDerived, VisionInputs, VisionHistoryPoint>;
@@ -62,6 +63,57 @@ function ellipsePath(cx: number, cy: number, rx: number, ry: number): string {
 function circlePath(cx: number, cy: number, r: number): string {
   return `M ${cx},${cy - r} a ${r},${r} 0 1,0 ${2 * r},0 a ${r},${r} 0 1,0 ${-2 * r},0`;
 }
+
+/** The control rail, hoisted so the page can clamp a nudge to the same ranges. */
+export const VISION_CONTROLS: readonly ControlSpec<VisionInputs>[] = [
+  { kind: 'slider', label: 'Scene luminance', key: 'sceneLuminanceLogCd', min: -5, max: 4, step: 0.5, unit: ' log cd/m²' },
+  {
+    /* The swinging-light test as a setting, not three impulses. A torch held on an eye stays
+     * there, so the rail carries which eye is lit and the learner swings it back deliberately —
+     * which is the whole examination. The three buttons in the bar now write this. */
+    kind: 'toggle',
+    label: 'Torch',
+    key: 'torchEye',
+    colorToken: 'o2',
+    options: [
+      { value: 'off', label: 'Off' },
+      { value: 'right', label: 'Right eye' },
+      { value: 'left', label: 'Left eye' },
+    ],
+  },
+  { kind: 'slider', label: 'Rod integrity', key: 'rodIntegrity', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Foveal cone integrity', key: 'coneIntegrity', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Left optic nerve (afferent)', key: 'leftOpticNerveAfferent', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Right pupil efferent', key: 'rightPupilEfferentGain', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Fixation distance', key: 'targetDistanceMetres', min: 0.12, max: 6, step: 0.02, unit: ' m' },
+  { kind: 'slider', label: 'Lens amplitude', key: 'maximumAccommodationD', min: 0, max: 12, step: 0.5, unit: ' D' },
+  { kind: 'slider', label: 'Aqueous production', key: 'aqueousProductionRate', min: 0, max: 2, step: 0.05 },
+  { kind: 'slider', label: 'Meshwork outflow', key: 'trabecularOutflowFacility', min: 0, max: 1.5, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Angle width', key: 'angleWidthPct', min: 0, max: 100, step: 2, unit: '%' },
+  { kind: 'slider', label: 'Pilocarpine', key: 'pilocarpineDosePct', min: 0, max: 100, step: 5, unit: '%' },
+  { kind: 'slider', label: 'Acetazolamide', key: 'acetazolamideDosePct', min: 0, max: 100, step: 5, unit: '%' },
+  { kind: 'slider', label: 'Mydriatic', key: 'mydriaticDosePct', min: 0, max: 100, step: 5, unit: '%' },
+  {
+    kind: 'toggle',
+    label: 'Pathway lesion',
+    key: 'fieldLesionSite',
+    colorToken: 'retina',
+    options: [
+      { value: 'none', label: 'None' },
+      { value: 'leftOpticNerve', label: 'L nerve' },
+      { value: 'rightOpticNerve', label: 'R nerve' },
+      { value: 'chiasmalCentre', label: 'Chiasm' },
+      { value: 'leftOpticTract', label: 'L tract' },
+      { value: 'rightOpticTract', label: 'R tract' },
+      { value: 'leftTemporalRadiation', label: "L Meyer's" },
+      { value: 'rightTemporalRadiation', label: "R Meyer's" },
+      { value: 'leftParietalRadiation', label: 'L parietal' },
+      { value: 'rightParietalRadiation', label: 'R parietal' },
+      { value: 'leftOccipitalLobe', label: 'L occipital' },
+      { value: 'rightOccipitalLobe', label: 'R occipital' },
+    ],
+  },
+];
 
 export function buildVisionPresentation(ctx: Ctx): ModulePresentation<VisionInternalState, VisionDerived, VisionInputs, VisionHistoryPoint> {
   const { derived } = ctx;
@@ -134,6 +186,36 @@ export function buildVisionPresentation(ctx: Ctx): ModulePresentation<VisionInte
           { type: 'text', x: 176, y: 410, text: `R ${derived.pupilRightMm.toFixed(1)} mm`, cls: 'sideTick', anchor: 'middle' as const },
           { type: 'text', x: 384, y: 410, text: `L ${derived.pupilLeftMm.toFixed(1)} mm`, cls: 'sideTick', anchor: 'middle' as const },
 
+          /* The aqueous circuit, between the two eyes it belongs to.
+           *
+           * The drawing carried intraocular pressure as a caption and an alarm and nothing else, so
+           * a treated glaucoma — a normal pressure held there by two drugs and a widened outflow —
+           * was indistinguishable from an untreated normal eye. That is the clinical point exactly
+           * backwards: a treated eye is a MANAGED eye, and what is being managed is the balance
+           * between what the ciliary body makes and what the meshwork lets out. Both sides of that
+           * balance are computed from the inputs, so both are visible before anything integrates.
+           */
+          { type: 'text', x: 280, y: 344, text: 'Aqueous', cls: 'anatomy', anchor: 'middle' as const },
+          {
+            type: 'path' as const,
+            d: 'M232,364 L262,364',
+            colorToken: 'capillary',
+            strokeWidth: 0.6 + clamp(derived.aqueousProductionUlPerMin / AQUEOUS.PRODUCTION_UL_PER_MIN, 0, 2) * 2,
+            strokeLinecap: 'round' as const,
+            fill: 'none' as const,
+          },
+          { type: 'circle' as const, cx: 280, cy: 364, r: 9, fill: 'capillary', fillOpacity: 0.2, stroke: 'text-dim', strokeWidth: 1 },
+          {
+            type: 'path' as const,
+            d: 'M298,364 L328,364',
+            colorToken: 'urine',
+            strokeWidth: 0.6 + clamp(derived.outflowFacilityUlPerMinPerMmhg / AQUEOUS.FACILITY_REF_UL_PER_MIN_PER_MMHG, 0, 2) * 2,
+            strokeLinecap: 'round' as const,
+            fill: 'none' as const,
+          },
+          { type: 'text', x: 228, y: 380, text: 'made', cls: 'sideTick', anchor: 'end' as const },
+          { type: 'text', x: 332, y: 380, text: 'drained', cls: 'sideTick', anchor: 'start' as const },
+
           // Torch beams, when the swinging-torch test is running.
           ...(torchRight ? [{ type: 'line' as const, x1: 104, y1: 420, x2: 158, y2: 382, cls: 'torchBeam' }] : []),
           ...(torchLeft ? [{ type: 'line' as const, x1: 456, y1: 420, x2: 402, y2: 382, cls: 'torchBeam' }] : []),
@@ -183,8 +265,10 @@ export function buildVisionPresentation(ctx: Ctx): ModulePresentation<VisionInte
             x: 20,
             y: 126,
             text: derived.classification,
+            /* No `styleVars`: `.verdict` states `font-size: 15px` outright and reads no custom
+             * property, so the 13px asked for here was never applied on either platform. The
+             * schema has no per-node font size to ask for it with, and 15px clears the sweep. */
             cls: 'verdict',
-            styleVars: { 'font-size': 13, 'letter-spacing': 0.04 },
           },
     ];
     const scene: FrameNode = {
@@ -197,41 +281,7 @@ export function buildVisionPresentation(ctx: Ctx): ModulePresentation<VisionInte
     };
     return {
       diagram: [scene],
-      controls: [
-      { kind: 'slider', label: 'Scene luminance', key: 'sceneLuminanceLogCd', min: -5, max: 4, step: 0.5, unit: ' log cd/m²' },
-      { kind: 'slider', label: 'Rod integrity', key: 'rodIntegrity', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Foveal cone integrity', key: 'coneIntegrity', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Left optic nerve (afferent)', key: 'leftOpticNerveAfferent', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Right pupil efferent', key: 'rightPupilEfferentGain', min: 0, max: 1, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Fixation distance', key: 'targetDistanceMetres', min: 0.12, max: 6, step: 0.02, unit: ' m' },
-      { kind: 'slider', label: 'Lens amplitude', key: 'maximumAccommodationD', min: 0, max: 12, step: 0.5, unit: ' D' },
-      { kind: 'slider', label: 'Aqueous production', key: 'aqueousProductionRate', min: 0, max: 2, step: 0.05 },
-      { kind: 'slider', label: 'Meshwork outflow', key: 'trabecularOutflowFacility', min: 0, max: 1.5, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Angle width', key: 'angleWidthPct', min: 0, max: 100, step: 2, unit: '%' },
-      { kind: 'slider', label: 'Pilocarpine', key: 'pilocarpineDosePct', min: 0, max: 100, step: 5, unit: '%' },
-      { kind: 'slider', label: 'Acetazolamide', key: 'acetazolamideDosePct', min: 0, max: 100, step: 5, unit: '%' },
-      { kind: 'slider', label: 'Mydriatic', key: 'mydriaticDosePct', min: 0, max: 100, step: 5, unit: '%' },
-      {
-        kind: 'toggle',
-        label: 'Pathway lesion',
-        key: 'fieldLesionSite',
-        colorToken: 'retina',
-        options: [
-          { value: 'none', label: 'None' },
-          { value: 'leftOpticNerve', label: 'L nerve' },
-          { value: 'rightOpticNerve', label: 'R nerve' },
-          { value: 'chiasmalCentre', label: 'Chiasm' },
-          { value: 'leftOpticTract', label: 'L tract' },
-          { value: 'rightOpticTract', label: 'R tract' },
-          { value: 'leftTemporalRadiation', label: "L Meyer's" },
-          { value: 'rightTemporalRadiation', label: "R Meyer's" },
-          { value: 'leftParietalRadiation', label: 'L parietal' },
-          { value: 'rightParietalRadiation', label: 'R parietal' },
-          { value: 'leftOccipitalLobe', label: 'L occipital' },
-          { value: 'rightOccipitalLobe', label: 'R occipital' },
-        ],
-      },
-    ],
+      controls: VISION_CONTROLS,
     readouts: [
       {
         label: 'Acuity',

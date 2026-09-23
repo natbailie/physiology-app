@@ -14,6 +14,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { mechanicalVentilationContent } from './content';
 import { mvLoopConfig } from './engine/loopConfig';
@@ -59,6 +60,7 @@ export function MechanicalVentilationPage() {
 
   return (
     <ModulePage
+      historyCapacity={mvLoopConfig.historyCapacity}
       moduleId="mechanicalVentilation"
       title="Mechanical Ventilation & Ventilator Pressures"
       subtitle="PEEP, pressure support, driving pressure & how much of the breath is yours"
@@ -74,7 +76,17 @@ export function MechanicalVentilationPage() {
       }
       diagram={<MvDiagram derived={snapshot.derived} inputs={inputs} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={MV_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <Sparkline
@@ -88,6 +100,7 @@ export function MechanicalVentilationPage() {
         />
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={mechanicalVentilationContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of mechanical ventilation — not a clinical or diagnostic tool. The scenario bar carries a PATIENT (choose ARDS, COPD, OSA or neuromuscular weakness); the rail tunes the ventilator against them. Watch what actually moves: PEEP reopens an ARDS shunt but CPAP alone splints the floppy OSA airway; a higher set rate packs in breaths before an obstructed lung has emptied and auto-PEEP stacks on the dial; and oxygen fixes a shunt but never clears CO2. Use the quiz and the baseline trace to compare a ventilator setting against normal breathing.'}
     />

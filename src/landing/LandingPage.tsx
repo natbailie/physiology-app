@@ -2,6 +2,7 @@ import { AuthForm } from '@/auth/AuthForm';
 import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import { MODULES } from '@/home/moduleRegistry';
 import styles from './LandingPage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 const SIMULATOR_COUNT = MODULES.filter((m) => m.kind !== 'reference' && m.status === 'available').length;
 
@@ -16,6 +17,7 @@ const SIMULATOR_COUNT = MODULES.filter((m) => m.kind !== 'reference' && m.status
 export function LandingPage() {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <div className={styles.card}>
         <div className={styles.brandPanel}>
           <BrandMark size="lg" tone="ink" as="h1" />
@@ -47,6 +49,12 @@ export function LandingPage() {
       <p className={styles.footer}>
         <a href="#pricing" className={styles.pricingLink}>
           See what a subscription includes
+        </a>
+        <a href="#methodology" className={styles.pricingLink}>
+          How the physiology is checked
+        </a>
+        <a href="#accessibility" className={styles.pricingLink}>
+          Accessibility statement
         </a>
         <span>
           Simplified, conceptual models built to teach mechanism — not clinical or diagnostic tools.

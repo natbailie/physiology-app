@@ -74,6 +74,14 @@ describe('StudyReport', () => {
     expect(screen.getByLabelText('40 per cent known')).toBeTruthy();
   });
 
+  it('hides the decorative prescription glyph from screen readers', () => {
+    // The ℞ is decoration; the words "Prescribed for you" carry the meaning.
+    render(<StudyReport weakSpots={[spot({ moduleId: 'respiratory', reason: 'lowAccuracy' })]} />);
+    const heading = screen.getByRole('heading', { name: /prescribed for you/i });
+    const glyph = heading.querySelector('[aria-hidden="true"]');
+    expect(glyph?.textContent).toContain('℞');
+  });
+
   it('shows the due count only when something is due', () => {
     const { container } = render(
       <StudyReport weakSpots={[spot({ moduleId: 'respiratory', reason: 'stale', dueCount: 0 })]} />,

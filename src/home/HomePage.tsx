@@ -1,22 +1,46 @@
+import { useEffect } from 'react';
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { DisciplineCard } from '@/shared/components/DisciplineCard/DisciplineCard';
 import { useAuth } from '@/auth/AuthContext';
 import { useEntitlement } from '@/billing/useEntitlement';
-import { useProgressStore } from '@/shared/assessment/useProgressStore';
+import { RoundBoard } from './RoundBoard';
+import { useRound } from './useRound';
 import { StudyStrip } from './StudyStrip';
 import { StudyReport } from './StudyReport';
 import { DISCIPLINES, MODULES, THEMES, type DisciplineId } from './moduleRegistry';
 import { MEDICATIONS } from '@/medications/drugs';
 import { useModuleProgress } from './useModuleProgress';
+import { ExamPrompt } from './ExamPrompt';
+import { ExamFilterBar } from './ExamFilterBar';
+import { matchesExam, seedExamFilter, useExamFilter } from './examFilter';
+import { useExamProfile } from '@/account/examProfile';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import styles from './HomePage.module.css';
 
+/** Module id -> display name. Module-scope so `useRound`'s memo sees a stable function. */
+const MODULE_NAMES = new Map(MODULES.map((module) => [module.id, module.name]));
+const moduleNameOf = (moduleId: string): string => MODULE_NAMES.get(moduleId) ?? moduleId;
+
 export function HomePage() {
   const { user, initialising } = useAuth();
-  const { isUnlocked } = useEntitlement();
-  const store = useProgressStore();
+  const entitlement = useEntitlement();
+  const { isUnlocked } = entitlement;
   const { totals, weakSpots } = useModuleProgress();
+  const round = useRound(moduleNameOf, entitlement);
+  const { targetExam, ready } = useExamProfile();
+  const examFilter = useExamFilter();
+
+  // The saved exam becomes the starting filter on a first visit, and never overrules a learner
+  // who has since chosen to look at something else — see `seedExamFilter`.
+  //
+  // In an effect rather than in the render body, which is where this started. Seeding during
+  // render notified the store's subscribers mid-render, and `examFilter` above had ALREADY been
+  // read as null for this pass — so the counts below were computed unfiltered and the learner
+  // watched "51 simulators" flip to "23". Committing first costs one honest re-render instead.
+  useEffect(() => {
+    if (ready) seedExamFilter(targetExam);
+  }, [ready, targetExam]);
 
   const reference = MODULES.find((module) => module.kind === 'reference');
 
@@ -27,6 +51,7 @@ export function HomePage() {
   const byDiscipline = new Map<DisciplineId, number>();
   for (const module of MODULES) {
     if (!module.theme || module.kind === 'reference') continue;
+    if (!matchesExam(module.exams, examFilter)) continue;
     const discipline = disciplineOf.get(module.theme);
     if (discipline) byDiscipline.set(discipline, (byDiscipline.get(discipline) ?? 0) + 1);
   }
@@ -52,17 +77,8 @@ export function HomePage() {
         </p>
       </header>
 
-      <StudyStrip
-        dueCount={totals.due}
-        streakDays={store.streak()}
-        known={totals.known}
-        totalQuestions={totals.totalQuestions}
-        attempted={totals.attempted}
-        reviewModuleId={totals.reviewModuleId}
-        reviewModuleName={totals.reviewModuleName}
-      />
-
-      <StudyReport weakSpots={weakSpots} />
+      <ExamPrompt />
+      <ExamFilterBar />
 
       <div className={styles.disciplineGrid}>
         {DISCIPLINES.map((discipline) => {
@@ -81,6 +97,21 @@ export function HomePage() {
           );
         })}
       </div>
+
+      {/* The round sits BELOW the subject grid. Picking what to study is the decision a learner
+          arrives with; the round is what they do once they have picked, and on a first visit it
+          is a ward of people they have never met. Above the grid it answered a question nobody
+          had asked yet. */}
+      <RoundBoard round={round} />
+
+      <StudyStrip
+        dueCount={totals.due}
+        known={totals.known}
+        totalQuestions={totals.totalQuestions}
+        attempted={totals.attempted}
+      />
+
+      <StudyReport weakSpots={weakSpots} />
 
       {reference && (
         <section className={styles.tools}>

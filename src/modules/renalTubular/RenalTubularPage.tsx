@@ -1,73 +1,100 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
-import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { NephronDiagram } from './components/NephronDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
+import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
+import { useModuleCases } from '@/shared/hooks/useModuleCases';
+import { RENAL_TUBULAR_CASES } from './cases';
 import { RENAL_TUBULAR_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
-import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
-import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { renalTubularContent } from './content';
+import { RENAL_TUBULAR_CONTROLS, buildRenalTubularPresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
 import { renalTubularLoopConfig } from './engine/loopConfig';
-import { perturbWaterDeprivation } from './engine/engine';
-import { DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS, RENAL_TUBULAR_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { RenalTubularInputs } from './engine/types';
+import { DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS, RENAL_TUBULAR_PRESET_LABELS, RENAL_TUBULAR_PRESET_GLOSS, PRESET_ORDER } from './engine/presets';
+import type { RenalTubularDerived, RenalTubularHistoryPoint, RenalTubularInputs, RenalTubularState } from './engine/types';
 
 export function RenalTubularPage() {
-  const { inputs, setInputs, shareLink } = useShareableInputs<RenalTubularInputs>('renalTubular', DEFAULT_RENAL_TUBULAR_INPUTS);
+  // Opened from the ward round, or null for the catalogue route. The seed means the engine
+  // settles the patient directly rather than settling a healthy body and then jumping.
+  const patient = useModuleCase(RENAL_TUBULAR_CASES);
+  const { inputs, setInputs, shareLink } = useShareableInputs<RenalTubularInputs>(
+    'renalTubular',
+    DEFAULT_RENAL_TUBULAR_INPUTS,
+    caseInputs(patient, DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS),
+  );
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, renalTubularLoopConfig);
   const resetScenario = useScenarioReset({
     setInputs,
-    defaults: DEFAULT_RENAL_TUBULAR_INPUTS,
+    // At a bedside, Reset means "back to this patient". Returning a learner who is mid-case to
+    // a healthy volunteer would discard the thing they came to look at.
+    defaults: caseInputs(patient, DEFAULT_RENAL_TUBULAR_INPUTS, RENAL_TUBULAR_PRESETS) ?? DEFAULT_RENAL_TUBULAR_INPUTS,
     resetEngine: reset,
     baseline,
     transport,
   });
 
-  const { session, summary } = useModulePractice({
+  // Tab, question sets, session, bedside and the three bedded nodes. Everything downstream of
+  // the engine that every bedded page repeats lives in the hook; what stays here is this
+  // module's physiology and its presentation.
+  const cases = useModuleCases({
     moduleId: 'renalTubular',
+    patient,
+    cases: RENAL_TUBULAR_CASES,
     questions: RENAL_TUBULAR_QUESTIONS,
     presets: RENAL_TUBULAR_PRESETS,
-    inputs,
     defaultInputs: DEFAULT_RENAL_TUBULAR_INPUTS,
+    inputs,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
+    shareLink,
+    snapshot,
+    transport,
+    baselineFrozen: baseline.history !== null,
+    presetLabels: RENAL_TUBULAR_PRESET_LABELS,
+    presetGloss: RENAL_TUBULAR_PRESET_GLOSS,
   });
+  const { session } = cases;
 
   const handleChange = useInputSetter(setInputs);
 
-  const applyPreset = useScenarioPreset({
-    setInputs,
-    defaults: DEFAULT_RENAL_TUBULAR_INPUTS,
-    presets: RENAL_TUBULAR_PRESETS,
-    resetEngine: reset,
-  });
+  /* One drawing, not two. This page rendered a hand-written NephronDiagram, ReadoutPanel,
+   * ControlPanel and three Sparklines while `presentation.ts` described all four for the phone —
+   * and the two had already drifted, with the schema's osmolality markers and aquaporin arrows
+   * painted at zero opacity because their style variables sat on a parent group the schema
+   * renderer never reads. The schema's controls, readouts and charts were verified identical to
+   * the components they replace before this conversion. */
+  const ctx = getPresentationContext<RenalTubularState, RenalTubularDerived, RenalTubularInputs, RenalTubularHistoryPoint>(
+    snapshot,
+    history,
+    baseline,
+    inputs,
+  );
+  const slots = usePresentationSlots('renalTubular', buildRenalTubularPresentation(ctx), ctx, inputs, handleChange);
 
-  function triggerWaterDeprivation() {
-    perturb((state) => perturbWaterDeprivation(state));
-  }
 
-  const plasmaHistory = useSeries(history, (h) => h.plasmaOsmolality);
-  const plasmaHistoryBaseline = useSeries(baseline.history, (h) => h.plasmaOsmolality);
-  const urineHistory = useSeries(history, (h) => h.urineOsmolality);
-  const urineHistoryBaseline = useSeries(baseline.history, (h) => h.urineOsmolality);
-  const adhHistory = useSeries(history, (h) => h.adhLevel * 100);
-  const adhHistoryBaseline = useSeries(baseline.history, (h) => h.adhLevel * 100);
+  /* Water deprivation is the CAUSE, not the plasma osmolality it produces.
+   *
+   * This used to hand-write a twelve-milliosmole step into the plant, which is the reading the
+   * module exists to explain — and it left the water-intake slider sitting at its normal value
+   * through a deprivation test. Driving the intake to zero lets the osmolality rise out of the
+   * model instead, and the rail shows what was done to the patient. */
+  const nudge = useInputNudge(setInputs, RENAL_TUBULAR_CONTROLS);
+  const triggerWaterDeprivation = () => nudge({ waterIntakeRate: -300 });
+
 
   return (
     <ModulePage
+      historyCapacity={renalTubularLoopConfig.historyCapacity}
       moduleId="renalTubular"
       title="Renal Tubular Physiology"
       subtitle="nephron segments, countercurrent multiplication & ADH"
@@ -76,38 +103,19 @@ export function RenalTubularPage() {
         <PresetBar
           order={PRESET_ORDER}
           labels={RENAL_TUBULAR_PRESET_LABELS}
-          onApply={applyPreset}
+          onApply={cases.applyPreset}
           actions={[{ label: 'Water deprivation', onClick: triggerWaterDeprivation, variant: 'danger' }]}
-          onShare={shareLink}
+          onShare={cases.shareLink}
           onReset={resetScenario}
         />
       }
-      diagram={<NephronDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      {...cases.page}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline
-    label="Plasma osmolality"
-    unit="mOsm/kg"
-    data={plasmaHistory} baselineData={plasmaHistoryBaseline}
-    domainMin={240}
-    domainMax={360}
-    colorVar="var(--tubule)"
-  />
-  <Sparkline
-    label="Urine osmolality"
-    unit="mOsm/kg"
-    data={urineHistory} baselineData={urineHistoryBaseline}
-    domainMin={0}
-    domainMax={1200}
-    colorVar="var(--urine)"
-  />
-  <Sparkline label="ADH" unit="%" data={adhHistory} baselineData={adhHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--adh)" />
-        </>
-      }
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      charts={slots.charts}
+      controls={slots.controls}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={renalTubularContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of nephron function — not a clinical or diagnostic tool. The best way to use it: pick "Central DI", note the dilute urine, then raise "Exogenous ADH (DDAVP)" and watch the urine concentrate sharply — then repeat with "Nephrogenic DI", where the same dose changes almost nothing. That contrast is the water deprivation test. Simulated time runs faster than real time so ADH responses (minutes) and medullary gradient washout (hours) are both watchable within a session.'}
     />

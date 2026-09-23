@@ -117,13 +117,14 @@ export function buildCalciumHomeostasisPresentation(ctx: Ctx): ModulePresentatio
           {
             type: 'group',
             transform: 'translate(232, 44)',
-            styleVars: { 'pth-level': derived.pthLevel },
             children: [
               ...([[-9, -8], [9, -8], [-9, 7], [9, 7]] as const).map(([cx, cy]) => ({
                 type: 'group' as const,
                 transform: `translate(${cx}, ${cy})`,
                 children: [
-                  { type: 'path' as const, d: ellipse(6, 5), fill: 'pth' as const, colorToken: 'pth', strokeWidth: 1.5, styleVars: { 'pth-level': derived.pthLevel } },
+                  /* Density IS the PTH level. `--pth-level` was set on the group and on the gland and read
+                     by nothing, so four parathyroids sat at full saturation whatever the hormone did. */
+                  { type: 'path' as const, d: ellipse(6, 5), fill: 'pth' as const, fillOpacity: 0.25 + clamp(derived.pthLevel, 0, 1) * 0.65, colorToken: 'pth', strokeWidth: 1.5 },
                 ],
               })),
               { type: 'text', x: 0, y: 28, text: 'Parathyroids', cls: 'organLabel' },
@@ -132,9 +133,9 @@ export function buildCalciumHomeostasisPresentation(ctx: Ctx): ModulePresentatio
           {
             type: 'group',
             transform: 'translate(104, 196)',
-            styleVars: { resorption: resorptionRate },
             children: [
-              { type: 'path', d: BONE_PATH, fill: 'calcium', colorToken: 'calcium', strokeWidth: 2, styleVars: { resorption: resorptionRate } },
+              // Bone pales as it is resorbed, for the same reason and by the same device.
+              { type: 'path', d: BONE_PATH, fill: 'calcium', fillOpacity: 0.85 - resorptionRate * 0.55, colorToken: 'calcium', strokeWidth: 2 },
               { type: 'text', x: 0, y: 56, text: 'Bone', cls: 'organLabel' },
             ],
           },

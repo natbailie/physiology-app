@@ -1,6 +1,7 @@
 import { MODULES } from '@/home/moduleRegistry';
 import { FREE_MODULE_IDS } from './config';
 import styles from './Paywall.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 const FREE_MODULES = MODULES.filter((m) => FREE_MODULE_IDS.has(m.id) && m.status === 'available');
 
@@ -13,6 +14,7 @@ export function Paywall({ moduleId }: { moduleId: string }) {
 
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <a href="#" className={styles.backLink}>
         ← All modules
       </a>

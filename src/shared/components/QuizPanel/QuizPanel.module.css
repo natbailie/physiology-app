@@ -102,17 +102,24 @@
 
 /* Choices are deliberately uniform — no styling hints at which one is right. The letter is a
  * keyboard affordance, not a rank. */
+/* 260px, not 200: an option that carries a gloss needs room for a short clause under its name,
+   and four of them across a desktop width left each one too narrow to say anything. This lands
+   them two-up, which is what the mock does. */
 .choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--s-3);
   margin-top: var(--s-1);
 }
 
+/* A grid, not a flex row: with a gloss under the name the option is two lines, and centring
+   would float the key chip halfway down the taller of them. `align-items: start` pins it to the
+   first line, where the letter belongs. */
 .choice {
   composes: button from '../../styles/button.module.css';
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: var(--s-3);
   padding: var(--s-4);
   text-align: left;
@@ -133,8 +140,28 @@
   color: var(--text-faint);
 }
 
+/* `white-space` is set on the CHILD, not on `.choice`.
+   
+   `.choice` composes `.button`, which is `white-space: nowrap`, and a composed class carries
+   equal specificity — so `.choice { white-space: normal }` beside it is a coin toss decided by
+   emitted stylesheet order, and it was losing. Nothing showed while every option was a single
+   word; the moment a gloss went underneath, the second line ran straight out of the button.
+   Declaring it here means there is no competition to lose. */
 .choiceLabel {
   min-width: 0;
+  white-space: normal;
+}
+
+/* What the scenario IS, never what its numbers do — see the gloss rule on QuizPanelProps.
+   Regular weight and dim, so it reads as a note under the name rather than a second label
+   competing with it. */
+.choiceGloss {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+  font-size: var(--fs-micro);
+  color: var(--text-dim);
+  letter-spacing: normal;
 }
 
 .watch {
@@ -199,16 +226,6 @@
 .verdictDetail {
   font-weight: 500;
   color: var(--text);
-}
-
-/* Points at the frozen baseline. Only shown on a miss, where the comparison is the lesson. */
-.counterfactual {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-prose);
-  color: var(--text-dim);
-  margin: 0;
-  padding-left: var(--s-4);
-  border-left: 2px dashed var(--panel-border);
 }
 
 /* The 60-100 word payoff. This is the thing the learner is here for, so it is set as prose

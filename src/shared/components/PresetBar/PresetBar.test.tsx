@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { PresetBar } from './PresetBar';
+import { ModuleShellProvider } from '@/shared/context/moduleShell';
 
 afterEach(cleanup);
 
@@ -61,5 +62,23 @@ describe('PresetBar', () => {
     for (const name of ['Normal', 'Alpha disease', 'Injure', 'Reset']) {
       expect((screen.getByRole('button', { name }) as HTMLButtonElement).disabled, name).toBe(false);
     }
+  });
+
+  /**
+   * The shell read that closes the pages which never passed `disabled`: once a page feeds
+   * `blindControls` to the shell, a blinded learner gets a locked bar with no `disabled` prop.
+   */
+  it('locks the bar while the shell is blinded, even without the disabled prop', () => {
+    const onApply = vi.fn();
+    render(
+      <ModuleShellProvider blinded>
+        <PresetBar order={ORDER} labels={LABELS} onApply={onApply} onReset={vi.fn()} />
+      </ModuleShellProvider>,
+    );
+
+    const button = screen.getByRole('button', { name: 'Alpha disease' }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    button.click();
+    expect(onApply).not.toHaveBeenCalled();
   });
 });

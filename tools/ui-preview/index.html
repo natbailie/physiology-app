@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physiology Lab — UI direction previews</title>
+<style>body{font-family:-apple-system,"Inter",sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6;color:#0f172a;background:#f8fafc}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 4px 14px -8px rgba(15,23,42,.2)}
+a{color:#0f62d6}.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px}</style></head>
+<body>
+<h1>Physiology Lab — UI direction previews</h1>
+<p>Static mocks. No app code changed. Open each, compare the same three screens (Home · Simulator desktop + 390pt native · Reference/Drugs), then pick a direction.</p>
+<div class="card"><h3>A — Modern clinical minimal</h3><p>NHS/Epic-inspired. Calm whites, single blue action, vitals-style tiles.</p><p><a href="./A-clinical-minimal.html">Open A-clinical-minimal.html →</a></p></div>
+<div class="card"><h3>B — Dark monitor / ICU</h3><p>Bedside-monitor inspired. Dark-first, glowing traces, alarm hierarchy.</p><p><a href="./B-monitor-dark.html">Open B-monitor-dark.html →</a></p></div>
+<div class="card"><h3>C — Textbook / academic</h3><p>Guyton/Handbook voice. Serif prose, numbered figures, examiner's notes.</p><p><a href="./C-textbook.html">Open C-textbook.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>H-home — production home page ★ latest</h3><p>Home as it would ship: app header, round, vitals, prescriptions, subjects, footer. Dark-first, university-accessible.</p><p><a href="./H-home.html">Open H-home.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>H-shockStates — production module page</h3><p>Shock States as it would ship: sticky top bar, Amina bedside, circuit, readouts, sliders, quiz, lessons.</p><p><a href="./H-shockStates.html">Open H-shockStates.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>H-respiratory — production module page</h3><p>Respiratory &amp; Acid-Base as it would ship: Nadia bedside, Davenport diagram, blood gas, Kussmaul quiz.</p><p><a href="./H-respiratory.html">Open H-respiratory.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>H-cardiorenal — production module page</h3><p>Cardiorenal as it would ship: Margaret bedside, heart–kidney loop, RAAS observations, two-beds comparison.</p><p><a href="./H-cardiorenal.html">Open H-cardiorenal.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>H — ward-round style, university-accessible (style notes)</h3><p>home-F look kept dark-first with WCAG 2.2 AA colour/focus fixes for UK university use: solid acuity tags, bordered meters, visible focus, skip link. Home + Shock + Respiratory + Cardiorenal.</p><p><a href="./H-ward-round-accessible.html">Open H-ward-round-accessible.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>G — ward-round style, UK public sector compatible ★ latest</h3><p>Concept F restyled to NHS + GOV.UK-style tokens: light-first, yellow focus, word+tag acuity, definition-list vitals. Home + Shock + Respiratory + Cardiorenal with real beds, switchable NHS/GOV.UK and light/dark-enhancement.</p><p><a href="./G-uk-public-sector.html">Open G-uk-public-sector.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>home-F — ward-round home with real beds ★ latest</h3><p>The F night-shift style applied to the actual home page: all 8 real beds with real routes, StudyStrip as vitals, StudyReport as prescriptions, real subject grid.</p><p><a href="./home-F.html">Open home-F.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>F-flagship — night-shift cinematic concept ★ latest</h3><p>Ward-round home, patient-framed bedside with insult button and split compare, registrar quiz, school-code-first pricing, schools dashboard. Concept copy, not verbatim.</p><p><a href="./F-flagship.html">Open F-flagship.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>E-cardiorenal-1to1 — exact page replica, textbook plate ★ latest</h3><p>Fresh ink-and-wash redraw with value pills, white explanations and trends, dark chrome by default, navy quiz panels in dark mode, evened spacing rhythm. Real quiz and explainer copy throughout.</p><p><a href="./E-cardiorenal-1to1.html">Open E-cardiorenal-1to1.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>D-cardiorenal-inapp — full module page, white gridless plate ★ latest</h3><p>The actual cardiorenal page as it would look in the app: sticky topBar, real presets/sliders/readouts, white gridless plate, study section. Plate follows theme.</p><p><a href="./D-cardiorenal-inapp.html">Open D-cardiorenal-inapp.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>D-anatomy — Fusion with real heart + kidney ★ latest</h3><p>Same fusion chrome, but the circuit panel renders the actual cardiorenal plate from <span class="mono">organShapes.ts</span>.</p><p><a href="./D-fusion-anatomy.html">Open D-fusion-anatomy.html →</a></p></div>
+<div class="card" style="border-color:#0f62d6"><h3>D — Clinical day / Monitor night ★ recommended fusion</h3><p>A chrome + B instruments. Light default, dark follows system. Dark scope wells in both themes.</p><p><a href="./D-fusion.html">Open D-fusion.html →</a></p></div>
+<h3>How to view</h3>
+<p class="mono">cd physiology-app/tools/ui-preview<br>python3 -m http.server 8123<br># open http://localhost:8123/</p>
+<p>Or double-click any file — no build step. Each prototype has a light/dark toggle (A, B).</p>
+<h3>What to judge</h3>
+<ul><li>Which feels most <i>clinical and trustworthy</i> to a med student / resident?</li><li>Is the simulator scannable in 5 seconds (MAP, CO, lactate)?</li><li>Does the mobile 390pt frame feel like the same product?</li><li>Mix-and-match is allowed — e.g. A chrome + C explainer typography.</li></ul>
+</body></html>

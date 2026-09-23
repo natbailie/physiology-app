@@ -1,3 +1,5 @@
+import type { ExamId } from './exams';
+
 /** The top tier of the catalogue: the subject a learner picks before anything else. A
  * discipline owns themes, a theme owns modules. Route ids are `discipline/<id>` (see
  * useHashRoute and App.tsx). */
@@ -155,6 +157,13 @@ export const THEMES: ThemeDescriptor[] = [
     accentColorVar: 'var(--exercise)',
   },
   {
+    id: 'metabolism',
+    name: 'Metabolism',
+    blurb: 'Energy balance, fuel selection and the catabolic stress response.',
+    discipline: 'physiology',
+    accentColorVar: 'var(--glucose)',
+  },
+  {
     id: 'cellMolecular',
     name: 'Cell & Molecular',
     blurb: 'The cell-level machinery underneath the organ systems.',
@@ -185,6 +194,18 @@ export interface ModuleDescriptor {
    * ModuleCard can visually distinguish them from feedback-loop simulators. */
   kind?: 'simulator' | 'reference';
   /**
+   * The exams this module is HIGH-YIELD for, not every syllabus it appears on somewhere.
+   *
+   * The distinction is the whole point: a filter that tags everything with everything narrows
+   * nothing, and a learner sitting the FRCA wants the eighteen modules that will actually be
+   * examined rather than a catalogue with the word "anaesthesia" removed from it.
+   *
+   * Absent means NOT YET MAPPED, which is why an untagged module still shows under every filter.
+   * That reads differently from "on no syllabus" and is the safer default: a student who trusts
+   * a filter will skip what it hides, so a wrong tag costs more than a missing one.
+   */
+  exams?: readonly ExamId[];
+  /**
    * Modules that model a neighbouring part of the same problem.
    *
    * The app siloes concepts that a patient does not: hyperkalaemia is modelled in three places,
@@ -203,6 +224,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Cardiorenal',
     tagline: 'Heart & kidney feedback simulator',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--artery)',
     related: [
@@ -215,6 +237,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Respiratory & Acid-Base',
     tagline: 'Ventilation, gas exchange & reading a blood gas',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'respiratory',
     accentColorVar: 'var(--o2)',
     related: [
@@ -228,6 +251,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'HPA Axis',
     tagline: 'Cortisol, stress response & adrenal insufficiency',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--cortisol)',
     related: [
@@ -239,6 +263,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Thyroid (HPT) Axis',
     tagline: 'TSH, T4/T3 & thyroid function tests',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--thyroid)',
     related: [
@@ -250,6 +275,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'GI Physiology',
     tagline: 'Gastric acid, gut hormones & motility along the meal',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'gastrointestinal',
     accentColorVar: 'var(--gastrin)',
     related: [
@@ -262,6 +288,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Glucose Regulation',
     tagline: 'Insulin, glucagon & counter-regulatory hormones',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--glucose)',
     related: [
@@ -274,6 +301,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Calcium & Bone/Mineral',
     tagline: 'PTH, calcitriol & phosphate regulation',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1', 'MRCS_PART_A'],
     theme: 'endocrine',
     accentColorVar: 'var(--pth)',
     related: [
@@ -285,6 +313,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'HPG Axis',
     tagline: 'GnRH, LH/FSH & the ovulatory LH surge',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--lh)',
     related: [
@@ -296,6 +325,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Membrane & Action Potentials',
     tagline: 'Ion conductances, Nernst/GHK & the action potential',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--vm)',
     related: [
@@ -309,6 +339,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Autonomic Nervous System',
     tagline: 'Sympathetic/parasympathetic balance across organ effectors',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--sympathetic)',
     related: [
@@ -321,6 +352,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Respiratory Mechanics & Spirometry',
     tagline: 'Lung volumes, compliance & V/Q matching',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'respiratory',
     accentColorVar: 'var(--compliance)',
     related: [
@@ -333,6 +365,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Mechanical Ventilation & Ventilator Pressures',
     tagline: 'PEEP, pressure support, driving pressure & how much of the breath is yours',
     status: 'available',
+    exams: ['MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'respiratory',
     accentColorVar: 'var(--vq)',
     related: [
@@ -345,6 +378,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Respiratory Failure & V/Q Mismatch',
     tagline: 'Reading a blood gas as two axes: the oxygen shunt and the CO2 drive',
     status: 'available',
+    exams: ['UKMLA', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'respiratory',
     accentColorVar: 'var(--o2)',
     related: [
@@ -358,6 +392,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'ECG & Cardiac Conduction',
     tagline: 'How one dipole, seen twelve ways, writes an ECG',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--ecg-trace)',
     related: [
@@ -372,6 +407,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Cardiac Cycle & PV Loop',
     tagline: 'Preload, afterload, contractility & the pressure-volume loop',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--pv-loop)',
     related: [
@@ -385,6 +421,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Coronary Circulation',
     tagline: 'Supply, demand & the vasodilatory reserve in between',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--artery)',
     related: [
@@ -399,6 +436,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Renal Tubular Physiology',
     tagline: 'Nephron segments, countercurrent multiplication & ADH',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'renalFluids',
     accentColorVar: 'var(--tubule)',
     related: [
@@ -411,6 +449,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Coagulation & Hemostasis',
     tagline: 'The clotting cascade, PT/APTT & anticoagulants',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'haematology',
     accentColorVar: 'var(--fibrin)',
     related: [
@@ -422,6 +461,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Erythropoiesis & Anemia',
     tagline: 'EPO feedback, iron & B12, and classifying an anemia',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'haematology',
     accentColorVar: 'var(--hemoglobin)',
     related: [
@@ -435,6 +475,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Immune Response',
     tagline: 'Innate to adaptive, and how memory changes everything',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1'],
     theme: 'haematology',
     accentColorVar: 'var(--memory)',
     related: [
@@ -446,6 +487,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Hypersensitivity',
     tagline: 'Types I-IV, and every transfusion reaction among them',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'haematology',
     accentColorVar: 'var(--ige)',
     related: [
@@ -459,6 +501,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Muscle & EC Coupling',
     tagline: 'Calcium, cross-bridges, length-tension & force-velocity',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--sarcomere)',
     related: [
@@ -471,6 +514,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Potassium & Sodium-Water Balance',
     tagline: 'Serum vs total body, and tonicity vs volume',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1', 'MRCS_PART_A'],
     theme: 'renalFluids',
     accentColorVar: 'var(--potassium)',
     related: [
@@ -484,6 +528,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Capillary Exchange & Oedema',
     tagline: 'Starling forces, the interstitium & lymphatic reserve',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--capillary)',
     related: [
@@ -496,6 +541,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Venous Return & Cardiac Function',
     tagline: 'Filling pressure, the two curves & where they cross',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--venous)',
     related: [
@@ -508,6 +554,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Shock States',
     tagline: 'Four ways to fail, and the numbers that separate them',
     status: 'available',
+    exams: ['UKMLA', 'MRCP_PART_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'cardiovascular',
     accentColorVar: 'var(--artery)',
     related: [
@@ -521,6 +568,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Fetal & Neonatal Circulation',
     tagline: 'Three shunts, and the minute two circulations become one',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA'],
     theme: 'reproduction',
     accentColorVar: 'var(--o2)',
     related: [
@@ -532,6 +580,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Neuromuscular Junction',
     tagline: 'Safety factor, fade, and telling presynaptic from postsynaptic',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--vm)',
     related: [
@@ -544,6 +593,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Cerebral Perfusion, ICP & CSF',
     tagline: 'Monro-Kellie, the pressure-volume curve and CPP = MAP − ICP',
     status: 'available',
+    exams: ['UKMLA', 'MRCP_PART_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--vm)',
     related: [
@@ -552,10 +602,24 @@ export const MODULES: ModuleDescriptor[] = [
     ],
   },
   {
+    id: 'cognitiveNeuroscience',
+    name: 'Cognitive Neurophysiology',
+    tagline: 'Arousal, the 7±2 ceiling & the executive reserve',
+    status: 'available',
+    exams: ['USMLE_STEP_1'],
+    theme: 'neuroMuscle',
+    accentColorVar: 'var(--axon)',
+    related: [
+      { id: 'cerebralPerfusion', why: 'the blood flow that keeps this brain thinking' },
+      { id: 'membranePotentials', why: 'the resting and action potentials every cognitive computation runs on' },
+    ],
+  },
+  {
     id: 'vision',
     name: 'Vision & Phototransduction',
     tagline: 'Rods vs cones, dark adaptation & the pupil reflexes',
     status: 'available',
+    exams: ['USMLE_STEP_1'],
     theme: 'specialSenses',
     accentColorVar: 'var(--retina)',
     related: [
@@ -568,6 +632,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Hearing & Cochlear Mechanics',
     tagline: 'The audiogram, recruitment & telling conductive from cochlear',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA'],
     theme: 'specialSenses',
     accentColorVar: 'var(--cochlea)',
     related: [
@@ -579,6 +644,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Vestibular System & Vertigo',
     tagline: 'Canal firing, compensation, BPPV & the head impulse',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'specialSenses',
     accentColorVar: 'var(--vestibular)',
     related: [
@@ -591,6 +657,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Somatosensation & Pain Pathways',
     tagline: 'The dorsal-horn gate, sensitisation & the tract dissociations',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--nociception)',
     related: [
@@ -603,6 +670,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Motor Control: Basal Ganglia & Cerebellum',
     tagline: 'Slowness, error & release across the movement disorders',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'neuroMuscle',
     accentColorVar: 'var(--basal-ganglia)',
     related: [
@@ -615,6 +683,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Liver & Bilirubin Metabolism',
     tagline: 'One pigment, three places to fail, read from urine and stool',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
     theme: 'gastrointestinal',
     accentColorVar: 'var(--liver)',
     related: [
@@ -628,6 +697,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Maternal Physiology, Labour & Lactation',
     tagline: 'Every maternal number changes, and most look like disease',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA'],
     theme: 'reproduction',
     accentColorVar: 'var(--placenta)',
     related: [
@@ -640,6 +710,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Anterior Pituitary: GH & Prolactin',
     tagline: 'Autonomy, the dopamine brake & the glucose suppression test',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--pituitary)',
     related: [
@@ -652,6 +723,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Adrenal Cortex: Steroidogenesis & CAH',
     tagline: 'One pathway, four enzymes, a fingerprint at every block',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1'],
     theme: 'endocrine',
     accentColorVar: 'var(--cortisol)',
     related: [
@@ -664,6 +736,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Adrenal Medulla & Phaeochromocytoma',
     tagline: 'Alpha raises it, beta moves the rest — block in the right order',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1', 'MRCS_PART_A'],
     theme: 'endocrine',
     accentColorVar: 'var(--adrenal-medulla)',
     related: [
@@ -676,6 +749,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Blood Groups & Transfusion Reactions',
     tagline: 'Preformed antibodies, and two reaction timelines that never overlap',
     status: 'available',
+    exams: ['UKMLA', 'MRCP_PART_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
     theme: 'haematology',
     accentColorVar: 'var(--transfusion)',
     related: [
@@ -688,6 +762,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Thermoregulation, Fever & Heat Illness',
     tagline: 'Fever is defended and hyperthermia is overwhelmed',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'FRCA_PRIMARY'],
     theme: 'integrative',
     accentColorVar: 'var(--thermal)',
     related: [
@@ -700,6 +775,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Exercise Physiology',
     tagline: 'Every system answers one question: how much oxygen do the muscles need',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'integrative',
     accentColorVar: 'var(--exercise)',
     related: [
@@ -713,6 +789,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Enzyme Kinetics & Inhibition',
     tagline: 'One equation explains saturation, competition & drug class',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'FRCA_PRIMARY'],
     theme: 'cellMolecular',
     accentColorVar: 'var(--ecg-trace)',
     related: [
@@ -720,11 +797,51 @@ export const MODULES: ModuleDescriptor[] = [
       { id: 'respiratory', why: 'what systemic acidaemia does to every reaction at once' },
     ],
   },
+{
+    id: 'metabolism',
+    name: 'Metabolism & Energy Balance',
+    tagline: 'Fuel mix, ketosis & the cost of catabolic stress',
+    status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCS_PART_A', 'FRCA_PRIMARY'],
+    theme: 'metabolism',
+    accentColorVar: 'var(--glucose)',
+    related: [
+      { id: 'enzymeKinetics', why: 'the enzymes underneath the fuel-switch decisions' },
+      { id: 'glucoseRegulation', why: 'the insulin axis this module read as a dial' },
+    ],
+  },
+  {
+    id: 'toxicology',
+    name: 'Toxicology & Poisoning',
+    tagline: 'The nomogram, the antidote race & the eight-hour window',
+    status: 'available',
+    exams: ['UKMLA', 'MRCP_PART_1'],
+    theme: 'metabolism',
+    accentColorVar: 'var(--danger)',
+    related: [
+      { id: 'enzymeKinetics', why: 'the same kinetics matter twice as much when the dose is wrong' },
+      { id: 'liverPhysiology', why: 'the liver this overdosed patient is asking to clear the load' },
+    ],
+  },
+  {
+    id: 'anaesthesia',
+    name: 'Anaesthesia & Gas Uptake',
+    tagline: 'The dial, the circuit & the solubility race',
+    status: 'available',
+    exams: ['FRCA_PRIMARY'],
+    theme: 'metabolism',
+    accentColorVar: 'var(--o2)',
+    related: [
+      { id: 'respiratory', why: 'the lungs these volatile agents wash through' },
+      { id: 'shockStates', why: 'the cardiac output that sets the speed of every uptake' },
+    ],
+  },
   {
     id: 'cellCycle',
-    name: 'Cell Cycle & Checkpoints',
-    tagline: 'Four phases, three checkpoints, and every cancer drug names one',
+    name: 'Cell Cycle & Division',
+    tagline: 'Checkpoints, DNA damage & the fate of the divided cell',
     status: 'available',
+    exams: ['USMLE_STEP_1'],
     theme: 'cellMolecular',
     accentColorVar: 'var(--o2)',
     related: [
@@ -737,6 +854,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Digestion & Absorption',
     tagline: 'Pancreas, bile, brush border & the stool that names the broken link',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCP_PART_1'],
     theme: 'gastrointestinal',
     accentColorVar: 'var(--gastrin)',
     related: [
@@ -750,6 +868,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Inflammation',
     tagline: 'Acute response, resolution, and the conditions that prevent it',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'MRCS_PART_A'],
     theme: 'haematology',
     accentColorVar: 'var(--danger)',
     related: [
@@ -763,6 +882,7 @@ export const MODULES: ModuleDescriptor[] = [
     name: 'Micturition',
     tagline: 'Bladder filling, storage and the voluntary control of voiding',
     status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA'],
     theme: 'renalFluids',
     accentColorVar: 'var(--o2)',
     related: [

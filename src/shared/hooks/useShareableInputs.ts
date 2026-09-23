@@ -14,6 +14,18 @@ import { decodeScenario, encodeScenario, routeIdFromHash } from './scenarioUrl';
 export function useShareableInputs<T extends object>(
   moduleId: string,
   defaults: T,
+  /**
+   * What to open on, when the page is not being opened cold.
+   *
+   * A ward-round case arrives at a patient, and settling normal physiology first — then jumping
+   * to the bedside once an effect has run — shows the learner half a second of the wrong body.
+   * Seeding here instead means `useEngineLoop` settles the patient directly, and because its
+   * `settledState` is keyed on the inputs it caches that settle like any other.
+   *
+   * `defaults` still governs Share and Reset; this is the starting state, not a new baseline.
+   * A scenario in the URL wins over it, because an explicit link is the more specific request.
+   */
+  initial?: T,
 ): {
   inputs: T;
   setInputs: React.Dispatch<React.SetStateAction<T>>;
@@ -21,16 +33,17 @@ export function useShareableInputs<T extends object>(
   shareLink: () => string;
 } {
   const [inputs, setInputs] = useState<T>(() => {
-    if (typeof window === 'undefined') return defaults;
-    if (routeIdFromHash(window.location.hash) !== moduleId) return defaults;
+    const opening = initial ?? defaults;
+    if (typeof window === 'undefined') return opening;
+    if (routeIdFromHash(window.location.hash) !== moduleId) return opening;
 
     const scenario = decodeScenario(window.location.hash);
-    if (!scenario) return defaults;
+    if (!scenario) return opening;
 
     // Only keys the module actually has. A link from an older version naming an input that no
     // longer exists loads the rest rather than failing, and a hand-edited one cannot inject
     // anything the module was not already expecting.
-    const applied = { ...defaults } as Record<string, unknown>;
+    const applied = { ...opening } as Record<string, unknown>;
     for (const [key, value] of Object.entries(scenario.inputs)) {
       if (key in applied && typeof value === typeof applied[key]) applied[key] = value;
     }

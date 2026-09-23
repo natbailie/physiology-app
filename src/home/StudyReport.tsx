@@ -32,7 +32,17 @@ function reasonText(spot: WeakSpot): string {
 }
 
 /**
- * What to work on next, and why.
+ * What to work on next, and why — the ward round's prescriptions.
+ *
+ * Retitled rather than reimplemented when the round landed. A "℞ prescribed for you" panel is
+ * this panel: a ranked list of what the learner is weakest at, each row carrying the reason and
+ * a mastery meter. Building a second component over the same `rankWeaknesses` output would have
+ * been two affordances for one idea, and the two would have drifted.
+ *
+ * Note what is deliberately NOT here: an expiry. The concept this framing came from had
+ * prescriptions lapsing with the shift, which is streak punishment wearing a white coat — the
+ * same thing `currentStreak`'s leniency was written to avoid. A weak spot stops being listed
+ * when it stops being weak, and at no other time.
  *
  * Absent until a learner has answered something, on the same reasoning as `StudyStrip`: a report
  * that says nothing is worse than no report. It is also absent once nothing is weak, which is the
@@ -48,7 +58,7 @@ export function StudyReport({ weakSpots }: StudyReportProps) {
   return (
     <section className={styles.report} aria-labelledby="study-report-title">
       <h2 className={styles.title} id="study-report-title">
-        Worth another look
+        <span aria-hidden="true">℞</span> Prescribed for you
       </h2>
 
       <ul className={styles.list}>

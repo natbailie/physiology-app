@@ -75,3 +75,19 @@ export const MICTURITION_PRESET_ORDER: MicturitionPresetName[] = [
   'overflowIncontinence',
   'neurogenic',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const MICTURITION_PRESET_GLOSS: Partial<Record<MicturitionPresetName, string>> = {
+  filling: 'the bladder storing, quietly',
+  strongUrge: 'full enough that the urge is hard to defer',
+  voiding: 'emptying, with the outlet relaxed',
+  detrusorOveractivity: 'the bladder wall contracting before it is asked to',
+  stressIncontinence: 'a weak outlet that leaks when the abdomen squeezes',
+  overflowIncontinence: 'a bladder too full to take more, leaking past an obstruction',
+  neurogenic: 'the cord no longer coordinating storage with emptying',
+};

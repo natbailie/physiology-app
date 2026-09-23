@@ -38,7 +38,7 @@ describe('module registry wiring', () => {
 
   it('routes nowhere the registry does not list', () => {
     // 'home' is the fallback and never appears in VALID_ROUTES; the rest are utility pages.
-    const utility = new Set(['account', 'privacy', 'pricing']);
+    const utility = new Set(['account', 'accessibility', 'privacy', 'pricing', 'methodology', 'review-h', 'teacher']);
     const known = new Set(MODULES.map((module) => module.id));
     const themeRoutes = new Set(THEMES.map((theme) => `theme/${theme.id}`));
     const disciplineRoutes = new Set(DISCIPLINES.map((d) => `discipline/${d.id}`));

@@ -1,7 +1,7 @@
 import { clamp } from '@/shared/lib/math';
 import { CLASSIFICATION } from './engine/constants';
 import type { ShockDerived, ShockHistoryPoint, ShockInputs, ShockState } from './engine/types';
-import type { ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
+import type { ModulePresentation, PresentationContext, SceneNode, ControlSpec } from '@/shared/presentation/types';
 
 const LOOP = 'M 112 200 L 203 200 L 203 110 L 363 110 L 363 200 L 470 200 L 470 352 L 112 352 Z';
 const LUNGS = 'M 243 110 q 20 -30 40 0 q 20 30 40 0';
@@ -15,6 +15,27 @@ function band(value: number, low: number, high: number): string {
   if (value > high) return 'high';
   return 'normal';
 }
+
+/**
+ * The control rail, hoisted out of the builder so the page can read the same ranges the
+ * schema declares.
+ *
+ * `useInputNudge` clamps a button's delta to the slider it writes, and the only honest source
+ * for that range is the slider itself — restating it at the call site is a second place to be
+ * wrong, and the one that would drift. Hoisting also gives the array a stable identity across
+ * the engine's thirty renders a second, which is what lets the hook memoise.
+ */
+export const SHOCK_CONTROLS: ReadonlyArray<ControlSpec<ShockInputs>> = [
+  { kind: 'slider', label: 'Blood volume', key: 'bloodVolumeMl', min: 2000, max: 6500, step: 50, unit: ' mL' },
+  { kind: 'slider', label: 'Contractility', key: 'contractility', min: 0, max: 2, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Vascular resistance', key: 'systemicVascularResistance', min: 0.15, max: 3, step: 0.01, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Pericardial pressure', key: 'pericardialPressureMmHg', min: 0, max: 28, step: 0.5, unit: ' mmHg' },
+  { kind: 'slider', label: 'Pulmonary resistance', key: 'pulmonaryVascularResistance', min: 1, max: 9, step: 0.1, unit: 'x' },
+  { kind: 'slider', label: 'Tissue extraction', key: 'tissueExtractionCapacity', min: 0.2, max: 1.3, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Oxygen demand', key: 'oxygenDemandMlPerMin', min: 120, max: 600, step: 10, unit: ' mL/min' },
+  { kind: 'slider', label: 'Haemoglobin', key: 'haemoglobinGDl', min: 3, max: 18, step: 0.5, unit: ' g/dL' },
+  { kind: 'slider', label: 'Baroreflex gain', key: 'baroreflexGain', min: 0, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
+];
 
 export function buildShockStatesPresentation(ctx: Ctx): ModulePresentation<ShockState, ShockDerived, ShockInputs, ShockHistoryPoint> {
   const { derived } = ctx;
@@ -35,7 +56,7 @@ export function buildShockStatesPresentation(ctx: Ctx): ModulePresentation<Shock
     { type: 'path', d: 'M 470 206 L 470 346', colorToken: 'artery', strokeWidth: 3 * calibre },
     { type: 'text', x: 480, y: 272, text: 'Arteries', cls: 'anatomy' },
     { type: 'text', x: 480, y: 288, text: `SVR ${(derived.systemicVascularResistance * 100).toFixed(0)}%`, cls: 'valueLabel', colorToken: 'text' },
-    { type: 'rect', x: TANK.x, y: TANK.y, width: TANK.width, height: TANK.height, cls: 'tank', styleVars: { tank: 1 } },
+    { type: 'rect', x: TANK.x, y: TANK.y, width: TANK.width, height: TANK.height, cls: 'tank' },
     {
       type: 'rect',
       x: TANK.x + 3,
@@ -43,7 +64,6 @@ export function buildShockStatesPresentation(ctx: Ctx): ModulePresentation<Shock
       width: TANK.width - 6,
       height: Math.max(0, fillHeight - 6),
       fill: 'venous',
-      styleVars: { 'tank-fill': clamp(fillHeight / TANK.height, 0, 1) },
     },
     { type: 'text', x: TANK.x + TANK.width / 2, y: TANK.y - 10, text: 'Venous reservoir', cls: 'anatomy', anchor: 'middle' },
     {
@@ -68,7 +88,7 @@ export function buildShockStatesPresentation(ctx: Ctx): ModulePresentation<Shock
       anchor: 'middle',
       opacity: 0.6,
     },
-    { type: 'path', d: LUNGS, colorToken: 'o2', strokeWidth: 2.5, styleVars: { 'lungs-opacity': clamp(1 - obstruction * 0.4, 0.6, 1) } },
+    { type: 'path', d: LUNGS, colorToken: 'o2', strokeWidth: 2.5, opacity: clamp(1 - obstruction * 0.4, 0.6, 1) },
     { type: 'text', x: 283, y: 78, text: 'Lungs', cls: 'anatomy', anchor: 'middle' },
   );
 
@@ -163,17 +183,7 @@ export function buildShockStatesPresentation(ctx: Ctx): ModulePresentation<Shock
         children,
       },
     ],
-    controls: [
-      { kind: 'slider', label: 'Blood volume', key: 'bloodVolumeMl', min: 2000, max: 6500, step: 50, unit: ' mL' },
-      { kind: 'slider', label: 'Contractility', key: 'contractility', min: 0, max: 2, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Vascular resistance', key: 'systemicVascularResistance', min: 0.15, max: 3, step: 0.01, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Pericardial pressure', key: 'pericardialPressureMmHg', min: 0, max: 28, step: 0.5, unit: ' mmHg' },
-      { kind: 'slider', label: 'Pulmonary resistance', key: 'pulmonaryVascularResistance', min: 1, max: 9, step: 0.1, unit: 'x' },
-      { kind: 'slider', label: 'Tissue extraction', key: 'tissueExtractionCapacity', min: 0.2, max: 1.3, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Oxygen demand', key: 'oxygenDemandMlPerMin', min: 120, max: 600, step: 10, unit: ' mL/min' },
-      { kind: 'slider', label: 'Haemoglobin', key: 'haemoglobinGDl', min: 3, max: 18, step: 0.5, unit: ' g/dL' },
-      { kind: 'slider', label: 'Baroreflex gain', key: 'baroreflexGain', min: 0, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
-    ],
+    controls: SHOCK_CONTROLS,
     readouts: [
       {
         label: 'MAP',

@@ -173,8 +173,41 @@ export function buildHypersensitivityPresentation(ctx: Ctx): ModulePresentation<
 
   const i = derived.armActivity.I;
 
+  /* The four cards' shading is stated on the NODE, not as a style variable.
+   *
+   * All four used to publish `styleVars: { 'opacity': … }`, and no rule in either project reads
+   * `--opacity` — the same trap cerebralPerfusion and somaticSensation each record fixing. So the
+   * granule spread, the antibody density, the complex deposition and the T-cell arrival were every
+   * one of them painted at full strength, on the phone and in the harness alike: four quantities
+   * the drawing claimed to carry and did not. */
   const mastCellChildren: readonly SceneNode[] = [
     { type: 'path', d: circleOutline(60, 78, 30), colorToken: 'ige', strokeWidth: 2, fill: 'none' },
+    /* IgE already bound to the mast cell's surface: what a previous exposure LEFT BEHIND, which
+     * this module's own presets call the point of the whole thing. It is there before the
+     * challenge and it is what makes a sensitised host a sensitised host — so a naive patient and
+     * an anaphylactic one stop being the same picture. */
+    ...Array.from({ length: Math.round(clamp(derived.igeSensitisation, 0, 1.5) * 8) }, (_, k) => {
+      const angle = (k / 8) * Math.PI * 2 - Math.PI / 2;
+      return {
+        type: 'path' as const,
+        d: `M${(60 + Math.cos(angle) * 30).toFixed(1)},${(78 + Math.sin(angle) * 30).toFixed(1)} l${(Math.cos(angle) * 5).toFixed(1)},${(Math.sin(angle) * 5).toFixed(1)}`,
+        colorToken: 'ige',
+        strokeWidth: 1.6,
+        strokeLinecap: 'round' as const,
+        fill: 'none' as const,
+      };
+    }),
+    // A stabiliser caps the cell rather than emptying it: the granules are still there, held in.
+    ...(derived.mastCellStabilisation > 0
+      ? [{
+          type: 'path' as const,
+          d: circleOutline(60, 78, 34),
+          colorToken: 'ok',
+          strokeWidth: 0.5 + clamp(derived.mastCellStabilisation / 100, 0, 1) * 3,
+          fill: 'none' as const,
+          opacity: 0.7,
+        }]
+      : []),
     ...Array.from({ length: 5 }, (_, k) => {
       const angle = (k / 5) * Math.PI * 2;
       const spread = 1 + i * 1.6;
@@ -184,37 +217,78 @@ export function buildHypersensitivityPresentation(ctx: Ctx): ModulePresentation<
         cy: 78 + Math.sin(angle) * 14 * spread,
         r: 3.2,
         fill: 'ige',
-        styleVars: { 'opacity': clamp(0.4 + i * 0.6, 0, 1) },
+        fillOpacity: clamp(0.4 + i * 0.6, 0, 1),
       };
     }),
   ];
 
   const targetCellChildren: readonly SceneNode[] = [
     { type: 'path', d: circleOutline(180, 78, 30), colorToken: 'cytotoxic-ab', strokeWidth: 2, fill: 'none' },
+    // Antibody the patient already carries against that cell surface, before any of it binds.
+    ...Array.from({ length: Math.round(clamp(derived.iggAgainstCellSurface, 0, 1.5) * 6) }, (_, k) => {
+      const angle = (k / 6) * Math.PI * 2 + 0.4;
+      return {
+        type: 'circle' as const,
+        cx: 180 + Math.cos(angle) * 22,
+        cy: 78 + Math.sin(angle) * 22,
+        r: 2.4,
+        fill: 'cytotoxic-ab',
+        fillOpacity: 0.7,
+      };
+    }),
+    // Complement, which is what turns a bound antibody into a lysed cell.
+    ...Array.from({ length: Math.round(clamp(derived.complementFunction, 0, 1.5) * 4) }, (_, k) => ({
+      type: 'circle' as const,
+      cx: 156 + k * 8,
+      cy: 112,
+      r: 2,
+      fill: 'complement',
+      fillOpacity: 0.8,
+    })),
     ...[-1, 0, 1].map((k) => ({
       type: 'path' as const,
       d: `M${180 + k * 18},${48 - 10} l-5,10 m5,-10 l5,10 m-5,0 v6`,
       colorToken: 'cytotoxic-ab',
       strokeWidth: 1.6,
       fill: 'none',
-      styleVars: { 'opacity': clamp(0.25 + derived.boundToCellSurface * 0.75, 0, 1) },
+      strokeOpacity: clamp(0.25 + derived.boundToCellSurface * 0.75, 0, 1),
     })),
   ];
 
   const complexChildren: readonly SceneNode[] = [
     { type: 'path', d: 'M270,52 h60 v52 h-60 z', colorToken: 'immune-complex', strokeWidth: 2, fill: 'none' },
+    // The circulating antibody pool the complexes will be made FROM, drawn along the top of the
+    // plasma box — present in the plasma before any antigen arrives to complex with it.
+    ...Array.from({ length: Math.round(clamp(derived.circulatingIggForComplexes, 0, 1.5) * 6) }, (_, k) => ({
+      type: 'path' as const,
+      d: `M${274 + k * 9},46 l-3,6 m3,-6 l3,6`,
+      colorToken: 'immune-complex',
+      strokeWidth: 1.3,
+      strokeLinecap: 'round' as const,
+      fill: 'none' as const,
+    })),
     ...[0, 1, 2, 3, 4, 5].map((k) => ({
       type: 'circle' as const,
       cx: 276 + (k % 3) * 24,
       cy: 62 + Math.floor(k / 3) * 30,
       r: 2.6 + derived.immuneComplexDeposition * 2.4,
       fill: 'immune-complex',
-      styleVars: { 'opacity': clamp(0.2 + derived.immuneComplexDeposition * 0.8, 0, 1) },
+      fillOpacity: clamp(0.2 + derived.immuneComplexDeposition * 0.8, 0, 1),
     })),
   ];
 
   const tissueChildren: readonly SceneNode[] = [
     { type: 'path', d: 'M390,52 h60 v52 h-60 z', colorToken: 'delayed-type', strokeWidth: 2, fill: 'none' },
+    // Memory T cells already resident in the tissue — the sensitisation a contact dermatitis needs
+    // to have happened before, and the reason a first exposure does nothing.
+    ...Array.from({ length: Math.round(clamp(derived.sensitisedTCells, 0, 1.5) * 5) }, (_, k) => ({
+      type: 'circle' as const,
+      cx: 396 + k * 13,
+      cy: 112,
+      r: 2.8,
+      fill: 'memory',
+      fillOpacity: 0.75,
+    })),
     ...[0, 1, 2, 3, 4].map((k) => {
       const arrive = derived.tCellRecruitment;
       return {
@@ -223,7 +297,7 @@ export function buildHypersensitivityPresentation(ctx: Ctx): ModulePresentation<
         cy: 78 - (1 - arrive) * 26,
         r: 3.4,
         fill: 'delayed-type',
-        styleVars: { 'opacity': clamp(0.25 + arrive * 0.75, 0, 1) },
+        fillOpacity: clamp(0.25 + arrive * 0.75, 0, 1),
       };
     }),
   ];
@@ -231,7 +305,10 @@ export function buildHypersensitivityPresentation(ctx: Ctx): ModulePresentation<
   const mechanisms: FrameNode = {
     type: 'frame',
     key: 'hypersensitivity-mechanisms',
-    viewBox: [0, 0, 480, 220],
+    /* 268 rather than 220: the strip below carries the UNIT and the RECIPIENT, which is what the
+     * seven transfusion scenarios differ in and what none of the four mechanism cards could
+     * show. Extra canvas rather than a crowded one. */
+    viewBox: [0, 0, 480, 268],
     ariaLabel: `The four hypersensitivity mechanisms, each shaded by how much of the current injury it is causing. Dominant mechanism: ${derived.mechanismSummary}`,
     children: [
       { type: 'text', x: 60, y: 26, text: 'Type I', cls: 'anatomyStrong', anchor: 'middle' },
@@ -265,6 +342,60 @@ export function buildHypersensitivityPresentation(ctx: Ctx): ModulePresentation<
 
       { type: 'text', x: 22, y: 198, text: 'Same antigen, same host, four different injuries — the difference is which arm answers', cls: 'pathLabel' },
       { type: 'text', x: 22, y: 212, text: `Antigen: soluble ${(derived.solubleAntigen * 100).toFixed(0)}% · fixed to tissue ${(derived.fixedAntigen * 100).toFixed(0)}%`, cls: 'pathLabel' },
+
+      /* The unit and the patient it is going into.
+       *
+       * Seven of this module's scenarios are a transfusion, and each is defined by one property of
+       * the bag or one of the recipient — an incompatible group, a leukocyte-rich product, a donor
+       * carrying anti-leukocyte antibody, an IgA-deficient patient, a heart with no reserve. None
+       * of that is a mechanism, so none of it could appear on the four cards above, and all seven
+       * drew an untouched screen. Drawn as the unit hanging and the patient beneath it, both fully
+       * specified before a drop is given. */
+      { type: 'path', d: 'M22,226 L458,226', colorToken: 'panel-border', strokeWidth: 1, fill: 'none' },
+      { type: 'text', x: 22, y: 242, text: 'Unit', cls: 'anatomyStrong' },
+      { type: 'path', d: 'M58,232 h42 v30 h-42 z', colorToken: 'transfusion', strokeWidth: 1.6, fill: 'transfusion', fillOpacity: 0.16 },
+      ...Array.from({ length: Math.round(clamp(derived.productLeukocyteLoad / 100, 0, 1) * 6) }, (_, k) => ({
+        type: 'circle' as const,
+        cx: 64 + (k % 3) * 14,
+        cy: 241 + Math.floor(k / 3) * 13,
+        r: 2.4,
+        fill: 'innate',
+        fillOpacity: 0.85,
+      })),
+      ...Array.from({ length: Math.round(clamp(derived.donorAntileukocyteAntibody, 0, 1) * 4) }, (_, k) => ({
+        type: 'path' as const,
+        d: `M${106 + k * 10},240 l-3,6 m3,-6 l3,6`,
+        colorToken: 'cytotoxic-ab',
+        strokeWidth: 1.3,
+        strokeLinecap: 'round' as const,
+        fill: 'none' as const,
+      })),
+      ...(derived.aboCompatibility < 1
+        ? [
+            {
+              type: 'path' as const,
+              d: 'M58,232 L100,262 M100,232 L58,262',
+              colorToken: 'danger',
+              strokeWidth: 1 + (1 - clamp(derived.aboCompatibility, 0, 1)) * 2,
+              fill: 'none' as const,
+              opacity: 0.4 + (1 - clamp(derived.aboCompatibility, 0, 1)) * 0.6,
+            },
+            { type: 'text' as const, x: 150, y: 246, text: 'ABO mismatch', cls: 'caption', colorToken: 'danger', halo: 'bg' as const },
+          ]
+        : [{ type: 'text' as const, x: 150, y: 246, text: 'group compatible', cls: 'caption' }]),
+
+      { type: 'text', x: 262, y: 242, text: 'Recipient', cls: 'anatomyStrong' },
+      /* Bar 320-380 rather than 330-400: at the wider placement its caption ran five pixels off
+       * the right edge of the frame, which the sweep catches and the eye does not. */
+      { type: 'path', d: 'M320,238 L380,238', colorToken: 'text-faint', strokeWidth: 4, strokeLinecap: 'round', fill: 'none' },
+      { type: 'path', d: `M320,238 L${(320 + clamp(derived.cardiacReserve, 0, 1) * 60).toFixed(1)},238`, colorToken: 'artery', strokeWidth: 4, strokeLinecap: 'round', fill: 'none' },
+      { type: 'text', x: 386, y: 241, text: 'cardiac reserve', cls: 'caption' },
+      ...(derived.recipientIgaDeficiency > 0
+        ? [{ type: 'text' as const, x: 320, y: 258, text: `IgA deficient ${(derived.recipientIgaDeficiency * 100).toFixed(0)}%`, cls: 'caption', colorToken: 'danger' }]
+        : []),
+      ...(derived.anamnesticRecall > 0
+        ? [{ type: 'text' as const, x: 262, y: 258, text: `primed ${(derived.anamnesticRecall * 100).toFixed(0)}%`, cls: 'caption', colorToken: 'memory' }]
+        : []),
     ],
   };
 

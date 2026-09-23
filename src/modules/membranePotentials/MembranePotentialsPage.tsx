@@ -14,6 +14,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { membranePotentialsContent } from './content';
 import { membraneLoopConfig } from './engine/loopConfig';
@@ -69,6 +70,7 @@ export function MembranePotentialsPage() {
 
   return (
     <ModulePage
+      historyCapacity={membraneLoopConfig.historyCapacity}
       moduleId="membranePotentials"
       title="Membrane & Action Potentials"
       subtitle="ion conductances, Nernst/GHK & the action potential"
@@ -85,7 +87,17 @@ export function MembranePotentialsPage() {
       }
       diagram={<MembraneDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={MEMBRANE_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -107,6 +119,7 @@ export function MembranePotentialsPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={membranePotentialsContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of membrane excitability — not a clinical or diagnostic tool. Click "Stimulate" to fire a single action potential, or raise the stimulus current slider past threshold for repetitive firing. Unlike every other module here, this one runs much SLOWER than real time: an action potential lasts about two milliseconds, so the upstroke, repolarization and refractory period would otherwise be far too fast to see.'}
     />

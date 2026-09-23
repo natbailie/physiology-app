@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f2f5f8" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#050a13" />
     <link
       rel="preload"
       href="/fonts/inter-latin-var.woff2"
@@ -26,21 +26,29 @@
       `:root[data-theme='dark']` block rather than duplicating the palette for
       `prefers-color-scheme` and again for an explicit override, which means the attribute has
       to be on <html> by the time the CSS applies. Doing it here rather than in React is also
-      what prevents a flash of light theme on a dark-set machine.
+      what prevents a flash of the wrong theme.
+
+      DARK IS THE DEFAULT, and that is why 'system' is now a STORED VALUE rather than the
+      absence of one. It used to be the absence: choosing "Auto" removed the key, and an absent
+      key meant "follow the machine". Defaulting to dark makes those two meanings collide — an
+      absent key would mean dark, so a learner who picked Auto would be given dark and have no
+      way back to their machine. Writing 'system' explicitly is what keeps all three states
+      reachable. `useTheme.ts` writes it; this script has to understand it.
     -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('theme');
           var system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          var resolved = stored === 'dark' || stored === 'light' ? stored : system;
+          var resolved =
+            stored === 'system' ? system : stored === 'dark' || stored === 'light' ? stored : 'dark';
           document.documentElement.dataset.theme = resolved;
           document
             .querySelector('meta[name="theme-color"]')
-            .setAttribute('content', resolved === 'dark' ? '#10161d' : '#f2f5f8');
+            .setAttribute('content', resolved === 'dark' ? '#050a13' : '#f6f8fb');
         } catch (e) {
-          /* Private mode can throw on localStorage. Light is the safe default. */
-          document.documentElement.dataset.theme = 'light';
+          /* Private mode can throw on localStorage. The default stands, which is dark. */
+          document.documentElement.dataset.theme = 'dark';
         }
       })();
     </script>

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Production preview: Cardiorenal module page in the university-accessible ward-round style. Fictional patient. Simplified teaching model, not a clinical tool.">
+<title>Cardiorenal · Physiology Lab — production preview H</title>
+<style>
+  /* H shared tokens — dark-first, WCAG 2.2 AA floors (text 4.5:1, non-text 3:1). */
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --raised:#e9eef5; --border:#687d95;
+    --text:#0f1f33; --dim:#33475f; --faint:#5a6f88;
+    --brand:#0f62d6; --brand-text:#ffffff; --accent:#b91c1c;
+    --link:#0f62d6; --link-visited:#5b21b6;
+    --chip-red-text:#b91c1c; --chip-red-bg:#fdecec; --chip-red-border:#b91c1c;
+    --chip-amber-text:#6b4400; --chip-amber-bg:#fff4d6; --chip-amber-border:#6b4400;
+    --chip-green-text:#046c4e; --chip-green-bg:#e6f4ed; --chip-green-border:#046c4e;
+    --chip-grey-text:#33475f; --chip-grey-bg:#eef2f7; --chip-grey-border:#33475f;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#5a7a9e;
+    --text:#e8f1ff; --dim:#b9c9dd; --faint:#9db4cc;
+    --brand:#4cc3ff; --brand-text:#03101f; --accent:#ff8f8f;
+    --link:#7fd0ff; --link-visited:#c4a4ff;
+    --chip-red-text:#ffc9c9; --chip-red-bg:#2a1215; --chip-red-border:#ff8f8f;
+    --chip-amber-text:#ffdf8e; --chip-amber-bg:#2a2108; --chip-amber-border:#ffcf5c;
+    --chip-green-text:#8ff2c6; --chip-green-bg:#0a2620; --chip-green-border:#5eeab0;
+    --chip-grey-text:#c4d3e6; --chip-grey-bg:transparent; --chip-grey-border:#9db4cc;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .skip-link{position:absolute;left:-9999px;top:0;background:var(--brand);color:var(--brand-text);padding:10px 18px;font-weight:800;font-size:15px;z-index:100;border-radius:0 0 8px 0}
+  .skip-link:focus{left:0}
+  .proto-bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 20px;background:#020610;color:#e8f1ff;border-bottom:2px solid #5a7a9e;font-size:13px}
+  [data-theme="light"] .proto-bar{background:#0f1f33}
+  .proto-bar nav{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap}
+  .proto-bar nav a{color:#e8f1ff}
+  .theme-seg{display:flex;background:#0f2a4d;border:1px solid #5a7a9e;border-radius:8px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#e8f1ff;font:inherit;font-size:12px;padding:6px 12px;min-height:36px;border-radius:6px;cursor:pointer}
+  .theme-seg button[aria-pressed="true"]{background:#4cc3ff;color:#03101f;font-weight:800}
+  :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 20px 90px;display:flex;flex-direction:column;gap:20px}
+  .kicker{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--brand)}
+  h1{font-size:28px;letter-spacing:-.02em;margin:0;line-height:1.15}
+  h2{font-size:20px;margin:0}
+  h3{font-size:16px;margin:0}
+  .lede{color:var(--dim);max-width:70ch}
+  .mono{font-family:var(--mono)}
+  a{color:var(--link);text-underline-offset:.15em}
+  a:visited{color:var(--link-visited)}
+  .btn{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:12px 20px;min-height:48px;border:1.5px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--brand);border-color:transparent;color:var(--brand-text)}
+  .topbar{position:sticky;top:var(--topbar-h,57px);z-index:20;background:var(--panel);border:1.5px solid var(--border);border-top:none;border-radius:0 0 16px 16px;padding:14px 20px 16px;box-shadow:0 12px 32px rgba(0,0,0,.3)}
+  [data-theme="light"] .topbar{box-shadow:0 8px 24px rgba(15,31,51,.12)}
+  .title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brandmark{font-weight:800;font-size:15px;text-decoration:none;color:inherit}
+  .brandmark:visited{color:inherit}
+  .brand-rule{width:1px;height:22px;background:var(--border)}
+  .back-link{font-size:14px;font-weight:700}
+  .subtitle{color:var(--dim);font-size:14px;flex-basis:100%;margin:0}
+  .modetabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0;padding:0;list-style:none}
+  .modetabs button{font:inherit;font-size:15px;font-weight:700;background:var(--raised);border:1.5px solid var(--border);border-radius:10px;padding:10px 18px;min-height:48px;cursor:pointer;color:var(--text)}
+  .modetabs button[aria-pressed="true"]{background:var(--panel);border-color:var(--text);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
+  .casebanner{border:1.5px solid var(--border);border-left:8px solid var(--chip-grey-border);border-radius:12px;padding:12px 16px;margin-top:12px;background:var(--raised)}
+  .casebanner h2{font-size:16px}
+  .casebanner p{margin:4px 0 0;color:var(--dim);font-size:14px;max-width:80ch}
+  .acuity{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.04em;border-radius:7px;padding:5px 9px;white-space:nowrap;border:1.5px solid}
+  .acuity.grey{background:var(--chip-grey-bg);color:var(--chip-grey-text);border-color:var(--chip-grey-border)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+  .chip{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--border);background:var(--panel);color:var(--text);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--bg);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+  .chip-row-label{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--dim);align-self:center}
+  .card{background:var(--panel);border:1.5px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+  [data-theme="light"] .card{box-shadow:0 8px 28px rgba(15,31,51,.14)}
+  .pad{padding:20px}
+  .lab-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+  .diagram{border:1.5px solid var(--border);border-radius:12px;background:var(--panel);padding:12px}
+  .diagram .fig-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;color:var(--dim);padding:2px 4px 8px;flex-wrap:wrap}
+  dl.obs{margin:12px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  dl.obs div{border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--raised)}
+  dl.obs dt{font-size:12px;color:var(--dim);font-weight:700}
+  dl.obs dd{margin:2px 0 0;font-family:var(--mono);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  dl.obs dd small{font-size:12px;color:var(--dim);font-weight:400}
+  .rail-head{display:flex;gap:8px;margin-bottom:4px}
+  .transport{flex:1;font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--border);background:var(--panel);color:var(--text);border-radius:10px;padding:10px 6px;min-height:48px;cursor:pointer}
+  .field{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--panel);margin-top:10px}
+  .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;gap:10px}
+  .field output{font-family:var(--mono)}
+  .field .note{font-size:12px;color:var(--dim)}
+  input[type="range"]{width:100%;min-height:44px;accent-color:var(--brand);margin:0}
+  fieldset{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin:0;max-width:80ch}
+  legend{font-weight:700;padding:0 6px}
+  .radio{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+  .radio input{width:26px;height:26px;margin-top:2px;accent-color:var(--brand);flex:none}
+  details{border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin:10px 0;max-width:80ch}
+  summary{font-weight:700;cursor:pointer;min-height:44px}
+  table{border-collapse:collapse;width:100%;max-width:80ch;margin:10px 0;font-size:13px}
+  th,td{border:1.5px solid var(--border);padding:8px 10px;text-align:left}
+  th{background:var(--raised)}
+  .compare{border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;margin-top:12px;background:var(--panel);max-width:80ch}
+  .compare p{margin:4px 0 0;color:var(--dim);font-size:14px}
+  .disclaimer{border-left:8px solid var(--chip-amber-border);padding:8px 0 8px 16px;margin:16px 0 0;color:var(--dim);font-size:14px;max-width:80ch}
+  .note{font-size:13px;color:var(--dim)}
+  footer.pagefoot{border-top:1.5px solid var(--border);padding:14px 4px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+  /* Below 960px the control rail docks to the viewport bottom — the shipped ModulePage
+     behaviour — so a slider drag stays beside the diagram it changes instead of flowing
+     ~1,100px beneath it. The topbar sticks beneath the wrapping proto-bar via --topbar-h,
+     published by the ResizeObserver below (mirroring ModulePage); the 57px fallback only
+     covers no-JS. */
+  @media(max-width:960px){.lab-grid{grid-template-columns:1fr}dl.obs{grid-template-columns:repeat(2,1fr)}.lab-grid>aside{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:52svh;overflow:auto;background:var(--panel);border-top:1.5px solid var(--border);padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))}.wrap{padding-bottom:56svh}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="proto-bar"><b>H-cardiorenal · production preview</b><span style="border:1px solid #5a7a9e;border-radius:999px;padding:2px 10px;font-size:12px">static mock — values illustrative</span><nav aria-label="H pages"><a href="./H-home.html">Home</a><a href="./H-shockStates.html">Shock States</a><a href="./H-respiratory.html">Respiratory</a><a href="./H-ward-round-accessible.html">Style notes</a></nav><span class="theme-seg" role="group" aria-label="Theme"><button type="button" data-t="dark" aria-pressed="true">Dark</button><button type="button" data-t="light" aria-pressed="false">Light</button><button type="button" data-t="auto" aria-pressed="false">Auto</button></span></div>
+<div class="wrap">
+<main id="main" aria-labelledby="modTitle">
+  <header class="topbar">
+    <div class="title-row">
+      <a class="brandmark" href="./H-home.html">Φ Physiology Lab</a>
+      <span class="brand-rule" aria-hidden="true"></span>
+      <a class="back-link" href="./H-home.html">← Modules</a>
+      <h1 id="modTitle">Cardiorenal</h1>
+      <p class="subtitle">Heart and kidney feedback simulator</p>
+    </div>
+    <ul class="modetabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="casebanner"><h2>Bedside: Margaret, 79 · Bed D03 · <span class="acuity grey"><span aria-hidden="true">○</span> New</span></h2><p>Ankles swelling, breathless on stairs, passing little urine. <b>Work out which organ is failing, and what the RAAS axis is responding to.</b> Compare with Derek (D08) next door: same RAAS, opposite lesion.</p></div>
+    <div class="chips" role="group" aria-label="Scenarios">
+      <span class="chip-row-label" id="scenLabel">Scenario:</span>
+      <button class="chip" type="button" aria-pressed="false" aria-describedby="scenLabel">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true" aria-describedby="scenLabel">Heart failure</button>
+      <button class="chip" type="button" aria-pressed="false" aria-describedby="scenLabel">Kidney failure</button>
+      <button class="chip" type="button" aria-pressed="false" aria-describedby="scenLabel">Salt load</button>
+    </div>
+  </header>
+
+  <section class="card" aria-labelledby="labTitle"><div class="pad">
+    <div class="kicker" id="labTitle">Lab</div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified heart and kidney loop: low cardiac output, low filtration, high RAAS. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Heart–kidney loop (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 130" width="100%" height="130" aria-hidden="true">
+          <path d="M90 60 c0-24 26-38 39-26 c13-12 39 2 39 26 c0 22-19 41-39 53 c-20-12-39-31-39-53" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="129" y="65" text-anchor="middle" font-size="12" fill="currentColor">Pump ↓</text>
+          <rect x="270" y="25" width="70" height="70" rx="24" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="305" y="60" text-anchor="middle" font-size="12" fill="currentColor">Kidney</text>
+          <text x="305" y="75" text-anchor="middle" font-size="12" fill="currentColor">GFR ↓</text>
+          <text x="205" y="45" text-anchor="middle" font-size="12" fill="currentColor">flow ↓</text>
+          <text x="205" y="108" text-anchor="middle" font-size="12" fill="currentColor">RAAS ↑ retains salt + water</text>
+        </svg>
+      </div>
+      <h2 style="margin:14px 0 4px">Observations</h2>
+      <dl class="obs" aria-label="Cardiorenal observations">
+        <div><dt>Cardiac output</dt><dd>3.1 <small>L/min</small></dd></div>
+        <div><dt>MAP</dt><dd>78 <small>mmHg</small></dd></div>
+        <div><dt>GFR</dt><dd>48 <small>mL/min</small></dd></div>
+        <div><dt>RAAS</dt><dd>2.40</dd></div>
+        <div><dt>Urine</dt><dd>0.40 <small>mL/min</small></dd></div>
+        <div><dt>Blood volume</dt><dd>5.80 <small>L</small></dd></div>
+      </dl>
+      <div class="compare"><h3>Two beds, one axis</h3><p>Margaret (D03): pump failing — low output, low MAP, RAAS compensating for flow never delivered. Derek (D08): kidney failing — preserved pump converts retained volume into <b>high</b> pressure. Same raised RAAS, opposite lesion, opposite treatment.</p></div>
+      <h2 style="margin:14px 0 4px">Trends</h2>
+      <div class="diagram"><div class="fig-head"><span>Blood volume, L · live, illustrative</span><span>Trend</span></div>
+        <svg viewBox="0 0 300 60" width="100%" height="60" aria-hidden="true"><polyline points="0,40 40,40 80,42 120,44 160,46 200,48 240,49 300,50" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+        <details><summary>Data table for blood volume trend</summary><table><thead><tr><th scope="col">Time</th><th scope="col">Blood volume (L)</th></tr></thead><tbody><tr><td>0 min</td><td>5.0</td></tr><tr><td>10 min</td><td>5.4</td></tr><tr><td>20 min</td><td>5.8</td></tr></tbody></table></details>
+      </div>
+      <div class="disclaimer">A simplified, conceptual model of heart–kidney feedback — not a clinical or diagnostic tool. <a href="#lessons">Where these numbers came from</a>.</div>
+    </div><aside aria-label="Simulation controls">
+      <div class="rail-head" role="group" aria-label="Transport">
+        <button class="transport" type="button">❚❚ Pause</button>
+        <button class="transport" type="button">▶ Step</button>
+        <button class="transport" type="button">Reset</button>
+      </div>
+      <div class="field"><label for="cr-pump">Pump strength <output for="cr-pump">55%</output></label><input id="cr-pump" type="range" min="10" max="120" value="55" aria-valuetext="55%"></div>
+      <div class="field"><label for="cr-salt">Salt intake <output for="cr-salt">Normal</output></label><input id="cr-salt" type="range" min="0" max="100" value="50" aria-valuetext="Normal"></div>
+      <div class="field"><label for="cr-kidney">Kidney function <output for="cr-kidney">Intact</output></label><input id="cr-kidney" type="range" min="0" max="100" value="90" aria-valuetext="Intact"><div class="note">Lower this to turn Margaret into Derek: same oedema, opposite pressure.</div></div>
+    </aside></div>
+  </div></section>
+
+  <section class="card" aria-labelledby="qTitle"><div class="pad">
+    <div class="kicker">Questions · Patients tab in the app</div>
+    <h2 id="qTitle">Practice at this bedside</h2>
+    <fieldset style="margin-top:12px"><legend>Margaret's creatinine is rising on a diuretic. The team ask whether to stop it. What is the kidney doing?</legend>
+      <div class="radio"><input id="cr-q1" type="radio" name="cr-q"><label for="cr-q1"><b>Underperfused, not diseased</b> — defending pressure it cannot see</label></div>
+      <div class="radio"><input id="cr-q2" type="radio" name="cr-q"><label for="cr-q2"><b>Primarily failing</b> — the lesion is in the nephron</label></div>
+      <p><button class="btn primary" type="button">Check answer</button></p>
+      <details><summary>Explanation</summary><p>Output is down and everything follows from that one fact. The kidney reads low flow as low volume and turns RAAS on; retaining more volume loads a ventricle that could not cope with the last litre. The creatinine is a consequence, not a second diagnosis — the loop breaks by treating the pump.</p></details>
+    </fieldset>
+  </div></section>
+
+  <section class="card" aria-labelledby="lessonsTitle" id="lessons"><div class="pad">
+    <div class="kicker">Lessons</div>
+    <h2 id="lessonsTitle">Which organ started it</h2>
+    <p class="lede">Both beds are oliguric, salt-retaining, RAAS-driven — and treated in opposite directions. The output and the pressure, read alongside RAAS, separate a failing pump from a failing kidney. Related modules: Venous Return — where the preload comes from; Renal Tubular — what the nephron does with the filtrate.</p>
+    <p class="note">Provenance: asserted bands with literature sources; unsourced gaps listed honestly in the app.</p>
+  </div></section>
+
+  <footer class="pagefoot" role="contentinfo"><a href="#accessibility">Accessibility statement</a><a href="#methodology">Methodology</a><a href="#privacy">Privacy</a><span>Fictional patient. Simplified teaching model — not a clinical tool.</span></footer>
+</main>
+</div>
+<script>
+(function(){const root=document.documentElement,btns=[...document.querySelectorAll('.theme-seg button')];const mq=matchMedia('(prefers-color-scheme: dark)');const store=()=>{try{return localStorage.getItem('physio-preview-h-theme')||'dark'}catch(e){return 'dark'}};function apply(m){const t=m==='auto'?(mq.matches?'dark':'light'):m;root.dataset.theme=t;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===m)));}btns.forEach(b=>b.onclick=()=>{const m=b.dataset.t;try{if(m==='auto')localStorage.removeItem('physio-preview-h-theme');else localStorage.setItem('physio-preview-h-theme',m)}catch(e){}apply(m);});if(mq.addEventListener)mq.addEventListener('change',()=>{if(store()==='auto')apply('auto');});apply(store());})();
+/* The proto-bar wraps at narrow widths (159px at 390px), so the module topbar cannot use a
+   fixed offset. Publish its measured height as --topbar-h, mirroring ModulePage. */
+(function(){var bar=document.querySelector('.proto-bar');if(!bar||!('ResizeObserver' in window))return;var root=document.documentElement;function pub(){root.style.setProperty('--topbar-h',bar.offsetHeight+'px');}new ResizeObserver(pub).observe(bar);pub();})();
+</script>
+</body>
+</html>

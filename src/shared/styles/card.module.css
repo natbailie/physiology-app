@@ -64,13 +64,27 @@ a.card:hover::before {
   opacity: 1;
 }
 
+/* The press, which is what a navigation actually begins with.
+ *
+ * The hover lifts the tile; the press puts it back down and takes a fraction off it, so the card
+ * answers the pointer before the page does. `--dur-fast` exists for exactly this — it was declared
+ * with the other motion tokens and used by nothing until now — because a press that decays over the
+ * full 180ms still looks slow when the finger has already gone. Stated after `:hover` so it wins
+ * between two rules of equal specificity, which is how it reads on a pointer device: hovering and
+ * pressing at once. */
+a.card:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: var(--dur-fast);
+}
+
 a.card:focus-visible {
   outline: 2px solid var(--card-accent, var(--brand));
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  a.card:hover {
+  a.card:hover,
+  a.card:active {
     transform: none;
   }
 }

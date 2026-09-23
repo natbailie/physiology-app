@@ -1,9 +1,10 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { micturitionLoopConfig } from './engine/loopConfig';
-import { MICTURITION_PRESETS, DEFAULT_MICTURITION_INPUTS } from './engine/presets';
+import { MICTURITION_PRESETS, DEFAULT_MICTURITION_INPUTS, MICTURITION_PRESET_GLOSS } from './engine/presets';
 import { MICTURITION_QUESTIONS } from './questions';
 import type { MicturitionDerived, MicturitionInputs, MicturitionInternalState } from './engine/types';
 import type { MicturitionPresetName } from './engine/presets';
@@ -32,3 +33,5 @@ describe('micturition predict questions', () => {
     predictions,
   );
 });
+
+describeGlossSet(MICTURITION_PRESET_GLOSS, MICTURITION_PRESETS, patterns);

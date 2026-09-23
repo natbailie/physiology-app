@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-flagship — Night-shift cinematic · concept preview</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --raised:#eef2f7; --border:#dfe6ef;
+    --text:#0f1f33; --dim:#4b5d75; --faint:#7c8da6;
+    --brand:#0f62d6; --accent:#c62828;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+    --serif:Georgia,"Literata",serif;
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#1d3352;
+    --text:#e8f1ff; --dim:#a9bdd6; --faint:#6f87a5;
+    --brand:#4cc3ff; --accent:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .proto-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 20px;background:#020610;color:#cfe6ff;border-bottom:1px solid #163154;font-size:12.5px}
+  .proto-bar nav{display:flex;gap:12px;margin-left:auto}.proto-bar nav a{color:#cfe6ff;text-decoration:none;opacity:.8}
+  .theme-seg{display:flex;background:#0f2a4d;border-radius:8px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#cfe6ff;font:inherit;font-size:11.5px;padding:4px 9px;border-radius:6px;cursor:pointer;opacity:.7}
+  .theme-seg button[aria-pressed="true"]{background:#4cc3ff;color:#03101f;opacity:1;font-weight:800}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 20px 90px;display:flex;flex-direction:column;gap:44px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--brand)}
+  h1{font-size:34px;letter-spacing:-.02em;margin:8px 0;line-height:1.12}
+  h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .lede{color:var(--dim);max-width:70ch}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+  .pad{padding:20px}
+  .mono{font-family:var(--mono)}
+  .btn{font:inherit;font-size:13px;font-weight:700;border-radius:10px;padding:11px 18px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#fff}
+  [data-theme="dark"] .btn.primary{color:#03101f;box-shadow:0 0 24px rgba(76,195,255,.4)}
+  .btn.insult{background:#c02828;border-color:transparent;color:#fff;font-size:15px;padding:14px 22px;box-shadow:0 0 28px rgba(255,93,93,.45)}
+  .badge{font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:999px;padding:2px 10px;color:var(--dim);background:var(--raised)}
+  .badge.hot{background:#ffb224;border-color:#ffb224;color:#231600;font-family:var(--mono)}
+  .badge.blue{color:var(--brand);border-color:var(--brand)}
+  /* wordmark trace */
+  .trace path{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 2.2s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @media(prefers-reduced-motion:reduce){.trace path{animation:none;stroke-dashoffset:0}}
+  /* phone + desktop pairs */
+  .pair{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+  .phone{width:390px;max-width:100%;border:1px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel)}
+  [data-theme="dark"] .phone{border-color:#2a4d7d;background:#040b16}
+  .phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--faint);padding:10px 16px 0}
+  .tabs{display:flex;border-top:1px solid var(--border)}
+  .tabs span{flex:1;text-align:center;font-size:10px;color:var(--faint);padding:10px 0 14px}
+  .tabs .on{color:var(--brand);font-weight:800}
+  /* patient cards */
+  .pt{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:center}
+  .pt + .pt{margin-top:10px}
+  .acuity{font-family:var(--mono);font-size:10px;font-weight:800;border-radius:7px;padding:4px 8px;white-space:nowrap}
+  .acuity.red{background:rgba(255,93,93,.14);color:#ff8d8d;border:1px solid #ff5d5d}
+  .acuity.amber{background:rgba(255,178,36,.12);color:#ffb224;border:1px solid #ffb224}
+  .acuity.green{background:rgba(61,220,151,.1);color:#3ddc97;border:1px solid #3ddc97}
+  .pt small{color:var(--dim);display:block}
+  /* vitals strip */
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .vital{background:#02070f;border:1px solid #1d3352;border-radius:12px;padding:10px 12px;color:#e8f1ff}
+  .vital span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8ba0b9}
+  .vital b{font-family:var(--mono);font-size:24px;text-shadow:0 0 16px currentColor}
+  .vital small{font-family:var(--mono);font-size:11px;color:#a9bdd6}
+  /* banner */
+  .banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#020610;border:1px solid #1d3352;border-radius:12px;padding:12px 16px;color:#e8f1ff}
+  .banner .livedot{width:9px;height:9px;border-radius:50%;background:#ff5d5d;box-shadow:0 0 12px #ff5d5d;animation:blink 1.4s infinite}
+  @keyframes blink{50%{opacity:.3}}
+  @media(prefers-reduced-motion:reduce){.banner .livedot{animation:none}}
+  /* split compare */
+  .split{position:relative;border:1px solid #1d3352;border-radius:12px;overflow:hidden;background:#fff}
+  .split .after{position:absolute;inset:0;background:rgba(192,40,40,.16);mix-blend-mode:multiply;pointer-events:none}
+  .split .tag{position:absolute;top:8px;font-family:var(--mono);font-size:10px;font-weight:800;border-radius:6px;padding:3px 9px}
+  .split input{position:absolute;left:12px;right:12px;bottom:10px;width:calc(100% - 24px);accent-color:#4cc3ff}
+  /* quiz */
+  .quiz{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:16px;background:var(--panel)}
+  .quiz .stem{font-family:var(--serif);font-size:16px;margin:8px 0;max-width:64ch}
+  .opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+  .opt{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--raised);font-weight:700;font-size:13px;cursor:pointer;color:var(--text)}
+  .opt small{display:block;font-weight:400;color:var(--dim);font-size:11px}
+  .timer{font-family:var(--mono);font-size:12px;color:#ffb224;border:1px solid #ffb224;border-radius:8px;padding:4px 10px}
+  /* pricing */
+  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .price{border:1px solid var(--border);border-radius:14px;padding:18px;background:var(--panel)}
+  .price.hero{border-color:var(--brand);box-shadow:0 0 30px rgba(76,195,255,.18)}
+  .price .amount{font-family:var(--mono);font-size:32px}
+  .schoolcode{display:flex;gap:8px;margin-bottom:14px}
+  .schoolcode input{flex:1;font:inherit;font-family:var(--mono);padding:10px 12px;border-radius:10px;border:1px dashed var(--brand);background:transparent;color:var(--text)}
+  .blurbox{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:linear-gradient(135deg,#0f1e35,#3a2b3f 55%,#0f1e35);min-height:150px;display:grid;place-items:center}
+  .blurbox .lock{font-size:13px;background:rgba(2,6,16,.72);border:1px solid #2a4d7d;border-radius:10px;padding:10px 16px;color:#dff;text-align:center}
+  /* heat table */
+  table.heat{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.heat th,table.heat td{padding:8px 10px;border-top:1px solid var(--border);text-align:left}
+  .cell{display:inline-block;min-width:34px;text-align:center;font-family:var(--mono);border-radius:6px;padding:2px 6px}
+  @media(max-width:960px){.pair,.price-grid{grid-template-columns:1fr}.vitals{grid-template-columns:repeat(2,1fr)}.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>F-flagship · Night-shift cinematic</b><span style="border:1px solid #2a4d7d;border-radius:999px;padding:2px 10px;font-size:12px">concept — copy is illustrative, not repo-verbatim</span><nav><a href="#onboard">Onboard</a><a href="#round">Round</a><a href="#bedside">Bedside</a><a href="#registrar">Registrar</a><a href="#referral">Referral</a><a href="#schools">Schools</a></nav><span class="theme-seg"><button data-t="auto" aria-pressed="false">Auto</button><button data-t="light" aria-pressed="false">Light</button><button data-t="dark" aria-pressed="true">Dark</button></span></div>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Flagship concept F · a hospital you carry, not a simulator library</div>
+    <h1>Physiology Lab <svg class="trace" viewBox="0 0 220 40" width="180" height="34" style="vertical-align:-6px"><path d="M0 22 H70 L76 22 80 8 86 34 90 22 H130 L136 22 140 10 146 32 150 22 H220" fill="none" stroke="#4cc3ff" stroke-width="2.5" stroke-linecap="round"/></svg></h1>
+    <p class="lede">Home is a <b>ward round</b>. Reviews are <b>patients to see</b>. Weak spots get <b>prescribed</b>. Locked content is a <b>referral</b>. Progress is a <b>competency map of the human body</b>. Students feel like doctors from minute one; schools see a teaching ward, not a question bank.</p>
+  </header>
+
+  <!-- 1. FIRST SAVE -->
+  <section id="onboard" class="card"><div class="pad">
+    <div class="kicker">01 · First save — 60 seconds, no signup wall</div>
+    <h2>Pick an exam. Meet a patient.</h2>
+    <p class="lede">Auth appears only when there is something to save. The countdown starts ticking from this moment — urgency is the engine.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
+      <button class="btn primary">UKMLA</button><button class="btn">USMLE Step 1</button><button class="btn">MRCP Part 1</button><button class="btn">MRCS Part A</button><button class="btn">FRCA Primary</button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <span class="badge">Exam date</span>
+      <input value="2027-03-12" aria-label="exam date" style="font:inherit;font-family:var(--mono);padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--raised);color:var(--text)">
+      <button class="btn primary">Start my round →</button>
+      <span class="mono" style="font-size:12px;color:var(--faint)">142 days · 3 free systems · no card</span>
+    </div>
+  </div></section>
+
+  <!-- 2. WARD ROUND HOME -->
+  <section id="round" class="card"><div class="pad">
+    <div class="kicker">02 · Ward-round home</div>
+    <h2>Good evening, Amina — 3 patients are waiting.</h2>
+    <p class="lede">UKMLA · <b class="mono">142 days</b> · shift 6 · due reviews arrive as cases with acuity, not as a question count.</p>
+  </div>
+  <div class="pair" style="padding:0 20px 20px">
+    <div class="phone"><div class="phone-status"><span>21:47</span><span>● on shift</span></div>
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
+        <div class="pt"><span class="acuity red">CRASH</span><div><b>Amina, 24</b><small>Collapsed at mile 20 · shock states</small></div></div>
+        <div class="pt"><span class="acuity amber">DUE</span><div><b>George, 68</b><small>Post-MI breathless · cardiorenal</small></div></div>
+        <div class="pt"><span class="acuity green">CHECK</span><div><b>Priya, 31</b><small>DKA recovery · acid–base</small></div></div>
+        <button class="btn primary">Start round →</button>
+      </div>
+      <div class="tabs"><span class="on">Round</span><span>Body map</span><span>Drugs</span><span>Account</span></div>
+    </div>
+    <div>
+      <div class="vitals">
+        <div class="vital" style="color:#3ddc97"><span>SHIFT · DAY</span><b>6</b><small>streak, pauses honestly</small></div>
+        <div class="vital" style="color:#ffb224"><span>DUE TODAY</span><b>14</b><small>3 crash · 11 routine</small></div>
+        <div class="vital" style="color:#4cc3ff"><span>KNOWN</span><b>68%</b><small>across 5 systems</small></div>
+        <div class="vital" style="color:#ff6b6b"><span>WEAKEST</span><b>Shock</b><small>prescribed below</small></div>
+      </div>
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start">
+        <div style="border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;background:var(--panel)">
+          <div class="mono" style="font-size:10px;letter-spacing:.12em;color:var(--faint)">COMPETENCY MAP</div>
+          <svg viewBox="0 0 120 170" width="130" height="180">
+            <circle cx="60" cy="20" r="13" fill="none" stroke="#3ddc97" stroke-width="7"/>
+            <rect x="42" y="40" width="36" height="60" rx="14" fill="none" stroke="#ffb224" stroke-width="7"/>
+            <path d="M44 52 L44 110 M76 52 L76 110" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round"/>
+            <path d="M42 104 L28 150 M78 104 L92 150" stroke="#3d5470" stroke-width="6" stroke-linecap="round"/>
+            <path d="M44 60 L24 84 M76 60 L96 84" stroke="#ffb224" stroke-width="6" stroke-linecap="round"/>
+          </svg>
+          <div class="mono" style="font-size:10px;color:var(--dim)">neuro ✓ · cardio ~ · shock ! · limbs locked</div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 6px">℞ Prescribed for you</h3>
+          <div class="pt"><span class="acuity amber">℞</span><div><b>2 shock drills before Friday</b><small>venous return + tamponade · 12 min · expires with shift 8</small></div></div>
+          <div class="pt"><span class="acuity green">℞</span><div><b>1 acid–base blood gas</b><small>Winters drill · 4 min</small></div></div>
+          <p class="lede" style="font-size:13px">Prescriptions expire — retrieval works because it is spaced, and spacing needs a deadline with a white coat on it.</p>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 3. BEDSIDE -->
+  <section id="bedside" class="card"><div class="pad">
+    <div class="kicker">03 · Bedside simulator — presets are dead, patients replace them</div>
+    <div class="banner"><span class="livedot"></span><div><b>Amina, 24 · collapsed at mile 20</b><div class="mono" style="font-size:11px;color:#8ba0b9">BED A04 · HAEMORRHAGIC SHOCK · SIM 00:04:32 · BASELINE FROZEN</div></div>
+      <div class="mono" style="margin-left:auto;font-size:12px"><span style="color:#ff8d8d">MAP 62 ▼</span> · <span style="color:#3ddc97">HR 112</span> · <span style="color:#4cc3ff">SpO₂ 94</span></div>
+    </div>
+    <div class="vitals" style="margin-top:12px">
+      <div class="vital" style="color:#ff6b6b"><span>MAP mmHg</span><b>62</b><small>▼ target ≥ 65</small></div>
+      <div class="vital" style="color:#ff6b6b"><span>CO L/min</span><b>3.1</b><small>baseline 5.0</small></div>
+      <div class="vital" style="color:#4cc3ff"><span>Lactate</span><b>4.2 ▲</b><small>shock ≥ 2.0</small></div>
+      <div class="vital" style="color:#e8c547"><span>CVP mmHg</span><b>2 ↓</b><small>cf. tamponade ↑</small></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
+      <button class="btn insult">▼ Run the insult — 800 mL</button>
+      <button class="btn">Noradrenaline ↑</button>
+      <button class="btn">250 mL bolus</button>
+      <span class="mono" style="font-size:11px;color:var(--faint)">interventions, not sliders — sliders live one tap deeper</span>
+    </div>
+    <div class="split" style="margin-top:12px;min-height:170px">
+      <svg viewBox="0 0 560 150" width="100%" height="150"><rect x="0" y="0" width="560" height="150" fill="#fff"/><path d="M0 40 H560" stroke="#94a3b8" stroke-dasharray="6 5"/><path d="M0 60 C120 58 260 62 400 88 S520 100 560 102" fill="none" stroke="#c02828" stroke-width="3"/><text x="14" y="24" font-size="11" fill="#475569">MAP · now vs frozen baseline</text></svg>
+      <div class="after" id="afterLayer" style="clip-path:inset(0 0 0 55%)"></div>
+      <span class="tag" style="left:8px;background:#0f62d6;color:#fff">BEFORE</span>
+      <span class="tag" style="right:8px;background:#c02828;color:#fff">AFTER</span>
+      <input type="range" min="0" max="100" value="55" aria-label="before after compare" oninput="document.getElementById('afterLayer').style.clipPath='inset(0 0 0 '+this.value+'%)'">
+    </div>
+    <p class="lede" style="font-size:13px">Drag the divider: before/after split-plate comparison. The single most shareable interaction in the product — built for screenshots.</p>
+  </div></section>
+
+  <!-- 4. NIGHT REGISTRAR -->
+  <section id="registrar" class="card"><div class="pad">
+    <div class="kicker">04 · Night-registrar quiz — pattern questions as timed case IDs</div>
+    <div class="quiz">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="badge blue">REGISTRAR CALLED</span><span class="timer">◷ 02:00</span><span class="mono" style="font-size:11px;color:var(--faint)">calm scoring · wrong answers cost nothing but time</span></div>
+      <p class="stem">Amina is cold, tachycardic at 112, MAP 62, lactate 4.2, CVP 2, narrow pulse pressure. Fluids haven’t been given. Name the shock.</p>
+      <div class="opts">
+        <button class="opt">A · Hypovolaemic<small>low volume, low filling</small></button>
+        <button class="opt">B · Cardiogenic<small>pump failure, high filling</small></button>
+        <button class="opt">C · Distributive<small>low resistance, warm</small></button>
+        <button class="opt">D · Obstructive<small>blocked filling, high CVP</small></button>
+      </div>
+      <p class="lede" style="font-size:13px">Same engine-verified questions, same 60–100-word explanations — only the framing changed from “practice set” to “the bleep just went off.”</p>
+    </div>
+  </div></section>
+
+  <!-- 5. REFERRAL PAYWALL + PRICING -->
+  <section id="referral" class="card"><div class="pad">
+    <div class="kicker">05 · Referral paywall — locked content behaves like a referral, not a wall</div>
+    <div class="blurbox"><div class="lock"><b>Referred by your exam — UKMLA</b><br><span class="mono" style="font-size:12px">23 questions + full acid–base simulator live here</span><br><br><button class="btn primary">Do one free round, no card →</button></div></div>
+    <h2 style="margin:16px 0 4px">Pricing, school-code first</h2>
+    <p class="lede">UK schools pay by purchase order — so the code box goes <i>above</i> the cards, not in small print below.</p>
+    <div class="schoolcode" style="margin-top:12px"><input value="" placeholder="Have a school code? Enter it here — e.g. KINGS-2027" aria-label="school licence code"><button class="btn primary">Redeem</button></div>
+    <div class="price-grid">
+      <div class="price hero"><span class="badge blue">MOST CHOSEN</span><h3>Annual</h3><div class="amount">£55<span style="font-size:13px">/year</span></div><p class="lede" style="font-size:13px">15p a day. Bought once before finals and forgotten about, in a good way.</p><button class="btn primary">Subscribe annual</button></div>
+      <div class="price"><h3>Monthly</h3><div class="amount">£9<span style="font-size:13px">/month</span></div><p class="lede" style="font-size:13px">The cram plan. Honestly labelled — get through the block, then decide.</p><button class="btn">Subscribe monthly</button></div>
+    </div>
+    <p class="lede" style="font-size:13px">🎁 Gift a term to your study group · 💌 Free month for every mate who subscribes — students share revision resources; price that behaviour in.</p>
+  </div></section>
+
+  <!-- 6. SCHOOLS -->
+  <section id="schools" class="card"><div class="pad">
+    <div class="kicker">06 · Schools — a teaching ward with a dashboard</div>
+    <h2>Cohort MBChB 2027 · 214 students · 78% on rounds this week</h2>
+    <table class="heat">
+      <tr><th>Student</th><th>Shock</th><th>Cardio</th><th>Renal</th><th>Acid–base</th><th>Round set</th></tr>
+      <tr><td>A. Khan</td><td><span class="cell" style="background:rgba(61,220,151,.15);color:#3ddc97">92</span></td><td><span class="cell" style="background:rgba(61,220,151,.15);color:#3ddc97">88</span></td><td><span class="cell" style="background:rgba(255,178,36,.15);color:#ffb224">61</span></td><td><span class="cell" style="background:rgba(255,93,93,.15);color:#ff8d8d">34</span></td><td><a href="#schools" style="color:var(--brand)">set round →</a></td></tr>
+      <tr><td>J. Osei</td><td><span class="cell" style="background:rgba(255,178,36,.15);color:#ffb224">66</span></td><td><span class="cell" style="background:rgba(61,220,151,.15);color:#3ddc97">81</span></td><td><span class="cell" style="background:rgba(61,220,151,.15);color:#3ddc97">90</span></td><td><span class="cell" style="background:rgba(255,178,36,.15);color:#ffb224">58</span></td><td><a href="#schools" style="color:var(--brand)">set round →</a></td></tr>
+    </table>
+    <p class="lede" style="font-size:13px">Tutors set a round with a link. MLA content-map coverage per module. Retrieval-practice evidence strip for the procurement meeting. Students opt in — no surveillance product.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="badge blue">MLA: shock ✓</span><span class="badge blue">MLA: fluids ✓</span><span class="badge">MLA: prescribing →</span></div>
+  </div></section>
+
+  <section class="card"><div class="pad">
+    <div class="kicker">Port notes (if greenlit)</div>
+    <p class="lede">New tokens: ward-ink scale, trace phosphors, case-amber, motion durations. New components: CaseHeader, RoundList, CompetencyMap, InsultButton, SplitCompare, ReferralPaywall, SchoolCodeFirst. Deliberately excluded: XP/coins, default leaderboards, sounds, streak punishment, paywalled reference.</p>
+  </div></section>
+</div>
+<script>
+(function(){const root=document.documentElement,btns=[...document.querySelectorAll('.theme-seg button')];const mq=matchMedia('(prefers-color-scheme: dark)');const cur=()=>localStorage.getItem('physio-preview-theme')||'dark';function apply(m){const t=m==='auto'?(mq.matches?'dark':'light'):m;root.dataset.theme=t;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===m)));}btns.forEach(b=>b.onclick=()=>{const m=b.dataset.t;if(m==='auto')localStorage.removeItem('physio-preview-theme');else localStorage.setItem('physio-preview-theme',m);apply(m);});mq.addEventListener?.('change',()=>{if(cur()==='auto')apply('auto');});apply(cur());})();
+</script>
+</body>
+</html>

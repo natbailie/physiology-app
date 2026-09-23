@@ -9,6 +9,10 @@
  *   3. Does a LINE run through a label?   (a gridline across the value tracking a point)
  *   4. Can any label be READ?             (a word written across a saturated signal colour)
  *
+ * The page holds both themes and shows one at a time. This measures whichever is ON SCREEN,
+ * so run it once per theme: a label that clears its neighbour in light can collide in dark
+ * only if the text differs, but contrast differs in both directions and routinely does.
+ *
  * Measure with `getBoundingClientRect`, NOT `getBBox` — `getBBox` ignores ancestor transforms, so
  * every label inside a translated `<g>` reports the same origin and every diagram looks broken.
  *
@@ -35,7 +39,11 @@
   const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
   const alpha = (el) =>
     Number.parseFloat(el.getAttribute('fill-opacity') ?? '1') * Number.parseFloat(el.getAttribute('opacity') ?? '1');
-  const frames = () => [...document.querySelectorAll('svg[data-module]')];
+  // The page now holds BOTH themes for every frame, one of them hidden. A hidden frame
+  // measures as zero width, which would report every one of its labels as leaving the frame,
+  // so the sweep only ever sees the theme currently on screen.
+  const frames = () =>
+    [...document.querySelectorAll('svg[data-module]')].filter((s) => s.getBoundingClientRect().width > 0);
   const name = (svg) => svg.dataset.module + (svg.dataset.frame !== '0' ? `[${svg.dataset.frame}]` : '');
 
   function geometry() {
@@ -205,7 +213,9 @@
   const desktop = geometry();
   figures.forEach((f) => (f.style.maxWidth = '390px'));
   const phone = geometry();
-  figures.forEach((f) => (f.style.maxWidth = '900px'));
+  // Restore to the page's own sizing, which is now a grid the width control drives — pinning
+  // these back to 900px would override it.
+  figures.forEach((f) => (f.style.maxWidth = ''));
   const strokes = overStrokes();
   const readability = contrast();
   return [

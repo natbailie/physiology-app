@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { AdrenalMedullaDiagram } from './components/AdrenalMedullaDiagram';
@@ -69,6 +70,7 @@ export function AdrenalMedullaPage() {
 
   return (
     <ModulePage
+      historyCapacity={medullaLoopConfig.historyCapacity}
       moduleId="adrenalMedulla"
       title="Adrenal Medulla & Phaeochromocytoma"
       subtitle="alpha raises it, beta moves everything else — and the order of blockade is the exam"
@@ -88,7 +90,17 @@ export function AdrenalMedullaPage() {
       }
       diagram={<AdrenalMedullaDiagram derived={snapshot.derived} inputs={inputs} />}
       readouts={<AdrenalMedullaReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={MEDULLA_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={MEDULLA_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={MEDULLA_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

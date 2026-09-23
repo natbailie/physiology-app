@@ -108,3 +108,26 @@ export const SHOCK_PRESET_ORDER: ShockPresetName[] = [
   'resuscitated',
   'decompensating',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do.
+ *
+ * That distinction is the whole constraint. "Obstructive — blocked filling, high CVP" would make
+ * `wedge-separates-obstruction` answerable from the options alone, when the entire subject of
+ * that question is that CVP is raised in BOTH candidates and only the wedge separates them. A
+ * gloss names the cause, which the scenario's own name already implies; it never reports a row
+ * of the panel. `questions.test.ts` holds that: no gloss may contain a panel label or a digit.
+ *
+ * Partial on purpose — `normal` needs no gloss, and a full Record would force filler.
+ */
+export const SHOCK_PRESET_GLOSS: Partial<Record<ShockPresetName, string>> = {
+  haemorrhagic: 'blood lost from the circuit',
+  cardiogenic: 'the pump cannot clear what reaches it',
+  septic: 'the vessels have opened, and the tissue cannot extract',
+  tamponade: 'the heart is squeezed from outside and cannot fill',
+  pulmonaryEmbolism: 'the obstruction sits between the two sides',
+  anaphylaxis: 'sudden vasodilatation with capillary leak',
+  resuscitated: 'the same bleed, hours later and given salt water',
+  decompensating: 'the same bleed, with the reflex spent',
+};

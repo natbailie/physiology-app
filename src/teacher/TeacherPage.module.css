@@ -1,0 +1,176 @@
+.page {
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-5) var(--s-8);
+}
+
+.header {
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--s-3);
+}
+
+.standfirst {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+}
+
+.body {
+  padding-top: var(--s-5);
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+}
+
+.error {
+  font-size: var(--fs-sm);
+  color: var(--danger);
+}
+
+.create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+.createLabel {
+  flex: 1 1 100%;
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  padding: var(--s-2) var(--s-3);
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+}
+
+.primary {
+  composes: button primary from '@/shared/styles/button.module.css';
+  flex: none;
+}
+
+.cohortBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.cohortTab {
+  padding: var(--s-2) var(--s-3);
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+
+.cohortTab[aria-pressed='true'] {
+  color: var(--on-solid);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.joinCode {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-5);
+}
+
+.joinLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.code {
+  font-family: var(--mono);
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+
+.summary {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin: 0 0 var(--s-3);
+}
+
+/* Wide content scrolls inside its own container rather than the page body. */
+.table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.caption {
+  text-align: left;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  padding-bottom: var(--s-3);
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+}
+
+.table thead th {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.rowHead {
+  font-weight: 400;
+}
+
+.rowHead a {
+  color: var(--brand);
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A weak score is emphasised, but the number is always the carrier — colour alone would be lost
+   to a colour-blind reader and to anyone printing this for a curriculum meeting. */
+.num [data-weak='true'] {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.withheld {
+  color: var(--text-faint);
+  font-style: italic;
+}

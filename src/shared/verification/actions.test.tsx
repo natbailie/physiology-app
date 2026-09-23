@@ -195,6 +195,169 @@ function actionReachesScreen(page: PageUnderTest, label: string, siblings: strin
 const buttons = (container: HTMLElement, cls: string) =>
   Array.from(container.querySelectorAll<HTMLButtonElement>(`button[class*="${cls}"]`));
 
+/**
+ * Every setting the control rail is currently showing.
+ *
+ * Range inputs are read by `aria-label` and value because `Slider` is CONTROLLED — its `value` is
+ * the input the engine is running on — and toggle options by their pressed state, so a scenario
+ * delivered as a categorical change is seen too. Scoped to the rail, which holds nothing but the
+ * controls: the readouts and the diagram move on their own every frame and would answer the
+ * question by themselves.
+ */
+function railSettings(container: HTMLElement): string {
+  const rail = container.querySelector<HTMLElement>('[class*="railScroll"]');
+  if (!rail) return '';
+  const ranges = Array.from(rail.querySelectorAll<HTMLInputElement>('input[type="range"]')).map(
+    (range) => `${range.getAttribute('aria-label')}=${range.value}`,
+  );
+  /* `aria-checked`, not `aria-pressed`: `ToggleGroup` renders a radio group, and its docblock says
+   * the shared styling keys off `aria-checked` deliberately. Reading the wrong attribute made every
+   * categorical control invisible to this check — which is how three torch buttons could write a
+   * toggle and still be reported as leaving the rail untouched. */
+  const toggles = Array.from(rail.querySelectorAll<HTMLButtonElement>('button[aria-checked]')).map(
+    (option) => `${option.textContent}=${option.getAttribute('aria-checked')}`,
+  );
+  return [...ranges, ...toggles].join('|');
+}
+
+/**
+ * Actions whose effect is an EVENT rather than a setting, one line of reason each.
+ *
+ * A stimulus, a manoeuvre, a bolus, a flash: the decay IS the physiology and there is nothing for a
+ * slider to hold. Everything NOT named here is a standing change to the patient, and a standing
+ * change has to leave the rail showing it — press "Haemorrhage 1 L" and the blood-volume slider
+ * should walk down, because the alternative is a page whose controls disagree with its own picture
+ * about what happened.
+ *
+ * That was the state of every one of these buttons: `perturb` writes engine STATE, which no slider
+ * reads, so sixty-six buttons could move the model without moving the panel beside it. This list is
+ * the half that is right to work that way, and it is asserted in BOTH directions, so a button
+ * converted to an input edit has to come off it.
+ */
+const MOMENTARY_BY_DESIGN = new Set<string>([
+  // Stimuli and manoeuvres: a depolarising pulse, a twitch, a tetanus, a forced expiration, a
+  // positioning test, a head thrust, a flash. Each is over in milliseconds to seconds and the
+  // RECOVERY is the reading — there is no standing quantity for a slider to hold.
+  'membranePotentials: "Stimulate"',
+  'muscleContraction: "Stimulate"',
+  'neuromuscularJunction: "Tetanic burst"',
+  'neuromuscularJunction: "Rest"',
+  'respiratoryMechanics: "FVC maneuver"',
+  'vestibular: "Dix-Hallpike"',
+  'vestibular: "Head impulse"',
+  'vision: "Camera flash"',
+  'venousReturn: "Valsalva"',
+  // Meals, boluses and doses: something given once that the body then handles. CLAUDE.md makes the
+  // point about this exact class — a fasting glucose model defends itself almost perfectly, and it
+  // is the meal that separates a working pancreas from a failed one. Where the SIZE of the dose is
+  // a setting it already has its own slider, and that slider is what the button reads.
+  'gastrointestinal: "Eat meal"',
+  'digestionAbsorption: "Eat a meal"',
+  'glucoseRegulation: "Eat meal"',
+  'glucoseRegulation: "Give insulin"',
+  'anteriorPituitary: "Oral glucose load"',
+  'calciumHomeostasis: "Calcium infusion"',
+  'electrolyteBalance: "Saline bolus"',
+  'electrolyteBalance: "K+ bolus"',
+  'somaticSensation: "Opioid bolus"',
+  'motorControl: "Levodopa dose"',
+  // Insults that arrive once and are then lived through: the wearing-off, the clearing, the
+  // resolving is the teaching. A permanent version, where one exists, is already a slider beside
+  // it — `noiseNotchDepthDb` carries the threshold shift a concert leaves behind for good.
+  'adrenalMedulla: "Paroxysm"',
+  'hpaAxis: "Acute stressor"',
+  'coagulation: "Injure vessel"',
+  'coronaryCirculation: "Vasospasm"',
+  'erythropoiesis: "Acute bleed"',
+  'exercisePhysiology: "Anaerobic surge"',
+  'hearing: "Loud concert (no plugs)"',
+  'liverPhysiology: "Haemolytic episode"',
+  'liverPhysiology: "Alcohol binge"',
+  'somaticSensation: "Fresh injury"',
+  'pregnancy: "Feed (let-down)"',
+  /* Labour onset starts a process that ENDS ITSELF: `engine.ts` clears `labourActive` the moment
+   * dilation completes, and again on delivery. Same shape as Infect or New insult — an event that
+   * begins something self-limiting — not a setting a slider could hold. The earlier reading, that
+   * "once it starts it does not stop", is contradicted by the engine. */
+  'pregnancy: "Labour onset"',
+  // A host meeting an antigen, and the treatments for what follows. The preset sets up WHO the
+  // patient is — sensitised, IgA deficient, ABO incompatible — and these buttons are the exposure
+  // and its management, which is why `SAME_SCREEN_ON_PRESS_BY_DESIGN` records all 82 host pairs as
+  // correctly identical until one of them is pressed.
+  'hypersensitivity: "Challenge"',
+  'hypersensitivity: "Transfuse"',
+  'hypersensitivity: "Adrenaline"',
+  'hypersensitivity: "Diurese"',
+  'immuneResponse: "Infect"',
+  'immuneResponse: "Vaccinate"',
+  'inflammation: "New insult"',
+  'inflammation: "Drain abscess"',
+  // Treatments and insults the engine deliberately models as WEARING OFF, checked one by one
+  // against their perturb bodies rather than against their names. Each writes a state field that
+  // decays on a stated time constant, and the decay is the teaching: an antipyretic wears off, a
+  // stent re-occludes as oedema reclaims it, a bronchospasm resolves, a bout of exertion ends, a
+  // dose of insulin shifts potassium once. Converting these to standing inputs would not be making
+  // the rail honest — it would be changing the physiology to match the rail.
+  'liverPhysiology: "ERCP stent"',
+  'thermoregulation: "Antipyretic"',
+  'thermoregulation: "Active cooling"',
+  'thermoregulation: "Active rewarming"',
+  'respiratory: "Bronchospasm"',
+  'coronaryCirculation: "Exertion"',
+  'electrolyteBalance: "Give insulin"',
+  'muscleContraction: "Caffeine"',
+  'hptAxis: "Acute illness"',
+  'anteriorPituitary: "Bromocriptine dose"',
+  'capillaryExchange: "Albumin infusion"',
+  // Volumes the model INTEGRATES rather than reads from a slider, so there is no control to move.
+  // Cardiorenal's blood volume is the plant variable the kidney fills and empties, and cerebral
+  // CSF accumulates at 0.35 mL/min; neither has a rail entry and neither should. Cardiorenal is
+  // covered instead by making its baroreflex a control, so the bleed can be watched undefended.
+  'cardiorenal: "Hemorrhage"',
+  'cerebralPerfusion: "Drain CSF"',
+]);
+
+/**
+ * Standing changes the rail does not yet show — the backlog, not an exemption.
+ *
+ * Each of these is a lasting change to the patient delivered through `perturb`, which writes engine
+ * state no slider reads. Press "Haemorrhage 1 L" and the blood volume really does fall, but the
+ * blood-volume slider beside it still reads 5000: the page tells the learner two different things
+ * about the same patient, and only one of them is true.
+ *
+ * Each entry names the input the conversion should move. Asserted in both directions, so an entry
+ * that has been converted fails until it is deleted.
+ */
+const STANDING_BUT_INVISIBLE = new Set<string>([
+  // Empty, and it should stay that way. Every standing change now writes the inputs and shows on
+  // the rail; a new button that writes engine state instead fails the check below until it is
+  // either converted or explained on MOMENTARY_BY_DESIGN above.
+]);
+
+/**
+ * Presses every action on ONE paused page and reports which of them left the rail unchanged.
+ *
+ * One render per module rather than one per button, which matters: this file already renders each
+ * page hundreds of times for the screen sweep, and a second per-button sweep beside it exhausted
+ * the worker's heap rather than failing an assertion. Pressing several actions onto the same page
+ * is safe here because the rail is a pure function of the INPUTS — an earlier press can only have
+ * moved a slider, and a later press that moves one still reads as a change.
+ */
+function actionsThatLeaveTheRail(page: PageUnderTest, labels: string[]): string[] {
+  const container = openPaused(page);
+  const actions = [...buttons(container, 'impulse'), ...buttons(container, 'danger')];
+  const unmoved: string[] = [];
+  for (const label of labels) {
+    const action = actions.find((candidate) => candidate.textContent === label);
+    if (!action) throw new Error(`${page.id}: action "${label}" vanished between renders`);
+    const before = railSettings(container);
+    fireEvent.click(action);
+    if (railSettings(container) === before) unmoved.push(label);
+  }
+  cleanup();
+  return unmoved;
+}
+
 /** Everything a learner can see, minus the bar the buttons themselves live in — a pressed button
  * takes focus and its own markup changes, which would answer the question by itself. */
 function screen(container: HTMLElement): string {
@@ -232,6 +395,29 @@ describe('every button in the top bar moves the model', () => {
         { inert: unexplained, 'allowlisted but no longer inert — delete them': stale },
         `action buttons that change nothing on screen:\n  ${unexplained.join('\n  ') || '(none)'}`,
       ).toEqual({ inert: [], 'allowlisted but no longer inert — delete them': [] });
+    });
+
+    it('moves a control when a standing action is pressed', () => {
+      // One render for the labels, and unmounted before the sweep starts. `afterEach(cleanup)` is
+      // too late when a module has six buttons: the trees pile up inside the test and the worker
+      // exits rather than failing an assertion, which is the trap the docblock above records.
+      const opened = openPaused(page);
+      const labels = [...buttons(opened, 'impulse'), ...buttons(opened, 'danger')].map(
+        (action) => action.textContent ?? '',
+      );
+      cleanup();
+      if (labels.length === 0) return; // Nine modules ship scenarios only; there is nothing to press.
+      const invisible = actionsThatLeaveTheRail(page, labels).map((label) => `${id}: "${label}"`);
+      const unexplained = invisible.filter(
+        (entry) => !MOMENTARY_BY_DESIGN.has(entry) && !STANDING_BUT_INVISIBLE.has(entry),
+      );
+      const stale = [...MOMENTARY_BY_DESIGN, ...STANDING_BUT_INVISIBLE].filter(
+        (entry) => entry.startsWith(`${id}: `) && !invisible.includes(entry),
+      );
+      expect(
+        { 'standing actions the rail does not show': unexplained, 'allowlisted but now standing — delete them': stale },
+        `action buttons that leave the control rail untouched:\n  ${unexplained.join('\n  ') || '(none)'}`,
+      ).toEqual({ 'standing actions the rail does not show': [], 'allowlisted but now standing — delete them': [] });
     });
   });
 });

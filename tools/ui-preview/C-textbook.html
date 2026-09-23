@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C — Textbook / academic · Physiology Lab preview</title>
+<style>
+  :root{
+    --paper:#fbf8f1; --panel:#fffef9; --ink:#1c1a15; --dim:#5a554a; --faint:#8a8474;
+    --rule:#e4ddd0; --accent:#8c2f1b; --link:#1d4f8c; --o2:#1d5f8c; --kidney:#7a5c00;
+    --serif:"Literata",Georgia,"Times New Roman",serif; --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.65;
+    background-image:repeating-linear-gradient(0deg,transparent 0 27px,rgba(140,47,27,.045) 27px 28px)}
+  .proto-bar{position:sticky;top:0;z-index:20;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:9px 20px;background:#1c1a15;color:#f5eddc;font-family:var(--sans);font-size:13px}
+  .proto-bar nav{display:flex;gap:14px;margin-left:auto}.proto-bar nav a{color:#f5eddc;text-decoration:none;opacity:.85}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 22px 90px;display:flex;flex-direction:column;gap:44px}
+  .kicker{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:38px;line-height:1.15;letter-spacing:-.01em;margin:8px 0;font-weight:600}
+  h2{font-size:26px;margin:0;font-weight:600} h3{font-family:var(--sans);font-size:14px;margin:0}
+  .lede{font-size:16.5px;color:var(--dim);max-width:66ch}
+  .drop::first-letter{float:left;font-size:52px;line-height:.9;padding:4px 10px 0 0;color:var(--accent);font-weight:700}
+  .plate{background:var(--panel);border:1px solid var(--rule);border-radius:6px;box-shadow:0 1px 0 var(--rule),0 16px 32px -20px rgba(60,45,20,.35)}
+  .masthead{display:flex;justify-content:space-between;gap:16px;align-items:baseline;flex-wrap:wrap;padding:20px 24px;border-bottom:3px double var(--rule)}
+  .brand{font-variant:small-caps;letter-spacing:.08em;font-weight:700;font-size:20px}
+  .brand small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--faint)}
+  .toc{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:12px;padding:14px 24px;border-bottom:1px solid var(--rule)}
+  .toc span{border:1px solid var(--rule);border-radius:999px;padding:4px 12px;background:#fff}
+  .toc .on{background:var(--ink);color:#f5eddc;border-color:var(--ink)}
+  .chapter{padding:22px 24px}
+  .fig{display:grid;grid-template-columns:1fr 220px;gap:18px;padding:16px 24px}
+  .fig-box{border:1px solid var(--rule);background:#fff;padding:12px}
+  .caption{font-size:13px;color:var(--dim);line-height:1.55}
+  .caption b{color:var(--ink)}
+  .margin-note{font-family:var(--sans);font-size:12px;color:var(--dim);border-left:3px solid var(--accent);padding:2px 0 2px 12px;align-self:start}
+  .margin-note b{color:var(--accent)}
+  .contents{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0;border-top:1px solid var(--rule)}
+  .entry{padding:14px 18px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule)}
+  .entry .n{font-family:var(--sans);font-size:11px;color:var(--accent);font-weight:800;letter-spacing:.1em}
+  .entry p{font-size:14px;color:var(--dim);margin:4px 0;font-family:var(--sans)}
+  .sim-head{padding:18px 24px;border-bottom:1px solid var(--rule)}
+  .sim-head .ref{font-family:var(--sans);font-size:11px;letter-spacing:.1em;color:var(--faint)}
+  .lab{display:grid;grid-template-columns:minmax(0,1fr) 280px}
+  .lab-main{padding:18px 24px;display:flex;flex-direction:column;gap:16px;border-right:1px solid var(--rule)}
+  table.vitals{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13px}
+  table.vitals th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:left;padding:6px 8px;border-bottom:2px solid var(--ink)}
+  table.vitals td{padding:8px;border-bottom:1px solid var(--rule)}
+  table.vitals td.num{font-family:var(--mono);font-weight:700}
+  .equation{font-family:var(--serif);font-style:italic;background:#fff;border:1px solid var(--rule);padding:10px 14px;text-align:center}
+  .exercise{border:1px solid var(--rule);border-left:4px solid var(--accent);background:#fffdf4;padding:14px 16px}
+  .exercise p{font-size:15px}
+  .rail{padding:18px;display:flex;flex-direction:column;gap:14px;background:#faf5ea}
+  .control{font-family:var(--sans);font-size:12px}
+  .control output{font-family:var(--mono);font-weight:700}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .phones{display:grid;grid-template-columns:360px 1fr;gap:20px;padding:18px 24px}
+  .phone{width:360px;max-width:100%;border:1px solid var(--rule);border-radius:22px;background:var(--panel);overflow:hidden;font-family:var(--sans)}
+  .tabs{display:flex;border-top:1px solid var(--rule);font-size:10px;color:var(--faint)}.tabs span{flex:1;text-align:center;padding:10px 0 14px}.tabs .on{color:var(--accent);font-weight:800}
+  .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--rule)}
+  .ref-col{padding:16px 20px}.ref-col:first-child{border-right:1px solid var(--rule)}
+  .footnote{font-size:12.5px;color:var(--faint);border-top:1px solid var(--rule);padding:12px 24px;font-family:var(--sans)}
+  @media(max-width:900px){.fig,.lab,.phones,.ref-grid{grid-template-columns:1fr}.lab-main{border-right:none;border-bottom:1px solid var(--rule)}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>C · Textbook / academic</b><span style="border:1px solid #5a554a;border-radius:999px;padding:2px 10px;font-size:12px">Guyton / Oxford Handbook voice</span><nav><a href="#home">Contents</a><a href="#sim">Plate 12</a><a href="#ref">Appendix</a></nav></div>
+<div class="wrap">
+<header><div class="kicker">Direction C · static mock · serif-first</div>
+<h1>Learn it once, properly — then test it at the bedside.</h1>
+<p class="lede drop">Physiology repays careful reading. This direction sets explanations in a book serif, numbers in tabular mono, and every diagram as a numbered figure with a legend — so a student moving from lecture to ward recognises the same mental model.</p></header>
+
+<section id="home" class="plate"><div class="masthead"><div class="brand">Physiology Lab<small>Bentara Medical · 2nd edition</small></div><div style="font-family:var(--sans);font-size:12px;color:var(--dim)">Amina K. · MRCP (UK) · Ch. 4–7 due</div></div>
+<div class="toc"><span class="on">Contents</span><span>Ch. 4 Shock</span><span>Ch. 5 Respiration</span><span>Ch. 6 Renal</span><span>Ch. 7 Endocrine</span><span>Appendix: formulae</span><span>Materia medica</span></div>
+<div class="chapter"><div class="kicker">Chapter IV · The circulation in shock</div><h2>Contents</h2><p class="lede">Fifty-one interactive plates. Begin where your last review ended — marginal notes mark examinable mechanisms (UKMLA, USMLE, MRCP).</p></div>
+<div class="contents">
+<div class="entry"><div class="n">PLATE 12</div><b>Shock states</b><p>Haemorrhagic vs cardiogenic vs distributive. 8 questions.</p><p style="color:var(--accent)">● Due 8 · UKMLA, MRCP</p></div>
+<div class="entry"><div class="n">PLATE 13</div><b>Venous return</b><p>Guyton curves, stressed volume, tamponade.</p><p>● Due 2 · USMLE</p></div>
+<div class="entry"><div class="n">PLATE 18</div><b>ECG conduction</b><p>Einthoven's law, bundle-branch block.</p><p>● Due 4 · USMLE, MRCP</p></div>
+<div class="entry"><div class="n">PLATE 24</div><b>Renal clearance</b><p>Inulin, PAH, Starling forces across the glomerulus.</p><p>● Stable · UKMLA</p></div>
+</div>
+<div class="footnote">Marginalia in this mock stand in for spaced-repetition state: “Due 8” means eight predictions await your answer.</div></section>
+
+<section id="sim" class="plate"><div class="sim-head"><div class="ref">PLATE 12 · CHAPTER IV · EXAMINABLE — UKMLA / MRCP</div><h2>Shock: haemorrhage and the venous return curve</h2><p class="lede">Lower stressed volume → lower mean systemic filling pressure → lower venous return. The heart can only pump what it receives. <i>Predict (Exercise 12.3) before running the plate.</i></p></div>
+<div class="lab"><div class="lab-main">
+<div class="fig-box"><div class="ref" style="font-family:var(--sans);font-size:11px;color:var(--faint)">FIG. 12.1 — CIRCUIT SCHEMATIC, LIVE STATE AFTER 800 ML LOSS</div>
+<svg viewBox="0 0 560 170" width="100%" height="150"><ellipse cx="110" cy="85" rx="62" ry="48" fill="#f7e8e4" stroke="#8c2f1b" stroke-width="2"/><text x="110" y="80" text-anchor="middle" font-size="13" font-weight="700">Heart</text><text x="110" y="96" text-anchor="middle" font-size="11" font-family="monospace">CO 3.1 L/min</text>
+<ellipse cx="290" cy="85" rx="62" ry="48" fill="#e6eff6" stroke="#1d5f8c" stroke-width="2"/><text x="290" y="80" text-anchor="middle" font-size="13" font-weight="700">Lungs</text><text x="290" y="96" text-anchor="middle" font-size="11" font-family="monospace">SaO₂ 94%</text>
+<ellipse cx="465" cy="85" rx="58" ry="48" fill="#f4ecd4" stroke="#7a5c00" stroke-width="2"/><text x="465" y="80" text-anchor="middle" font-size="13" font-weight="700">Kidney</text><text x="465" y="96" text-anchor="middle" font-size="11" font-family="monospace">GFR 62</text>
+<path d="M172 85 H228 M352 85 H407" stroke="#8c2f1b" stroke-width="2.5"/></svg>
+<div class="caption"><b>Fig. 12.1.</b> Simplified circuit. Fill of each chamber encodes output; hue encodes system (red arterial, blue respiratory, ochre renal). See legend, Table 12.1.</div></div>
+<table class="vitals"><tr><th>Table 12.1 · Variable</th><th>Now</th><th>Resting</th><th>Note</th></tr>
+<tr><td>Mean arterial pressure</td><td class="num">62 mmHg ↓</td><td class="num">90</td><td>below autoregulation</td></tr>
+<tr><td>Cardiac output</td><td class="num">3.1 L/min</td><td class="num">5.0</td><td>preload-limited</td></tr>
+<tr><td>Lactate</td><td class="num">4.2 mmol/L ↑</td><td class="num">0.9</td><td>anaerobic threshold 2.0</td></tr>
+<tr><td>Central venous pressure</td><td class="num">2 mmHg ↓</td><td class="num">6</td><td>cf. tamponade ↑</td></tr></table>
+<div class="equation">MAP − CVP = CO × SVR &nbsp;&nbsp;·&nbsp;&nbsp; therefore a low MAP with low CVP implies low flow, not low resistance</div>
+<div class="exercise"><h3>EXERCISE 12.3 — PREDICT, THEN RUN</h3><p><i>An 800 mL haemorrhage: what happens to central venous pressure and to pulse pressure? Run Plate 12 to test your answer; the figure withholds its verdict while blinded.</i></p><p style="font-family:var(--sans);font-size:13px"><button style="font:inherit;padding:8px 14px;background:var(--ink);color:#f5eddc;border:none;border-radius:6px;cursor:pointer">Run the plate</button> <a href="#ref" style="color:var(--link)">Derivation in Appendix →</a></p></div>
+</div>
+<aside class="rail"><div class="control"><b>ADJUSTMENTS TO THE PREPARATION</b></div>
+<div class="control"><label>Blood loss · <output>800 mL</output></label><input type="range" value="55"><div style="color:var(--dim)">Lowers stressed volume (Guyton, Ch. 4).</div></div>
+<div class="control"><label>Noradrenaline · <output>0.04 µg/kg/min</output></label><input type="range" value="20"><div style="color:var(--dim)">Raises SVR; watch diastolic lift, Fig. 12.2.</div></div>
+<div class="control"><label>Crystalloid bolus · <output>250 mL</output></label><input type="range" value="30"></div>
+<div class="margin-note"><b>Examiner's note (MRCP).</b> Haemorrhagic vs cardiogenic shock separate on CVP: low here, high in tamponade. Candidates confuse the two yearly.</div></aside></div>
+<div style="padding:18px 24px"><h3 style="font-family:var(--serif);font-size:18px">The same plate, set for the pocket (390 pt)</h3><div class="phones"><div class="phone"><div style="padding:12px 14px;border-bottom:1px solid var(--rule)"><div style="font-size:10px;letter-spacing:.12em;color:var(--faint)">PLATE 12 · SHOCK</div><b>Haemorrhage vs cardiogenic</b></div>
+<div style="display:flex;gap:6px;padding:10px 12px"><span style="flex:1;text-align:center;background:var(--ink);color:#f5eddc;border-radius:8px;padding:7px;font-size:12px">Simulate</span><span style="flex:1;text-align:center;padding:7px;font-size:12px;color:var(--dim)">Practice</span><span style="flex:1;text-align:center;padding:7px;font-size:12px;color:var(--dim)">Learn</span></div>
+<div style="margin:0 12px;border:1px solid var(--rule);padding:8px;background:#fff"><svg viewBox="0 0 340 90" width="100%" height="80"><ellipse cx="60" cy="45" rx="45" ry="30" fill="#f7e8e4" stroke="#8c2f1b" stroke-width="2"/><ellipse cx="175" cy="45" rx="45" ry="30" fill="#e6eff6" stroke="#1d5f8c" stroke-width="2"/><ellipse cx="285" cy="45" rx="45" ry="30" fill="#f4ecd4" stroke="#7a5c00" stroke-width="2"/></svg><div class="caption" style="font-size:11px"><b>Fig. 12.1 (pocket).</b> CO 3.1 · MAP 62 · lactate 4.2.</div></div>
+<div style="margin:10px 12px"><label style="font-size:12px">Blood loss · <span style="font-family:var(--mono)">800 mL</span></label><input type="range" value="55"></div>
+<div class="tabs"><span class="on">Study</span><span>Formulae</span><span>Drugs</span><span>Account</span></div></div>
+<div><p class="lede">Pocket plates keep figure numbers, table numbers, and exercise numbers identical — a tutor can say “open Fig. 12.1” and both screens agree. Sliders become “adjustments to the preparation”; the bottom sheet is the bench drawer.</p></div></div></div></section>
+
+<section id="ref" class="plate"><div class="sim-head"><div class="ref">APPENDIX A · FORMULAE &nbsp;&nbsp;·&nbsp;&nbsp; MATERIA MEDICA (UK TOP-100)</div><h2>What to carry onto the ward</h2></div>
+<div class="ref-grid"><div class="ref-col"><h3>A.3 — CORRECTED CALCIUM</h3><div class="equation">Ca<sub>corr</sub> = Ca<sub>meas</sub> + 0.02 × (40 − albumin)</div><p class="caption">Worked: 2.05 + 0.02×(40−28) = <b>2.29 mmol/L</b> (ref. 2.2–2.6). See Plate 31, calcium handling.</p><h3 style="margin-top:14px">A.7 — MEAN ARTERIAL PRESSURE</h3><div class="equation">MAP ≈ ⅓ SBP + ⅔ DBP = 65 mmHg</div></div>
+<div class="ref-col"><h3>M.14 — ACE INHIBITORS (—pril)</h3><p class="caption">Ramipril, enalapril, lisinopril. Lower angiotensin II and aldosterone; first-line in heart failure with reduced ejection fraction. <b>See Plate 12</b> — watch afterload fall and renal perfusion change.</p><h3 style="margin-top:12px">M.22 — LOOP DIURETICS</h3><p class="caption">Furosemide, bumetanide. Block NKCC2 in the thick ascending limb. <b>See Plate 24.</b></p></div></div>
+<div class="footnote">Sources: BNF 2026; NICE NG106; Guyton &amp; Hall 14th ed., Ch. 4. Spelling follows British usage throughout.</div></section>
+</div>
+</body>
+</html>

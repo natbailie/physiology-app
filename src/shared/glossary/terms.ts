@@ -1712,6 +1712,112 @@ const ENTRIES: Record<string, GlossaryEntry> = {
     definition:
       'The pattern of field loss, which localises the lesion along the visual pathway better than any other sign: one eye means anterior to the chiasm, bitemporal means the chiasm itself, and a homonymous defect means behind it.',
   },
+  // --- Metabolism & Energy Balance ---
+  'energy expenditure': {
+    definition:
+      'Whole-body daily energy use: resting metabolic rate multiplied by activity and by any catabolic stress. An ITU or trauma patient\'s bill can double or more, which is why critically ill muscle is lost faster than any feeding can replace it.',
+  },
+  ketones: {
+    definition:
+      'Fat-derived fuel molecules (acetoacetate, beta-hydroxybutyrate, acetone) made by the liver when fasting, partly replacing glucose as the brain\'s fuel. Trace levels are normal; over 1 mmol/L means the fast has moved into ketosis, and a high level with high glucose is a ketotic emergency rather than a fast.',
+  },
+  'carbohydrate oxidation': {
+    definition:
+      'The share of the fuel mix being burnt as carbohydrate. High just after a meal, it collapses once glycogen is spent, which is the metabolic switch fasting is really about — the body is not burning less, it is burning different fuel.',
+  },
+  'fat oxidation': {
+    definition:
+      'The share of the fuel mix being burnt as fat. It rises through the fast as glucagon takes over and collapses the carbohydrate share, so in starvation the body runs most of its economy on fat.',
+  },
+  'protein oxidation': {
+    definition:
+      'The share of the fuel mix coming from protein, and the visible cost of catabolic states. A small resting leak grows under starvation (protein feeds gluconeogenesis) and under trauma or sepsis, where muscle is consumed faster than any feeding replaces it.',
+  },
+  'respiratory quotient': {
+    definition:
+      'Carbon dioxide produced per oxygen consumed — 1.0 for pure carbohydrate, 0.7 for pure fat, so a mixed diet sits near 0.8 and deep starvation leans toward the fat end. It is how a spirometer reads which fuel the body is on.',
+  },
+  'insulin signal': {
+    definition:
+      'The relative anabolic drive of insulin, high after a meal and low in fasting. High insulin is the fed signal: store glucose, stop gluconeogenesis, switch off ketone production — which is why resistance to it distorts every fuel decision downstream.',
+  },
+  'glycogen remaining': {
+    definition:
+      'Leftover stored sugar, as a percentage of capacity. Liver glycogen spares gluconeogenesis for the first stretch of a fast and is spent after roughly a day; after it is gone, glucose is made from protein — which is what the protein oxidation reading shows climbing in its place.',
+  },
+  // --- Toxicology ---
+  'plasma paracetamol': {
+    definition:
+      'Circulating paracetamol in the blood at the presented hour, in mg/L. Its danger comes only from where it sits on the falling post-absorption curve relative to the treatment line — a high number late in the curve can be safe, and a modest number early can be anything but.',
+  },
+  'nomogram line': {
+    definition:
+      'The Rumack-Matthew treatment threshold: 100 mg/L at four hours falling to 15 mg/L at twenty-four hours. A plasma level above the line at any point predicts hepatotoxicity without NAC; the line is why "is this overdose dangerous" is answered with a graph rather than a tablet count.',
+  },
+  'absorbed dose': {
+    definition:
+      'The dose that actually reached the circulation, after activated charcoal has sequestered its share, in mg/kg. Crossing 75 mg/kg is the UK cut-off at which NAC is indicated whatever the measured plasma — the threshold this module treats as the line between "history" and "overdose".',
+  },
+  'hepatotoxicity risk': {
+    definition:
+      'The combined risk of liver toxicity for this presentation, driving off nomogram position and how early NAC started. The same curve is almost benign with NAC inside its window and severe without it — this is the single number the race against the eight-hour clock is trying to keep down.',
+  },
+  'antidote window': {
+    definition:
+      'Hours of the eight-hour window still unused at the presented time. It only ever falls, and it is the clock that converts the nomogram into urgency: NAC is near-total protection within eight hours of ingestion, partial by twenty-four, and little help to a liver already injured after that.',
+  },
+  'charcoal uptake': {
+    definition:
+      'The share of the load activated charcoal captured before it reached the blood, as a percentage. Its only real value lives in the first hour or two after ingestion, because it works on drug still in the gut — the same charcoal that halves the plasma at one hour changes almost nothing at twelve.',
+  },
+  'alveolar concentration': {
+    definition:
+      'The fraction of agent actually reaching the alveolar gas, as a percent of the dial setting. It is only ever a compromise: the circuit dilutes the dial with re-breathed gas, the blood strips what arrives, and the displayed number is the ceiling that is left after both. The patient is asleep at the effect-site number, not this one.',
+  },
+  'effect-site (brain)': {
+    definition:
+      'The agent concentration at the site that actually produces anaesthesia, lagging the alveolar level across a blood–brain step the solubility coefficient sets. This is the number worth waiting for: induction is complete not when the monitor plateaus but when this curve has caught up to it.',
+  },
+  'wash-in progress': {
+    definition:
+      'How far the alveolar concentration has travelled toward its own equilibrium ceiling, 0 to 1. One means fully charged, near zero means the curve has barely left the floor. Emergence is the same fraction running backwards — the dial decides which way it moves.',
+  },
+  'inspired fraction': {
+    definition:
+      'The effective inspired concentration at the Y-piece after the circuit has diluted the dial with re-breathed and partially used gas, expressed as a percent. At low fresh gas flows this falls well below the vaporizer reading, which is the mechanical explanation for why "two percent on the dial" is not two percent at the alveolus.',
+  },
+  'minutes to 90%': {
+    definition:
+      'How long the alveolar wash-in takes to reach ninety percent of its ceiling at the current fresh gas flow and solubility. It is the induction clock of the whole model — a doubling of the blood:gas coefficient roughly doubles it, and a flush of fresh gas cuts it by the same factor.',
+  },
+  'agent absorption': {
+    definition:
+      'The uptake index of agent leaving the gas and entering the body — roughly solubility times cardiac output times the current alveolar level. It is the accounting half of anaesthesia: the same dial extracts more from a high-output patient, and that is why the vaporizer has to lead the cardiac output rather than follow it.',
+  },
+  'performance index': {
+    definition:
+      'The composite outcome of the Yerkes-Dodson inverted-U: near a hundred percent when arousal sits at the task\'s optimum, the memory ceiling has headroom and demand stays inside the reserve, collapsing toward its floor when any one of those breaks. It is a teaching score, not a clinical test, but every pre-clinical question about "why did performance fall" is really asking for its factors.',
+  },
+  'working memory occupancy': {
+    definition:
+      'How much of the seven-plus-or-minus-two ceiling is being spent, including the friction distraction and fatigue spend for free: one hundred percent means the rack is full and nothing else can be held while it is. It packages load and interference into the single number that actually predicts whether a problem will fit long enough to solve.',
+  },
+  'deployed effort': {
+    definition:
+      'The effort an executive reserve can actually mount, cut in two ways: distance from the task\'s optimum arousal (effort far off the peak is moot) and fatigue (which withdraws from the reserve itself). A motivated but exhausted learner reads low here — the physiological record of being unable to start, however much they want to.',
+  },
+  'arousal optimality': {
+    definition:
+      'Closeness to the arousal this task wants, rather than to any fixed ideal — a hard problem wants low arousal, so a learner at forty-five percent can be optimally placed for one task and far over-peak for another. Zero means the learner sits on a shoulder of the inverted-U, where performance wastes away despite effort.',
+  },
+  'demand overshoot': {
+    definition:
+      'How far the task demand runs past what the current reserve and arousal state can cover, before the demand cliff: past about twenty-five percent the performance curve falls through rather than downhill, so this is the number that separates hard-but-doable from overwhelmed. The panic preset is parked deliberately beyond it.',
+  },
+  'task optimum': {
+    definition:
+      'The arousal level the current task performs best at, which difficulty relocates downward: an easy task peaks near forty-five percent, while a demanding one may want only fifteen. It is the Yerkes-Dodson insight made numeric — the same dial reading can be exactly right for one problem and ruination for another.',
+  },
 };
 
 /**

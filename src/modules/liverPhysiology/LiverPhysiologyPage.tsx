@@ -7,6 +7,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { buildLiverPhysiologyPresentation } from './presentation';
 import { getPresentationContext } from '@/shared/presentation/context';
@@ -63,6 +64,7 @@ export function LiverPhysiologyPage() {
 
   return (
     <ModulePage
+      historyCapacity={liverLoopConfig.historyCapacity}
       moduleId="liverPhysiology"
       title="Liver & Bilirubin Metabolism"
       subtitle="one pigment, three places to fail, and a urine dipstick that tells you which"
@@ -84,7 +86,17 @@ export function LiverPhysiologyPage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={LIVER_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={LIVER_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={LIVER_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       blindControls={session.blinded}

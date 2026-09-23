@@ -10,6 +10,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { glucoseRegulationContent } from './content';
 import { glucoseLoopConfig } from './engine/loopConfig';
@@ -66,6 +67,7 @@ export function GlucoseRegulationPage() {
 
   return (
     <ModulePage
+      historyCapacity={glucoseLoopConfig.historyCapacity}
       moduleId="glucoseRegulation"
       title="Glucose Regulation"
       subtitle="insulin, glucagon & counter-regulatory hormones"
@@ -82,10 +84,21 @@ export function GlucoseRegulationPage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={GLUCOSE_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       controls={slots.controls}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={glucoseRegulationContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of glucose regulation — not a clinical or diagnostic tool. Pick a preset (or set the sliders yourself), then click "Eat meal" to deliver the carbohydrate load and "Give insulin" to deliver the insulin dose. Try the Type 1 diabetes preset, eat a meal, and watch glucose climb unchecked — then give insulin. Simulated time runs faster than real time so a post-meal glucose excursion (physiologically a couple of hours) is watchable within a session.'}
     />

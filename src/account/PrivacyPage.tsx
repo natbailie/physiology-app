@@ -1,4 +1,5 @@
 import styles from './AccountPage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 /**
  * The whole notice, in plain language. It only ever lists data that is actually stored —
@@ -7,6 +8,7 @@ import styles from './AccountPage.module.css';
 export function PrivacyPage() {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <h1 className={styles.title}>Privacy: what we store</h1>
       </header>
@@ -37,8 +39,24 @@ export function PrivacyPage() {
           <h2 className={styles.sectionTitle}>Why it is stored</h2>
           <p className={styles.muted}>
             So your progress follows you between devices, so the app can bring back the questions
-            you got wrong, and — with your permission later — so a teacher can see how a class is
-            coping. Your individual answers are not shown to anyone else.
+            you got wrong, and so a teacher can see how a class is coping.
+          </p>
+        </section>
+
+        <section>
+          <h2 className={styles.sectionTitle}>If you join a class</h2>
+          <p className={styles.muted}>
+            Joining a class with a code — or being enrolled in one by a licence your school bought —
+            lets the teacher who runs it see how that class is getting on. Their dashboard shows the
+            class as a whole: how many people have attempted each module and what proportion were
+            correct. It does not list students, and a module is left blank until at least five
+            people have attempted it, so a class average can never be read back as one
+            person&rsquo;s result.
+          </p>
+          <p className={styles.muted}>
+            Being straight about the limit of that: the permission your teacher holds is over the
+            answers of people in their own classes, and it is what makes the class figures possible.
+            Nobody else can see them, no other teacher can, and leaving the class ends it.
           </p>
         </section>
 

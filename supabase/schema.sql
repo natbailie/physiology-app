@@ -1,5 +1,10 @@
 -- Physiology Lab — accounts and progress.
--- Run in the Supabase dashboard (SQL Editor), or via `supabase db push` once the CLI is set up.
+--
+-- HOW THIS GETS APPLIED: paste it into the Supabase dashboard's SQL Editor, or hand it to the
+-- Supabase MCP connector as a migration. NOT `supabase db push` — that pushes files from
+-- `supabase/migrations/`, and this project has no such directory and no `config.toml`. The
+-- command therefore succeeds silently having done nothing, which costs an afternoon to notice.
+-- The applied migration history is in `supabase_migrations.schema_migrations`.
 --
 -- Design notes:
 -- * Every attempt is one row. The app's current ModuleSummary aggregates (attempted, correct,
@@ -18,7 +23,11 @@ create table if not exists public.profiles (
   -- column grants at the bottom of this file.
   subscription_status text not null default 'free',
   stripe_customer_id text,
-  current_period_end timestamptz
+  current_period_end timestamptz,
+  -- Who the learner is revising as. Both are self-declared, both nullable, and both are written
+  -- by the client — hence the explicit column grant at the bottom of this file.
+  target_exam text,
+  training_level text
 );
 
 create table if not exists public.question_attempts (
@@ -82,13 +91,13 @@ create policy "update own profile"
 
 -- The policy above governs *which row* a user may update, not which columns. Without the grants
 -- below, anyone holding the anon key could set their own subscription_status to 'active' and let
--- themselves into the paid catalogue. Revoke the table-wide grant and hand back only the column
--- a learner legitimately owns.
+-- themselves into the paid catalogue. Revoke the table-wide grant and hand back only the columns
+-- a learner legitimately owns: their display name, and what they say they are revising for.
 --
 -- This pair is load-bearing and easy to undo by accident: any later `grant update on
 -- public.profiles` anywhere re-opens the hole for every column, including the billing ones.
 revoke update on public.profiles from authenticated;
-grant update (display_name) on public.profiles to authenticated;
+grant update (display_name, target_exam, training_level) on public.profiles to authenticated;
 
 drop policy if exists "read own attempts" on public.question_attempts;
 create policy "read own attempts"
@@ -128,6 +137,20 @@ alter table public.profiles
   add column if not exists stripe_customer_id text,
   add column if not exists current_period_end timestamptz;
 
--- Re-assert the column grants after the ALTER, in case it re-granted anything.
+-- ---------------------------------------------------------------------------
+-- The learner's own answer to "what are you revising for?", which filters the catalogue and
+-- segments the audience in RevenueCat. Unlike the billing columns above, these ARE the client's
+-- to write, so they are named in the grant below.
+-- ---------------------------------------------------------------------------
+alter table public.profiles
+  add column if not exists target_exam text,
+  add column if not exists training_level text;
+
+-- Re-assert the column grants after the ALTERs, in case either re-granted anything.
+--
+-- This is the line that makes the two columns above writable at all. `revoke update ... from
+-- authenticated` is total, so a column missing from the `grant` cannot be written by a signed-in
+-- learner and — because PostgREST reports that as a silent no-op on an otherwise successful
+-- request — the failure looks exactly like a UI that forgot to save.
 revoke update on public.profiles from authenticated;
-grant update (display_name) on public.profiles to authenticated;
+grant update (display_name, target_exam, training_level) on public.profiles to authenticated;

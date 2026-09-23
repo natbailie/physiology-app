@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Slider } from '@/shared/components/Slider/Slider';
 import { ControlRail } from '@/shared/components/ControlRail/ControlRail';
+import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
 import type { MotorInputs } from '../engine/types';
 
 interface ControlPanelProps {
@@ -94,6 +95,19 @@ function ControlPanelBase({ inputs, onChange }: ControlPanelProps) {
         step={1}
         unit="%"
         onChange={(v) => onChange('dystoniaSeverityPct', v)}
+      />
+      {/* The stimulator is a device that is switched on and left on, so it belongs on the rail
+          rather than behind a button that flipped hidden state. Mirrors the toggle the schema
+          declares, which is what the phone renders — this page draws its own rail. */}
+      <ToggleGroup
+        label="Deep brain stimulation"
+        value={inputs.deepBrainStimulation}
+        options={[
+          { value: 'off', label: 'Off' },
+          { value: 'on', label: 'On' },
+        ]}
+        colorVar="var(--basal-ganglia)"
+        onChange={(v) => onChange('deepBrainStimulation', v as MotorInputs['deepBrainStimulation'])}
       />
     </ControlRail>
   );

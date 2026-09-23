@@ -19,8 +19,39 @@ interface CascadeNodeSpec {
   color: string;
   cx: number;
   cy: number;
+  /** How much of this step is RUNNING right now — zero until something injures the vessel. */
   level: (d: CoagDerived) => number;
+  /**
+   * How much of it is AVAILABLE to run, from the factors the patient has.
+   *
+   * The whole of this module's diagram backlog was one omission: every quantity drawn was a
+   * running one, and an uninjured patient's cascade is at rest, so a haemophiliac, a warfarinised
+   * patient and a healthy one painted the same collapsed ladder. What separates them is standing
+   * there in `derived` the entire time as the input passthroughs — which is exactly what a factor
+   * ASSAY measures, and what the lab panel beside the drawing has always reported.
+   */
+  available: (d: CoagDerived) => number;
+  /**
+   * Where this node's name sits, relative to the node.
+   *
+   * It used to be below every node without exception, which worked while a node was a disc of at
+   * most thirteen units. The availability ring reaches fifteen, and the common-pathway nodes are
+   * thirty-six apart — so each ring swallowed the label of the node above it, and the sweep found
+   * a line through "Xa" over 92% of its width. The stacked three take their names to the side; the
+   * two limb heads keep theirs below, where nothing is stacked under them.
+   */
+  labelX: number;
+  labelY: number;
+  labelAnchor: 'middle' | 'end';
 }
+
+/** Circulating platelets in the lumen, at fixed positions so the count reads as a count rather
+ * than as a jitter. Clear of the breach at x 96-136, which the plug occupies. */
+const PLATELET_POSITIONS: readonly { cx: number; cy: number }[] = [
+  { cx: 44, cy: 78 }, { cx: 62, cy: 104 }, { cx: 78, cy: 70 }, { cx: 56, cy: 90 },
+  { cx: 84, cy: 112 }, { cx: 148, cy: 76 }, { cx: 166, cy: 102 }, { cx: 182, cy: 82 },
+  { cx: 154, cy: 114 }, { cx: 192, cy: 108 }, { cx: 70, cy: 118 }, { cx: 176, cy: 68 },
+];
 
 /**
  * The cascade as a ladder: two limbs converging on a shared common pathway. Node brightness
@@ -30,7 +61,9 @@ interface CascadeNodeSpec {
  */
 const CASCADE_NODES: CascadeNodeSpec[] = [
   // Extrinsic limb (PT).
-  { label: 'TF·VIIa', color: 'artery', cx: -46, cy: 0, level: (d) => d.tissueFactorExposure },
+  // Factor VII is vitamin K dependent, so warfarin and liver disease shrink what is on hand here
+  // before anything happens — which is why they lengthen the PT this limb is named for.
+  { label: 'TF·VIIa', color: 'artery', cx: -46, cy: 0, level: (d) => d.tissueFactorExposure, available: (d) => d.vitaminKDependentFactors / 100, labelX: 0, labelY: 30, labelAnchor: 'middle' },
   // Intrinsic limb (APTT) — shows ACTIVATION, not merely available factor: the tenase complex
   // only assembles once thrombin has begun amplifying it.
   {
@@ -39,11 +72,17 @@ const CASCADE_NODES: CascadeNodeSpec[] = [
     cx: 46,
     cy: 0,
     level: (d) => clamp((d.factorVIIIActivity / 100) * (d.factorIXActivity / 100) * clamp(d.thrombin * 2, 0, 1), 0, 1),
+    // The same product WITHOUT the thrombin gate: the tenase a haemophiliac could assemble if
+    // thrombin ever arrived. Haemophilia A and B each collapse one term of it.
+    available: (d) => clamp((d.factorVIIIActivity / 100) * (d.factorIXActivity / 100), 0, 1.5),
+    labelX: 0,
+    labelY: 30,
+    labelAnchor: 'middle',
   },
   // Common pathway.
-  { label: 'Xa', color: 'platelet', cx: 0, cy: 40, level: (d) => d.factorXa },
-  { label: 'Thrombin', color: 'thrombin', cx: 0, cy: 76, level: (d) => d.thrombin },
-  { label: 'Fibrin', color: 'fibrin', cx: 0, cy: 112, level: (d) => d.fibrin },
+  { label: 'Xa', color: 'platelet', cx: 0, cy: 40, level: (d) => d.factorXa, available: (d) => d.vitaminKDependentFactors / 100, labelX: -20, labelY: 4, labelAnchor: 'end' },
+  { label: 'Thrombin', color: 'thrombin', cx: 0, cy: 76, level: (d) => d.thrombin, available: (d) => d.vitaminKDependentFactors / 100, labelX: -20, labelY: 4, labelAnchor: 'end' },
+  { label: 'Fibrin', color: 'fibrin', cx: 0, cy: 112, level: (d) => d.fibrin, available: (d) => d.fibrinogenLevel / 100, labelX: -20, labelY: 4, labelAnchor: 'end' },
 ];
 
 export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagState, CoagDerived, CoagInputs, CoagHistoryPoint> {
@@ -59,10 +98,23 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
     // Radius carries activation — a dark, shrunken node is a broken limb, a large glowing one
     // is carrying the reaction.
     const r = Math.max(4 + level * 9, 1);
+    // The ring is what the patient HAS; the disc inside it is what is happening. Capped at 1.2 so
+    // a supranormal assay cannot grow a ring into its neighbour eighteen units away.
+    const available = clamp(node.available(derived), 0, 1.2);
     return {
       type: 'group' as const,
       transform: `translate(${cx}, ${cy})`,
       children: [
+        {
+          type: 'circle' as const,
+          cx: 0,
+          cy: 0,
+          r: 5 + available * 9,
+          fill: 'none',
+          stroke: node.color,
+          strokeWidth: 1.4,
+          opacity: 0.85,
+        },
         {
           type: 'circle' as const,
           cx: 0,
@@ -72,11 +124,12 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
         },
         {
           type: 'text' as const,
-          x: 0,
-          y: 27,
+          x: node.labelX,
+          y: node.labelY,
           text: node.label,
-          anchor: 'middle' as const,
+          anchor: node.labelAnchor,
           colorToken: 'text',
+          halo: 'panel' as const,
         },
       ],
     };
@@ -92,6 +145,12 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
         children: [
           // --- Injured vessel ---
           { type: 'text', x: 116, y: 38, text: 'Injured vessel', cls: 'organLabel', anchor: 'middle' },
+          /* The lumen, which the schema omitted and the web drew from its own stylesheet — one of
+           * the drifts that came of keeping two drawings. Stated as data rather than as a class so
+           * the phone gets it too; `--wash-faint` is 14%. Square rather than the legacy rounded
+           * rect because `RectNode` carries no corner radius, and the walls above and below it are
+           * straight lines in any case. */
+          { type: 'rect', x: 30, y: 62, width: 172, height: 62, fill: 'artery', fillOpacity: 0.14 },
           // Upper wall.
           { type: 'path', d: 'M30,62 L202,62', colorToken: 'artery', strokeWidth: 3 },
           // Lower wall, broken at the injury site.
@@ -105,6 +164,27 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
             strokeWidth: Math.max(0.2, injury * 3),
           },
           { type: 'text', x: 116, y: 152, text: 'breach', anchor: 'middle', colorToken: 'danger', opacity: Math.max(0, injury) },
+          /* Platelets circulating in the lumen, before any of them are called on. A count, not a
+           * wash — the same device immuneResponse uses for its cell populations, and the only way
+           * thrombocytopenia is visible in an uninjured vessel. */
+          ...PLATELET_POSITIONS.slice(0, Math.round(clamp(derived.plateletCount / 400, 0, 1) * PLATELET_POSITIONS.length)).map((pos) => ({
+            type: 'circle' as const,
+            cx: pos.cx,
+            cy: pos.cy,
+            r: 2.6,
+            fill: 'platelet',
+            fillOpacity: 0.75,
+          })),
+          /* von Willebrand factor lining the breach: what platelets adhere TO. A vWF deficiency is
+           * a thin line here and a normal patient a thick one, before a single platelet sticks. */
+          {
+            type: 'path',
+            d: 'M92,128 L140,128',
+            colorToken: 'platelet',
+            strokeWidth: Math.max(0.4, clamp(derived.vonWillebrandFactor / 100, 0, 1.5) * 3),
+            strokeLinecap: 'round',
+            opacity: 0.7,
+          },
           // Platelet plug sealing the breach, with the fibrin mesh forming across it.
           {
             type: 'group',
@@ -127,6 +207,23 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
               })),
             ],
           },
+          /* Aspirin over the platelets rather than over the plug: it blocks the cyclo-oxygenase of
+           * every platelet in the vessel, taken days before the injury and lasting the life of the
+           * cell. A bar through the population says that; a mark on a plug that does not exist yet
+           * would not. */
+          ...(derived.aspirinDose > 0
+            ? [
+                {
+                  type: 'path' as const,
+                  d: 'M38,66 L198,118',
+                  colorToken: 'danger',
+                  strokeWidth: 0.6 + clamp(derived.aspirinDose / 100, 0, 1) * 1.8,
+                  strokeLinecap: 'round' as const,
+                  opacity: 0.55,
+                },
+                { type: 'text' as const, x: 200, y: 122, text: 'aspirin', anchor: 'end' as const, colorToken: 'danger', halo: 'bg' as const, opacity: 0.9 },
+              ]
+            : []),
           {
             type: 'text',
             x: 30,
@@ -160,10 +257,10 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
             transform: 'translate(330, 68)',
             children: [
               // 15 units apart, not 12: at 12 the two lines of each pair touched.
-              { type: 'text', x: -46, y: -28, text: 'Extrinsic', anchor: 'middle', colorToken: 'text-dim' },
-              { type: 'text', x: -46, y: -13, text: '(PT)', anchor: 'middle', colorToken: 'text-faint' },
-              { type: 'text', x: 46, y: -28, text: 'Intrinsic', anchor: 'middle', colorToken: 'text-dim' },
-              { type: 'text', x: 46, y: -13, text: '(APTT)', anchor: 'middle', colorToken: 'text-faint' },
+              { type: 'text', x: -46, y: -36, text: 'Extrinsic', anchor: 'middle', colorToken: 'text-dim' },
+              { type: 'text', x: -46, y: -21, text: '(PT)', anchor: 'middle', colorToken: 'text-faint' },
+              { type: 'text', x: 46, y: -36, text: 'Intrinsic', anchor: 'middle', colorToken: 'text-dim' },
+              { type: 'text', x: 46, y: -21, text: '(APTT)', anchor: 'middle', colorToken: 'text-faint' },
 
               // Both limbs converge on factor Xa.
               {
@@ -191,13 +288,28 @@ export function buildCoagulationPresentation(ctx: Ctx): ModulePresentation<CoagS
                 strokeWidth: derived.fibrin > 0.1 ? 1.6 : 1.2,
               },
 
+              /* Heparin as a gate ACROSS the common pathway, because that is where it acts:
+               * antithrombin inhibits thrombin and Xa, so the bar sits on the link between them
+               * and widens with the dose. Drawn whether or not a clot is running, which is the
+               * point — an anticoagulated patient is anticoagulated before they are cut. */
+              ...(derived.heparinDose > 0
+                ? [
+                    {
+                      type: 'path' as const,
+                      d: 'M-11,58 L11,58',
+                      colorToken: 'danger',
+                      strokeWidth: 1 + clamp(derived.heparinDose / 100, 0, 1) * 3,
+                      strokeLinecap: 'round' as const,
+                    },
+                    { type: 'text' as const, x: 16, y: 61, text: 'heparin', anchor: 'start' as const, colorToken: 'danger', halo: 'panel' as const },
+                  ]
+                : []),
               // Thrombin's positive feedback onto the upstream cofactors — the explosive burst.
               {
                 type: 'path',
                 d: 'M12,76 C56,64 62,26 52,10',
                 colorToken: 'thrombin',
                 strokeWidth: Math.max(0.1, 1.6 * (0.15 + thrombin * 0.85)),
-                styleVars: { 'thrombin-level': thrombin },
               },
               {
                 type: 'text',

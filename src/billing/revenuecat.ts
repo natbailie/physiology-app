@@ -114,3 +114,43 @@ export async function purchasePackage(
     };
   }
 }
+
+/**
+ * Tell RevenueCat what this learner is revising for.
+ *
+ * Attributes are what make the audience segmentable — a paywall or a campaign aimed at the people
+ * sitting the FRCA rather than at everyone — and they are the reason `exams.ts` asks the question
+ * once and both features share the answer.
+ *
+ * ## Why this is not called on sign-in
+ *
+ * It would be the obvious moment, and it is the wrong one here: `@revenuecat/purchases-js` is
+ * 840 kB, larger than the rest of the app, and the whole reason every import of it in this file
+ * is dynamic is that a learner who never buys anything never downloads it. Setting an attribute
+ * at sign-in would pull that chunk for everybody and undo the one rule `CLAUDE.md` calls
+ * non-negotiable about learner-facing dependencies.
+ *
+ * So it is called where the SDK is already being loaded for its own reasons — the pricing page,
+ * and again after a purchase — which is also where the attribute is worth anything. The phone has
+ * no such trade to make: `react-native-purchases` is linked into the binary either way, so the
+ * native sibling sets them on sign-in.
+ *
+ * Failure is swallowed on purpose, and the web SDK does not retry: a learner must never be
+ * stopped from buying because an analytics attribute would not save.
+ */
+export async function setExamAttributes(
+  appUserId: string,
+  attributes: { targetExam: string | null; trainingLevel: string | null },
+): Promise<void> {
+  if (!isRevenueCatConfigured) return;
+
+  try {
+    const instance = await sdk(appUserId);
+    await instance.setAttributes({
+      target_exam: attributes.targetExam,
+      training_level: attributes.trainingLevel,
+    });
+  } catch {
+    // Segmentation is not worth an error a learner would see.
+  }
+}

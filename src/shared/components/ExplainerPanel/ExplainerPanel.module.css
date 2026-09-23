@@ -46,6 +46,15 @@
   transform: rotate(225deg) translate(-2px, -2px);
 }
 
+/* Shown in place of the prose while practice has it shut. Outside the <details>, so it is
+   visible exactly when the content is not. */
+.collapsedNote {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  padding-top: var(--s-3);
+  margin: 0;
+}
+
 /* Legacy flat prose, directly under the panel summary. */
 .paragraphs {
   display: flex;

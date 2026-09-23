@@ -1,25 +1,24 @@
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { ImmuneDiagram } from './components/ImmuneDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { IMMUNE_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { immuneResponseContent } from './content';
+import { buildImmuneResponsePresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
 import { immuneLoopConfig } from './engine/loopConfig';
 import { perturbInfect, perturbVaccinate } from './engine/engine';
 import { DEFAULT_IMMUNE_INPUTS, IMMUNE_PRESETS, IMMUNE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
-import type { ImmuneInputs } from './engine/types';
+import type { ImmuneDerived, ImmuneHistoryPoint, ImmuneInputs, ImmuneState } from './engine/types';
 
 export function ImmuneResponsePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<ImmuneInputs>('immuneResponse', DEFAULT_IMMUNE_INPUTS);
@@ -48,6 +47,17 @@ export function ImmuneResponsePage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* One drawing, not two. The schema's readouts, controls and charts were verified identical to
+   * the components they replace; its diagram now also carries the HOST — resident macrophages, the
+   * CD4 count as the helper cell's own radius, and the suppression over the whole node. */
+  const ctx = getPresentationContext<ImmuneState, ImmuneDerived, ImmuneInputs, ImmuneHistoryPoint>(
+    snapshot,
+    history,
+    baseline,
+    inputs,
+  );
+  const slots = usePresentationSlots('immuneResponse', buildImmuneResponsePresentation(ctx), ctx, inputs, handleChange);
+
   const applyPreset = useScenarioPreset({
     setInputs,
     defaults: DEFAULT_IMMUNE_INPUTS,
@@ -55,15 +65,10 @@ export function ImmuneResponsePage() {
     resetEngine: reset,
   });
 
-  const loadHistory = useSeries(history, (h) => h.pathogenLoad * 100);
-  const loadHistoryBaseline = useSeries(baseline.history, (h) => h.pathogenLoad * 100);
-  const iggHistory = useSeries(history, (h) => h.iggTitre * 100);
-  const iggHistoryBaseline = useSeries(baseline.history, (h) => h.iggTitre * 100);
-  const memoryHistory = useSeries(history, (h) => h.memoryLevel * 100);
-  const memoryHistoryBaseline = useSeries(baseline.history, (h) => h.memoryLevel * 100);
 
   return (
     <ModulePage
+      historyCapacity={immuneLoopConfig.historyCapacity}
       moduleId="immuneResponse"
       title="Immune Response"
       subtitle="innate to adaptive, and how memory changes everything"
@@ -79,19 +84,23 @@ export function ImmuneResponsePage() {
           disabled={session.blinded}
         />
       }
-      diagram={<ImmuneDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={IMMUNE_PRESET_LABELS} />}
-      transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-  <Sparkline label="Pathogen load" unit="%" data={loadHistory} baselineData={loadHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--pathogen)" />
-  <Sparkline label="IgG" unit="%" data={iggHistory} baselineData={iggHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--antibody)" />
-  <Sparkline label="Memory" unit="%" data={memoryHistory} baselineData={memoryHistoryBaseline} domainMin={0} domainMax={100} colorVar="var(--memory)" />
-        </>
+      diagram={slots.diagram}
+      readouts={slots.readouts}
+      questions={
+        <QuestionSet
+          count={IMMUNE_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={IMMUNE_PRESET_LABELS} />
+        </QuestionSet>
       }
+      transport={<SimControls transport={transport} baseline={baseline} />}
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={immuneResponseContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of the immune response — not a clinical or diagnostic tool. The best way to use it: click "Infect" on a healthy host and watch the primary response run its course, then — once it has cleared — click "Infect" again. Nothing about the inputs has changed, only the memory the first infection left behind, and the second course is barely an illness. "Vaccinate" reaches the same protected state without any infection at all. One simulated second is roughly one day.'}
     />

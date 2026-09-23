@@ -1,6 +1,7 @@
 import type { VisionInputs } from './types';
 
 export const DEFAULT_VISION_INPUTS: VisionInputs = {
+  torchEye: 'off',
   sceneLuminanceLogCd: 2,
   rodIntegrity: 1,
   coneIntegrity: 1,
@@ -106,3 +107,26 @@ export const VISION_PRESET_ORDER: VisionPresetName[] = [
   'meyersLoopLeft',
   'occipitalInfarctRight',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const VISION_PRESET_GLOSS: Partial<Record<VisionPresetName, string>> = {
+  normalDaylight: 'light enough that the cones are doing all of the work',
+  dimRestaurant: 'light low enough that the cones are handing over',
+  starlight: 'too little light for cones at all',
+  retinitisPigmentosa: 'rods dying from the periphery inwards',
+  macularDegeneration: 'the centre of the retina failing while its edges hold',
+  opticNeuritisLeft: 'one optic nerve inflamed, so its signal arrives weakened',
+  fixedDilatedRight: 'the nerve that constricts one eye no longer working',
+  presbyopia: 'a lens too stiff to change shape for near work',
+  openAngleGlaucoma: 'drainage failing slowly, with the angle still open',
+  acuteAngleClosure: 'drainage blocked suddenly by the iris itself',
+  treatedGlaucoma: 'the same drainage problem, with outflow restored by drug',
+  chiasmalCompression: 'crossing fibres squeezed where the two nerves meet',
+  occipitalInfarctRight: 'the far end of the pathway lost, behind everything else',
+  meyersLoopLeft: 'the fibres that swing forward through the temporal lobe interrupted',
+};

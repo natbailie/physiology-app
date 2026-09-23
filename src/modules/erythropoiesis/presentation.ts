@@ -86,7 +86,6 @@ export function buildErythropoiesisPresentation(ctx: Ctx): ModulePresentation<Er
           {
             type: 'group',
             transform: 'translate(96,120)',
-            styleVars: { 'marrow-output': marrowOutput, 'marrow-function': marrowFunction },
             children: [
               /* Density IS output: a marrow working flat out is dense, an aplastic one is an
                  empty cavity with an outline. That was carried by `--marrow-output` alone, a
@@ -102,14 +101,16 @@ export function buildErythropoiesisPresentation(ctx: Ctx): ModulePresentation<Er
           { type: 'vessel', path: BLOOD_VESSEL_PATH, speed: flowSpeed, colorToken: 'hemoglobin' },
           {
             type: 'group',
-            styleVars: { 'hb-level': hbLevel },
             children: CELL_POSITIONS.map((p) => ({
               type: 'circle' as const,
               cx: p.cx,
               cy: p.cy,
               r: cellRadius,
+              /* Colour IS the haemoglobin concentration; radius is the MCV. A pale cell and a
+                 full one were identical while `--hb-level` carried it, which is the one thing an
+                 anaemia diagram has to show. */
               fill: 'hemoglobin',
-              styleVars: { 'hb-level': hbLevel },
+              fillOpacity: clamp(0.2 + hbLevel * 0.68, 0.2, 1),
             })),
           },
           { type: 'text', x: 78, y: 270, text: `MCV ${derived.mcv.toFixed(0)} fL`, cls: 'pathLabel' },

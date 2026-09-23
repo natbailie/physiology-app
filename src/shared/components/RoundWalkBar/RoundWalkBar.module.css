@@ -1,0 +1,29 @@
+/* Names rather than "Previous" and "Next": the name is what tells a learner whether the step is
+   worth taking, and it is the same currency the round board used. */
+.walk {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  font-size: var(--fs-xs);
+}
+
+.link {
+  font-weight: 700;
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.end {
+  color: var(--text-faint);
+}
+
+.position {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}

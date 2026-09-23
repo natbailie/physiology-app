@@ -31,3 +31,23 @@
   font-weight: 700;
   line-height: var(--lh-tight);
 }
+
+/* A section eyebrow: the small mono line that names what a block IS, above its heading.
+ *
+ * Tracked because mono at this size closes up, NOT because it is shouting — it is sentence case
+ * like every other label in the app, and the moment one is set in caps it has become the old
+ * uppercase voice and should be reverted. That is why adopting this needed no carve-out in the
+ * sentence-case rule.
+ *
+ * Colour through a property for the reason `microLabel` documents: a composed class carries
+ * equal specificity, so a consumer restating `color` beside it is a coin toss decided by
+ * emitted stylesheet order. `--brand` clears 4.5:1 on --panel, --bg and --readout-ink in both
+ * themes, which is every ground a kicker lands on. */
+.kicker {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  line-height: var(--lh-tight);
+  color: var(--kicker-color, var(--brand));
+}

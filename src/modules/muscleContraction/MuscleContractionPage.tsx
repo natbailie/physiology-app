@@ -16,6 +16,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { muscleContractionContent } from './content';
 import { muscleLoopConfig } from './engine/loopConfig';
@@ -81,6 +82,7 @@ export function MuscleContractionPage() {
 
   return (
     <ModulePage
+      historyCapacity={muscleLoopConfig.historyCapacity}
       moduleId="muscleContraction"
       title="Muscle & Excitation-Contraction Coupling"
       subtitle="calcium, cross-bridges, length-tension & force-velocity"
@@ -100,7 +102,17 @@ export function MuscleContractionPage() {
       }
       diagram={<MuscleDiagram derived={derived} excitationPulse={state.excitationPulse} />}
       readouts={<ReadoutPanel derived={derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={MUSCLE_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -143,6 +155,7 @@ export function MuscleContractionPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={muscleContractionContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of excitation-contraction coupling — not a clinical or biomechanical tool. Tension is expressed as a percentage of maximal tetanic tension. Like the action potential module, this one runs far SLOWER than real time (about 1/20): a twitch is over in a tenth of a second, so the calcium transient and the tension it produces would otherwise be impossible to see as separate events. Press "Stimulate" for a single twitch, or raise the stimulation frequency for summation and tetanus.'

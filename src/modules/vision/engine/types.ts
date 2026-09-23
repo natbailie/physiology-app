@@ -18,6 +18,8 @@ export type { FieldLesionSite, EyeFieldSectors } from './visualFields';
 export interface VisionInputs {
   /** Scene luminance, log10 cd/m2 (-5 starlight to +4 bright sunlight). */
   sceneLuminanceLogCd: number;
+  /** Which eye the torch is held on. 'off' leaves the pupils to the ambient scene alone. */
+  torchEye: TorchEye;
   /** Rod system integrity, fraction (0-1). Low models retinitis pigmentosa. */
   rodIntegrity: number;
   /** Foveal cone integrity, fraction (0-1). Low models macular degeneration. */
@@ -50,6 +52,16 @@ export interface VisionInputs {
 
 /** Which eye the torch is shining in, as a signed marker: 0 none, 1 right, -1 left. */
 export type FlashEye = 0 | 1 | -1;
+
+/**
+ * Which eye the examiner's torch is in, as a SETTING rather than an event.
+ *
+ * A torch held on an eye stays on it — the swinging-light test is a sequence of held positions,
+ * not three impulses — so this belongs on the rail where the learner can see which eye is lit and
+ * swing it back deliberately. It used to live only in `flashEye` on the state, written by three
+ * buttons that left no trace on the control panel at all.
+ */
+export type TorchEye = 'off' | 'right' | 'left';
 
 export interface VisionInternalState {
   simTimeSeconds: number;

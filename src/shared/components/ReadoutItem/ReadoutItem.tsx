@@ -57,6 +57,11 @@ function ReadoutItemBase({
   const hint = [secondary, setPointHint(value, setPoint)].filter(Boolean).join(' · ');
   const style = colorVar ? ({ '--tile-color': colorVar } as CSSProperties) : undefined;
   const withheld = Boolean(revealsPattern && blinded);
+  // A verdict is a word, not a reading: it stays small, unglowing, and on the ink's own text
+  // colour. That is also what keeps it outside `palette.test.ts`'s LARGE-text claim, which only
+  // holds for a numeral at --fs-2xl in a signal colour. `wide` is how a module already declares
+  // "this value is a verdict rather than a number" — see the prop's own docblock.
+  const isVerdict = Boolean(wide || revealsPattern);
   usePublishedTile({ moduleId, label, value, unit, secondary: hint === '' ? undefined : hint, withheld });
 
   return (
@@ -64,11 +69,18 @@ function ReadoutItemBase({
       {/* Looks its own label up, so a module gains definitions without being touched. The
           module id goes with it because some labels are the module's own word — `State`,
           micturition's `Volume` — and mean something different one page over. */}
-      <span className={`label ${styles.label}`} style={style}>
+      <span className={`label ${styles.label}`}>
         <Term label={label} moduleId={moduleId} />
       </span>
       <div className={styles.valueRow}>
-        <span className={`numeral ${styles.value}`}>{withheld ? '—' : value}</span>
+        {/* The colour rides the NUMBER now, not its label. A signal colour naming a quantity
+            while the quantity itself sat in plain text was the wrong half lit. */}
+        <span
+          className={isVerdict ? `${styles.value} ${styles.verdict}` : styles.value}
+          style={isVerdict ? undefined : style}
+        >
+          {withheld ? '—' : value}
+        </span>
         {unit && !withheld && <span className={styles.unit}>{unit}</span>}
       </div>
       {withheld ? (

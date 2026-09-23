@@ -4,6 +4,7 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
 import { GuytonDiagram } from './components/GuytonDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
@@ -15,10 +16,12 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { venousReturnContent } from './content';
 import { venousReturnLoopConfig } from './engine/loopConfig';
-import { perturbHemorrhage, perturbTransfusion, perturbValsalva } from './engine/engine';
+import { perturbValsalva } from './engine/engine';
+import { VENOUS_RETURN_CONTROLS } from './presentation';
 import {
   DEFAULT_VENOUS_RETURN_INPUTS,
   VENOUS_RETURN_PRESETS,
@@ -60,6 +63,11 @@ export function VenousReturnPage() {
   const msfpHistory = useSeries(history, (h) => h.meanSystemicFillingPressure);
 
   const handleChange = useInputSetter(setInputs);
+  // Blood lost or given is a standing change and moves the slider; a Valsalva is not, and does not.
+  // That split is the whole distinction this rail was hiding — `volumeOffsetMl` carried the litre
+  // forever while the blood-volume slider went on reading 5000, and the intrathoracic surge decays
+  // to nothing in four seconds, which is right for a manoeuvre and wrong for a haemorrhage.
+  const nudge = useInputNudge(setInputs, VENOUS_RETURN_CONTROLS);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -70,6 +78,7 @@ export function VenousReturnPage() {
 
   return (
     <ModulePage
+      historyCapacity={venousReturnLoopConfig.historyCapacity}
       moduleId="venousReturn"
       title="Venous Return & Cardiac Function Curves"
       subtitle="filling pressure, the two curves & where they cross"
@@ -80,9 +89,9 @@ export function VenousReturnPage() {
           labels={VENOUS_RETURN_PRESET_LABELS}
           onApply={applyPreset}
           actions={[
-            { label: 'Transfuse 1 L', onClick: () => perturb((s) => perturbTransfusion(s)), variant: 'impulse' },
+            { label: 'Transfuse 1 L', onClick: () => nudge({ bloodVolumeMl: 1000 }), variant: 'impulse' },
             { label: 'Valsalva', onClick: () => perturb((s) => perturbValsalva(s)), variant: 'impulse' },
-            { label: 'Haemorrhage 1 L', onClick: () => perturb((s) => perturbHemorrhage(s)), variant: 'danger' },
+            { label: 'Haemorrhage 1 L', onClick: () => nudge({ bloodVolumeMl: -1000 }), variant: 'danger' },
           ]}
           onShare={shareLink}
           onReset={resetScenario}
@@ -90,7 +99,17 @@ export function VenousReturnPage() {
       }
       diagram={<GuytonDiagram derived={derived} />}
       readouts={<ReadoutPanel derived={derived} inputs={inputs} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={VENOUS_RETURN_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -136,6 +155,7 @@ export function VenousReturnPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={venousReturnContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={
         'A simplified, conceptual model of the systemic circulation — not a clinical tool. This module runs in real time: right atrial pressure is not solved for, it obeys mass balance, rising when venous return exceeds cardiac output and falling when it does not, so the crossing of the two curves emerges rather than being assumed. The Cardiorenal module deliberately uses the simpler MAP = CO x SVR shortcut instead; this is where that shortcut is unpacked.'

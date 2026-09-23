@@ -1,6 +1,7 @@
 import { FormulaCard } from './components/FormulaCard';
 import { FORMULAS, type FormulaDomain } from './formulas';
 import styles from './ReferencePage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 /** Order reads roughly the way a pre-clinical course does, not alphabetically. */
 const DOMAINS: readonly FormulaDomain[] = [
@@ -15,6 +16,7 @@ const DOMAINS: readonly FormulaDomain[] = [
 export function ReferencePage() {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href="#">
           &larr; Modules

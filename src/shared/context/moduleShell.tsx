@@ -16,11 +16,6 @@ interface ModuleShellValue {
   /** True while a pattern-discrimination question hides the inputs. Consumed by the diagram so
    * it can withhold the classification it would otherwise print in the corner. */
   blinded: boolean;
-  /** Whether practice is idle and can be started from the header. */
-  canStartPractice: boolean;
-  startPractice: () => void;
-  /** Called by QuizPanel: the handler while a session can be started, null while one is running. */
-  registerStartPractice: (start: (() => void) | null) => void;
   /** The module's preset labels, or null when no preset bar is mounted. */
   scenarioLabels: Record<string, string> | null;
   /** True while the preset bar is locked. Consumers must not load a scenario. */
@@ -28,6 +23,14 @@ interface ModuleShellValue {
   applyScenario: (id: string) => void;
   /** Called by PresetBar on mount and whenever its labels or locked state change. */
   registerScenarios: (registration: ScenarioRegistration | null) => void;
+  /**
+   * The engine's `historyCapacity` — the number of points a chart is sized for. A `Sparkline` that
+   * does not know it stretches whatever points it has across the whole frame, so a module opening
+   * on a trace that is still filling draws a two-point line corner to corner and compresses it on
+   * every tick. It is a shell-wide fact about the page, so it comes through here rather than being
+   * threaded onto each of the ninety-odd charts by hand.
+   */
+  historyCapacity: number | null;
   /** Scrolls the lab region back under the sticky header. */
   revealLab: () => void;
   registerRevealLab: (reveal: () => void) => void;
@@ -36,13 +39,11 @@ interface ModuleShellValue {
 const ModuleShellContext = createContext<ModuleShellValue>({
   moduleId: '',
   blinded: false,
-  canStartPractice: false,
-  startPractice: () => {},
-  registerStartPractice: () => {},
   scenarioLabels: null,
   scenariosLocked: false,
   applyScenario: () => {},
   registerScenarios: () => {},
+  historyCapacity: null,
   revealLab: () => {},
   registerRevealLab: () => {},
 });
@@ -50,11 +51,10 @@ const ModuleShellContext = createContext<ModuleShellValue>({
 /**
  * Lets the two ends of a module page talk without threading props through all 45 of them.
  *
- * The header needs a practice button that only QuizPanel knows how to trigger, the diagram
- * needs to know a question is open so it stops printing the answer, and the explainer — which
- * sits below everything — needs to load the scenario a paragraph is talking about. All three
- * are shell-wide facts about the page rather than anything a module should have to pass down,
- * which is what keeps this feature out of all 45 module pages.
+ * The diagram needs to know a question is open so it stops printing the answer, and the
+ * explainer — which sits below everything — needs to load the scenario a paragraph is talking
+ * about. Both are shell-wide facts about the page rather than anything a module should have to
+ * pass down, which is what keeps this feature out of all 45 module pages.
  *
  * The handlers themselves live in refs and only the data a consumer RENDERS goes through state.
  * Storing a function in state would republish the context on every registration, re-running the
@@ -63,24 +63,18 @@ const ModuleShellContext = createContext<ModuleShellValue>({
 export function ModuleShellProvider({
   blinded,
   moduleId = '',
+  historyCapacity = null,
   children,
 }: {
   blinded: boolean;
   /** Optional so the tests that mount this provider alone keep working; a module page always
    *  passes one. */
   moduleId?: string;
+  /** Optional for the same reason. A chart with no capacity falls back to its own point count,
+   *  which is what every chart did before this existed. */
+  historyCapacity?: number | null;
   children: ReactNode;
 }) {
-  const starter = useRef<(() => void) | null>(null);
-  const [canStartPractice, setCanStartPractice] = useState(false);
-
-  const registerStartPractice = useCallback((start: (() => void) | null) => {
-    starter.current = start;
-    setCanStartPractice(start != null);
-  }, []);
-
-  const startPractice = useCallback(() => starter.current?.(), []);
-
   // The apply function stays in a ref; only the labels and the lock — the two things a
   // consumer needs in order to render — go through state.
   const applier = useRef<((id: string) => void) | null>(null);
@@ -116,26 +110,22 @@ export function ModuleShellProvider({
     () => ({
       moduleId,
       blinded,
-      canStartPractice,
-      startPractice,
-      registerStartPractice,
       scenarioLabels,
       scenariosLocked,
       applyScenario,
       registerScenarios,
+      historyCapacity,
       revealLab,
       registerRevealLab,
     }),
     [
       moduleId,
       blinded,
-      canStartPractice,
-      startPractice,
-      registerStartPractice,
       scenarioLabels,
       scenariosLocked,
       applyScenario,
       registerScenarios,
+      historyCapacity,
       revealLab,
       registerRevealLab,
     ],

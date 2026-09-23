@@ -12,6 +12,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { erythropoiesisContent } from './content';
 import { erythroLoopConfig } from './engine/loopConfig';
@@ -67,6 +68,7 @@ export function ErythropoiesisPage() {
 
   return (
     <ModulePage
+      historyCapacity={erythroLoopConfig.historyCapacity}
       moduleId="erythropoiesis"
       title="Erythropoiesis & Anemia"
       subtitle="EPO feedback, iron & B12, and classifying an anemia"
@@ -84,7 +86,17 @@ export function ErythropoiesisPage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={ERYTHRO_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={ERYTHROPOIESIS_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={ERYTHRO_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       blindControls={session.blinded}

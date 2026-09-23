@@ -128,3 +128,27 @@ export const PRESET_ORDER: RenalTubularPresetName[] = [
   'preRenalAzotaemia',
   'atn',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const RENAL_TUBULAR_PRESET_GLOSS: Partial<Record<RenalTubularPresetName, string>> = {
+  centralDI: 'no vasopressin made',
+  nephrogenicDI: 'vasopressin made, but the duct cannot hear it',
+  siadh: 'vasopressin released when it should not be',
+  loopDiuretic: 'the thick ascending limb blocked, and the medullary gradient with it',
+  thiazide: 'the distal tubule blocked, sparing the concentrating gradient',
+  acetazolamide: 'bicarbonate left behind in the proximal tubule',
+  sglt2Inhibitor: 'glucose left in the filtrate, dragging water after it',
+  amiloride: 'the sodium channel shut in the collecting duct',
+  mannitol: 'a solute that cannot be reabsorbed, holding water in the lumen',
+  tolvaptan: 'the vasopressin receptor blocked',
+  proximalRTA: 'bicarbonate lost because the proximal tubule cannot reclaim it',
+  distalRTA: 'acid that cannot be pumped out at the far end',
+  type4RTA: 'aldosterone either missing or unheard',
+  preRenalAzotaemia: 'a kidney that is intact but starved of blood',
+  atn: 'tubules injured, so the reabsorption machinery has stopped',
+};

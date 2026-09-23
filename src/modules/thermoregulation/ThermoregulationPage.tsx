@@ -2,13 +2,13 @@ import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
-import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
+import { useModuleCases } from '@/shared/hooks/useModuleCases';
+import { THERMO_CASES } from './cases';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
-import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
-import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ThermoDiagram } from './components/ThermoDiagram';
 import { ThermoReadoutPanel } from './components/ReadoutPanel';
@@ -21,44 +21,59 @@ import { perturbActiveCooling, perturbActiveRewarming, perturbGiveAntipyretic } 
 import {
   THERMO_PRESETS,
   THERMO_PRESET_LABELS,
+  THERMO_PRESET_GLOSS,
   THERMO_PRESET_ORDER,
   DEFAULT_THERMO_INPUTS,
 } from './engine/presets';
 import type { ThermoInputs } from './engine/types';
 
 export function ThermoregulationPage() {
-  const { inputs, setInputs, shareLink } = useShareableInputs<ThermoInputs>('thermoregulation', DEFAULT_THERMO_INPUTS);
+  // Opened from the ward round, or null for the catalogue route. The seed means the engine
+  // settles the patient directly rather than settling a healthy body and then jumping.
+  const patient = useModuleCase(THERMO_CASES);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ThermoInputs>(
+    'thermoregulation',
+    DEFAULT_THERMO_INPUTS,
+    caseInputs(patient, DEFAULT_THERMO_INPUTS, THERMO_PRESETS),
+  );
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, thermoLoopConfig);
   const resetScenario = useScenarioReset({
     setInputs,
-    defaults: DEFAULT_THERMO_INPUTS,
+    // At a bedside, Reset means "back to this patient". Returning a learner who is mid-case to
+    // a healthy volunteer would discard the thing they came to look at.
+    defaults: caseInputs(patient, DEFAULT_THERMO_INPUTS, THERMO_PRESETS) ?? DEFAULT_THERMO_INPUTS,
     resetEngine: reset,
     baseline,
     transport,
   });
 
-  const { session, summary } = useModulePractice({
+  // Tab, question sets, session, bedside and the three bedded nodes. Everything downstream of
+  // the engine that every bedded page repeats lives in the hook; what stays here is this
+  // module's physiology and its presentation.
+  const cases = useModuleCases({
     moduleId: 'thermoregulation',
+    patient,
+    cases: THERMO_CASES,
     questions: THERMO_QUESTIONS,
     presets: THERMO_PRESETS,
-    inputs,
     defaultInputs: DEFAULT_THERMO_INPUTS,
+    inputs,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
+    shareLink,
+    snapshot,
+    transport,
+    baselineFrozen: baseline.history !== null,
+    presetLabels: THERMO_PRESET_LABELS,
+    presetGloss: THERMO_PRESET_GLOSS,
   });
+  const { session } = cases;
 
   const handleChange = useInputSetter(setInputs);
-
-  const applyPreset = useScenarioPreset({
-    setInputs,
-    defaults: DEFAULT_THERMO_INPUTS,
-    presets: THERMO_PRESETS,
-    resetEngine: reset,
-  });
 
   const coreHistory = useSeries(history, (h) => h.core);
   const coreBaseline = useSeries(baseline.history, (h) => h.core);
@@ -69,6 +84,7 @@ export function ThermoregulationPage() {
 
   return (
     <ModulePage
+      historyCapacity={thermoLoopConfig.historyCapacity}
       moduleId="thermoregulation"
       title="Thermoregulation, Fever & Heat Illness"
       subtitle="fever is defended and hyperthermia is overwhelmed — the set point tells you which"
@@ -77,20 +93,20 @@ export function ThermoregulationPage() {
         <PresetBar
           order={THERMO_PRESET_ORDER}
           labels={THERMO_PRESET_LABELS}
-          onApply={applyPreset}
+          onApply={cases.applyPreset}
           actions={[
             { label: 'Antipyretic', onClick: () => perturb(perturbGiveAntipyretic), variant: 'impulse' },
             { label: 'Active cooling', onClick: () => perturb(perturbActiveCooling), variant: 'impulse' },
             { label: 'Active rewarming', onClick: () => perturb(perturbActiveRewarming), variant: 'impulse' },
           ]}
-          onShare={shareLink}
+          onShare={cases.shareLink}
           onReset={resetScenario}
           disabled={session.blinded}
         />
       }
+      {...cases.page}
       diagram={<ThermoDiagram derived={snapshot.derived} />}
       readouts={<ThermoReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={THERMO_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

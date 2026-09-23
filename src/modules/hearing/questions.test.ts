@@ -1,9 +1,10 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { hearingLoopConfig } from './engine/loopConfig';
-import { DEFAULT_HEARING_INPUTS, HEARING_PRESETS, type HearingPresetName } from './engine/presets';
+import { DEFAULT_HEARING_INPUTS, HEARING_PRESETS, type HearingPresetName, HEARING_PRESET_GLOSS } from './engine/presets';
 import { HEARING_QUESTIONS } from './questions';
 import type { HearingDerived, HearingInputs, HearingInternalState } from './engine/types';
 
@@ -21,3 +22,5 @@ describe('hearing pattern questions', () => {
 describe('hearing predict questions', () => {
   describeQuestionSet(hearingLoopConfig, DEFAULT_HEARING_INPUTS, HEARING_PRESETS, predictions);
 });
+
+describeGlossSet(HEARING_PRESET_GLOSS, HEARING_PRESETS, patterns);

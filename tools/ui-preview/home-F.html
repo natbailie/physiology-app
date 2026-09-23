@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>home-F — Ward-round home with real beds · concept preview</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --raised:#eef2f7; --border:#dfe6ef;
+    --text:#0f1f33; --dim:#4b5d75; --faint:#7c8da6;
+    --brand:#0f62d6; --accent:#c62828;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+    --serif:Georgia,"Literata",serif;
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#1d3352;
+    --text:#e8f1ff; --dim:#a9bdd6; --faint:#6f87a5;
+    --brand:#4cc3ff; --accent:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .proto-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 20px;background:#020610;color:#cfe6ff;border-bottom:1px solid #163154;font-size:12.5px}
+  .proto-bar nav{display:flex;gap:12px;margin-left:auto}.proto-bar nav a{color:#cfe6ff;text-decoration:none;opacity:.8}
+  .theme-seg{display:flex;background:#0f2a4d;border-radius:8px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#cfe6ff;font:inherit;font-size:11.5px;padding:4px 9px;border-radius:6px;cursor:pointer;opacity:.7}
+  .theme-seg button[aria-pressed="true"]{background:#4cc3ff;color:#03101f;opacity:1;font-weight:800}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 20px 90px;display:flex;flex-direction:column;gap:32px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--brand)}
+  h1{font-size:34px;letter-spacing:-.02em;margin:8px 0;line-height:1.12}
+  h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .lede{color:var(--dim);max-width:70ch}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+  .pad{padding:20px}
+  .mono{font-family:var(--mono)}
+  .btn{font:inherit;font-size:13px;font-weight:700;border-radius:10px;padding:11px 18px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#fff}
+  [data-theme="dark"] .btn.primary{color:#03101f;box-shadow:0 0 24px rgba(76,195,255,.4)}
+  .trace path{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 2.2s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @media(prefers-reduced-motion:reduce){.trace path{animation:none;stroke-dashoffset:0}}
+  .pair{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+  .phone{width:390px;max-width:100%;border:1px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column}
+  [data-theme="dark"] .phone{border-color:#2a4d7d;background:#040b16}
+  .phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--faint);padding:10px 16px 0}
+  .phone-list{padding:10px 12px;display:flex;flex-direction:column;gap:10px;max-height:560px;overflow:auto}
+  .tabs{display:flex;border-top:1px solid var(--border);margin-top:auto}
+  .tabs span{flex:1;text-align:center;font-size:10px;color:var(--faint);padding:10px 0 14px}
+  .tabs .on{color:var(--brand);font-weight:800}
+  .pt{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+  a.pt:hover{border-color:var(--brand)}
+  .pt + .pt{margin-top:0}
+  .acuity{font-family:var(--mono);font-size:10px;font-weight:800;border-radius:7px;padding:4px 8px;white-space:nowrap}
+  .acuity.red{background:rgba(255,93,93,.14);color:#ff8d8d;border:1px solid #ff5d5d}
+  .acuity.amber{background:rgba(255,178,36,.12);color:#ffb224;border:1px solid #ffb224}
+  .acuity.green{background:rgba(61,220,151,.1);color:#3ddc97;border:1px solid #3ddc97}
+  .acuity.grey{background:transparent;color:var(--faint);border:1px solid var(--faint)}
+  .pt small{color:var(--dim);display:block}
+  .pt .mod{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--faint);display:block;margin-top:2px}
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .vital{background:#02070f;border:1px solid #1d3352;border-radius:12px;padding:10px 12px;color:#e8f1ff}
+  .vital span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8ba0b9}
+  .vital b{font-family:var(--mono);font-size:24px;text-shadow:0 0 16px currentColor;display:block}
+  .vital small{font-family:var(--mono);font-size:11px;color:#a9bdd6}
+  .rx-row{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:flex-start}
+  .rx-row + .rx-row{margin-top:10px}
+  .rx-row small{color:var(--dim);display:block}
+  .meter{height:6px;border-radius:999px;background:var(--raised);margin-top:8px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--brand);border-radius:999px}
+  .referrals{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1px dashed var(--border);border-radius:12px;color:var(--dim);font-size:13px;margin-top:12px}
+  .referrals a{color:var(--brand);font-weight:700}
+  .disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .disc{border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--panel)}
+  .disc h3{margin:0 0 4px;font-size:15px}
+  .disc p{margin:0;color:var(--dim);font-size:13px}
+  .disc .count{font-family:var(--mono);font-size:11px;color:var(--faint);display:block;margin-top:8px}
+  .disc.soon{opacity:.65;border-style:dashed}
+  .note{font-size:12.5px;color:var(--faint)}
+  @media(max-width:960px){.pair{grid-template-columns:1fr}.vitals{grid-template-columns:repeat(2,1fr)}.disc-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>home-F · Ward-round home, real beds</b><span style="border:1px solid #2a4d7d;border-radius:999px;padding:2px 10px;font-size:12px">concept — beds, links and module names are repo-verbatim; counts and acuity illustrative</span><nav><a href="#round">Round</a><a href="#subjects">Subjects</a><a href="#notes">Port notes</a></nav><span class="theme-seg"><button data-t="auto" aria-pressed="false">Auto</button><button data-t="light" aria-pressed="false">Light</button><button data-t="dark" aria-pressed="true">Dark</button></span></div>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Flagship concept F · a hospital you carry, not a simulator library</div>
+    <h1>Physiology Lab <svg class="trace" viewBox="0 0 220 40" width="180" height="34" style="vertical-align:-6px"><path d="M0 22 H70 L76 22 80 8 86 34 90 22 H130 L136 22 140 10 146 32 150 22 H220" fill="none" stroke="#4cc3ff" stroke-width="2.5" stroke-linecap="round"/></svg></h1>
+    <p class="lede">Home is a <b>ward round</b>. Reviews are <b>patients to see</b>. Weak spots get <b>prescribed</b>. Locked content is a <b>referral</b>. Progress is a <b>competency map of the human body</b>. Bentara Medical.</p>
+  </header>
+
+  <!-- WARD ROUND HOME : real beds -->
+  <section id="round" class="card"><div class="pad">
+    <div class="kicker">Ward-round home · maps to HomePage + RoundBoard + StudyStrip + StudyReport</div>
+    <h2>Good evening — 8 patients are waiting.</h2>
+    <p class="lede">Due reviews arrive as cases with acuity, not as a question count. Acuity below is illustrative — in the app it is derived from your review ladder (<span class="mono">crash · due · check · new</span>), never hand-typed. Links are the real routes.</p>
+  </div>
+  <div class="pair" style="padding:0 20px 20px">
+    <div class="phone"><div class="phone-status"><span>21:47</span><span>● on shift</span></div>
+      <div class="phone-list">
+        <a class="pt" href="#shockStates?case=amina-trauma"><span class="acuity red">CRASH</span><div><b>Amina, 24</b><small>Motorcycle collision, cool peripheries, heart rate 112</small><span class="mod">BED A04 · SHOCK STATES</span></div></a>
+        <a class="pt" href="#shockStates?case=george-post-mi"><span class="acuity amber">DUE</span><div><b>George, 68</b><small>Breathless four days after an anterior MI, systolic 84</small><span class="mod">BED A07 · SHOCK STATES</span></div></a>
+        <a class="pt" href="#shockStates?case=ruth-warm-shock"><span class="acuity grey">NEW</span><div><b>Ruth, 71</b><small>Two days of fever, warm and vasodilated, lactate climbing</small><span class="mod">BED B02 · SHOCK STATES</span></div></a>
+        <a class="pt" href="#respiratory?case=nadia-dka"><span class="acuity grey">NEW</span><div><b>Nadia, 19</b><small>Vomiting, breathing deeply, three days of thirst</small><span class="mod">BED C01 · RESPIRATORY &amp; ACID-BASE</span></div></a>
+        <a class="pt" href="#respiratory?case=brian-copd"><span class="acuity grey">NEW</span><div><b>Brian, 74</b><small>Long-standing COPD, PaCO2 raised, pH nearly normal</small><span class="mod">BED C05 · RESPIRATORY &amp; ACID-BASE</span></div></a>
+        <a class="pt" href="#respiratory?case=colin-salicylate"><span class="acuity grey">NEW</span><div><b>Colin, 34</b><small>Confused and hyperventilating, ringing in the ears</small><span class="mod">BED C09 · RESPIRATORY &amp; ACID-BASE</span></div></a>
+        <a class="pt" href="#cardiorenal?case=margaret-heart-failure"><span class="acuity grey">NEW</span><div><b>Margaret, 79</b><small>Ankles swelling, breathless on stairs, passing little urine</small><span class="mod">BED D03 · CARDIORENAL</span></div></a>
+        <a class="pt" href="#cardiorenal?case=derek-kidney-failure"><span class="acuity grey">NEW</span><div><b>Derek, 61</b><small>Long-standing hypertension, creatinine doubled, oedematous</small><span class="mod">BED D08 · CARDIORENAL</span></div></a>
+        <span class="btn primary" style="text-align:center">Start round →</span>
+      </div>
+      <div class="tabs"><span class="on">Round</span><span>Body map</span><span>Drugs</span><span>Account</span></div>
+    </div>
+    <div>
+      <div class="vitals">
+        <div class="vital" style="color:#3ddc97"><span>SHIFT · DAY</span><b>6</b><small>illustrative streak</small></div>
+        <div class="vital" style="color:#ffb224"><span>DUE TODAY</span><b>6</b><small>1 crash · 1 due · 4 new</small></div>
+        <div class="vital" style="color:#4cc3ff"><span>KNOWN</span><b>48/412</b><small>absolute count, not %</small></div>
+        <div class="vital" style="color:#ff6b6b"><span>WEAKEST</span><b>Shock</b><small>prescribed below</small></div>
+      </div>
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start">
+        <div style="border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;background:var(--panel)">
+          <div class="mono" style="font-size:10px;letter-spacing:.12em;color:var(--faint)">COMPETENCY MAP</div>
+          <svg viewBox="0 0 120 170" width="130" height="180" role="img" aria-label="Competency map of the human body">
+            <circle cx="60" cy="20" r="13" fill="none" stroke="#3ddc97" stroke-width="7"/>
+            <rect x="42" y="40" width="36" height="60" rx="14" fill="none" stroke="#ffb224" stroke-width="7"/>
+            <path d="M44 52 L44 110 M76 52 L76 110" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round"/>
+            <path d="M42 104 L28 150 M78 104 L92 150" stroke="#3d5470" stroke-width="6" stroke-linecap="round"/>
+            <path d="M44 60 L24 84 M76 60 L96 84" stroke="#ffb224" stroke-width="6" stroke-linecap="round"/>
+          </svg>
+          <div class="mono" style="font-size:10px;color:var(--dim)">shock ! · cardio ~ · acid-base ~ · limbs locked</div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 6px">℞ Prescribed for you</h3>
+          <div class="rx-row"><span class="acuity amber">℞</span><div style="flex:1"><b>Shock States</b><small>A question here has come back round and caught you twice.</small><div class="meter"><i style="width:38%"></i></div></div><span class="mono" style="font-size:11px;color:var(--faint)">3 due</span></div>
+          <div class="rx-row"><span class="acuity amber">℞</span><div style="flex:1"><b>Respiratory &amp; Acid-Base</b><small>4 of 9 right so far.</small><div class="meter"><i style="width:44%"></i></div></div><span class="mono" style="font-size:11px;color:var(--faint)">2 due</span></div>
+          <div class="rx-row"><span class="acuity green">℞</span><div style="flex:1"><b>Cardiorenal</b><small>3 of 8 questions still unseen.</small><div class="meter"><i style="width:61%"></i></div></div></div>
+          <p class="lede note" style="font-size:13px">Same <span class="mono">StudyReport</span> ranking as today. Deliberately no expiry — a weak spot stops being listed when it stops being weak, and at no other time.</p>
+        </div>
+      </div>
+      <div class="referrals"><span>Paywalled state: locked cases appear here as referrals with no acuity chip — e.g. “2 more patients are on wards you do not have access to”.</span><a href="#pricing">See who →</a></div>
+    </div>
+  </div></section>
+
+  <!-- SUBJECTS : real disciplines -->
+  <section id="subjects" class="card"><div class="pad">
+    <div class="kicker">Subjects · maps to disciplineGrid in HomePage</div>
+    <h2>Pick a subject to explore.</h2>
+    <p class="lede">Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE, MRCP). Counts illustrative of shape; simulators exclude reference pages.</p>
+    <div class="disc-grid" style="margin-top:14px">
+      <div class="disc"><h3>Physiology</h3><p>The feedback-loop simulators, one organ system at a time.</p><span class="count">~50 simulators</span></div>
+      <div class="disc"><h3>Pharmacology</h3><p>The high-yield drug classes of the UK top-100, and the diagrams that show how each works.</p><span class="count">100+ classes</span></div>
+      <div class="disc soon"><h3>Microbiology · soon</h3><p>The organisms, what they infect and the drugs that reach them.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Biochemistry · soon</h3><p>The pathways underneath the physiology, and where each one fails.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Anatomy · soon</h3><p>Structure and the relationships that make the clinical signs make sense.</p><span class="count">roadmap</span></div>
+      <div class="disc soon"><h3>Pathology · soon</h3><p>How disease processes begin, spread and show themselves.</p><span class="count">roadmap</span></div>
+    </div>
+    <p class="lede note" style="margin-top:12px">Tools row below this in the app: Formula Reference (pinned). Footnote throughout: simplified conceptual models for teaching mechanism — not clinical or diagnostic tools.</p>
+  </div></section>
+
+  <section id="notes" class="card"><div class="pad">
+    <div class="kicker">Port notes (if greenlit)</div>
+    <p class="lede">New tokens: ward-ink scale, trace phosphors, case-amber, motion durations. New components: CaseHeader, RoundList, CompetencyMap, ReferralPaywall. Data bindings: <span class="mono">RoundBoard → phone list</span>, <span class="mono">StudyStrip → vitals</span>, <span class="mono">StudyReport → ℞ rows</span>, <span class="mono">DISCIPLINES → subject grid</span>. Deliberately excluded: XP/coins, default leaderboards, sounds, streak punishment, expiring prescriptions, paywalled reference.</p>
+  </div></section>
+</div>
+<script>
+(function(){const root=document.documentElement,btns=[...document.querySelectorAll('.theme-seg button')];const mq=matchMedia('(prefers-color-scheme: dark)');const cur=()=>localStorage.getItem('physio-preview-theme')||'dark';function apply(m){const t=m==='auto'?(mq.matches?'dark':'light'):m;root.dataset.theme=t;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===m)));}btns.forEach(b=>b.onclick=()=>{const m=b.dataset.t;if(m==='auto')localStorage.removeItem('physio-preview-theme');else localStorage.setItem('physio-preview-theme',m);apply(m);});mq.addEventListener?.('change',()=>{if(cur()==='auto')apply('auto');});apply(cur());})();
+</script>
+</body>
+</html>

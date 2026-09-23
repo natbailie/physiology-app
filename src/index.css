@@ -37,24 +37,26 @@
 }
 
 :root {
-  /* Surfaces — the house neutral, shared with the haematology app: white panels on a
-   * slate ground. Both products render the same ramp so a learner moving between them
-   * reads one system rather than two. */
-  --bg: #f8fafc;
+  /* Surfaces. White panels on a faintly blue ground — the slate ramp the haematology app
+   * shares, walked one step towards the navy the dark theme is built on, so the two themes
+   * are one instrument rather than a document and a monitor. The light half stays a page a
+   * learner can read for an hour; the shift is small enough here that the family resemblance
+   * with the house app survives it, and large enough to be the same product as the dark. */
+  --bg: #f6f8fb;
   --panel: #ffffff;
-  --panel-raised: #f1f5f9;
-  --panel-border: #e2e8f0;
+  --panel-raised: #eef2f7;
+  --panel-border: #687d95;
   /* Axis gridlines. Only the four modules whose diagram is genuinely a plot use these —
    * the graph paper that used to sit behind every diagram is gone. */
-  --grid-line: #e2e8f0;
-  --grid-line-minor: #f1f5f9;
+  --grid-line: #dfe6ef;
+  --grid-line-minor: #eef2f7;
 
   /* Text */
-  --text: #0f172a;
+  --text: #0f1f33;
   /* One notch darker than the house app's own label greys, which sit at 2.6:1 on white.
    * palette.test.ts holds this ramp to 4.5:1 and the difference is barely visible. */
-  --text-dim: #475569;
-  --text-faint: #64748b;
+  --text-dim: #455572;
+  --text-faint: #5c6f88;
   /* Text sitting ON a solid signal colour (a filled danger button, a badge). */
   --on-solid: #ffffff;
 
@@ -63,14 +65,32 @@
    * dark mode. These four tokens are that surface and the type that sits on it, and they
    * are deliberately NOT part of the signal palette: nothing physiological is drawn with
    * them. In dark mode the ink lifts one step so the band still separates from the page. */
-  --brand-ink: #0f172a;
-  --brand-ink-border: #1e293b;
+  --brand-ink: #0f1f33;
+  --brand-ink-border: #1d3352;
   --on-brand-ink: #ffffff;
   --brand-ink-dim: #94a3b8;
   /* The accent, lightened for the ink. --brand itself is calibrated on white and reads at
    * 3.45:1 on slate — below the floor — so the brand panels get their own step. One value
    * for both themes: it clears 4.5:1 on either ink. */
   --brand-on-ink: #60a5fa;
+
+  /* Instrument ground: the recessed slab a bedside vitals tile is printed on.
+   *
+   * This WANTED to be the mock's near-black in both themes, on the reasoning that a monitor is
+   * black in a lit room too. It cannot be, and the reason is the palette's own construction:
+   * the light signals are calibrated on WHITE, so on a near-black tile they are the wrong end
+   * of the ramp — nociception lands at 2.48:1 and venous at 2.70:1 against a 4.5:1 floor. The
+   * derived colours cannot be re-lifted per element either; `--artery` is substituted once, on
+   * :root, and descendants inherit the result rather than re-deriving it.
+   *
+   * So the slab inverts like everything else, and only dark mode gets the monitor. What makes
+   * a tile read as an instrument in either theme is the mono numerals, the tight border and the
+   * halo — not the absence of light. Held to the text floor by palette.test.ts, including for
+   * every signal, because a tile prints its number in the colour of the quantity it carries. */
+  --readout-ink: #eef2f7;
+  --readout-ink-border: #dfe6ef;
+  --on-readout-ink: #0f1f33;
+  --readout-ink-dim: #4b5d75;
 
   /* Elevation. Three steps, slate-tinted rather than neutral black, so a lifted panel
    * warms towards the ground it sits on instead of greying it. */
@@ -81,6 +101,9 @@
   --shadow-3:
     0 20px 25px -5px rgba(15, 23, 42, 0.1),
     0 8px 10px -6px rgba(15, 23, 42, 0.06); /* a card under the cursor, and the diagram */
+  /* The one shadow that points UP: the mobile control dock is pinned to the bottom of the
+   * viewport and casts onto the lab above it. --shadow-2 would put it off-screen. */
+  --shadow-up: 0 -4px 16px rgba(15, 23, 42, 0.1);
 
   /* Diagram effect tuning. The diagrams encode physiological intensity as
    * translucent washes and coloured halos; these tokens let the whole set be
@@ -197,7 +220,7 @@
   /* The one house accent: primary actions, the brand caption, the focus ring. It is a base
    * like any other so it lifts into dark mode with the rest of them, and so palette.test.ts
    * holds it to the same contrast floors. */
-  --brand-base: #2563eb;
+  --brand-base: #0f62d6;
   --ok-base: #007a6f;
   --warn-base: #9c6608;
   --danger-base: #c62828;
@@ -382,26 +405,37 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* The same slate ramp as light, walked the other way: --panel here IS the ink the light
-   * theme paints its brand panels in, so the two themes are one family rather than two. */
-  --bg: #0b1220;
-  --panel: #0f172a;
-  --panel-raised: #1e293b;
-  --panel-border: #334155;
-  --grid-line: #1e293b;
-  --grid-line-minor: #172033;
+  /* The night shift: a navy instrument ground rather than the neutral slate this app used
+   * to darken to. The panel sits close enough to the light theme's --brand-ink to read as
+   * the same surface a learner already meets on the sign-in card, and far enough below it
+   * that a lifted signal colour has somewhere to go. Every one of the 93 gains contrast
+   * against this panel over the slate it replaced — see the assertions in palette.test.ts,
+   * which is what that headroom is for. */
+  --bg: #050a13;
+  --panel: #0b1526;
+  --panel-raised: #0f1e35;
+  --panel-border: #5a7a9e;
+  --grid-line: #0f1e35;
+  --grid-line-minor: #0a1526;
 
-  --text: #f1f5f9;
-  --text-dim: #cbd5e1;
-  --text-faint: #94a3b8;
+  --text: #e8f1ff;
+  --text-dim: #a9bdd6;
+  --text-faint: #6f87a5;
 
   /* Ink one step up from --panel, so the brand panels still read as a distinct surface
    * instead of dissolving into the page the way a literal slate-900 would. */
-  --brand-ink: #1e293b;
-  --brand-ink-border: #334155;
+  --brand-ink: #12233d;
+  --brand-ink-border: #2a4d7d;
 
   /* On a lifted signal colour the ground reads, not white. */
-  --on-solid: #10161d;
+  --on-solid: #03101f;
+
+  /* Dark is where the instrument slab gets to be an actual monitor: below --panel rather than
+   * above it, so a vitals tile reads as recessed into the console instead of lifted off it. */
+  --readout-ink: #02070f;
+  --readout-ink-border: #1d3352;
+  --on-readout-ink: #e8f1ff;
+  --readout-ink-dim: #8ba0b9;
 
   /* Shadow does less work on dark, so the hairline border carries the separation instead. */
   --shadow-1: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
@@ -411,6 +445,7 @@
   --shadow-3:
     0 20px 25px -5px rgba(0, 0, 0, 0.55),
     0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-up: 0 -4px 16px rgba(0, 0, 0, 0.5);
 
   /* Lift every signal towards a cool near-white. Tuned against the contrast assertions in
    * src/theme/palette.test.ts — raising it washes the hues together, lowering it loses the
@@ -428,6 +463,13 @@
   --stroke-mix: 58%;
   --glow-blur: 1;
   --glow-mix: 58%;
+
+  /* The one hand-override this block has. --brand is a signal base like any other, so it
+   * reaches dark mode through the same color-mix towards --signal-tint as the other 93 —
+   * and that lift cannot produce a cyan from a blue without dragging every signal with it.
+   * The monitor accent is therefore stated outright. palette.test.ts measures it on the new
+   * panel exactly as it measures a derived one, which is what keeps this honest. */
+  --brand: #4cc3ff;
 }
 
 * {
@@ -468,6 +510,20 @@ button {
   outline-offset: 2px;
 }
 
+/* Forced colours (Windows High Contrast): the OS replaces the whole palette with the
+ * user's system colours, so every custom wash, glow and gradient goes with it. What has
+ * to survive is structure, not branding: panels already carry 1px borders (see
+ * panel.module.css), chips carry their words as well as their colours, and meters carry
+ * text alternatives — so this block only repairs what the mapping genuinely breaks.
+ * Component-level repairs (slider track, numeral halo, meter fill) live beside the rules
+ * they repair and are bound by forcedColors.style.test.ts with this one. */
+@media (forced-colors: active) {
+  :focus-visible {
+    /* The one outline colour the OS guarantees against any ground it can set. */
+    outline: 3px solid Highlight;
+  }
+}
+
 /* Reduced motion, everywhere.
  *
  * 41 of the 45 diagram stylesheets animate or transition and only 5 declared a guard of their
@@ -488,6 +544,24 @@ button {
   }
 }
 
+/* Crossfade between pages.
+ *
+ * The user agent already cross-fades a view transition; all this does is put it on the house
+ * timing instead of the browser's 250ms linear default, so a page change reads like every other
+ * state change in the app. `useHashRoute` is what starts it, and it starts one only once the
+ * incoming page's chunk has landed — a transition begun earlier would capture the blank Suspense
+ * fallback and then pop the real page in behind it.
+ *
+ * NOT guarded by the block above, and it cannot be: that rule is written against `*`, and these
+ * pseudo-elements are not elements and are not in the document tree. The reduced-motion guard for
+ * this lives in `useHashRoute`, which simply does not start a transition — so the commit stays
+ * synchronous and the navigation is instant rather than fast. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease);
+}
+
 /* Utility: clinical instrument label treatment — small, muted, lightly tracked.
  * Sentence case: these labels are read, not shouted, and an app of nothing but capitals is
  * slower to scan. The tracking that made caps legible (0.09em) reads as broken spacing on
@@ -505,4 +579,20 @@ button {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
+}
+
+/* Utility: visually hidden but still announced — the shared answer for decorative-glyph
+ * exclusions, meter text alternatives and any other content meant for screen readers
+ * rather than sighted learners. `display: none` would remove it from the
+ * accessibility tree as well; this keeps it. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }

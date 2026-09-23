@@ -16,8 +16,12 @@ function ellipsePath(cx: number, cy: number, rx: number, ry: number): string {
 }
 
 export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<MicturitionInternalState, MicturitionDerived, MicturitionInputs, MicturitionHistoryPoint> {
-  const { derived } = ctx;
+  const { derived, inputs } = ctx;
   const volumeFraction = derived.bladderVolumeML / BLADDER.MAX_CAPACITY_ML;
+  /* Read from the INPUTS: cortical inhibition never reaches `derived`. Coerced, because the
+   * control writes it as a 0-or-100 slider while the input is typed boolean — a pre-existing
+   * mismatch that works because 0 is falsy, and one this drawing must not depend on the shape of. */
+  const holding = Boolean(inputs.cortexInhibitsMicturition);
 
   const detrusorWidth = 4 + derived.detrusorTone * 8;
   const sphincterGap = 6 + (1 - derived.externalSphincterTone) * 10;
@@ -48,6 +52,37 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
   const externalSphincterY = 180 + volumeFraction * 20;
 
   const bladderChildren: SceneNode[] = [
+    /* The descending cortical brake on the voiding reflex.
+     *
+     * The one thing in this module that makes continence voluntary, and the drawing had no
+     * pathway for it — so the control that decides whether a full bladder empties on the spot
+     * moved nothing. Drawn as a descending fibre onto the pelvic nerve it inhibits, with a
+     * crossbar rather than an arrowhead because it is an INHIBITORY connection: the same sign
+     * convention `HormoneArrow` uses everywhere else in the app.
+     */
+    {
+      type: 'path' as const,
+      d: 'M52,-6 L52,28',
+      colorToken: 'parasympathetic',
+      strokeWidth: holding ? 3 : 1,
+      opacity: holding ? 0.95 : 0.3,
+      fill: 'none' as const,
+    },
+    ...(holding
+      ? [{ type: 'path' as const, d: 'M44,28 L60,28', colorToken: 'parasympathetic', strokeWidth: 3, strokeLinecap: 'round' as const, fill: 'none' as const }]
+      : []),
+    // The group is translate(120,44) scale(1.6), so y=-14 puts the baseline at 21.6 and the cap
+    // height inside the frame. At -22 the ascenders were clipped by five pixels.
+    { type: 'text' as const, x: 52, y: -14, text: 'Cortex', cls: 'label', colorToken: 'parasympathetic', anchor: 'middle' as const },
+    {
+      type: 'text' as const,
+      x: 68,
+      y: 42,
+      text: holding ? 'holding' : 'released',
+      cls: 'caption',
+      colorToken: 'parasympathetic',
+    },
+
     // Parasympathetic nerve (left) — contracts detrusor.
     {
       type: 'path' as const,

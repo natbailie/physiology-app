@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { examName, examShortName, type ExamId } from '@/home/exams';
 import styles from './ModuleCard.module.css';
 
 interface ModuleCardProps {
@@ -15,6 +16,9 @@ interface ModuleCardProps {
   dueCount?: number;
   /** Outside the learner's subscription: the card points at pricing rather than the module. */
   locked?: boolean;
+  /** Exams this module is high-yield for. Absent means not yet mapped — the card shows nothing
+   * rather than claiming the module is on no syllabus. */
+  exams?: readonly ExamId[];
 }
 
 /** A home-screen tile for one physiology module — a clickable link when available,
@@ -31,6 +35,7 @@ export function ModuleCard({
   mastery,
   dueCount = 0,
   locked = false,
+  exams,
 }: ModuleCardProps) {
   const style = accentColorVar ? ({ '--card-accent': accentColorVar } as CSSProperties) : undefined;
 
@@ -71,6 +76,17 @@ export function ModuleCard({
       </span>
       <span className={styles.tagline}>{tagline}</span>
       {kind === 'reference' && <span className={styles.badge}>Reference</span>}
+      {exams && exams.length > 0 && (
+        <span className={styles.exams}>
+          {exams.map((exam) => (
+            // The short form, because five of these have to fit across a card. The full name is
+            // on the title so the abbreviation is never the only thing a reader has.
+            <span key={exam} className={styles.exam} title={examName(exam)}>
+              {examShortName(exam)}
+            </span>
+          ))}
+        </span>
+      )}
       {mastery !== undefined && (
         <span className={styles.meter} role="img" aria-label={`${Math.round(mastery * 100)} per cent known`}>
           <span className={styles.meterFill} style={{ width: `${Math.max(mastery * 100, 2)}%` }} />

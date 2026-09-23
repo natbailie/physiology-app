@@ -1,21 +1,13 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { ShockDerived, ShockInputs, ShockState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { ShockInputs } from './engine/types';
 import type { ShockPresetName } from './engine/presets';
 import { perturbFluidBolus } from './engine/engine';
+import { SHOCK_PANEL, type ShockSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: ShockState; derived: ShockDerived };
 export type ShockQuestion = ModuleQuestion<ShockInputs, ShockPresetName, Snapshot>;
 
-/** The haemodynamic panel: output, both filling pressures, resistance, and the two oxygen
- * numbers. Between them these name the cause; no one of them does it alone. */
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'Cardiac index', unit: 'L/min/m²', value: (s) => s.derived.cardiacIndex, decimals: 1 },
-  { label: 'CVP', unit: 'mmHg', value: (s) => s.derived.centralVenousPressureMmHg, decimals: 0 },
-  { label: 'Wedge', unit: 'mmHg', value: (s) => s.derived.wedgePressureMmHg, decimals: 0 },
-  { label: 'SVR', value: (s) => s.derived.effectiveSvr, decimals: 2 },
-  { label: 'SvO₂', unit: '%', value: (s) => s.derived.mixedVenousSaturationPercent, decimals: 0 },
-  { label: 'Lactate', unit: 'mmol/L', value: (s) => s.derived.lactateMmolL, decimals: 1 },
-];
+/** Shared with the ward-round bedside — see `panel.ts`. */
+const PANEL = SHOCK_PANEL;
 
 const SETTLE = 3000;
 

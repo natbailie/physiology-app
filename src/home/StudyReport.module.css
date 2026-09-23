@@ -73,6 +73,21 @@
   background: var(--text-dim);
 }
 
+/* Forced colours: track and fill are both author greys the OS replaces, potentially with
+ * the same system colour. Restate them in system colours — the labelled `role="img"` with
+ * its percent text is what carries the value, so the bar is decoration either way. */
+@media (forced-colors: active) {
+  .meter {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    height: 5px;
+  }
+
+  .meterFill {
+    background: Highlight;
+  }
+}
+
 .due {
   font-family: var(--mono);
   font-size: var(--fs-micro);

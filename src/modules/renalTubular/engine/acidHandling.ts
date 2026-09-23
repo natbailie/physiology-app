@@ -25,7 +25,7 @@ export function effectiveDistalDrive(inputs: RenalTubularInputs): number {
 }
 
 /** Proximal HCO3 reclaim effectiveness after structural failure and carbonic-anhydrase block. */
-function effectiveProximalReclaim(inputs: RenalTubularInputs): number {
+export function effectiveProximalReclaim(inputs: RenalTubularInputs): number {
   const caBlock = clamp(inputs.acetazolamideDose, 0, 100) / 100;
   return clamp(inputs.proximalAcidReclaim, 0, 1) * (1 - ACID.ACETAZOLAMIDE_MAX_BLOCK * caBlock);
 }

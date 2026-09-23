@@ -99,3 +99,21 @@ export const PRESET_ORDER: RespPresetName[] = [
   'cardiacArrest',
   'vomitingOnCopd',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this disorder IS, never what the gas
+ * shows. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss that
+ * reported a row of the ABG would answer the pattern questions from the options alone.
+ */
+export const RESP_PRESET_GLOSS: Partial<Record<RespPresetName, string>> = {
+  copdChronicAcidosis: 'years of retention, with the kidney caught up',
+  copdExacerbation: 'a retainer who has got acutely worse today',
+  panicHyperventilation: 'blowing off gas faster than the body makes it',
+  dkaMetabolicAcidosis: 'ketoacids consuming buffer, and the breathing compensating',
+  highAltitude: 'thin air, driving the breathing up',
+  diarrhoeaNonGap: 'bicarbonate lost from the gut, chloride taking its place',
+  pyloricStenosis: 'acid lost upwards, from vomiting',
+  salicylatePoisoning: 'a poison that drives the breathing and makes acid at once',
+  cardiacArrest: 'no circulation and no ventilation together',
+  vomitingOnCopd: 'a retainer who has started vomiting on top',
+};

@@ -2,7 +2,11 @@ import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { DISCIPLINES, MODULES, THEMES, type ThemeId } from './moduleRegistry';
 import { useModuleProgress } from './useModuleProgress';
+import { ExamFilterBar } from './ExamFilterBar';
+import { matchesExam, useExamFilter } from './examFilter';
+import { examName } from './exams';
 import styles from './ThemePage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 interface ThemePageProps {
   themeId: ThemeId;
@@ -14,10 +18,12 @@ export function ThemePage({ themeId }: ThemePageProps) {
   const theme = THEMES.find((t) => t.id === themeId);
   const { isUnlocked } = useEntitlement();
   const { progress } = useModuleProgress();
+  const examFilter = useExamFilter();
 
   if (!theme) return null;
 
-  const modules = MODULES.filter((module) => module.theme === themeId);
+  const inTheme = MODULES.filter((module) => module.theme === themeId);
+  const modules = inTheme.filter((module) => matchesExam(module.exams, examFilter));
 
   // Back goes up one tier, to the subject this theme sits under. A discipline that skips its
   // own page (its href points straight at a hub) has nowhere for that link to land, so the
@@ -29,6 +35,7 @@ export function ThemePage({ themeId }: ThemePageProps) {
   return (
     <div className={styles.page}>
       <nav className={styles.backRow}>
+        <ThemeBar />
         <a href={backHref} className={styles.backLink}>
           ← {backLabel}
         </a>
@@ -39,6 +46,20 @@ export function ThemePage({ themeId }: ThemePageProps) {
         <p className={styles.blurb}>{theme.blurb}</p>
       </header>
 
+      <ExamFilterBar
+        countText={
+          examFilter === null ? undefined : `${modules.length} of ${inTheme.length} for ${examName(examFilter)}`
+        }
+      />
+
+      {/* A theme can be filtered down to nothing — MRCS Part A covers none of the special senses.
+          Saying so, with the way out attached, is the difference between a filter and a bug. */}
+      {examFilter !== null && modules.length === 0 ? (
+        <p className={styles.empty}>
+          Nothing in {theme.name} is mapped to {examName(examFilter)}. Choose “All exams” above to see the{' '}
+          {inTheme.length} module{inTheme.length === 1 ? '' : 's'} here.
+        </p>
+      ) : (
       <div className={styles.grid}>
         {modules.map((module) => (
           <ModuleCard
@@ -49,6 +70,7 @@ export function ThemePage({ themeId }: ThemePageProps) {
           />
         ))}
       </div>
+      )}
 
       <p className={styles.footnote}>
         These are simplified, conceptual models built to teach mechanism — not clinical or diagnostic tools.

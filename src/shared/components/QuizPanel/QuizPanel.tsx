@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   DIRECTION_CHOICES,
   isPatternQuestion,
@@ -8,7 +8,7 @@ import {
 } from '@/shared/assessment/types';
 import type { QuizSession } from '@/shared/assessment/useQuizSession';
 import type { ModuleSummary } from '@/shared/assessment/progressStore';
-import { useModuleShell } from '@/shared/context/moduleShell';
+import text from '@/shared/styles/text.module.css';
 import styles from './QuizPanel.module.css';
 
 interface QuizPanelProps<TInputs, TPreset extends string, TSnapshot> {
@@ -16,6 +16,17 @@ interface QuizPanelProps<TInputs, TPreset extends string, TSnapshot> {
   summary: ModuleSummary;
   /** Display names for scenario options. Required for pattern-discrimination questions. */
   presetLabels?: Record<TPreset, string>;
+  /**
+   * One line under a scenario option, naming what the state IS.
+   *
+   * Pattern questions only — a predict question offers Rises / Falls / Barely changes, which
+   * gloss nothing, and looking those ids up in a preset map would be a silent type-lie.
+   *
+   * A gloss must never report a row of the panel. "Obstructive — blocked filling, high CVP"
+   * would answer `wedge-separates-obstruction` from the options alone; the module's own
+   * `questions.test.ts` refuses a gloss containing a panel label or a digit.
+   */
+  presetGloss?: Partial<Record<TPreset, string>>;
 }
 
 function directionLabel(direction: string): string {
@@ -64,18 +75,9 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   session,
   summary,
   presetLabels,
+  presetGloss,
 }: QuizPanelProps<TInputs, TPreset, TSnapshot>) {
   const { phase, question, index, total, answer, correct, score, mode, dueCount } = session;
-  const { registerStartPractice } = useModuleShell();
-
-  // Publish the start handler so the sticky header can offer a practice button. Withdrawn
-  // while a session is running, which is what makes that button disappear.
-  const idle = phase === 'idle' || phase === 'complete';
-  const { start } = session;
-  useEffect(() => {
-    registerStartPractice(idle ? start : null);
-    return () => registerStartPractice(null);
-  }, [idle, start, registerStartPractice]);
 
   const choices = choiceIds<TInputs, TPreset, TSnapshot>(question);
 
@@ -83,12 +85,23 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   // move to the pointer for every question.
   const predicting = phase === 'predicting';
   const { commit } = session;
+  // The panel's own root, so the keyboard shortcut can tell whether anybody can see it.
+  const rootRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!predicting || choices.length === 0) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       const target = event.target as HTMLElement | null;
       if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      // Refuse a keypress aimed at a panel nobody can see.
+      //
+      // The listener is on WINDOW, and a module page hides its tabs rather than unmounting them —
+      // so a learner who leaves a question open, switches to Lessons to read, and then types
+      // anything would otherwise commit an answer to a question off screen, straight into the
+      // persisted review ladder. The three modules with beds avoid it by mounting one panel at a
+      // time; the other 48 keep practice inside the lab, and only the page knows which tab is
+      // showing. Asking the DOM is what works for both.
+      if (rootRef.current?.closest('[inert]')) return;
       const key = event.key.toUpperCase();
       const byLetter = KEYS.indexOf(key);
       const byNumber = /^[1-9]$/.test(key) ? Number(key) - 1 : -1;
@@ -131,7 +144,10 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
               className={dueCount > 0 ? styles.secondary : styles.primary}
               onClick={session.start}
             >
-              {dueCount > 0 ? 'All questions' : 'Start practice'}
+              {/* "Practise all", not "All questions": this runs everything in THIS session's set,
+                  which on a patient's tab is that patient's questions — and there is now a tab
+                  literally called Questions holding a different set entirely. */}
+              {dueCount > 0 ? 'Practise all' : 'Start practice'}
             </button>
           </div>
         </div>
@@ -178,10 +194,10 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   const label = (id: string) => (pattern ? (presetLabels?.[id as TPreset] ?? id) : directionLabel(id));
 
   return (
-    <section className={styles.live} aria-label="Practice question">
+    <section ref={rootRef} className={styles.live} aria-label="Practice question">
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <span className="label">{mode === 'review' ? 'Review' : 'Practice'}</span>
+          <span className={text.kicker}>{mode === 'review' ? 'Review' : 'Practice'}</span>
           <ProgressDots index={index} total={total} />
         </div>
         <button type="button" className={styles.exit} onClick={session.exit}>
@@ -207,13 +223,23 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
                 <span className={styles.key} aria-hidden="true">
                   {KEYS[i]}
                 </span>
-                <span className={styles.choiceLabel}>{label(choice)}</span>
+                <span className={styles.choiceLabel}>
+                  {label(choice)}
+                  {pattern && presetGloss?.[choice as TPreset] && (
+                    <span className={styles.choiceGloss}>{presetGloss[choice as TPreset]}</span>
+                  )}
+                </span>
               </button>
             ))}
           </div>
           <p className={styles.watch}>
             {pattern
-              ? 'The controls are hidden — work from the readouts above.'
+              ? // "Above", not "on the lab tab": on a module with patients this panel sits under
+                // the bedside chart, which IS the panel the question is marked against; on the
+                // Questions tab it sits under the question's own instrument, which is the same
+                // rows; and on every other module it sits under the lab readouts. All three read
+                // "the numbers above" correctly, which is the whole contract.
+                'The controls are hidden — work from the numbers above.'
               : `Commit to an answer, then watch ${question.watch}.`}
           </p>
         </>
@@ -233,19 +259,6 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
                   )}".`}
             </span>
           </p>
-          {/*
-            The counterfactual is already on screen and unlabelled. `commit` freezes the trace
-            BEFORE applying the intervention, so the dashed series is where the model was
-            heading if nothing had been done — which is exactly what a learner who predicted
-            "barely changes" needs to compare against. Naming it costs a line; leaving them to
-            infer what a second series means wastes the one thing a video course cannot show.
-          */}
-          {!correct && !pattern && (
-            <p className={styles.counterfactual}>
-              The dashed trace is where {question.watch} was before the intervention — compare it
-              with the live one to see the size of the change you predicted away.
-            </p>
-          )}
           <p className={styles.explanation}>{question.explanation}</p>
           <div className={styles.revealActions}>
             <span className={styles.record}>

@@ -1,12 +1,14 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { exerciseLoopConfig } from './engine/loopConfig';
 import {
   DEFAULT_EXERCISE_INPUTS,
   EXERCISE_PRESETS,
   type ExercisePresetName,
+  EXERCISE_PRESET_GLOSS,
 } from './engine/presets';
 import { EXERCISE_QUESTIONS } from './questions';
 import type {
@@ -29,3 +31,5 @@ describe('exercise pattern questions', () => {
 describe('exercise predict questions', () => {
   describeQuestionSet(exerciseLoopConfig, DEFAULT_EXERCISE_INPUTS, EXERCISE_PRESETS, predictions);
 });
+
+describeGlossSet(EXERCISE_PRESET_GLOSS, EXERCISE_PRESETS, patterns);

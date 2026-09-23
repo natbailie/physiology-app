@@ -1,10 +1,12 @@
-/* Shared hairline tile grid for every module's ReadoutPanel. The panel components
- * themselves stay per-module (each reports different values); only the chrome is shared. */
+/* Shared tile grid for every module's ReadoutPanel. The panel components themselves stay
+ * per-module (each reports different values); only the chrome is shared.
+ *
+ * No outer panel and no hairlines any more. The 1px gap over a `--panel-border` background drew
+ * separators by letting the ground show through, which between bordered instrument slabs is a
+ * line of piping down the middle; and wrapping the set in a white bordered card put a panel
+ * around a row of panels. The tiles carry their own edges now. */
 .grid {
-  composes: panel from '../../styles/panel.module.css';
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--panel-border);
-  overflow: hidden;
+  gap: var(--s-2);
 }

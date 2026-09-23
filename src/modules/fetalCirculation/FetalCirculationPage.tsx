@@ -4,10 +4,13 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
+import { FETAL_CONTROLS } from './presentation';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { FetalDiagram } from './components/FetalDiagram';
@@ -17,7 +20,6 @@ import { FETAL_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { fetalCirculationContent } from './content';
 import { fetalLoopConfig } from './engine/loopConfig';
-import { perturbReopenDuct } from './engine/engine';
 import {
   DEFAULT_FETAL_INPUTS,
   FETAL_PRESETS,
@@ -53,6 +55,10 @@ export function FetalCirculationPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+  // A duct is held open BY prostaglandin, for as long as the infusion runs — so the button raises
+  // the infusion and the slider shows it, rather than writing the patency directly and leaving the
+  // learner no way to see what is holding it or to turn it off.
+  const nudge = useInputNudge(setInputs, FETAL_CONTROLS);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -75,6 +81,7 @@ export function FetalCirculationPage() {
 
   return (
     <ModulePage
+      historyCapacity={fetalLoopConfig.historyCapacity}
       moduleId="fetalCirculation"
       title="Fetal & Neonatal Circulation"
       subtitle="two circulations in parallel, and the minute they become one"
@@ -84,7 +91,7 @@ export function FetalCirculationPage() {
           order={FETAL_PRESET_ORDER}
           labels={FETAL_PRESET_LABELS}
           onApply={applyPreset}
-          actions={[{ label: 'Reopen duct', onClick: () => perturb(perturbReopenDuct), variant: 'impulse' }]}
+          actions={[{ label: 'Reopen duct', onClick: () => nudge({ prostaglandinLevel: 60 }), variant: 'impulse' }]}
           onShare={shareLink}
           onReset={resetScenario}
           disabled={session.blinded}
@@ -92,7 +99,17 @@ export function FetalCirculationPage() {
       }
       diagram={<FetalDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={FETAL_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={FETAL_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={FETAL_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

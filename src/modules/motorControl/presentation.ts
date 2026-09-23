@@ -114,6 +114,18 @@ export function buildMotorControlPresentation(ctx: Ctx): ModulePresentation<Moto
       },
     ],
     controls: [
+      {
+        /* The stimulator, as a device that is on or off. It used to be a button that flipped hidden
+         * state, so the rail could not say whether it was running. */
+        kind: 'toggle',
+        label: 'Deep brain stimulation',
+        key: 'deepBrainStimulation',
+        colorToken: 'basal-ganglia',
+        options: [
+          { value: 'off', label: 'Off' },
+          { value: 'on', label: 'On' },
+        ],
+      },
       { kind: 'slider', label: 'Movement command', key: 'movementCommandAmplitude', min: 0, max: 100, step: 1 },
       { kind: 'slider', label: 'Striatal dopamine', key: 'dopamineFraction', min: 0, max: 100, step: 1, unit: '%', format: 'percent' },
       { kind: 'slider', label: 'Indirect-pathway loss', key: 'striatalOutputLoss', min: 0, max: 100, step: 1, unit: '%' },

@@ -2,13 +2,13 @@ import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
-import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
+import { useModuleCases } from '@/shared/hooks/useModuleCases';
+import { VESTIBULAR_CASES } from './cases';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
-import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
-import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { VestibularDiagram } from './components/VestibularDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -21,44 +21,59 @@ import { perturbHeadImpulse, perturbPerformHallpike } from './engine/engine';
 import {
   VESTIBULAR_PRESETS,
   VESTIBULAR_PRESET_LABELS,
+  VESTIBULAR_PRESET_GLOSS,
   VESTIBULAR_PRESET_ORDER,
   DEFAULT_VESTIBULAR_INPUTS,
 } from './engine/presets';
 import type { VestibularInputs } from './engine/types';
 
 export function VestibularPage() {
-  const { inputs, setInputs, shareLink } = useShareableInputs<VestibularInputs>('vestibular', DEFAULT_VESTIBULAR_INPUTS);
+  // Opened from the ward round, or null for the catalogue route. The seed means the engine
+  // settles the patient directly rather than settling a healthy body and then jumping.
+  const patient = useModuleCase(VESTIBULAR_CASES);
+  const { inputs, setInputs, shareLink } = useShareableInputs<VestibularInputs>(
+    'vestibular',
+    DEFAULT_VESTIBULAR_INPUTS,
+    caseInputs(patient, DEFAULT_VESTIBULAR_INPUTS, VESTIBULAR_PRESETS),
+  );
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, vestibularLoopConfig);
   const resetScenario = useScenarioReset({
     setInputs,
-    defaults: DEFAULT_VESTIBULAR_INPUTS,
+    // At a bedside, Reset means "back to this patient". Returning a learner who is mid-case to
+    // a healthy volunteer would discard the thing they came to look at.
+    defaults: caseInputs(patient, DEFAULT_VESTIBULAR_INPUTS, VESTIBULAR_PRESETS) ?? DEFAULT_VESTIBULAR_INPUTS,
     resetEngine: reset,
     baseline,
     transport,
   });
 
-  const { session, summary } = useModulePractice({
+  // Tab, question sets, session, bedside and the three bedded nodes. Everything downstream of
+  // the engine that every bedded page repeats lives in the hook; what stays here is this
+  // module's physiology and its presentation.
+  const cases = useModuleCases({
     moduleId: 'vestibular',
+    patient,
+    cases: VESTIBULAR_CASES,
     questions: VESTIBULAR_QUESTIONS,
     presets: VESTIBULAR_PRESETS,
-    inputs,
     defaultInputs: DEFAULT_VESTIBULAR_INPUTS,
+    inputs,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
+    shareLink,
+    snapshot,
+    transport,
+    baselineFrozen: baseline.history !== null,
+    presetLabels: VESTIBULAR_PRESET_LABELS,
+    presetGloss: VESTIBULAR_PRESET_GLOSS,
   });
+  const { session } = cases;
 
   const handleChange = useInputSetter(setInputs);
-
-  const applyPreset = useScenarioPreset({
-    setInputs,
-    defaults: DEFAULT_VESTIBULAR_INPUTS,
-    presets: VESTIBULAR_PRESETS,
-    resetEngine: reset,
-  });
 
   const spvHistory = useSeries(history, (h) => h.spv);
   const spvBaseline = useSeries(baseline.history, (h) => h.spv);
@@ -69,6 +84,7 @@ export function VestibularPage() {
 
   return (
     <ModulePage
+      historyCapacity={vestibularLoopConfig.historyCapacity}
       moduleId="vestibular"
       title="Vestibular System & Vertigo"
       subtitle="vertigo is a firing mismatch between two nerves, and time changes what it means"
@@ -77,19 +93,19 @@ export function VestibularPage() {
         <PresetBar
           order={VESTIBULAR_PRESET_ORDER}
           labels={VESTIBULAR_PRESET_LABELS}
-          onApply={applyPreset}
+          onApply={cases.applyPreset}
           actions={[
             { label: 'Dix-Hallpike', onClick: () => perturb(perturbPerformHallpike), variant: 'impulse' },
             { label: 'Head impulse', onClick: () => perturb(perturbHeadImpulse), variant: 'impulse' },
           ]}
-          onShare={shareLink}
+          onShare={cases.shareLink}
           onReset={resetScenario}
           disabled={session.blinded}
         />
       }
+      {...cases.page}
       diagram={<VestibularDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={VESTIBULAR_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

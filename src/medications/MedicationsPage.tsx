@@ -16,6 +16,7 @@ import {
 } from './drugs';
 import { useHashRoute } from '@/shared/hooks/useHashRoute';
 import styles from './MedicationsPage.module.css';
+import { ThemeBar } from '@/theme/ThemeBar';
 
 const FAMILY_ACCENT = 'var(--raas)';
 
@@ -51,6 +52,7 @@ export function MedicationsPage() {
 function FamilyHub() {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href="#home">
           &larr; All subjects
@@ -106,6 +108,7 @@ function FamilyPage({ familyId }: { familyId: string }) {
 function InfectionTiers({ family }: { family: NonNullable<ReturnType<typeof getFamily>> }) {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href="#medications">
           &larr; All medications
@@ -165,6 +168,7 @@ function AntibioticsTiers({
 }) {
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href={`#medications/${family.id}`}>
           &larr; {family.name}
@@ -209,6 +213,7 @@ function MoaPage({ familyId, moa }: { familyId: string; moa: string }) {
   const members = getMoaClasses(moaMeta.id);
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href="#medications/infection/antibiotics">
           &larr; Antibiotics
@@ -273,6 +278,7 @@ function ClassGrid({
 
   return (
     <div className={styles.page}>
+      <ThemeBar />
       <header className={styles.header}>
         <a className={styles.backLink} href={`#medications/${family.id}`}>
           &larr; {family.name}

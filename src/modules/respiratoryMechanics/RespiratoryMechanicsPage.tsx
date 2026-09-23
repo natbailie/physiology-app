@@ -15,6 +15,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { respiratoryMechanicsContent } from './content';
 import { respMechLoopConfig } from './engine/loopConfig';
@@ -69,6 +70,7 @@ export function RespiratoryMechanicsPage() {
 
   return (
     <ModulePage
+      historyCapacity={respMechLoopConfig.historyCapacity}
       moduleId="respiratoryMechanics"
       title="Respiratory Mechanics & Spirometry"
       subtitle="lung volumes, compliance & V/Q matching"
@@ -85,7 +87,17 @@ export function RespiratoryMechanicsPage() {
       }
       diagram={<RespMechDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={RESP_MECH_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>
@@ -103,6 +115,7 @@ export function RespiratoryMechanicsPage() {
         </>
       }
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={respiratoryMechanicsContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of lung mechanics — not a clinical or diagnostic tool. Click "FVC maneuver" to run a forced expiration and trace the flow-volume loop; compare the scooped obstructive loop of COPD with the narrow but normally-shaped restrictive loop of fibrosis. Then contrast the "Pulmonary embolism" and "Pneumonia" presets and watch hypoxic pulmonary vasoconstriction engage for the shunt but do nothing at all for the dead space.'}
     />

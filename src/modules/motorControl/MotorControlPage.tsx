@@ -7,6 +7,7 @@ import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -17,7 +18,7 @@ import { MOTOR_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { motorControlContent } from './content';
 import { motorLoopConfig } from './engine/loopConfig';
-import { perturbLevodopaDose, perturbToggleDbs } from './engine/engine';
+import { perturbLevodopaDose } from './engine/engine';
 import {
   MOTOR_PRESETS,
   MOTOR_PRESET_LABELS,
@@ -70,6 +71,7 @@ export function MotorControlPage() {
 
   return (
     <ModulePage
+      historyCapacity={motorLoopConfig.historyCapacity}
       moduleId="motorControl"
       title="Motor Control: Basal Ganglia & Cerebellum"
       subtitle="slowness means dopamine, error means cerebellum, and release means involuntary movement"
@@ -81,7 +83,7 @@ export function MotorControlPage() {
           onApply={applyPreset}
           actions={[
             { label: 'Levodopa dose', onClick: () => perturb(perturbLevodopaDose), variant: 'impulse' },
-            { label: 'Deep brain stimulation', onClick: () => perturb(perturbToggleDbs), variant: 'impulse' },
+            { label: 'Deep brain stimulation', onClick: () => handleChange('deepBrainStimulation', inputs.deepBrainStimulation === 'on' ? 'off' : 'on'), variant: 'impulse' },
           ]}
           onShare={shareLink}
           onReset={resetScenario}
@@ -90,7 +92,17 @@ export function MotorControlPage() {
       }
       diagram={<MotorDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={MOTOR_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={MOTOR_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={MOTOR_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

@@ -1,23 +1,8 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { ElectrolyteDerived, ElectrolyteInputs, ElectrolyteState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { ElectrolyteInputs } from './engine/types';
 import type { ElectrolytePresetName } from './engine/presets';
-
-type Snapshot = { state: ElectrolyteState; derived: ElectrolyteDerived };
+import { SODIUM_PANEL, type ElectrolyteSnapshot as Snapshot } from './panel';
 export type ElectrolyteQuestion = ModuleQuestion<ElectrolyteInputs, ElectrolytePresetName, Snapshot>;
-
-/**
- * The hyponatraemia workup, in the order it is actually done.
- *
- * The serum sodium is on the panel and is deliberately near-useless: all three causes below
- * produce almost the same number, which is exactly the clinical problem. Volume status and
- * urine osmolality are what separate them, and that is the whole algorithm.
- */
-const SODIUM_PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'Serum Na+', unit: 'mEq/L', value: (s) => s.derived.serumSodiumMeqL, decimals: 1, tolerance: 0.004 },
-  { label: 'Serum K+', unit: 'mEq/L', value: (s) => s.derived.serumPotassiumMeqL, decimals: 2 },
-  { label: 'ECF volume', unit: 'L', value: (s) => s.derived.ecfVolumeL, decimals: 1 },
-  { label: 'Urine osmolality', unit: 'mOsm/kg', value: (s) => s.derived.urineOsmolality, decimals: 0 },
-];
 
 /**
  * Sodium moves over DAYS, and this engine works in real seconds — so a settle short enough to

@@ -1,4 +1,5 @@
 import { memo, useMemo, type CSSProperties } from 'react';
+import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './Sparkline.module.css';
 
 interface SparklineProps {
@@ -21,14 +22,29 @@ interface SparklineProps {
   secondaryBaselineData?: number[] | null;
   width?: number;
   height?: number;
+  /**
+   * Points the frame is sized for — the engine's `historyCapacity`. Without it a trace is stretched
+   * across the whole frame however few points it has, so a chart that is still filling draws a
+   * two-point line corner to corner and then compresses leftwards on every tick. Modules that open
+   * settled are seeded to capacity and never see it; the ones whose baseline is a trajectory, and
+   * so have no resting state to record, are exactly the ones that need this.
+   */
+  capacity?: number;
 }
 
-function buildPath(data: number[], domainMin: number, domainMax: number, width: number, height: number): string {
+function buildPath(
+  data: number[],
+  domainMin: number,
+  domainMax: number,
+  width: number,
+  height: number,
+  span: number,
+): string {
   if (data.length < 2) return '';
   const range = domainMax - domainMin || 1;
   return data
     .map((v, i) => {
-      const x = (i / (data.length - 1)) * width;
+      const x = (i / span) * width;
       const t = Math.min(1, Math.max(0, (v - domainMin) / range));
       const y = height - t * height;
       return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
@@ -53,28 +69,37 @@ function SparklineBase({
   secondaryBaselineData,
   width = 220,
   height = 46,
+  capacity,
 }: SparklineProps) {
-  const linePath = useMemo(() => buildPath(data, domainMin, domainMax, width, height), [data, domainMin, domainMax, width, height]);
+  // The divisor every series is drawn against. The shell carries the engine's own capacity, so a
+  // chart is sized for the trace it will eventually hold rather than for the points it has now.
+  // Falling back to the live series' own length is what every chart did before capacity existed,
+  // and keeps a caller outside a module page — the diagram audit, a unit test — unchanged.
+  const shell = useModuleShell();
+  const span = Math.max(1, (capacity ?? shell.historyCapacity ?? data.length) - 1);
+  const linePath = useMemo(() => buildPath(data, domainMin, domainMax, width, height, span), [data, domainMin, domainMax, width, height, span]);
   const secondaryPath = useMemo(
-    () => (secondaryData ? buildPath(secondaryData, domainMin, domainMax, width, height) : ''),
-    [secondaryData, domainMin, domainMax, width, height],
+    () => (secondaryData ? buildPath(secondaryData, domainMin, domainMax, width, height, span) : ''),
+    [secondaryData, domainMin, domainMax, width, height, span],
   );
   const baselinePath = useMemo(
-    () => (baselineData && baselineData.length > 1 ? buildPath(baselineData, domainMin, domainMax, width, height) : ''),
-    [baselineData, domainMin, domainMax, width, height],
+    () => (baselineData && baselineData.length > 1 ? buildPath(baselineData, domainMin, domainMax, width, height, span) : ''),
+    [baselineData, domainMin, domainMax, width, height, span],
   );
   const secondaryBaselinePath = useMemo(
     () =>
       secondaryBaselineData && secondaryBaselineData.length > 1
-        ? buildPath(secondaryBaselineData, domainMin, domainMax, width, height)
+        ? buildPath(secondaryBaselineData, domainMin, domainMax, width, height, span)
         : '',
-    [secondaryBaselineData, domainMin, domainMax, width, height],
+    [secondaryBaselineData, domainMin, domainMax, width, height, span],
   );
-  const areaPath = linePath ? `${linePath} L${width},${height} L0,${height} Z` : '';
-  const current = data.at(-1);
-
   const range = domainMax - domainMin || 1;
-  const lastX = width;
+  const current = data.at(-1);
+  // The trace's own right-hand edge, which is the frame's only once the buffer is full. The area
+  // fill and the end dot both have to close there rather than at `width`, or a half-filled chart
+  // paints a slab of colour under empty space and hangs its dot off the frame's right edge.
+  const lastX = (Math.max(0, data.length - 1) / span) * width;
+  const areaPath = linePath ? `${linePath} L${lastX.toFixed(1)},${height} L0,${height} Z` : '';
   const lastT = current !== undefined ? Math.min(1, Math.max(0, (current - domainMin) / range)) : 0;
   const lastY = height - lastT * height;
 

@@ -19,13 +19,19 @@
   flex-wrap: wrap;
 }
 
-/* Centred, not left-aligned: the three labels are different widths, and against a shared
-   left edge the dividers between them land at three different distances. */
+/* Centred, not left-aligned: the labels are different widths, and against a shared left edge
+   the divider between them lands at an arbitrary distance from each.
+
+   `min-width` rather than a bare natural width: the strip lost its third stat and its action
+   when the round above took the one primary action, and two figures at their own width bunched
+   into the left quarter of a full-bleed band. Giving each a floor spreads them without
+   stretching the band's own `space-between`, which still puts the status on the right. */
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s-1);
+  min-width: 6rem;
 }
 
 .divider {
@@ -49,27 +55,6 @@
 .statLabel {
   composes: microLabel from '../shared/styles/text.module.css';
   --micro-label-color: var(--brand-ink-dim);
-}
-
-.action {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--on-solid);
-  background: var(--brand);
-  border-radius: var(--r-md);
-  padding: var(--s-4) var(--s-6);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background-color var(--dur) var(--ease);
-}
-
-.action:hover {
-  background: color-mix(in srgb, var(--brand) 84%, #ffffff);
-}
-
-.action:focus-visible {
-  outline: 2px solid var(--brand-on-ink);
-  outline-offset: 2px;
 }
 
 .caughtUp {

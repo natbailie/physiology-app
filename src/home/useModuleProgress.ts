@@ -19,8 +19,6 @@ export interface ProgressTotals {
   attempted: number;
   known: number;
   totalQuestions: number;
-  reviewModuleId: string | null;
-  reviewModuleName: string | null;
 }
 
 /**
@@ -49,7 +47,6 @@ export function useModuleProgress(): {
     let attempted = 0;
     let known = 0;
     let totalQuestions = 0;
-    let mostDue: { id: string; name: string; count: number } | null = null;
 
     for (const module of MODULES) {
       if (module.kind === 'reference') continue;
@@ -70,10 +67,6 @@ export function useModuleProgress(): {
       attempted += summary.attempted;
       known += knownCount(summary.schedule, ids);
       byModule[module.id] = { mastery: moduleMastery, dueCount };
-
-      if (dueCount > 0 && (mostDue === null || dueCount > mostDue.count)) {
-        mostDue = { id: module.id, name: module.name, count: dueCount };
-      }
     }
 
     return {
@@ -86,8 +79,6 @@ export function useModuleProgress(): {
         attempted,
         known,
         totalQuestions,
-        reviewModuleId: mostDue?.id ?? null,
-        reviewModuleName: mostDue?.name ?? null,
       },
     };
   }, [store, indexVersion]);

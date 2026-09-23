@@ -102,3 +102,21 @@ export const ELECTROLYTE_PRESET_ORDER: ElectrolytePresetName[] = [
   'polydipsia',
   'diabetesInsipidus',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const ELECTROLYTE_PRESET_GLOSS: Partial<Record<ElectrolytePresetName, string>> = {
+  normal: 'salt, water and acid all sitting where the body wants them',
+  dka: 'insulin gone, ketoacids made, and water dragged out with the sugar',
+  ckdHyperkalemia: 'a kidney that can no longer excrete what the diet brings in',
+  loopDiuretic: 'salt and water driven out together at the thick ascending limb',
+  vomiting: 'acid and chloride lost upwards, with the kidney defending fullness instead',
+  siadh: 'water retained against normal fullness, because the signal to stop never comes',
+  hypovolemicHyponatremia: 'salt and water both lost, then replaced with water alone',
+  polydipsia: 'more water drunk than the kidney could possibly clear',
+  diabetesInsipidus: 'water pouring out because the collecting duct cannot hold it',
+};

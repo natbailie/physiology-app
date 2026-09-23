@@ -1,9 +1,23 @@
+/* The instrument tile: a recessed slab carrying a tracked micro-label, a large mono numeral in
+ * the quantity's own colour, and a mono note under it.
+ *
+ * The same device as ClinicPanel's bedside chart, and deliberately so — the lab used to draw a
+ * quieter, different readout on the same page, so a module with patients showed two idioms for
+ * one idea. This is the one that survived.
+ *
+ * `--readout-ink` is NOT near-black in light mode, and cannot be: the signal bases are calibrated
+ * on white, so the worst of them reads at 2.48:1 on a dark slab. Light gets a raised slab, dark
+ * gets the monitor. What makes it read as an instrument in either is the mono, the border and
+ * the halo — see the token's own comment in index.css. */
 .tile {
-  background: var(--panel);
-  padding: 0.75rem 0.9rem;
+  background: var(--readout-ink);
+  border: 1px solid var(--readout-ink-border);
+  border-radius: var(--r-md);
+  color: var(--on-readout-ink);
+  padding: var(--s-4);
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: var(--s-1);
   min-width: 0;
 }
 
@@ -11,33 +25,61 @@
   grid-column: 1 / -1;
 }
 
+/* Through the custom property rather than `color`, for the reason text.module.css documents: a
+   composed class carries equal specificity, so restating the colour here is a coin toss decided
+   by emitted stylesheet order. */
 .label {
-  color: var(--tile-color, var(--text-dim));
+  --micro-label-color: var(--readout-ink-dim);
 }
 
 .valueRow {
   display: flex;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: var(--s-2);
   flex-wrap: wrap;
 }
 
+/* The numeral carries the quantity's signal colour — the label used to, which coloured the word
+   and left the number it names in plain text.
+   
+   `composes: figure` supplies the mono face, tabular figures and the 700 weight that
+   `palette.test.ts`'s 3:1 floor on this ground assumes; readoutInkLargeText.style.test.ts reads
+   this rule to hold both halves. Do not restate the weight here. */
 .value {
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.1;
+  composes: figure from '../../styles/text.module.css';
+  font-size: var(--fs-2xl);
+  color: var(--tile-color, var(--on-readout-ink));
+  line-height: var(--lh-tight);
+  /* Phosphor. Decoration only — the digits carry the value, and this says nothing a reader who
+     cannot see the halo would miss. Tuned from the same knob as every other glow, rather than
+     the mock's flat 16px, which is calibrated for near-black and smears on the light slab. */
+  text-shadow: 0 0 calc(14px * var(--glow-blur)) color-mix(in srgb, currentColor var(--glow-mix), transparent);
   /* Classifications are single unbreakable words — "hyperprolactinaemia" needs ~200px, and a
      tile on a 375px viewport gives it 139. Without this it escapes the tile rather than wrapping. */
   overflow-wrap: anywhere;
 }
 
+/* Forced colours: the halo is painted in the signal colour the OS just replaced, so it can
+   only smear the digits. The digits themselves map to a system foreground and stay. */
+@media (forced-colors: active) {
+  .value {
+    text-shadow: none;
+  }
+}
+
+/* A verdict is a word, not a reading. It stays small and stays on the ink's own text colour,
+   which keeps it outside the large-text contrast claim by construction. */
+.verdict {
+  font-size: var(--fs-lg);
+  text-shadow: none;
+}
+
 .unit {
-  font-size: 0.7rem;
-  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  color: var(--readout-ink-dim);
 }
 
 .secondary {
-  font-size: 0.75rem;
-  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  color: var(--readout-ink-dim);
 }

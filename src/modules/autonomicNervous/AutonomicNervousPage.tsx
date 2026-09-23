@@ -12,6 +12,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { autonomicNervousContent } from './content';
 import { ansLoopConfig } from './engine/loopConfig';
@@ -59,6 +60,7 @@ export function AutonomicNervousPage() {
 
   return (
     <ModulePage
+      historyCapacity={ansLoopConfig.historyCapacity}
       moduleId="autonomicNervous"
       title="Autonomic Nervous System"
       subtitle="sympathetic/parasympathetic balance across organ effectors"
@@ -74,10 +76,21 @@ export function AutonomicNervousPage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={ANS_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       controls={slots.controls}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={autonomicNervousContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of autonomic control — not a clinical or diagnostic tool. Compare the "Fight or flight" and "Rest & digest" presets and watch the heart and gut tiles move in opposite directions, then contrast the "Atropine" and "Organophosphate" toxidromes, which mirror each other sign for sign. Simulated time runs faster than real time so each organ\'s response settles within a few seconds.'}
     />

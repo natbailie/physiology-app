@@ -24,7 +24,7 @@ app is; this file is about how to work in it.
   settle it). `src/shared/verification/references.test.ts` discovers them, fails if a module has
   none, and fails if a baseline falls outside its own band.
 
-  **`unsourced` is a first-class answer, not a failure.** 23 of 219 bands are unsourced, and almost
+  **`unsourced` is a first-class answer, not a failure.** 29 of 265 bands are unsourced, and almost
   all of them for the same reason: the quantity is a 0-1 or 0-100 index, so no published reference
   interval CAN apply until the engine changes units. Reading those `needs` strings end to end is
   the most useful validation backlog in the repo. Do not convert one to `literature` without a
@@ -35,7 +35,7 @@ app is; this file is about how to work in it.
 
 ## Adding or changing physiology
 
-Engine tests first, then the module. Write them as clinical assertions, the way the existing 37
+Engine tests first, then the module. Write them as clinical assertions, the way the existing 87
 engine test files do, not as numeric snapshots. A test named "produces high calcium with LOW
 phosphate" survives refactoring; one asserting `toBe(11.14)` does not.
 
@@ -48,12 +48,34 @@ and backward failure had to load the right heart before cardiogenic shock raised
 ## Starting states and scenario buttons
 
 - A module that has a resting steady state declares `SETTLE_SECONDS` in its `*_SIMULATION`
-  constants and `settleSeconds` on its loop config; `useEngineLoop` integrates that much simulated
-  time before the first frame, so the page opens on normal physiology instead of relaxing into it
-  while the learner watches. The result is cached per config, so mounts and resets are free.
+  constants and `settleSeconds` on its loop config; `shared/engine/settle.ts` integrates that much
+  simulated time before the first frame, so the page opens on normal physiology instead of relaxing
+  into it while the learner watches. The result is cached per config, so mounts and resets are free.
+  One implementation, file-synced, so the phone and the web open identically.
+- **The settle keeps its own tail as the opening TRACE, and steps at the loop's own step.** Both
+  halves are load-bearing. History used to start empty, so every chart drew blank, then a two-point
+  line across the whole frame, then compressed leftwards on every tick until the buffer filled —
+  on all 51 modules, and on every Reset and preset press. And the settle used to chunk at
+  `maxDtSeconds` while the live loop sub-steps at `min(maxDtSeconds, frame * timeScale)`, which is
+  smaller for half the modules: muscleContraction settled to a tension of 9.6 and the loop then
+  relaxed it to 0.12 over five real seconds, which looked exactly like a module that had not been
+  settled at all. Total simulated time is still exactly `settleSeconds`, which is what keeps the
+  promise that what a learner reads on load is what the harness checks.
+- **`Sparkline` takes the capacity, not just the points.** `ModulePage` passes `historyCapacity`
+  into the shell and every chart on the page reads it from there, including the ones `TrendsView`
+  builds from a schema and no page names. Without it a partial trace is stretched across the frame
+  rather than growing in from the left. `cases.test.ts` requires it on all 51 pages, because a
+  settle shortened during calibration would otherwise take the x-axis with it, silently.
 - A module whose baseline is a TRAJECTORY declares none — cellCycle progresses through phases,
   micturition fills a bladder, inflammation resolves an insult, cerebralPerfusion accumulates CSF.
   Settling those would jump past the thing the module is about.
+- **"No settle" is a claim, and it is now checked.** It used to be an early `return` in the drift
+  test, so a module nobody had ever calibrated was indistinguishable from one that does not need
+  it. `controls.test.tsx` measures the opening window of every unsettled module against the band it
+  goes on to occupy, and `OPENS_ON_A_TRAJECTORY` names the three that legitimately fail that —
+  cerebralPerfusion, inflammation, micturition. The other twelve were measured rather than assumed:
+  every one opens on values it holds, so their `createInitialState()` genuinely IS the resting
+  state, and each says so in its own `loopConfig.ts` now.
 - Pressing a scenario button goes through `useScenarioPreset`: it rebuilds the inputs from the
   module DEFAULTS (never from the current sliders, which used to let two presets stack silently)
   and resets the engine with them, so the scenario arrives settled rather than over the ten real
@@ -75,13 +97,14 @@ Three kinds of oracle, in descending order of how hard they are to fake:
   checks Einthoven's law (II = I + III) against arbitrary dipoles and it holds to ten decimal
   places, which no amount of miscalibration could produce.
 
-  Nine modules have one: `membranePotentials` (Nernst, Goldman), `enzymeKinetics`
+  Thirteen modules have one: `membranePotentials` (Nernst, Goldman), `enzymeKinetics`
   (Michaelis-Menten, the three inhibition transforms, Lineweaver-Burk), `respiratory`
   (Henderson-Hasselbalch, the alveolar gas equation, Winters), `ecgConduction` (Einthoven,
   Bazett), `muscleContraction` (Gordon-Huxley, Hill), `venousReturn` (Guyton), `capillaryExchange`
   (Starling, Landis-Pappenheimer), `electrolyteBalance` (Edelman, the osmolar gap, the glucose
-  correction), `renalTubular` (the clearance identities), `vision` (Watson-Yellott) and
-  `vestibular` (Steinhausen).
+  correction), `renalTubular` (the clearance identities), `mechanicalVentilation` (inverse
+  Severinghaus, the content-based shunt equation), `respiratoryFailure` (the shunt and alveolar
+  gas equations), `vision` (Watson-Yellott) and `vestibular` (Steinhausen).
 
   Where our model is not the published equation, say so and test the SHAPE rather than widening a
   tolerance until point agreement appears. `membranePotentials` inverts Goldman to recover the
@@ -120,9 +143,194 @@ Things that have caught questions out:
 - **A single run cannot compare two patients.** "Normal host versus deficient host" is a two-run
   comparison and belongs to the frozen-baseline overlay or a pattern drill.
 
+**A pattern question's options carry a gloss, and the gloss says what a scenario IS.** One line
+under the scenario's name — "a clot arriving where the blood should leave" — never what its
+numbers do. The distinction is load-bearing: "Obstructive — blocked filling, high CVP" answers the
+question from the options alone, without reading the panel it is asked against.
+`shared/assessment/glossSuite.ts` holds all of it, and takes the panels from the QUESTIONS rather
+than from a list, so it cannot go stale and `vision`'s three panels need no special case. Four
+rules: name no panel row, quote no figure, gloss nothing the module does not have, and **gloss
+every option any pattern question offers**. The last one leaks through LAYOUT rather than through
+wording — in a row of four where three carry a line of prose and the fourth sits bare, the bare one
+is marked as different before a word of it is read, and five of the seven gaps that test was
+written against were the module's own healthy preset. Native reaches the same constant through
+`gloss` on its `ModuleAdapter`, beside `labels`.
+
 Questions may carry a `perturb` in the setup or the intervention. Many of the sharpest teaching
 moments are events rather than settings — a fasting glucose model defends itself almost perfectly,
 and it is the meal that separates a working pancreas from a failed one.
+
+## Adding patient cases
+
+A case is a patient: one scenario the module already produces, given a name, a history and a
+reason to care. `src/modules/<module>/cases.ts`, verified by `cases.test.ts`. The ward round on
+`#home` is built entirely out of them.
+
+**Every module is tabbed.** All 51 show **Lab | Questions | Lessons**; the modules with
+beds add **Patients** second. The Lab tab is the instrument alone — diagram, readouts, charts,
+transport, sliders — and practice lives on the Questions tab everywhere, each question under
+its own instrument. **Lessons** is the
+old `section.study`: the explainer, related modules, the footnote and the provenance note.
+**Patients** is `ClinicPanel` (bed picker, history, live observations, questions, payoff), and
+**Questions** is what no bed claims. The two patient tabs appear only when `clinic` / `questions`
+are passed.
+
+**`ModulePage` owns the tab unless a page takes it.** `activeTab`/`onTabChange` are a discriminated
+union — both or neither — so pages without beds need no tab state of their own. The bedded
+pages control it through the `page` spread of `useModuleCases` (below), because they need the
+tab before render to build the question array the session runs.
+
+**A bedded page calls `useModuleCases`, not the wiring it replaced.** Tab, question sets,
+session, bedside and the three bedded nodes live in `shared/hooks/useModuleCases.tsx` — one call
+plus a spread into `ModulePage` — so a new tranche copies the call, not forty lines. The page
+keeps its own case subscription for the input seed, and everything downstream of the engine.
+
+**Every question carries its own instrument.** `QuestionSet` renders the current question's
+panel rows (pattern) or live `metric` tile (predict) in the bedside chart idiom, above the
+panel — which is what makes "work from the numbers above" true in all three homes: under the
+bedside chart, under the question's own instrument, under the lab readouts. One honest
+limit, stated in the code: `metric` takes a snapshot while `Sparkline` takes a history-point
+accessor, so the dashed counterfactual trace cannot follow — the live number only.
+
+**Tab crossings end sessions by set identity, not tab name.** Lab and Lessons show no set of
+their own and are transparent: a glance at the diagram or the prose mid-question ends
+nothing. Only arriving at a question-bearing tab with a different set ends the session, and
+`useModulePractice` holds the array it started on while one is live — because the alternative
+is worse than a blank panel: the cursor dangles, `blinded` lapses, and the preset bar and
+controls switch back on mid-pattern-question, so the scenario being asked about can be
+silently replaced.
+
+**Blindness reaches the preset bar through the shell.** `PresetBar` ORs the shell's `blinded`
+into its own `disabled`, and every page feeds `blindControls` — a no-op where a module asks
+nothing pattern-shaped, required everywhere anyway so the next pattern question cannot reopen
+it. `shared/verification/cases.test.ts` asserts every `*Page.tsx` passes `questions=` and
+`blindControls=`, the way it asserts the case-file rules.
+
+**The Questions tab holds only the UNCLAIMED set**, computed by `shared/cases/unclaimed.ts` and
+cached per module in the hook's `WeakMap` keyed on `(questions, cases)`, so the array keeps one
+identity without a per-page const. Pass module-scope arrays, never inline literals. Those leftovers are not
+an oversight: they are the questions whose scenario has no bed, and the mechanism drills tied to
+no presentation. Every question is therefore reachable from exactly one tab, which is the
+property that makes the split worth making. Each module's `cases.test.ts` asserts the set is
+non-empty, because a module that quietly claims everything renders a tab with nothing in it.
+
+Two consequences, both deliberate: `dueCount` is scoped to whichever tab is showing, so there is
+no whole-module "review everything" any more — it is distributed across the bed acuity chips and
+the Questions tab, which names what is due at the bedsides so the module is not a dead end for
+somebody following a "Review X" link. And `useReturnToBedsideOnComplete` is gated on the clinic
+tab, or a `?case=` left in the URL would jump the engine to that patient at the end of a set that
+has nothing to do with them.
+
+**Exactly one quiz session per page, and exactly one MOUNTED `QuizPanel`.** Two sessions collide
+on the shared engine, the shared frozen baseline, and the single mounted panel. Worse, and
+the reason every render site is gated on its own tab being active: `QuizPanel`
+installs a **`window`** keydown listener while a question is open, and the sections are hidden
+rather than unmounted — so a second panel would answer the same keypress, one `session` would
+`commit` twice, and `store.record` would write twice into the persisted review ladder.
+
+Three rules, each enforced rather than asked for:
+
+- **Observations are never written down.** `chart` is a list of `PanelField` ACCESSORS onto the
+  settled simulation — the same rows the module's pattern questions are marked against, shared
+  through a leaf `panel.ts`. A case therefore cannot claim a MAP of 62 while the engine settles
+  at 78. `describeCaseSet` reads the chart through the real engine and **refuses a bed whose
+  observations do not separate it from the healthy preset**, which is the case-shaped version of
+  the pattern-question fairness check and catches the authoring error that actually happens.
+- **Acuity is derived, never authored** (`shared/cases/acuity.ts`). It comes from the learner's
+  own review ladder: `crash` is a question forgotten twice, `due` is one come round again,
+  `check` is retained, `newAdmission` is unmet. A hand-typed acuity is stale the moment somebody
+  answers a question, and the round needs no new persistence or schema because of this.
+- **`cases.ts` has no value imports** except its own `./panel`. `home/moduleCases.ts` loads every
+  case file on the HOME page, and TypeScript erases `import type`, so getting this wrong is
+  silent: the round still works, having welded a physiology engine into the first chunk a
+  learner downloads. `shared/verification/cases.test.ts` fails on it.
+
+**Bedding a module, one theme per tranche with a review between.** Decide refuse-or-bed
+first (above). Then, per module: `panel.ts` — extract from `questions.ts` where one exists,
+author 4–6 rows where not; a leaf with `import type` only. 2–3 presets, each a presentation
+rather than a manoeuvre, each pair a mistake somebody actually makes; each must separate
+from the healthy preset on the chart, and `describeCaseSet` refuses the ones that read
+normal. `cases.ts` — globally unique `<firstname>-<condition>` ids (they travel in the URL),
+a bed of its own per patient, prose floors per `caseSuite`. `cases.test.ts` — copy
+`shockStates/cases.test.ts`; `settleSeconds` matches the module's own pattern questions, and
+a trajectory module with no steady state gets a chosen point plus a comment saying why. Wire
+the page onto `useModuleCases`. Leave the Questions tab non-empty — the suite asserts it.
+Then `npm run verify` (which regenerates the manifest — never hand-edit it), native
+`sync && verify`, review.
+
+Not every module gets a bed. 40 modules can carry a patient today and 7 more through a
+drug/toxin framing; 4 are mechanism-only and keep Lab | Questions | Lessons (`enzymeKinetics`,
+`cellCycle`, `muscleContraction`, `cognitiveNeuroscience`), and `anaesthesia` and
+`muscleContraction` are hard exclusions for having no healthy baseline at all — that last one
+is a requirement of `caseSuite`, not a judgement call. A patient admitted with
+Michaelis-Menten kinetics is the same lie about scale as drawing a sarcomere as gross
+anatomy. `caseModules` is deliberately a SUBSET of `MODULE_IDS` — the fourth manifest
+surface, asserted beside the three-way agreement rather than inside it. Refusing a bed is a
+valid tranche outcome and goes in its summary.
+
+Things that have caught this out:
+
+- **A bed is loaded by the URL, not by the route.** `#shockStates?case=amina` and
+  `#shockStates?case=george` resolve to the same route id, so `useHashRoute` bails out and the
+  page never remounts. `useModuleCase` therefore owns its own `hashchange` listener, and
+  `useBedside` re-applies the preset when the bed changes — without the second of those, the
+  round showed George's name over Amina's physiology, and the banner could not tell, because the
+  patient was the thing that changed.
+- **Seed, do not apply in an effect.** `useShareableInputs` takes an optional third argument so
+  the engine settles the patient directly. Applying the preset afterwards shows half a second of
+  normal physiology and then jumps.
+- **The banner goes stale honestly.** Nothing stops a learner pressing "Septic" over Amina, and a
+  header that kept asserting her name would be the only dishonest surface in the app. Preset-level
+  only: nudging a slider is exploring WITHIN the patient, which is the point of a bedside opening
+  into a live simulator.
+- **A running question also replaces the patient, and `activePreset` cannot see it.** The quiz
+  applies scenarios through `useModulePractice`, never through `bedside.apply`, so the stale
+  banner has nothing to fire on. `ClinicPanel` takes `sessionActive` and stops captioning the
+  chart with the patient's name for exactly that window — otherwise the tab would assert whose
+  numbers these are a few hundred pixels above the options.
+- **The lab is HIDDEN on every tab that is not the lab, never unmounted.** Every `ReadoutItem` registers its tile
+  with `shared/chat/tileRegistry.ts`, and `releaseTile` clears the live state once the last one
+  goes — so unmounting would blind the tutor on the tab where a learner is most likely to ask
+  what a number means. It would also drop the explainer's open mechanism cards, which are
+  uncontrolled DOM state. `.lab` is `display: grid`, so the user agent's own `[hidden]` rule loses
+  on specificity: `ModulePage.module.css` states `.lab[hidden] { display: none }` explicitly, and
+  without that line the tab strip toggles and nothing moves.
+- **`useBedside` tracks the CLEARED bed too.** The guard used to bail on a null patient without
+  writing its ref, so Amina -> all questions -> Amina matched a stale id and never re-applied her
+  preset. Same failure as above, reached through the picker.
+- **Ending a session on a bed change is not tidiness.** `useQuizSession` holds its queue as
+  question IDS; rebuilding the list underneath a live session leaves the cursor pointing at
+  nothing, and the panel renders blank while the phase still says a question is open.
+- **`QuizPanel` refuses a keypress from an inert subtree.** Its shortcut listener is on `window`,
+  and the sections are hidden rather than unmounted — so a learner who leaves a question open,
+  crosses to Lessons to read, and then types anything would otherwise commit an answer to a
+  question off screen, into the persisted review ladder. `rootRef.current?.closest('[inert]')`
+  is what stops it, and it works for all 51 without any page knowing which tab is showing.
+- **The preset bar is MOUNTED on every tab**, hidden with CSS, and this is the least obvious
+  invariant on the page. `PresetBar` registers the module's scenario labels with the shell, and
+  the explainer's 415 "show me" demo buttons read their text from that registration — only 4 set
+  a label of their own. Unmount the bar off the Lab tab and 411 of them render as nothing at all.
+  A wrapper carries the `hidden` attribute because `.bar` declares `display: flex`, an author rule
+  that beats the user agent's `[hidden]`. `ModulePage.test.tsx` is the only thing that catches
+  this; `ExplainerPanel.test.tsx` documents the failure but builds its own provider and cannot.
+- **A demo button switches tabs, then scrolls — in a layout effect.** Until the switch commits the
+  lab is `display: none`, and `getBoundingClientRect()` on such an element is an all-zero rect, so
+  the scroll would land at the top of the document. The header height is measured rather than read
+  from `--topbar-h` for the same reason: it grows by the preset row in that very commit.
+- **The Lessons tab says why it is closed during practice.** Every page passes
+  `startCollapsed={session.phase !== 'idle'}`, so the panel shuts the moment a question opens —
+  several sections state the answer. The note explaining that sits OUTSIDE the `<details>`:
+  anything inside a closed one that is not the `<summary>` is not rendered, so a note placed there
+  would be invisible in exactly the state it exists to explain.
+- **`teaching` is the answer.** It renders only once the session is `complete`, for the same
+  reason a diagram never prints the pattern it is being asked about.
+- **Prescriptions do not expire.** `StudyReport` was retitled rather than reimplemented; a weak
+  spot stops being listed when it stops being weak and at no other time. Expiry is streak
+  punishment, which `currentStreak`'s leniency exists to avoid.
+- **The ward round must not be a wall of locked beds.** A locked module can hold no review state,
+  so every one would read `newAdmission`. `useRound` segments them as referrals without an acuity
+  chip, and the free modules carry beds of their own so a free round is not empty.
+
 
 ## Selling it
 
@@ -359,15 +567,25 @@ from Google AI Studio (aistudio.google.com/apikey) — it needs no card.
    → Deploy.
 3. Edge Functions → Secrets → add `GEMINI_API_KEY`.
 
-**CLI**, the repeatable path:
+**CLI**, for the function and the secret:
 
 ```
 brew install supabase/tap/supabase
 supabase link --project-ref <ref>
-supabase db push
 supabase secrets set GEMINI_API_KEY=...
 supabase functions deploy chat
 ```
+
+**`supabase db push` is deliberately absent, and adding it back will not work.** It pushes files
+from `supabase/migrations/`, and the schema here lives in four hand-ordered `schema*.sql` files
+instead — there is no migrations directory and no `config.toml`, so the command exits 0 having
+done nothing at all. That silence is the whole problem: it reads exactly like success, and the
+next thing to fail is a save that no-ops because a column was never added.
+
+Apply schema through the SQL Editor, or through the Supabase MCP connector, which is where every
+migration in `supabase_migrations.schema_migrations` has actually come from. Should the CLI ever
+become the way this project is managed, that is a real piece of work — `supabase init` plus
+converting the four files into ordered migrations — and not a line in a code block.
 
 `supabase functions serve chat --env-file supabase/.env.local` runs it locally; that file is
 already gitignored by the `*.local` pattern.
@@ -544,18 +762,65 @@ somaticSensation offset by the cord's centre inside a group that translated by i
 four white-matter tracts were painted across the body maps below — obvious in the picture and
 invisible to every check.
 
+## Readouts
+
+Every numeric readout in the app is the same device: a recessed slab on `--readout-ink`, a
+tracked micro-label, a large mono numeral in the quantity's own signal colour with a phosphor
+halo, and a mono note under it. `ReadoutItem` on the lab and `ClinicPanel`'s bedside chart are
+the same idiom deliberately — the lab used to draw a quieter, different tile, so a module with
+patients showed two ideas for one thing on one page.
+
+- **The colour rides the NUMBER, not the label.** It used to be the other way round, which lit
+  the word and left the quantity it names in plain text.
+- **A verdict is not a reading.** A tile whose value is a classification stays small, unglowing
+  and on `--on-readout-ink`. That is what keeps it outside the contrast claim below by
+  construction, and `ReadoutItem` decides it from `wide`/`revealsPattern` rather than asking.
+- **The numeral must stay large and bold.** `palette.test.ts` measures every signal against
+  `--readout-ink` at the **3:1 WCAG large-text floor**, which is only the honest bar at ≥18.66px
+  bold. `src/theme/readoutInkLargeText.style.test.ts` holds every surface that prints one to
+  `--fs-2xl`, and to taking its weight by **composing** `figure` rather than restating 700 — a
+  restated weight is a second place to be wrong.
+- **A signal colour never goes on a solid accent — that is what `--on-solid` is for.** The phone's
+  bed picker fills the selected bed with the module's accent, and the acuity chip inside it kept
+  the acuity signal: every combination measured between 1.00 and 1.60:1, and because
+  gastrointestinal's accent IS `--danger`, CRASH there rendered at exactly 1.00:1 — the word
+  painted in its own background. `palette.test.ts` holds `--on-solid` to 4.5:1 on every signal for
+  this reason; the chip is 11pt, so the large-text floor was never the honest bar. The related
+  trap: React Native's `withAlpha` is translucent, so a "12% wash" is not a ground at all — it is
+  12% of the colour over whatever sits behind, which is how the chip came to be on the accent
+  without anyone choosing that.
+- **`ReadoutGridView.tsx` on native is a hand-written copy of this tile, and
+  `sync-engines.mjs --check` cannot see it** — `src/presentation` is outside `SYNCED_ONLY_DIRS`
+  because it mixes synced schema with hand-written views. Change one, change both.
+
 ## The house style
 
 This app and the haematology app (Bentara Medical) are one company's products and are meant to
 read that way. The shared language lives in `src/index.css` and the four stylesheets in
 `src/shared/styles/` — change it there, not in a component.
 
-- **Neutrals are the slate ramp**, surfaces and text alike, in both themes. Dark mode's `--panel`
-  is the same slate the light theme paints its brand panels in, so the two themes are one family.
+- **Neutrals are the slate ramp walked towards navy**, surfaces and text alike, in both themes.
+  Light is white panels on a faintly blue ground; dark is a night-shift instrument console. This
+  is a deliberate step away from the haematology app's exact neutrals — the family resemblance
+  now rests on the type, the spacing and the signal palette rather than on identical greys.
 - **`--brand` is the one house accent** and the only colour a primary action is ever painted in.
   A module's signal colour is for the physiology it draws, never for its buttons. It is declared
   as a `-base` like every signal, so it lifts into dark mode automatically and `palette.test.ts`
-  holds it to the same contrast floors.
+  holds it to the same contrast floors. Dark mode is the one exception in the whole palette: it
+  states `--brand` outright as the monitor cyan, because the `color-mix` lift cannot turn a blue
+  into a cyan without dragging all 93 signals with it.
+- **`--readout-ink` is the instrument slab** a bedside vitals tile is printed on. It inverts with
+  the theme like everything else, and it wanted not to — a monitor is black in a lit room too.
+  It cannot be: the light signals are calibrated on WHITE, so on a near-black tile the worst of
+  them reads at 2.48:1. What makes a tile read as an instrument in either theme is the mono
+  numerals, the tight border and the halo, not the absence of light. `palette.test.ts` holds the
+  signals on this ground to the 3:1 LARGE-text floor, which is only honest while the numeral is
+  actually large — `src/theme/readoutInkLargeText.style.test.ts` is what keeps that true, for
+  every surface that prints a number on this ground.
+- **The browser-chrome colour is stated in four places and bound by a test.** `index.html`'s
+  pre-paint script cannot import anything, `useTheme.ts` restates it for a later preference
+  change, and both had silently drifted a whole design away from `--bg`. `themeColor.test.ts`
+  binds every copy to the generated token.
 - **`--brand-ink` is a near-black panel used ON the light page**, not a dark-mode surface: the
   sign-in split card and the study band. Text on it uses `--on-brand-ink` / `--brand-ink-dim`,
   and the accent on it is **`--brand-on-ink`, never `--brand`** — blue-600 reads at 3.45:1 on
@@ -565,8 +830,12 @@ read that way. The shared language lives in `src/index.css` and the four stylesh
   (compose `microLabel` from `shared/styles/text.module.css`, or the global `.label` utility).
   Positive tracking on a heading is the old voice and should be deleted where it survives.
   This is the one place we depart from the haematology app, which shouts its labels in caps —
-  see the sentence-case rule under "Drawing diagrams". `--tracking-wide` survives for the one
-  thing that is still a logotype rather than a label: the wordmark in `BrandMark`.
+  see the sentence-case rule under "Drawing diagrams". `--tracking-wide` has exactly two uses:
+  the wordmark in `BrandMark`, which is a logotype rather than a label, and the `kicker` eyebrow
+  in `shared/styles/text.module.css`. A kicker is tracked because mono at that size closes up,
+  **not** because it is shouting — it is sentence case like everything else, and one set in caps
+  has become the old voice and should be reverted. Adopt it as a section eyebrow and nowhere
+  else; a kicker on every surface is how a house style dies.
 - `text.module.css` is the HTML half of `diagramText.module.css`. They are not interchangeable:
   the diagram sheet sets `fill` and sizes in SVG user units, so composing one into an HTML element
   silently does nothing.

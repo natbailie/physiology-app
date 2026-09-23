@@ -2,13 +2,14 @@ import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
 import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
-import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
+import { useInputNudge } from '@/shared/hooks/useInputNudge';
+import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
+import { useModuleCases } from '@/shared/hooks/useModuleCases';
+import { SHOCK_CASES } from './cases';
 import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
-import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
-import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ShockDiagram } from './components/ShockDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
@@ -17,48 +18,67 @@ import { SHOCK_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { shockStatesContent } from './content';
 import { shockLoopConfig } from './engine/loopConfig';
-import { perturbFluidBolus, perturbHaemorrhage } from './engine/engine';
+import { SHOCK_CONTROLS } from './presentation';
 import {
   DEFAULT_SHOCK_INPUTS,
   SHOCK_PRESETS,
   SHOCK_PRESET_LABELS,
+  SHOCK_PRESET_GLOSS,
   SHOCK_PRESET_ORDER,
 } from './engine/presets';
 import type { ShockInputs } from './engine/types';
 
 export function ShockStatesPage() {
-  const { inputs, setInputs, shareLink } = useShareableInputs<ShockInputs>('shockStates', DEFAULT_SHOCK_INPUTS);
+  // Opened from the ward round, or null for the catalogue route. The seed means the engine
+  // settles the patient directly rather than settling a healthy body and then jumping.
+  const patient = useModuleCase(SHOCK_CASES);
+  const { inputs, setInputs, shareLink } = useShareableInputs<ShockInputs>(
+    'shockStates',
+    DEFAULT_SHOCK_INPUTS,
+    caseInputs(patient, DEFAULT_SHOCK_INPUTS, SHOCK_PRESETS),
+  );
   const { snapshot, history, perturb, fastForward, reset, transport, baseline } = useEngineLoop(inputs, shockLoopConfig);
   const resetScenario = useScenarioReset({
     setInputs,
-    defaults: DEFAULT_SHOCK_INPUTS,
+    // At a bedside, Reset means "back to this patient". Returning a learner who is mid-case to
+    // a healthy volunteer would discard the thing they came to look at.
+    defaults: caseInputs(patient, DEFAULT_SHOCK_INPUTS, SHOCK_PRESETS) ?? DEFAULT_SHOCK_INPUTS,
     resetEngine: reset,
     baseline,
     transport,
   });
 
-  const { session, summary } = useModulePractice({
+  // Tab, question sets, session, bedside and the three bedded nodes. Everything downstream of
+  // the engine that every bedded page repeats lives in the hook; what stays here is this
+  // module's physiology and its presentation.
+  const cases = useModuleCases({
     moduleId: 'shockStates',
+    patient,
+    cases: SHOCK_CASES,
     questions: SHOCK_QUESTIONS,
     presets: SHOCK_PRESETS,
-    inputs,
     defaultInputs: DEFAULT_SHOCK_INPUTS,
+    inputs,
     setInputs,
     captureBaseline: baseline.capture,
     clearBaseline: baseline.clear,
     resetEngine: reset,
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
+    shareLink,
+    snapshot,
+    transport,
+    baselineFrozen: baseline.history !== null,
+    presetLabels: SHOCK_PRESET_LABELS,
+    presetGloss: SHOCK_PRESET_GLOSS,
   });
+  const { session } = cases;
 
   const handleChange = useInputSetter(setInputs);
-
-  const applyPreset = useScenarioPreset({
-    setInputs,
-    defaults: DEFAULT_SHOCK_INPUTS,
-    presets: SHOCK_PRESETS,
-    resetEngine: reset,
-  });
+  // A litre in or out is a change to the PATIENT, so it moves the blood-volume slider rather than a
+  // hidden offset behind it. The engine state is left alone, so the filling pressure falls and the
+  // baroreflex answers it in front of the learner instead of the scenario cutting to its endpoint.
+  const nudge = useInputNudge(setInputs, SHOCK_CONTROLS);
 
   const mapHistory = useSeries(history, (h) => h.map);
   const mapHistoryBaseline = useSeries(baseline.history, (h) => h.map);
@@ -73,6 +93,7 @@ export function ShockStatesPage() {
 
   return (
     <ModulePage
+      historyCapacity={shockLoopConfig.historyCapacity}
       moduleId="shockStates"
       title="Shock States"
       subtitle="four ways to fail, and the numbers that separate them"
@@ -81,19 +102,19 @@ export function ShockStatesPage() {
         <PresetBar
           order={SHOCK_PRESET_ORDER}
           labels={SHOCK_PRESET_LABELS}
-          onApply={applyPreset}
+          onApply={cases.applyPreset}
           actions={[
-            { label: 'Fluid bolus', onClick: () => perturb((s) => perturbFluidBolus(s, 1000)), variant: 'impulse' },
-            { label: 'Haemorrhage', onClick: () => perturb((s) => perturbHaemorrhage(s, 1000)), variant: 'danger' },
+            { label: 'Fluid bolus', onClick: () => nudge({ bloodVolumeMl: 1000 }), variant: 'impulse' },
+            { label: 'Haemorrhage', onClick: () => nudge({ bloodVolumeMl: -1000 }), variant: 'danger' },
           ]}
-          onShare={shareLink}
+          onShare={cases.shareLink}
           onReset={resetScenario}
           disabled={session.blinded}
         />
       }
+      {...cases.page}
       diagram={<ShockDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={SHOCK_PRESET_LABELS} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

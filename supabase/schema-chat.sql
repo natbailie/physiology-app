@@ -1,5 +1,6 @@
--- Physiology Lab — the tutor's usage ledger.
--- Run in the Supabase dashboard (SQL Editor), or via `supabase db push`. Depends on schema.sql.
+-- Physiology Lab — the tutor's usage ledger. Depends on schema.sql.
+-- Applied through the SQL Editor or the Supabase MCP connector, NOT `supabase db push` —
+-- see the header of schema.sql for why that command does nothing here.
 --
 -- Design notes:
 -- * One row per message sent, not a running total. The `chat` edge function counts rows since UTC

@@ -72,6 +72,22 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
           ...liver.defs,
         ],
         children: [
+          /* The meal that is QUEUED and the dose that is DRAWN UP.
+           *
+           * These two inputs are the only ones in the app that are not passthroughs — they are
+           * consumed by the "Eat meal" and "Give insulin" buttons rather than read every tick — so
+           * `fasting` and `insulinOverdose` are bit-identical to a normal patient in `derived`, and
+           * the presets' own comments say as much ("No meal queued"). Drawn from `ctx.inputs`,
+           * which is what the presentation context carries them for: a bolus waiting at the gut and
+           * a syringe filled at the bedside are both real, visible things before anything is given.
+           */
+          { type: 'text', x: 86, y: 52, text: 'queued', cls: 'caption' },
+          { type: 'circle', cx: 100, cy: 70, r: 4 + clamp(ctx.inputs.mealCarbLoadGrams / 150, 0, 1) * 13, fill: 'glucose', fillOpacity: 0.3, stroke: 'glucose', strokeWidth: 1.2 },
+          { type: 'text', x: 100, y: 96, text: `${ctx.inputs.mealCarbLoadGrams.toFixed(0)} g carb`, cls: 'caption', anchor: 'middle' },
+          { type: 'text', x: 360, y: 52, text: 'drawn up', cls: 'caption' },
+          { type: 'path', d: 'M356,64 h44', colorToken: 'insulin', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none', opacity: 0.25 },
+          { type: 'path', d: `M356,64 h${(2 + clamp(ctx.inputs.exogenousInsulinUnits / 20, 0, 1) * 42).toFixed(1)}`, colorToken: 'insulin', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none' },
+          { type: 'text', x: 378, y: 88, text: `${ctx.inputs.exogenousInsulinUnits.toFixed(0)} U`, cls: 'caption', anchor: 'middle' },
           {
             type: 'vessel',
             path: BLOODSTREAM_PATH,

@@ -2,6 +2,9 @@ import text from '@/shared/styles/diagramText.module.css';
 import anatomy from '@/shared/styles/anatomy.module.css';
 import cardiorenalClasses from '@/modules/cardiorenal/components/Diagram.module.css';
 import respiratoryClasses from '@/modules/respiratory/components/Diagram.module.css';
+import inflammationClasses from '@/modules/inflammation/components/Diagram.module.css';
+import renalTubularClasses from '@/modules/renalTubular/components/Diagram.module.css';
+import visionClasses from '@/modules/vision/components/Diagram.module.css';
 
 /** Every diagram class the schema may ask for. The shared text keys resolve to the shared
  * diagramText sheet; module-owned keys resolve by direct read of the module's own CSS-module
@@ -48,6 +51,47 @@ export interface ResolvedDiagramClasses {
   beatVolume: string;
   breathe: string;
   leader: string;
+  /* Module-owned keys for the three schema diagrams that carry their own stylesheet.
+   *
+   * `resolveClass` returns `undefined` for a key no module registers, and a schema node that
+   * states no `fill`, `stroke` or `colorToken` then renders with no paint at all — which is what
+   * made these unsafe to convert. Registering the key list is the precondition for pointing a page
+   * at `slots.diagram`: the phone already carries hand-ported tables for all three
+   * (`physiology-native/src/engine/<id>/diagramClasses.ts`), and these resolve the same names
+   * against the same stylesheets the hand-written components were reading. Names repeat across
+   * modules on purpose — `sideTick` is a tick in vision and a tick in vestibular — which is why
+   * they are resolved per module rather than merged. */
+  insultBacteria: string;
+  insultCrystal: string;
+  insultForeign: string;
+  macrophageDot: string;
+  monoBar: string;
+  neutBar: string;
+  neutrophilDot: string;
+  pusBar: string;
+  pusPool: string;
+  tissue: string;
+  aquaporinArrow: string;
+  cortexDivider: string;
+  medullaLabel: string;
+  osmolalityMarker: string;
+  osmolalityValue: string;
+  segmentLabel: string;
+  tubuleSegment: string;
+  chiasm: string;
+  cortex: string;
+  eyeOutline: string;
+  fibreLeftField: string;
+  fibreRightField: string;
+  fieldFrame: string;
+  fieldLetter: string;
+  iris: string;
+  lesionLabel: string;
+  lesionMark: string;
+  lgn: string;
+  pupil: string;
+  sideTick: string;
+  torchBeam: string;
 }
 
 type ClassKey = keyof ResolvedDiagramClasses;
@@ -78,6 +122,9 @@ const shared: Partial<ResolvedDiagramClasses> = {
  * owned key is named explicitly rather than merged. */
 const MODULE_CLASS_KEYS: Record<string, ClassKey[]> = {
   cardiorenal: ['urineFlow'],
+  inflammation: ['insultBacteria', 'insultCrystal', 'insultForeign', 'macrophageDot', 'monoBar', 'neutBar', 'neutrophilDot', 'pusBar', 'pusPool', 'tissue'],
+  renalTubular: ['aquaporinArrow', 'cortexDivider', 'medullaLabel', 'osmolalityMarker', 'osmolalityValue', 'segmentLabel', 'tubuleSegment'],
+  vision: ['chiasm', 'cortex', 'eyeOutline', 'fibreLeftField', 'fibreRightField', 'fieldFrame', 'fieldLetter', 'iris', 'lesionLabel', 'lesionMark', 'lgn', 'pupil', 'sideTick', 'torchBeam'],
   respiratory: [
     'plotAxis',
     'plotGrid',
@@ -97,6 +144,9 @@ const MODULE_CLASS_KEYS: Record<string, ClassKey[]> = {
 
 const MODULE_STYLES: Record<string, Record<string, string>> = {
   cardiorenal: cardiorenalClasses,
+  inflammation: inflammationClasses,
+  renalTubular: renalTubularClasses,
+  vision: visionClasses,
   respiratory: respiratoryClasses,
 };
 

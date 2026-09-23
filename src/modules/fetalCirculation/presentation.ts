@@ -1,7 +1,7 @@
 import { clamp } from '@/shared/lib/math';
 import { CLASSIFICATION } from './engine/constants';
 import type { FetalDerived, FetalHistoryPoint, FetalInputs, FetalState } from './engine/types';
-import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
+import type { ModulePresentation, PresentationContext, ControlSpec } from '@/shared/presentation/types';
 
 /* The circuit, in the same box-and-line language the hand-drawn diagram used: two columns of
  * heart chambers, a lung and placental bed each at the end of a vascular limb, and the three
@@ -45,6 +45,20 @@ function bySat(percent: number): 'artery' | 'venous' {
 }
 
 type Ctx = PresentationContext<FetalState, FetalDerived, FetalInputs, FetalHistoryPoint>;
+
+/**
+ * The control rail, hoisted so the page can read the same ranges the schema declares —
+ * `useInputNudge` clamps a button's delta to the slider it writes, and restating that range at
+ * the call site would be a second place to be wrong.
+ */
+export const FETAL_CONTROLS: ReadonlyArray<ControlSpec<FetalInputs>> = [
+  { kind: 'slider', label: 'Placental circulation', key: 'placentalCirculation', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Lung inflation', key: 'lungInflation', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Inspired oxygen', key: 'inspiredOxygen', min: 0.21, max: 1, step: 0.01, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Pulmonary vasoreactivity', key: 'pulmonaryVasoreactivity', min: 0, max: 2, step: 0.02, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Prostaglandin', key: 'prostaglandinLevel', min: 0, max: 100, step: 1, unit: '%' },
+  { kind: 'slider', label: 'Systemic tone', key: 'systemicToneScale', min: 0.4, max: 2, step: 0.05, unit: '%', format: 'percent' },
+];
 
 export function buildFetalCirculationPresentation(ctx: Ctx): ModulePresentation<FetalState, FetalDerived, FetalInputs, FetalHistoryPoint> {
   const { derived } = ctx;
@@ -90,6 +104,27 @@ export function buildFetalCirculationPresentation(ctx: Ctx): ModulePresentation<
           { type: 'marker', id: 'venous-arrow', colorToken: 'venous' },
         ],
         children: [
+          /* The prostaglandin holding the duct open — the infusion, not its effect.
+           *
+           * Patency is state and takes time to follow, so a duct-dependent lesion on prostin looked
+           * exactly like one without it at the moment the scenario was pressed. What is true
+           * immediately is that the drug is running, so it is drawn as an infusion band over the
+           * duct it is acting on. */
+          ...(derived.prostaglandinLevel > 0
+            ? [
+                {
+                  type: 'path' as const,
+                  d: 'M 248 112 Q 296 96 344 110',
+                  colorToken: 'raas',
+                  strokeWidth: 0.8 + clamp(derived.prostaglandinLevel / 100, 0, 1) * 4,
+                  strokeLinecap: 'round' as const,
+                  fill: 'none' as const,
+                  opacity: 0.8,
+                },
+                // Anchored END at x=240, clear of 'Aortic arch' which occupies up to x=310 on the same line.
+                { type: 'text' as const, x: 240, y: 92, text: `prostin ${derived.prostaglandinLevel.toFixed(0)}%`, cls: 'caption', anchor: 'end' as const, halo: 'bg' as const },
+              ]
+            : []),
           /* ---- Lungs. Barely perfused and fluid-filled until the first breath. ---- */
           { type: 'path', d: circlePath(74, 78, 30), colorToken: 'o2', strokeWidth: 2.5, fill: 'none' },
           { type: 'path', d: circlePath(124, 78, 30), colorToken: 'o2', strokeWidth: 2.5, fill: 'none' },
@@ -191,14 +226,7 @@ export function buildFetalCirculationPresentation(ctx: Ctx): ModulePresentation<
         ],
       },
     ],
-    controls: [
-      { kind: 'slider', label: 'Placental circulation', key: 'placentalCirculation', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Lung inflation', key: 'lungInflation', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Inspired oxygen', key: 'inspiredOxygen', min: 0.21, max: 1, step: 0.01, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Pulmonary vasoreactivity', key: 'pulmonaryVasoreactivity', min: 0, max: 2, step: 0.02, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Prostaglandin', key: 'prostaglandinLevel', min: 0, max: 100, step: 1, unit: '%' },
-      { kind: 'slider', label: 'Systemic tone', key: 'systemicToneScale', min: 0.4, max: 2, step: 0.05, unit: '%', format: 'percent' },
-    ],
+    controls: FETAL_CONTROLS,
     readouts: [
       { label: 'Pre-ductal SpO₂', value: (c) => c.derived.preDuctalSaturationPercent.toFixed(0), unit: '%', secondary: () => 'right arm', colorToken: 'o2' },
       {

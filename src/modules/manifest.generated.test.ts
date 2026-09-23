@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MODULE_IDS, contentModules, questionModules } from './manifest.generated';
+import { MODULE_IDS, caseModules, contentModules, questionModules } from './manifest.generated';
 
 /**
  * The manifest is generated (`tools/module-manifest/generate.mjs`), which replaces the old
@@ -26,6 +26,7 @@ interface Manifest {
 /** Module ids currently discoverable from the actual directories. */
 const questionPaths = import.meta.glob('./*/questions.ts', { eager: true });
 const contentPaths = import.meta.glob('./*/content.ts', { eager: true });
+const casePaths = import.meta.glob('./*/cases.ts', { eager: true });
 
 const moduleIdOf = (path: string): string => path.match(/^\.\/([^/]+)\//)![1]!;
 
@@ -82,6 +83,25 @@ describe('module manifest', () => {
     const ids = [...MODULE_IDS].sort();
     expect([...manifestQuestionIds].sort()).toEqual(ids);
     expect([...manifestContentIds].sort()).toEqual(ids);
+  });
+
+  /**
+   * The fourth surface, asserted BESIDE the three-way agreement above rather than inside it.
+   *
+   * `caseModules` is deliberately a SUBSET: most modules have no patient and should not. Folding
+   * it into the mutual-agreement assertion would demand a case file for all 51, which is the
+   * pressure the ward round must not apply — the reason to have a bed is that the subject is a
+   * patient, not that the manifest has a hole.
+   */
+  it('keeps caseModules a subset of MODULE_IDS that matches the directories', () => {
+    const onDiskCases = Object.keys(casePaths).map(moduleIdOf).sort();
+    const manifestCases = Object.keys(caseModules).sort();
+
+    expect(manifestCases, 'caseModules disagrees with the cases.ts files on disk').toEqual(onDiskCases);
+
+    const ids = new Set(MODULE_IDS);
+    const stray = manifestCases.filter((id) => !ids.has(id));
+    expect(stray, `caseModules entries that are not modules: ${stray.join(', ')}`).toEqual([]);
   });
 
   it('keeps a module id that has questions but no content out of contentModules', () => {

@@ -66,6 +66,27 @@ export function buildLiverPhysiologyPresentation(ctx: Ctx): ModulePresentation<L
   });
 
   const children: SceneNode[] = [
+    /* Albumin: the liver's other product, and the one a failing liver stops making.
+     *
+     * It reached `derived` as a passthrough nothing drew, so the slider that turns a jaundiced
+     * liver into a decompensated one moved no picture. Drawn as a column beside the bilirubin
+     * pools, because that is what it is — a plasma protein concentration, on the same axis and in
+     * the same blood. */
+    /* Moved out of the top row entirely: that row already carries four labels between x=40 and
+     * x=520, and the gap between "Liver · UGT conjugation" and "Gut · pigment arriving" is under
+     * sixty units. The lower right is empty below the prose lines, which all start at x=32. */
+    { type: 'text', x: 500, y: 276, text: 'albumin', cls: 'caption', anchor: 'middle' },
+    { type: 'path', d: 'M476,284 H524 V380 H476 Z', fill: 'none', colorToken: 'text', strokeWidth: 2.5 },
+    {
+      type: 'rect',
+      x: 480,
+      y: 376 - clamp(derived.albuminGPerL / 50, 0, 1) * 88,
+      width: 40,
+      height: clamp(derived.albuminGPerL / 50, 0, 1) * 88,
+      fill: 'platelet',
+      fillOpacity: 0.55,
+    },
+    { type: 'text', x: 500, y: 396, text: `${derived.albuminGPerL.toFixed(0)} g/L`, cls: 'caption', anchor: 'middle' },
     // --- Blood pool: unconjugated ---
     { type: 'path', d: 'M40,96 H110 V216 H40 Z', fill: 'none', colorToken: 'text', strokeWidth: 2.5 },
     {
@@ -134,7 +155,7 @@ export function buildLiverPhysiologyPresentation(ctx: Ctx): ModulePresentation<L
       fill: 'none',
       colorToken: 'liver',
       strokeWidth: 2.5,
-      styleVars: { 'duct-flow': parseFloat(ductOpacity) },
+      opacity: parseFloat(ductOpacity),
     },
     { type: 'text', x: 330, y: 216, text: 'bile duct', cls: 'caption' },
     ...(showObstruction

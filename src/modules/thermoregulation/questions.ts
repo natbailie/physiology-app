@@ -1,24 +1,10 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { ThermoDerived, ThermoInputs, ThermoInternalState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { ThermoInputs } from './engine/types';
 import type { ThermoPresetName } from './engine/presets';
 import { perturbActiveCooling, perturbGiveAntipyretic } from './engine/engine';
+import { THERMO_PANEL as PANEL, type ThermoSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: ThermoInternalState; derived: ThermoDerived };
 export type ThermoQuestion = ModuleQuestion<ThermoInputs, ThermoPresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'Core temp', unit: '°C', value: (s) => s.derived.coreTempC, decimals: 1 },
-  { label: 'Set point', unit: '°C', value: (s) => s.derived.setPointC, decimals: 1 },
-  { label: 'Shivering', unit: 'W', value: (s) => s.derived.shiveringW, decimals: 0, tolerance: 0.3 },
-  { label: 'Sweating', unit: 'W', value: (s) => s.derived.sweatW, decimals: 0, tolerance: 0.3 },
-  {
-    label: 'Net storage',
-    unit: 'W',
-    value: (s) => s.derived.netStorageW,
-    decimals: 0,
-    tolerance: 0.5,
-  },
-];
 
 const SETTLE = 500000;
 

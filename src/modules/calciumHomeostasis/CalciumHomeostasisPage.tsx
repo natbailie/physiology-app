@@ -12,6 +12,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { calciumHomeostasisContent } from './content';
 import { calciumLoopConfig } from './engine/loopConfig';
@@ -64,6 +65,7 @@ export function CalciumHomeostasisPage() {
 
   return (
     <ModulePage
+      historyCapacity={calciumLoopConfig.historyCapacity}
       moduleId="calciumHomeostasis"
       title="Calcium & Bone/Mineral Homeostasis"
       subtitle="PTH, calcitriol & phosphate regulation"
@@ -80,10 +82,21 @@ export function CalciumHomeostasisPage() {
       }
       diagram={slots.diagram}
       readouts={slots.readouts}
-      practice={<QuizPanel session={session} summary={summary} />}
+      questions={
+        <QuestionSet
+          count={CALCIUM_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={slots.charts}
       controls={slots.controls}
+      blindControls={session.blinded}
       explainer={<ExplainerPanel content={calciumHomeostasisContent} startCollapsed={session.phase !== 'idle'} />}
       footnote={'A simplified, conceptual model of calcium and phosphate homeostasis — not a clinical or diagnostic tool. Compare the presets by watching calcium and phosphate move in opposite directions: primary hyperparathyroidism raises calcium while dropping phosphate, hypoparathyroidism does the reverse, and hypomagnesemia produces hypocalcemia with PTH stuck near zero. Simulated time runs much faster than real time so PTH (minutes) and calcitriol (hours to days) responses are both watchable within a session.'}
     />

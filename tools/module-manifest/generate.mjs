@@ -36,8 +36,21 @@ function discover() {
     .sort();
 }
 
-function render(ids) {
+/**
+ * The subset of those that also carry patient cases.
+ *
+ * A SEPARATE filter rather than a third condition on `discover()`, which would drop the 43
+ * modules that have no cases out of `MODULE_IDS` entirely and take the question index and the
+ * tutor corpus with them. Cases are an optional file on an existing module, not a new kind of
+ * module, and the manifest has to say so.
+ */
+function discoverCases(ids) {
+  return ids.filter((name) => existsSync(join(modulesDir, name, 'cases.ts')));
+}
+
+function render(ids, caseIds) {
   const entries = (file) => ids.map((id) => `  ${id}: () => import('./${id}/${file}'),`).join('\n');
+  const caseEntries = caseIds.map((id) => `  ${id}: () => import('./${id}/cases'),`).join('\n');
 
   return `/**
  * Every module directory, as static imports.
@@ -70,16 +83,28 @@ ${entries('questions')}
 export const contentModules: Readonly<Record<string, ModuleLoader>> = {
 ${entries('content')}
 };
+
+/**
+ * Modules that carry patient cases — a SUBSET of \`MODULE_IDS\`, unlike the two maps above.
+ *
+ * Most modules have no bed and should not. Half the catalogue is cellular or molecular, and a
+ * patient admitted with Michaelis-Menten kinetics would be the same lie about scale that
+ * CLAUDE.md already refuses in the diagrams.
+ */
+export const caseModules: Readonly<Record<string, ModuleLoader>> = {
+${caseEntries}
+};
 `;
 }
 
 const ids = discover();
-const source = render(ids);
+const caseIds = discoverCases(ids);
+const source = render(ids, caseIds);
 const existing = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;
 
 if (existing === source) {
-  console.log(`module manifest up to date (${ids.length} modules)`);
+  console.log(`module manifest up to date (${ids.length} modules, ${caseIds.length} with cases)`);
 } else {
   writeFileSync(outPath, source);
-  console.log(`module manifest written: ${ids.length} modules`);
+  console.log(`module manifest written: ${ids.length} modules, ${caseIds.length} with cases`);
 }

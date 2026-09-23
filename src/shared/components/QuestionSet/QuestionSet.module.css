@@ -1,0 +1,106 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+.blurb {
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  max-width: 60ch;
+  margin: 0;
+}
+
+/* --- The question's own instrument ---
+   The bedside chart idiom deliberately: a module with patients already teaches one idea for
+   "numbers to reason from", and this tab showing a second would split the difference. Same
+   ink ground, same large-figure contract — readoutInkLargeText.style.test.ts holds this
+   `.rowValue` beside ClinicPanel's and ReadoutItem's for that reason. */
+.chart {
+  display: flex;
+  gap: var(--s-5);
+  overflow-x: auto;
+  max-width: 100%;
+  padding: var(--s-4) var(--s-5);
+  background: var(--readout-ink);
+  border: 1px solid var(--readout-ink-border);
+  border-radius: var(--r-md);
+  color: var(--on-readout-ink);
+}
+
+.chartCaption {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  --micro-label-color: var(--readout-ink-dim);
+  font-size: var(--fs-micro);
+}
+
+.rowValue {
+  composes: figure from '../../styles/text.module.css';
+  font-size: var(--fs-2xl);
+  color: var(--row-color, var(--on-readout-ink));
+  text-shadow: 0 0 calc(14px * var(--glow-blur)) color-mix(in srgb, currentColor var(--glow-mix), transparent);
+}
+
+/* Forced colours: the halo is painted in the signal colour the OS just replaced. */
+@media (forced-colors: active) {
+  .rowValue {
+    text-shadow: none;
+  }
+}
+
+.rowUnit {
+  font-size: var(--fs-micro);
+  font-weight: 400;
+  color: var(--readout-ink-dim);
+  margin-left: 3px;
+}
+
+/* What is due at the bedsides instead of here. Without it the module is a dead end for a
+   learner who followed a "Review Shock States" link from the home page: the beds hold most of
+   the questions, and nothing on this tab would say so. */
+.elsewhere {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding: var(--s-4) var(--s-5);
+  border: 1px dashed var(--panel-border);
+  border-radius: var(--r-md);
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.bedLink {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bedLink:hover {
+  text-decoration: underline;
+}

@@ -1,12 +1,14 @@
 import { describe } from 'vitest';
 import { describePatternSet } from '@/shared/assessment/patternSuite';
 import { describeQuestionSet } from '@/shared/assessment/questionSuite';
+import { describeGlossSet } from '@/shared/assessment/glossSuite';
 import { isPatternQuestion, type PredictQuestion } from '@/shared/assessment/types';
 import { vestibularLoopConfig } from './engine/loopConfig';
 import {
   DEFAULT_VESTIBULAR_INPUTS,
   VESTIBULAR_PRESETS,
   type VestibularPresetName,
+  VESTIBULAR_PRESET_GLOSS,
 } from './engine/presets';
 import { VESTIBULAR_QUESTIONS } from './questions';
 import type { VestibularDerived, VestibularInputs, VestibularInternalState } from './engine/types';
@@ -25,3 +27,5 @@ describe('vestibular pattern questions', () => {
 describe('vestibular predict questions', () => {
   describeQuestionSet(vestibularLoopConfig, DEFAULT_VESTIBULAR_INPUTS, VESTIBULAR_PRESETS, predictions);
 });
+
+describeGlossSet(VESTIBULAR_PRESET_GLOSS, VESTIBULAR_PRESETS, patterns);

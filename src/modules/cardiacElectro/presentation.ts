@@ -98,7 +98,10 @@ function anatomy(derived: CardiacDerived): FrameNode {
       { type: 'path', d: 'M 348 134 L 348 74 Q 348 52 372 52 L 438 52', colorToken: 'artery', strokeWidth: 12, fill: 'none' },
       { type: 'text', x: 410, y: 42, text: 'Aorta', cls: 'organLabel' },
       { type: 'rect', x: 232, y: 54, width: 80, height: 42, fill: 'artery' },
-      { type: 'text', x: 272, y: 80, text: 'Left atrium', cls: 'organLabel' },
+      // On a SOLID signal fill, so --on-solid rather than the default --text. It read 3.18:1
+      // before the navy palette and 2.95:1 after — the token was always the wrong one, and
+      // the sweep only caught it once the margin it was surviving on disappeared.
+      { type: 'text', x: 272, y: 80, text: 'Left atrium', cls: 'organLabel', colorToken: 'on-solid' },
       { type: 'path', d: 'M 276 96 L 276 114', colorToken: 'artery', strokeWidth: 8, fill: 'none' },
 
       // Inflow and outflow tracts, starting inside the chamber so the valves stay attached.

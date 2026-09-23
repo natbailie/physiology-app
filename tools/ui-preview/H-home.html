@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Production preview: Physiology Lab home page in the university-accessible ward-round style. Fictional patients. Simplified teaching models, not clinical tools.">
+<title>Physiology Lab — Home · production preview H</title>
+<style>
+  /* H shared tokens — dark-first, WCAG 2.2 AA floors (text 4.5:1, non-text 3:1). */
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --raised:#e9eef5; --border:#687d95;
+    --text:#0f1f33; --dim:#33475f; --faint:#5a6f88;
+    --brand:#0f62d6; --brand-text:#ffffff; --accent:#b91c1c;
+    --link:#0f62d6; --link-visited:#5b21b6;
+    --chip-red-text:#b91c1c; --chip-red-bg:#fdecec; --chip-red-border:#b91c1c;
+    --chip-amber-text:#6b4400; --chip-amber-bg:#fff4d6; --chip-amber-border:#6b4400;
+    --chip-green-text:#046c4e; --chip-green-bg:#e6f4ed; --chip-green-border:#046c4e;
+    --chip-grey-text:#33475f; --chip-grey-bg:#eef2f7; --chip-grey-border:#33475f;
+    --vital-bg:#02070f; --vital-border:#5a7a9e; --vital-label:#b9c9dd;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,"Inter","SF Pro Text",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#5a7a9e;
+    --text:#e8f1ff; --dim:#b9c9dd; --faint:#9db4cc;
+    --brand:#4cc3ff; --brand-text:#03101f; --accent:#ff8f8f;
+    --link:#7fd0ff; --link-visited:#c4a4ff;
+    --chip-red-text:#ffc9c9; --chip-red-bg:#2a1215; --chip-red-border:#ff8f8f;
+    --chip-amber-text:#ffdf8e; --chip-amber-bg:#2a2108; --chip-amber-border:#ffcf5c;
+    --chip-green-text:#8ff2c6; --chip-green-bg:#0a2620; --chip-green-border:#5eeab0;
+    --chip-grey-text:#c4d3e6; --chip-grey-bg:transparent; --chip-grey-border:#9db4cc;
+    --vital-bg:#02070f; --vital-border:#5a7a9e; --vital-label:#b9c9dd;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .skip-link{position:absolute;left:-9999px;top:0;background:var(--brand);color:var(--brand-text);padding:10px 18px;font-weight:800;font-size:15px;z-index:100;border-radius:0 0 8px 0}
+  .skip-link:focus{left:0}
+  /* Preview artefact removed (was .proto-bar): the theme control lives once, in
+     .header-actions below, as in HomePage. */
+  .theme-seg{display:flex;background:#0f2a4d;border:1px solid #5a7a9e;border-radius:8px;padding:2px;gap:2px}
+  .theme-seg button{border:none;background:transparent;color:#e8f1ff;font:inherit;font-size:12px;padding:6px 12px;min-height:36px;border-radius:6px;cursor:pointer}
+  .theme-seg button[aria-pressed="true"]{background:#4cc3ff;color:#03101f;font-weight:800}
+  :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px}
+  .wrap{max-width:1240px;margin:0 auto;padding:24px 20px 90px;display:flex;flex-direction:column;gap:24px}
+  .kicker{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--brand)}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0;line-height:1.15}
+  h2{font-size:22px;margin:0;letter-spacing:-.01em}
+  .lede{color:var(--dim);max-width:70ch}
+  a{color:var(--link);text-underline-offset:.15em}
+  a:visited{color:var(--link-visited)}
+  /* App header: BrandMark + ThemeToggle + account chip, as in HomePage. */
+  .app-header{display:flex;flex-direction:column;gap:12px}
+  .title-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brandmark{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+  .brandmark:visited{color:inherit}
+  .brandmark-mark{width:32px;height:32px;border-radius:9px;background:var(--brand);display:grid;place-items:center;color:var(--brand-text);font-weight:800;font-family:var(--mono)}
+  h1.brandmark-name{font-size:19px;margin:0}
+  .brandmark-sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);display:block}
+  .header-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .account-link{border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;min-height:48px;text-decoration:none;display:flex;flex-direction:column;justify-content:center;color:inherit}
+  .account-link:visited{color:inherit}
+  .account-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);font-weight:700}
+  .account-value{font-family:var(--mono);font-size:13px}
+  .subtitle{font-size:14px;color:var(--dim);max-width:70ch;line-height:1.6;margin:0}
+  .card{background:var(--panel);border:1.5px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+  [data-theme="light"] .card{box-shadow:0 8px 28px rgba(15,31,51,.14)}
+  .pad{padding:20px}
+  .mono{font-family:var(--mono)}
+  .btn{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:12px 20px;min-height:48px;border:1.5px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--brand);border-color:transparent;color:var(--brand-text)}
+  .pair{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+  .phone{width:390px;max-width:100%;border:1.5px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column}
+  .phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--dim);padding:10px 16px 0}
+  .phone-list{padding:10px 12px;display:flex;flex-direction:column;gap:10px;max-height:600px;overflow:auto}
+  /* Preview artefact removed (was .apptabs): a platform-comparison device, not a layout. */
+  .pt{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+  .pt:visited{color:inherit}
+  a.pt:hover{border-color:var(--brand)}
+  .acuity{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.04em;border-radius:7px;padding:5px 9px;white-space:nowrap;border:1.5px solid}
+  .acuity.red{background:var(--chip-red-bg);color:var(--chip-red-text);border-color:var(--chip-red-border)}
+  .acuity.amber{background:var(--chip-amber-bg);color:var(--chip-amber-text);border-color:var(--chip-amber-border)}
+  .acuity.green{background:var(--chip-green-bg);color:var(--chip-green-text);border-color:var(--chip-green-border)}
+  .acuity.grey{background:var(--chip-grey-bg);color:var(--chip-grey-text);border-color:var(--chip-grey-border)}
+  .pt small{color:var(--dim);display:block;font-size:13px}
+  .pt .mod{font-family:var(--mono);font-size:12px;color:var(--dim);display:block;margin-top:2px}
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .vital{background:var(--vital-bg);border:1.5px solid var(--vital-border);border-radius:12px;padding:10px 12px;color:#e8f1ff}
+  .vital span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--vital-label)}
+  .vital b{font-family:var(--mono);font-size:24px;text-shadow:0 0 16px currentColor;display:block}
+  .vital small{font-family:var(--mono);font-size:12px;color:var(--vital-label)}
+  @media(prefers-contrast:more){.vital b{text-shadow:none!important}}
+  .rx-row{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;gap:12px;align-items:flex-start}
+  .rx-row + .rx-row{margin-top:10px}
+  .rx-row small{color:var(--dim);display:block;font-size:13px}
+  .meter{height:8px;border-radius:999px;background:var(--raised);border:1px solid var(--border);margin-top:8px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--brand);border-radius:999px}
+  .rx-meta{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+  .referrals{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;color:var(--dim);font-size:13px;margin-top:12px}
+  .referrals a{font-weight:700;text-decoration:underline}
+  .disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .disc{border:1.5px solid var(--border);border-radius:14px;padding:16px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+  .disc h3{margin:0;font-size:16px}
+  .disc p{margin:0;color:var(--dim);font-size:13px}
+  .disc .count{font-family:var(--mono);font-size:12px;color:var(--dim);display:block;margin-top:2px}
+  .disc a{font-weight:700}
+  .disc.soon{border-style:dashed}
+  .tag-roadmap{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;border:1.5px solid var(--border);border-radius:999px;padding:2px 10px;color:var(--dim);text-transform:uppercase;align-self:flex-start}
+  .note{font-size:13px;color:var(--dim)}
+  .footnote{font-size:13px;color:var(--dim);line-height:1.6}
+  footer.pagefoot{border-top:1.5px solid var(--border);padding:14px 4px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+  @media(max-width:960px){.pair{grid-template-columns:1fr}.vitals{grid-template-columns:repeat(2,1fr)}.disc-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="wrap">
+<main id="main" aria-labelledby="brandName">
+  <header class="app-header">
+    <div class="title-row">
+      <a class="brandmark" href="#home" aria-current="page"><span class="brandmark-mark" aria-hidden="true">Φ</span><span><h1 class="brandmark-name" id="brandName">Physiology Lab</h1><span class="brandmark-sub">Bentara Medical</span></span></a>
+      <div class="header-actions">
+        <span class="theme-seg" role="group" aria-label="Theme"><button type="button" data-t="dark" aria-pressed="true">Dark</button><button type="button" data-t="light" aria-pressed="false">Light</button><button type="button" data-t="auto" aria-pressed="false">Auto</button></span>
+        <a class="account-link" href="#account"><span class="account-label">Access</span><span class="account-value">Sign in</span></a>
+      </div>
+    </div>
+    <p class="subtitle">Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE, MRCP). Pick a subject to explore.</p>
+  </header>
+
+  <section class="card" aria-labelledby="roundTitle"><div class="pad">
+    <div class="kicker">Your round</div>
+    <h2 id="roundTitle">Good evening — 8 patients are waiting.</h2>
+    <p class="lede">Due reviews arrive as cases with acuity, not as a question count. Acuity below is illustrative — in the app it is derived from your review ladder (<span class="mono">crash · due · check · new</span>), never hand-typed. Links are the real routes.</p>
+  </div>
+  <div class="pair" style="padding:0 20px 20px">
+    <div class="phone" role="region" aria-label="Round list">
+      <div class="phone-status"><span>21:47</span><span><span aria-hidden="true">●</span> on shift</span></div>
+      <div class="phone-list">
+        <a class="pt" href="#shockStates?case=amina-trauma"><span class="acuity red"><span aria-hidden="true">▲</span> Crash</span><span><b>Amina, 24</b><small>Motorcycle collision, cool peripheries, heart rate 112</small><span class="mod">Bed A04 · Shock States</span></span></a>
+        <a class="pt" href="#shockStates?case=george-post-mi"><span class="acuity amber"><span aria-hidden="true">●</span> Due</span><span><b>George, 68</b><small>Breathless four days after an anterior MI, systolic 84</small><span class="mod">Bed A07 · Shock States</span></span></a>
+        <a class="pt" href="#shockStates?case=ruth-warm-shock"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Ruth, 71</b><small>Two days of fever, warm and vasodilated, lactate climbing</small><span class="mod">Bed B02 · Shock States</span></span></a>
+        <a class="pt" href="#respiratory?case=nadia-dka"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Nadia, 19</b><small>Vomiting, breathing deeply, three days of thirst</small><span class="mod">Bed C01 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#respiratory?case=brian-copd"><span class="acuity green"><span aria-hidden="true">✓</span> Check</span><span><b>Brian, 74</b><small>Long-standing COPD, PaCO2 raised, pH nearly normal</small><span class="mod">Bed C05 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#respiratory?case=colin-salicylate"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Colin, 34</b><small>Confused and hyperventilating, ringing in the ears</small><span class="mod">Bed C09 · Respiratory &amp; Acid-Base</span></span></a>
+        <a class="pt" href="#cardiorenal?case=margaret-heart-failure"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Margaret, 79</b><small>Ankles swelling, breathless on stairs, passing little urine</small><span class="mod">Bed D03 · Cardiorenal</span></span></a>
+        <a class="pt" href="#cardiorenal?case=derek-kidney-failure"><span class="acuity grey"><span aria-hidden="true">○</span> New</span><span><b>Derek, 61</b><small>Long-standing hypertension, creatinine doubled, oedematous</small><span class="mod">Bed D08 · Cardiorenal</span></span></a>
+        <a class="btn primary" href="#round" style="text-align:center">Start round →</a>
+      </div>
+    </div>
+    <div>
+      <div class="vitals" role="group" aria-label="Study progress">
+        <div class="vital" style="color:#5eeab0"><span>Shift · day</span><b>6</b><small>illustrative streak</small></div>
+        <div class="vital" style="color:#ffdf8e"><span>Due today</span><b>6</b><small>1 crash · 1 due · 4 new</small></div>
+        <div class="vital" style="color:#4cc3ff"><span>Known</span><b>48/412</b><small>absolute count, not %</small></div>
+        <div class="vital" style="color:#ff9d9d"><span>Weakest</span><b>! Shock</b><small>prescribed below</small></div>
+      </div>
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:14px;align-items:start">
+        <div style="border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;background:var(--panel)">
+          <div class="mono" style="font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--dim)">Competency map</div>
+          <svg viewBox="0 0 120 170" width="130" height="180" role="img" aria-label="Competency map of the human body. Shock needs work (solid red), cardio and acid-base partly retained (dashed amber), limbs locked (dotted grey).">
+            <circle cx="60" cy="20" r="13" fill="none" stroke="#5eeab0" stroke-width="7"/>
+            <rect x="42" y="40" width="36" height="60" rx="14" fill="none" stroke="#ffcf5c" stroke-width="7" stroke-dasharray="10 5"/>
+            <path d="M44 52 L44 110 M76 52 L76 110" stroke="#ff8f8f" stroke-width="5" stroke-linecap="round"/>
+            <path d="M42 104 L28 150 M78 104 L92 150" stroke="#5a7a9e" stroke-width="6" stroke-linecap="round" stroke-dasharray="3 5"/>
+            <path d="M44 60 L24 84 M76 60 L96 84" stroke="#ffcf5c" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 5"/>
+          </svg>
+          <div class="mono" style="font-size:12px;color:var(--dim)">! shock · ~ cardio · ~ acid-base · <span aria-hidden="true">○</span> limbs locked</div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 6px"><span aria-hidden="true">℞</span> Prescribed for you</h3>
+          <div class="rx-row"><span class="acuity amber"><span aria-hidden="true">℞</span></span><div style="flex:1"><b>Shock States</b><small>A question here has come back round and caught you twice.</small><div class="meter" role="progressbar" aria-label="Shock States retained" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"><i style="width:38%"></i></div></div><span class="rx-meta">38% · 3 due</span></div>
+          <div class="rx-row"><span class="acuity amber"><span aria-hidden="true">℞</span></span><div style="flex:1"><b>Respiratory &amp; Acid-Base</b><small>4 of 9 right so far.</small><div class="meter" role="progressbar" aria-label="Respiratory and Acid-Base retained" aria-valuenow="44" aria-valuemin="0" aria-valuemax="100"><i style="width:44%"></i></div></div><span class="rx-meta">44% · 2 due</span></div>
+          <div class="rx-row"><span class="acuity green"><span aria-hidden="true">✓</span></span><div style="flex:1"><b>Cardiorenal</b><small>3 of 8 questions still unseen.</small><div class="meter" role="progressbar" aria-label="Cardiorenal seen" aria-valuenow="61" aria-valuemin="0" aria-valuemax="100"><i style="width:61%"></i></div></div><span class="rx-meta">61% seen</span></div>
+          <p class="lede note">A weak spot stops being listed when it stops being weak, and at no other time — prescriptions do not expire.</p>
+        </div>
+      </div>
+      <div class="referrals"><span><span aria-hidden="true">◔</span> Paywalled state: locked cases appear here as referrals with no acuity tag — e.g. “2 more patients are on wards you do not have access to”.</span><a href="#pricing">See who →</a></div>
+    </div>
+  </div></section>
+
+  <section class="card" aria-labelledby="subjTitle"><div class="pad">
+    <div class="kicker">Subjects</div>
+    <h2 id="subjTitle">Pick a subject to explore.</h2>
+    <div class="disc-grid" style="margin-top:14px">
+      <div class="disc"><h3>Physiology</h3><p>The feedback-loop simulators, one organ system at a time.</p><span class="count">~50 simulators</span><a href="#discipline/physiology">Open Physiology →</a></div>
+      <div class="disc"><h3>Pharmacology</h3><p>The high-yield drug classes of the UK top-100, and the diagrams that show how each works.</p><span class="count">100+ classes</span><a href="#theme/medications">Open Pharmacology →</a></div>
+      <div class="disc soon"><h3>Microbiology</h3><span class="tag-roadmap">Roadmap</span><p>The organisms, what they infect and the drugs that reach them.</p></div>
+      <div class="disc soon"><h3>Biochemistry</h3><span class="tag-roadmap">Roadmap</span><p>The pathways underneath the physiology, and where each one fails.</p></div>
+      <div class="disc soon"><h3>Anatomy</h3><span class="tag-roadmap">Roadmap</span><p>Structure and the relationships that make the clinical signs make sense.</p></div>
+      <div class="disc soon"><h3>Pathology</h3><span class="tag-roadmap">Roadmap</span><p>How disease processes begin, spread and show themselves.</p></div>
+    </div>
+    <h3 style="margin:16px 0 6px;font-size:15px">Tools</h3>
+    <p class="lede" style="font-size:14px"><a href="#reference">Formula Reference</a> — high-yield equations and calculators (pinned, never paywalled).</p>
+  </div></section>
+
+  <p class="footnote">These are simplified, conceptual models built to teach mechanism — not clinical or diagnostic tools. All patients shown are fictional.</p>
+  <footer class="pagefoot" role="contentinfo"><a href="#accessibility">Accessibility statement</a><a href="#methodology">Methodology</a><a href="#privacy">Privacy</a><a href="#pricing">Pricing</a></footer>
+</main>
+</div>
+<script>
+(function(){const root=document.documentElement,btns=[...document.querySelectorAll('.theme-seg button')];const mq=matchMedia('(prefers-color-scheme: dark)');const store=()=>{try{return localStorage.getItem('physio-preview-h-theme')||'dark'}catch(e){return 'dark'}};function apply(m){const t=m==='auto'?(mq.matches?'dark':'light'):m;root.dataset.theme=t;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===m)));}btns.forEach(b=>b.onclick=()=>{const m=b.dataset.t;try{if(m==='auto')localStorage.removeItem('physio-preview-h-theme');else localStorage.setItem('physio-preview-h-theme',m)}catch(e){}apply(m);});if(mq.addEventListener)mq.addEventListener('change',()=>{if(store()==='auto')apply('auto');});apply(store());})();
+</script>
+</body>
+</html>

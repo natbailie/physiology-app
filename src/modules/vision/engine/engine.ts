@@ -56,6 +56,20 @@ export function createInitialState(): VisionInternalState {
   };
 }
 
+/**
+ * Which eye is lit, from the torch SETTING, falling back to the momentary state.
+ *
+ * The setting is what the three buttons and the rail now write, and it is what a learner sees. The
+ * state fallback is kept because `perturbShineTorch` is how three of this module's questions stage
+ * a swinging-light test, and a question drives the engine directly rather than through the rail —
+ * so an unset torch must still be movable by hand.
+ */
+function torchOn(inputs: VisionInputs, state: VisionInternalState): FlashEye {
+  if (inputs.torchEye === 'right') return 1;
+  if (inputs.torchEye === 'left') return -1;
+  return state.flashEye;
+}
+
 export function computeDerived(state: VisionInternalState, inputs: VisionInputs): VisionDerived {
   const effectiveLuminanceLogCd = clamp(
     inputs.sceneLuminanceLogCd + state.luminanceShiftLog,
@@ -83,8 +97,9 @@ export function computeDerived(state: VisionInternalState, inputs: VisionInputs)
   // adds a boost scaled by the illuminated eye's own afferent gain, delivered bilaterally.
   const averageAfferent = (1 + clamp(inputs.leftOpticNerveAfferent, 0, 1)) / 2;
   const sceneDrive = pupilSceneDrive(effectiveLuminanceLogCd) * averageAfferent;
-  const flashingRight = state.flashEye === 1;
-  const flashingLeft = state.flashEye === -1;
+  const lit = torchOn(inputs, state);
+  const flashingRight = lit === 1;
+  const flashingLeft = lit === -1;
   const boostRight = torchFlashBoost(sceneDrive, 1, flashingRight);
   const boostLeft = torchFlashBoost(sceneDrive, clamp(inputs.leftOpticNerveAfferent, 0, 1), flashingLeft);
 
@@ -238,7 +253,7 @@ export function tick(
   const rodTarget = Math.min(effLog, RECEPTOR.ROD_ADAPTATION_CEILING_LOG_CD);
   const coneTarget = Math.max(effLog, RECEPTOR.CONE_ADAPTATION_FLOOR_LOG_CD);
 
-  const flashing = state.flashEye !== 0;
+  const flashing = torchOn(inputs, state) !== 0;
   const sceneDrive = pupilSceneDrive(effLog) * ((1 + clamp(derived.leftOpticNerveAfferent, 0, 1)) / 2);
   const boostRight = torchFlashBoost(sceneDrive, 1, flashing);
   const boostLeft = torchFlashBoost(sceneDrive, clamp(derived.leftOpticNerveAfferent, 0, 1), flashing);

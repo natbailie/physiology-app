@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en-GB" data-service="nhs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Concept preview: Physiology Lab ward-round style restyled to meet UK public sector accessibility requirements. Fictional patients. Simplified teaching models, not clinical tools.">
+<title>G — Ward-round style, UK public sector compatible · concept preview</title>
+<style>
+  /* ============ Tokens: light-first. Dark is an enhancement, out-of-spec for both systems. ============ */
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --raised:#f0f4f5; --border:#768692;
+    --text:#212b32; --dim:#425563; --faint:#425563;
+    --link:#005EB8; --link-visited:#330072;
+    --focus:#FFEB3B; --focus-text:#212b32;
+    --button:#007F3B; --button-hover:#00662f; --button-shadow:#00401e; --button-text:#ffffff;
+    --service-header:#005EB8; --service-header-text:#ffffff; --service-header-border:#003087;
+    --tag-red-bg:#d5281b; --tag-red-text:#ffffff;
+    --tag-yellow-bg:#ffeb3b; --tag-yellow-text:#212b32;
+    --tag-green-bg:#007f3b; --tag-green-text:#ffffff;
+    --tag-grey-bg:#e8edee; --tag-grey-text:#212b32; --tag-grey-border:#212b32;
+    --tag-blue-bg:#005eb8; --tag-blue-text:#ffffff;
+    --callout-border:#ffeb3b; --inset-border:#768692;
+    --error:#d5281b; --success:#007f3b;
+    --sans:"Frutiger 55 Roman", Frutiger, Arial, Helvetica, sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --serif:Georgia,"Literata",serif;
+    --container:960px;
+    --service-name:"NHS-style service header";
+  }
+  [data-service="govuk"]{
+    --bg:#ffffff; --panel:#ffffff; --raised:#f3f2f1; --border:#505a5f;
+    --text:#0b0c0c; --dim:#505a5f; --faint:#505a5f;
+    --link:#1d70b8; --link-visited:#4c2c92;
+    --focus:#ffdd00; --focus-text:#0b0c0c;
+    --button:#00703c; --button-hover:#005a30; --button-shadow:#002d18; --button-text:#ffffff;
+    --service-header:#0b0c0c; --service-header-text:#ffffff; --service-header-border:#0b0c0c;
+    --tag-red-bg:#d4351c; --tag-red-text:#ffffff;
+    --tag-yellow-bg:#ffdd00; --tag-yellow-text:#0b0c0c;
+    --tag-green-bg:#00703c; --tag-green-text:#ffffff;
+    --tag-grey-bg:#eeefef; --tag-grey-text:#0b0c0c; --tag-grey-border:#0b0c0c;
+    --tag-blue-bg:#1d70b8; --tag-blue-text:#ffffff;
+    --callout-border:#1d70b8; --inset-border:#505a5f;
+    --error:#d4351c; --success:#00703c;
+    --sans:Arial, Helvetica, sans-serif;
+    --service-name:"GOV.UK-style service header";
+  }
+  [data-theme="dark"]{
+    --bg:#050a13; --panel:#0b1526; --raised:#0f1e35; --border:#8ba0b9;
+    --text:#e8f1ff; --dim:#c4d3e6; --faint:#a9bdd6;
+    --link:#7fd0ff; --link-visited:#c4a4ff;
+    /* Focus stays yellow-on-black in dark too: never the thin blue ring from home-F. */
+    --tag-grey-bg:#1d3352; --tag-grey-text:#ffffff; --tag-grey-border:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#0b0c0c;color:var(--text);font-family:var(--sans);font-size:19px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  /* The preview page itself sits on a neutral ground; each service demo is a white sheet. */
+  .proto-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 20px;background:#0b0c0c;color:#fff;font-size:14px;border-bottom:4px solid var(--focus)}
+  .proto-bar nav{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap}
+  .proto-bar nav a{color:#fff}
+  .seg{display:flex;background:#1d1d1d;border:1px solid #505a5f;border-radius:8px;padding:2px;gap:2px}
+  .seg button{border:none;background:transparent;color:#fff;font:inherit;font-size:13px;padding:6px 12px;border-radius:6px;cursor:pointer;min-height:36px}
+  .seg button[aria-pressed="true"]{background:var(--focus);color:#0b0c0c;font-weight:700}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 20px 90px;display:flex;flex-direction:column;gap:28px;background:#e8edee}
+  [data-service="govuk"] .wrap{background:#eeefef}
+  [data-theme="dark"] .wrap{background:#020610}
+  .sheet{background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+  .sheet-inner{max-width:var(--container);margin:0 auto;padding:0 20px 32px}
+  @media(max-width:640px){body{font-size:18px}.sheet-inner{padding:0 16px 24px}}
+
+  /* Skip link: invisible until focused, then unmissable. */
+  .skip-link{position:absolute;left:-9999px;top:0;background:var(--focus);color:var(--focus-text);padding:10px 16px;font-weight:700;z-index:100}
+  .skip-link:focus{left:8px;top:8px;outline:4px solid var(--focus-text)}
+
+  /* Service headers */
+  .service-header{background:var(--service-header);color:var(--service-header-text);border-bottom:4px solid var(--service-header-border)}
+  .service-header .row{max-width:var(--container);margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .nhs-lozenge{background:#fff;color:#005EB8;font-weight:800;padding:2px 10px;font-size:22px;letter-spacing:-.02em;border-radius:2px}
+  [data-service="govuk"] .nhs-lozenge{display:none}
+  .crown-demo{display:none;font-weight:800;font-size:22px}
+  [data-service="govuk"] .crown-demo{display:inline}
+  .service-name{font-weight:700;font-size:19px}
+  .service-header a{color:var(--service-header-text)}
+  .phase-banner{border-bottom:1px solid var(--border);background:var(--bg)}
+  .phase-banner .row{max-width:var(--container);margin:0 auto;padding:8px 20px;font-size:16px;color:var(--text);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .phase-tag{font-weight:800;font-size:14px;letter-spacing:.06em;padding:2px 8px;background:var(--focus);color:var(--focus-text);border:2px solid var(--focus-text)}
+
+  /* Type */
+  h1{font-size:36px;line-height:1.15;margin:20px 0 8px;letter-spacing:-.01em}
+  h2{font-size:27px;line-height:1.25;margin:28px 0 8px}
+  h3{font-size:22px;margin:20px 0 6px}
+  @media(max-width:640px){h1{font-size:32px}h2{font-size:24px}}
+  .lede{color:var(--dim);max-width:70ch}
+  p{max-width:70ch}
+  small,.small{font-size:16px}
+  a{color:var(--link);text-underline-offset:.15em}
+  a:visited{color:var(--link-visited)}
+  .service-header a:visited{color:var(--service-header-text)}
+  /* Focus: yellow block, never a thin ring. */
+  :focus-visible{outline:4px solid var(--focus);outline-offset:0;box-shadow:0 0 0 6px var(--focus-text)}
+  .service-header :focus-visible,.proto-bar :focus-visible{box-shadow:0 0 0 4px #fff}
+
+  /* Buttons: min 44px, 19px, shadowed primary. */
+  .btn{font:inherit;font-size:19px;font-weight:700;border-radius:4px;padding:10px 20px;min-height:48px;border:2px solid var(--button);background:var(--panel);color:var(--button);cursor:pointer;text-decoration:none;display:inline-block;line-height:1.25}
+  .btn--primary{background:var(--button);color:var(--button-text);box-shadow:0 4px 0 var(--button-shadow);border-color:transparent;text-decoration:none}
+  .btn--primary:hover{background:var(--button-hover)}
+  .btn--start::after{content:" →"}
+  .btn-group{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+  .chip{font:inherit;font-size:16px;font-weight:700;border:2px solid var(--border);background:var(--panel);color:var(--text);border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--bg)}
+
+  /* Tags: text always carries meaning, colour never alone. Bold, bordered, ≥4.5:1. */
+  .tag{display:inline-block;font-size:14px;font-weight:800;letter-spacing:.06em;padding:4px 10px;border-radius:4px;border:2px solid transparent;white-space:nowrap;text-transform:uppercase}
+  .tag--red{background:var(--tag-red-bg);color:var(--tag-red-text);border-color:var(--tag-red-bg)}
+  .tag--yellow{background:var(--tag-yellow-bg);color:var(--tag-yellow-text);border-color:var(--tag-yellow-text)}
+  .tag--green{background:var(--tag-green-bg);color:var(--tag-green-text);border-color:var(--tag-green-bg)}
+  .tag--grey{background:var(--tag-grey-bg);color:var(--tag-grey-text);border-color:var(--tag-grey-border)}
+  .tag--blue{background:var(--tag-blue-bg);color:var(--tag-blue-text);border-color:var(--tag-blue-bg)}
+
+  .back-link{display:inline-block;margin-top:16px;font-size:16px}
+  .card{background:var(--panel);border:2px solid var(--border);border-radius:4px;padding:20px}
+  .bed{border:2px solid var(--border);border-radius:4px;padding:14px 16px;background:var(--panel);display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:inherit}
+  .bed:visited{color:inherit}
+  .bed:hover{border-color:var(--link)}
+  .bed + .bed{margin-top:12px}
+  .bed small{color:var(--dim);display:block;font-size:16px}
+  .bed .mod{font-family:var(--mono);font-size:14px;color:var(--dim);display:block;margin-top:4px}
+  .beds-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  dl.summary{margin:12px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  dl.summary div{border:2px solid var(--border);border-radius:4px;padding:10px 12px;background:var(--panel)}
+  dl.summary dt{font-size:16px;color:var(--dim);font-weight:700}
+  dl.summary dd{margin:2px 0 0;font-family:var(--mono);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  dl.summary dd small{font-size:14px;color:var(--dim);font-weight:400}
+
+  .rx-row{border:2px solid var(--border);border-left:8px solid var(--tag-yellow-text);border-radius:4px;padding:12px 14px;background:var(--panel)}
+  .rx-row + .rx-row{margin-top:10px}
+  .rx-row small{color:var(--dim);display:block}
+  .meter{height:8px;border-radius:999px;background:var(--raised);border:1px solid var(--border);margin-top:8px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--link);border-radius:999px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .tile{padding:16px;display:flex;flex-direction:column;gap:8px}
+  .tile p{margin:0;color:var(--dim);font-size:16px}
+  .tile.soon{border-style:dashed}
+
+  .callout{border:2px solid var(--text);border-left:10px solid var(--callout-border);padding:14px 18px;margin:20px 0;background:var(--panel)}
+  .callout h2,.callout h3{margin-top:0}
+  .inset{border-left:8px solid var(--inset-border);padding:8px 0 8px 16px;margin:16px 0;color:var(--dim)}
+  .warning-text{font-weight:700;display:flex;gap:10px;align-items:flex-start}
+  .warning-text .mark{display:inline-grid;place-items:center;min-width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:800}
+
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--border);margin:16px 0 0;padding:0;list-style:none}
+  .tabs button{font:inherit;font-size:19px;font-weight:700;background:var(--raised);border:2px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:10px 18px;min-height:48px;cursor:pointer;color:var(--text)}
+  .tabs button[aria-pressed="true"]{background:var(--panel);border-bottom:2px solid var(--panel);margin-bottom:-2px;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
+
+  .lab-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;margin-top:16px}
+  @media(max-width:900px){.lab-grid{grid-template-columns:1fr}}
+  .diagram{border:2px solid var(--border);border-radius:4px;background:var(--panel);padding:12px}
+  .diagram .fig-head{display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:var(--dim);padding:2px 4px 8px}
+  .field{border:2px solid var(--border);border-radius:4px;padding:12px 14px;background:var(--panel);margin-top:12px}
+  .field label{display:flex;justify-content:space-between;font-weight:700;font-size:19px;gap:12px}
+  .field output{font-family:var(--mono)}
+  input[type="range"]{width:100%;min-height:44px;accent-color:var(--link)}
+  fieldset{border:2px solid var(--border);border-radius:4px;padding:14px 16px;margin:16px 0;max-width:70ch}
+  legend{font-weight:700;padding:0 6px}
+  .radio{display:flex;gap:12px;align-items:flex-start;padding:10px 0;min-height:44px}
+  .radio input{width:28px;height:28px;margin-top:2px;accent-color:var(--link);flex:none}
+  details{border:2px solid var(--border);border-radius:4px;padding:12px 16px;margin:12px 0;max-width:70ch}
+  summary{font-weight:700;cursor:pointer;min-height:44px}
+  table{border-collapse:collapse;width:100%;max-width:70ch;margin:12px 0;font-size:16px}
+  th,td{border:2px solid var(--border);padding:8px 10px;text-align:left}
+  th{background:var(--raised)}
+  .mono{font-family:var(--mono)}
+  footer.service-footer{border-top:4px solid var(--service-header);margin-top:32px;background:var(--raised)}
+  footer.service-footer .row{max-width:var(--container);margin:0 auto;padding:20px;display:flex;gap:18px;flex-wrap:wrap;font-size:16px}
+  .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .token-table{font-size:16px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="proto-bar">
+  <b>G · Ward-round style, UK public sector compatible</b>
+  <span style="border:1px solid #fff;border-radius:999px;padding:2px 10px;font-size:13px">concept preview — static, no app code changed · fictional patients · illustrative counts</span>
+  <span class="seg" role="group" aria-label="Service style"><button type="button" data-s="nhs" aria-pressed="true">NHS</button><button type="button" data-s="govuk" aria-pressed="false">GOV.UK-style</button></span>
+  <span class="seg" role="group" aria-label="Theme"><button type="button" data-t="light" aria-pressed="true">Light (compliant)</button><button type="button" data-t="dark" aria-pressed="false">Dark enhancement</button></span>
+  <nav aria-label="Preview sections"><a href="#home">Home</a><a href="#shock">Shock</a><a href="#resp">Respiratory</a><a href="#cardio">Cardiorenal</a><a href="#notes">Compliance notes</a></nav>
+</div>
+
+<div class="wrap">
+  <div class="sheet"><div class="sheet-inner">
+    <p class="small" style="margin-top:20px"><span class="tag tag--yellow">Beta</span> <span id="serviceName">NHS-style service header</span> — use the switcher above to compare NHS and GOV.UK-style tokens. Same markup, different design system. Light is the compliant default; dark is a night-shift enhancement and out-of-spec for both systems.</p>
+    <h1>Ward-round style, restyled for UK public sector requirements</h1>
+    <p class="lede">Home is a <b>ward round</b>. Reviews are <b>patients to see</b>. Weak spots get <b>prescribed</b>. Locked content is a <b>referral</b>. The dark-monitor look of concept F is preserved as an optional enhancement — the compliant surface underneath is light, high-contrast, keyboard-first, and never carries meaning by colour alone. Bentara Medical.</p>
+    <div class="callout" role="note" aria-labelledby="notclinical">
+      <h2 id="notclinical" style="margin:0 0 4px;font-size:22px;">Simplified teaching models — not clinical tools</h2>
+      <p style="margin:0">Every simulator on this page is a conceptual model built to teach mechanism. Do not use it to make clinical decisions. All patients below are fictional.</p>
+    </div>
+    <h2>Token comparison (side-by-side)</h2>
+    <table class="token-table">
+      <caption class="visually-hidden">NHS and GOV.UK-style tokens used in this preview</caption>
+      <thead><tr><th scope="col">Concern</th><th scope="col">NHS variant</th><th scope="col">GOV.UK-style variant</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Header</th><td>NHS blue #005EB8, white lozenge</td><td>Black #0b0c0c service header (own-service, not the crown GOV.UK header)</td></tr>
+        <tr><th scope="row">Body text</th><td>#212b32 on white, 19px, Frutiger/Arial</td><td>#0b0c0c on white, 19px, GDS Transport/Arial fallback</td></tr>
+        <tr><th scope="row">Primary button</th><td>Green #007F3B, 4px dark shadow, 48px</td><td>Green #00703c, 4px dark shadow, 48px</td></tr>
+        <tr><th scope="row">Focus</th><td colspan="2">Thick yellow block (NHS #FFEB3B / GOV.UK #ffdd00) with dark text — never the thin blue ring</td></tr>
+        <tr><th scope="row">Acuity</th><td colspan="2">Word + bordered tag (CRASH red, DUE yellow, CHECK green, NEW grey). Colour is the second carrier, never the only one</td></tr>
+        <tr><th scope="row">Dark mode</th><td colspan="2">Enhancement only: navy panels, same yellow focus, same 4.5:1 floors, no glow-only meaning</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <!-- ================= HOME ================= -->
+  <div class="sheet" id="home"><div class="service-header" role="banner"><div class="row">
+    <span class="nhs-lozenge" aria-hidden="true">NHS</span><span class="crown-demo" aria-hidden="true">◆</span>
+    <span class="service-name">Physiology Lab</span>
+    <span style="margin-left:auto" class="small"><a href="#account">Account</a> · <a href="#pricing">Pricing</a></span>
+  </div></div>
+  <div class="phase-banner"><div class="row"><span class="phase-tag">Beta</span><span>This is a new service — your <a href="#feedback">feedback</a> will help us improve it.</span></div></div>
+  <div class="sheet-inner"><main id="main" aria-labelledby="homeTitle">
+    <a class="back-link" href="#subjects">← All subjects</a>
+    <h1 id="homeTitle">Good evening — 8 patients are waiting</h1>
+    <p class="lede">Due reviews arrive as cases with acuity, not as a question count. Acuity here is illustrative — in the app it is derived from your review ladder (<span class="mono">crash · due · check · new</span>), never hand-typed.</p>
+
+    <h2>Your round</h2>
+    <p class="lede">1 needing attention, 1 routine. <a href="#round-all">Show all 8</a>.</p>
+    <a class="bed" href="#shockStates?case=amina-trauma"><span class="tag tag--red">Crash</span><span><b>Amina, 24</b><small>Motorcycle collision, cool peripheries, heart rate 112</small><span class="mod">Bed A04 · Shock States</span></span></a>
+    <a class="bed" href="#shockStates?case=george-post-mi"><span class="tag tag--yellow">Due</span><span><b>George, 68</b><small>Breathless four days after an anterior MI, systolic 84</small><span class="mod">Bed A07 · Shock States</span></span></a>
+    <a class="bed" href="#shockStates?case=ruth-warm-shock"><span class="tag tag--grey">New</span><span><b>Ruth, 71</b><small>Two days of fever, warm and vasodilated, lactate climbing</small><span class="mod">Bed B02 · Shock States</span></span></a>
+    <a class="bed" href="#respiratory?case=nadia-dka"><span class="tag tag--grey">New</span><span><b>Nadia, 19</b><small>Vomiting, breathing deeply, three days of thirst</small><span class="mod">Bed C01 · Respiratory &amp; Acid-Base</span></span></a>
+    <a class="bed" href="#respiratory?case=brian-copd"><span class="tag tag--green">Check</span><span><b>Brian, 74</b><small>Long-standing COPD, PaCO2 raised, pH nearly normal</small><span class="mod">Bed C05 · Respiratory &amp; Acid-Base</span></span></a>
+    <a class="bed" href="#respiratory?case=colin-salicylate"><span class="tag tag--grey">New</span><span><b>Colin, 34</b><small>Confused and hyperventilating, ringing in the ears</small><span class="mod">Bed C09 · Respiratory &amp; Acid-Base</span></span></a>
+    <a class="bed" href="#cardiorenal?case=margaret-heart-failure"><span class="tag tag--grey">New</span><span><b>Margaret, 79</b><small>Ankles swelling, breathless on stairs, passing little urine</small><span class="mod">Bed D03 · Cardiorenal</span></span></a>
+    <a class="bed" href="#cardiorenal?case=derek-kidney-failure"><span class="tag tag--grey">New</span><span><b>Derek, 61</b><small>Long-standing hypertension, creatinine doubled, oedematous</small><span class="mod">Bed D08 · Cardiorenal</span></span></a>
+    <p><a class="btn btn--primary btn--start" href="#round">Start round</a></p>
+
+    <h2>Study progress</h2>
+    <dl class="summary" aria-label="Study progress">
+      <div><dt>Due today</dt><dd>6 <small>1 crash · 1 due · 4 new</small></dd></div>
+      <div><dt>Days in a row</dt><dd>6</dd></div>
+      <div><dt>Known</dt><dd>48<small>/412</small></dd></div>
+      <div><dt>Weakest area</dt><dd style="font-size:19px">Shock</dd></div>
+    </dl>
+    <p><a class="btn" href="#shockStates">Review Shock States</a> <span class="small">A weak spot stops being listed when it stops being weak — prescriptions do not expire.</span></p>
+
+    <h3>Prescribed for you</h3>
+    <div class="rx-row"><b>Shock States</b><small>A question here has come back round and caught you twice. 3 due.</small><div class="meter" role="img" aria-label="Shock States: 38 percent retained"><i style="width:38%"></i></div></div>
+    <div class="rx-row"><b>Respiratory &amp; Acid-Base</b><small>4 of 9 right so far. 2 due.</small><div class="meter" role="img" aria-label="Respiratory and Acid-Base: 44 percent retained"><i style="width:44%"></i></div></div>
+    <div class="rx-row"><b>Cardiorenal</b><small>3 of 8 questions still unseen.</small><div class="meter" role="img" aria-label="Cardiorenal: 61 percent unseen or retained"><i style="width:61%"></i></div></div>
+
+    <div class="inset"><p style="margin:0"><b>Referrals:</b> 2 more patients are on wards you do not have access to. <a href="#pricing">See who</a>. Locked cases carry no acuity tag — a locked module holds no review state.</p></div>
+
+    <h2 id="subjects">Pick a subject to explore</h2>
+    <p class="lede">Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE, MRCP).</p>
+    <div class="grid">
+      <div class="card tile"><h3>Physiology</h3><p>The feedback-loop simulators, one organ system at a time.</p><p class="small mono">~50 simulators</p><p><a href="#discipline/physiology">Open Physiology</a></p></div>
+      <div class="card tile"><h3>Pharmacology</h3><p>The high-yield drug classes of the UK top-100, and the diagrams that show how each works.</p><p class="small mono">100+ classes</p><p><a href="#theme/medications">Open Pharmacology</a></p></div>
+      <div class="card tile soon"><h3>Microbiology · soon</h3><p>The organisms, what they infect and the drugs that reach them.</p><p class="small">Roadmap</p></div>
+      <div class="card tile soon"><h3>Biochemistry · soon</h3><p>The pathways underneath the physiology, and where each one fails.</p><p class="small">Roadmap</p></div>
+      <div class="card tile soon"><h3>Anatomy · soon</h3><p>Structure and the relationships that make the clinical signs make sense.</p><p class="small">Roadmap</p></div>
+      <div class="card tile soon"><h3>Pathology · soon</h3><p>How disease processes begin, spread and show themselves.</p><p class="small">Roadmap</p></div>
+    </div>
+    <h3>Tools</h3>
+    <p><a href="#reference">Formula Reference</a> — high-yield equations and calculators (pinned, never paywalled).</p>
+  </main></div>
+  <footer class="service-footer" role="contentinfo"><div class="row"><a href="#accessibility">Accessibility statement</a><a href="#methodology">Methodology</a><a href="#privacy">Privacy</a><a href="#pricing">Pricing</a><span>Fictional patients. Simplified teaching models — not clinical tools.</span></div></footer>
+  </div>
+
+  <!-- ================= SHOCK ================= -->
+  <div class="sheet" id="shock"><div class="service-header" role="banner"><div class="row"><span class="nhs-lozenge" aria-hidden="true">NHS</span><span class="crown-demo" aria-hidden="true">◆</span><span class="service-name">Physiology Lab</span></div></div>
+  <div class="sheet-inner"><main aria-labelledby="shockTitle">
+    <a class="back-link" href="#home">← Modules</a>
+    <h1 id="shockTitle">Shock States</h1>
+    <p class="lede">Four ways to fail, and the numbers that separate them.</p>
+    <ul class="tabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="callout" role="note"><h3 style="margin:0">Bedside: Amina, 24 · Bed A04</h3><p style="margin:4px 0 0">Motorcycle collision, cool peripheries, heart rate 112. <b>Decide whether the blood pressure is telling you what you think it is.</b> If you change the scenario below, this banner goes stale honestly rather than claiming her name over different physiology.</p></div>
+    <h2>Scenario</h2>
+    <div class="btn-group" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">Haemorrhagic</button>
+      <button class="chip" type="button" aria-pressed="false">Cardiogenic</button>
+      <button class="chip" type="button" aria-pressed="false">Septic</button>
+      <button class="chip" type="button" aria-pressed="false">Tamponade</button>
+    </div>
+    <div class="btn-group"><button class="btn" type="button">Fluid bolus 1 L</button><button class="btn" type="button">Haemorrhage 1 L</button><button class="btn" type="button">Share link</button><button class="btn" type="button">Reset</button></div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified circuit diagram: low cardiac output, empty filling pressures, high resistance. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Circulatory circuit (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 150" width="100%" height="150" aria-hidden="true">
+          <rect x="150" y="20" width="120" height="60" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="210" y="46" text-anchor="middle" font-size="14" fill="currentColor">Heart</text>
+          <text x="210" y="64" text-anchor="middle" font-size="12" fill="currentColor">low output</text>
+          <rect x="20" y="40" width="90" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+          <text x="65" y="56" text-anchor="middle" font-size="12" fill="currentColor">Venous</text>
+          <text x="65" y="70" text-anchor="middle" font-size="12" fill="currentColor">empty</text>
+          <rect x="310" y="40" width="90" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="355" y="56" text-anchor="middle" font-size="12" fill="currentColor">Arterial</text>
+          <text x="355" y="70" text-anchor="middle" font-size="12" fill="currentColor">clamped</text>
+          <line x1="110" y1="60" x2="150" y2="60" stroke="currentColor" stroke-width="2"/>
+          <line x1="270" y1="60" x2="310" y2="60" stroke="currentColor" stroke-width="2"/>
+          <text x="210" y="110" text-anchor="middle" font-size="13" fill="currentColor">Resistance raised · both filling pressures empty</text>
+        </svg>
+      </div>
+      <h2>Observations</h2>
+      <dl class="summary" aria-label="Shock observations">
+        <div><dt>Cardiac index</dt><dd>1.8 <small>L/min/m²</small></dd></div>
+        <div><dt>CVP</dt><dd>2 <small>mmHg</small></dd></div>
+        <div><dt>Wedge</dt><dd>4 <small>mmHg</small></dd></div>
+        <div><dt>SvO₂</dt><dd>58 <small>%</small></dd></div>
+        <div><dt>Lactate</dt><dd>4.2 <small>mmol/L</small></dd></div>
+        <div><dt>SVR</dt><dd>1.62 <small>units</small></dd></div>
+      </dl>
+      <h2>Trends</h2>
+      <div class="diagram"><div class="fig-head"><span>MAP, mmHg</span><span>Live · illustrative</span></div>
+        <svg viewBox="0 0 300 60" width="100%" height="60" aria-hidden="true"><polyline points="0,20 40,22 80,26 120,30 160,36 200,40 240,44 300,48" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+        <details><summary>Data table for MAP trend</summary><table><thead><tr><th scope="col">Time</th><th scope="col">MAP (mmHg)</th></tr></thead><tbody><tr><td>0 min</td><td>82</td></tr><tr><td>10 min</td><td>78</td></tr><tr><td>20 min</td><td>72</td></tr></tbody></table></details>
+      </div>
+      <div class="inset"><p style="margin:0">A simplified, conceptual model of circulatory shock — not a clinical or diagnostic tool. <a href="#lessons">Where these numbers came from</a>.</p></div>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="sh-blood">Blood loss <output id="sh-blood-v" for="sh-blood">30%</output></label><input id="sh-blood" type="range" min="0" max="100" value="30"><small class="small">Model parameter. Moving it changes the diagram and every readout.</small></div>
+      <div class="field"><label for="sh-contract">Contractility <output id="sh-contract-v" for="sh-contract">100%</output></label><input id="sh-contract" type="range" min="0" max="200" value="100"></div>
+      <div class="field"><label for="sh-tone">Vascular tone <output id="sh-tone-v" for="sh-tone">130%</output></label><input id="sh-tone" type="range" min="0" max="200" value="130"></div>
+      <div class="field"><label for="sh-reflex">Baroreflex gain <output id="sh-reflex-v" for="sh-reflex">1.0</output></label><input id="sh-reflex" type="range" min="0" max="2" step="0.1" value="1"></div>
+    </aside></div>
+    <h2>Practice</h2>
+    <fieldset><legend>Cool, tachycardic trauma patient. Pressures below. Which shock state?</legend>
+      <div class="radio"><input id="sh-q1" type="radio" name="sh-q"><label for="sh-q1"><b>Haemorrhagic</b> — empty on both sides, clamped resistance</label></div>
+      <div class="radio"><input id="sh-q2" type="radio" name="sh-q"><label for="sh-q2"><b>Cardiogenic</b> — pump failing, full on both sides</label></div>
+      <div class="radio"><input id="sh-q3" type="radio" name="sh-q"><label for="sh-q3"><b>Septic</b> — warm, vasodilated, high output</label></div>
+      <div class="radio"><input id="sh-q4" type="radio" name="sh-q"><label for="sh-q4"><b>Obstructive</b> — blocked filling, high CVP, low wedge</label></div>
+      <p><button class="btn btn--primary" type="button">Check answer</button></p>
+      <details><summary>Explanation (shown after answering in the app)</summary><p>Both filling pressures are empty and the resistance is up — there is simply not enough blood in the circuit. Note the low mixed venous saturation: extraction is intact, unlike the septic pattern. Compensation hides the severity until it fails, which is why a normal pressure must never reassure you here.</p></details>
+    </fieldset>
+    <h2>Lessons</h2>
+    <p>Compensation hides haemorrhage: pressure holds while output collapses. Related: <a href="#venousReturn">Venous Return — the curves behind these filling pressures</a>; <a href="#cardiacElectro">Cardiac Cycle — pressure-volume consequences of a failing ventricle</a>.</p>
+  </main></div>
+  <footer class="service-footer" role="contentinfo"><div class="row"><a href="#accessibility">Accessibility statement</a><span>Provenance: asserted bands with literature/oracle sources; unsourced gaps listed honestly.</span></div></footer>
+  </div>
+
+  <!-- ================= RESPIRATORY ================= -->
+  <div class="sheet" id="resp"><div class="service-header" role="banner"><div class="row"><span class="nhs-lozenge" aria-hidden="true">NHS</span><span class="crown-demo" aria-hidden="true">◆</span><span class="service-name">Physiology Lab</span></div></div>
+  <div class="sheet-inner"><main aria-labelledby="respTitle">
+    <a class="back-link" href="#home">← Modules</a>
+    <h1 id="respTitle">Respiratory &amp; Acid-Base</h1>
+    <p class="lede">Ventilation, gas exchange and reading a blood gas.</p>
+    <ul class="tabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="callout" role="note"><h3 style="margin:0">Bedside: Nadia, 19 · Bed C01</h3><p style="margin:4px 0 0">Vomiting, breathing deeply, three days of thirst. <b>Say what the breathing is doing, and whether to slow it down.</b></p></div>
+    <h2>Scenario</h2>
+    <div class="btn-group" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">DKA metabolic acidosis</button>
+      <button class="chip" type="button" aria-pressed="false">COPD chronic retainer</button>
+      <button class="chip" type="button" aria-pressed="false">Salicylate poisoning</button>
+    </div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified Davenport diagram: low bicarbonate, low carbon dioxide, acid pH. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Davenport diagram (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 150" width="100%" height="150" aria-hidden="true">
+          <line x1="40" y1="10" x2="40" y2="130" stroke="currentColor" stroke-width="2"/>
+          <line x1="40" y1="130" x2="400" y2="130" stroke="currentColor" stroke-width="2"/>
+          <circle cx="120" cy="95" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="120" y="115" text-anchor="middle" font-size="12" fill="currentColor">DKA</text>
+          <circle cx="300" cy="60" r="6" fill="currentColor" opacity=".35"/>
+          <text x="300" y="80" text-anchor="middle" font-size="12" fill="currentColor">Normal</text>
+          <text x="210" y="145" text-anchor="middle" font-size="12" fill="currentColor">PaCO2 → · HCO3 ↑</text>
+        </svg>
+      </div>
+      <h2>Blood gas</h2>
+      <dl class="summary" aria-label="Arterial blood gas">
+        <div><dt>pH</dt><dd>7.28</dd></div>
+        <div><dt>PaCO2</dt><dd>22 <small>mmHg</small></dd></div>
+        <div><dt>HCO3−</dt><dd>12 <small>mEq/L</small></dd></div>
+        <div><dt>Anion gap</dt><dd>22 <small>mEq/L</small></dd></div>
+      </dl>
+      <p class="warning-text"><span class="mark" aria-hidden="true">!</span> Do not slow this breathing down. The low PaCO2 is compensation holding the pH up — check Winter's formula before acting.</p>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="re-vent">Alveolar ventilation <output for="re-vent">8.5 L/min</output></label><input id="re-vent" type="range" min="2" max="20" step="0.1" value="8.5"></div>
+      <div class="field"><label for="re-acid">Metabolic acid load <output for="re-acid">High</output></label><input id="re-acid" type="range" min="0" max="100" value="80"></div>
+      <div class="field"><label for="re-comp">Renal compensation <output for="re-comp">Days</output></label><input id="re-comp" type="range" min="0" max="14" value="1"><small class="small">Chronic retainers (Brian, C05) compensate over weeks; Nadia compensates in minutes by breathing.</small></div>
+    </aside></div>
+    <h2>Practice</h2>
+    <fieldset><legend>Nadia is breathing deeply at 32/min with a clear chest. What is the breathing doing?</legend>
+      <div class="radio"><input id="re-q1" type="radio" name="re-q"><label for="re-q1"><b>Compensating</b> — Kussmaul breathing blowing off CO2 to defend pH</label></div>
+      <div class="radio"><input id="re-q2" type="radio" name="re-q"><label for="re-q2"><b>Causing</b> — primary hyperventilation driving the alkalosis</label></div>
+      <div class="radio"><input id="re-q3" type="radio" name="re-q"><label for="re-q3"><b>Failing</b> — tiring chest needing ventilation now</label></div>
+      <p><button class="btn btn--primary" type="button">Check answer</button></p>
+    </fieldset>
+    <h2>Lessons</h2>
+    <p>Low bicarbonate with a wide gap is the disease; low PaCO2 is the answer. Related: <a href="#electrolyteBalance">Electrolytes — the other half of an acid-base disturbance</a>; <a href="#respiratoryFailure">Respiratory Failure — reading this gas as a diagnosis</a>.</p>
+  </main></div>
+  <footer class="service-footer" role="contentinfo"><div class="row"><a href="#accessibility">Accessibility statement</a><span>Equations checked against Henderson–Hasselbalch, alveolar gas and Winter's formula.</span></div></footer>
+  </div>
+
+  <!-- ================= CARDIORENAL ================= -->
+  <div class="sheet" id="cardio"><div class="service-header" role="banner"><div class="row"><span class="nhs-lozenge" aria-hidden="true">NHS</span><span class="crown-demo" aria-hidden="true">◆</span><span class="service-name">Physiology Lab</span></div></div>
+  <div class="sheet-inner"><main aria-labelledby="cardioTitle">
+    <a class="back-link" href="#home">← Modules</a>
+    <h1 id="cardioTitle">Cardiorenal</h1>
+    <p class="lede">Heart and kidney feedback simulator.</p>
+    <ul class="tabs" aria-label="Module views">
+      <li><button type="button" aria-pressed="true">Lab</button></li>
+      <li><button type="button" aria-pressed="false">Patients</button></li>
+      <li><button type="button" aria-pressed="false">Questions</button></li>
+      <li><button type="button" aria-pressed="false">Lessons</button></li>
+    </ul>
+    <div class="callout" role="note"><h3 style="margin:0">Bedside: Margaret, 79 · Bed D03</h3><p style="margin:4px 0 0">Ankles swelling, breathless on stairs, passing little urine. <b>Work out which organ is failing, and what the RAAS axis is responding to.</b> Compare with Derek (D08) next door: same RAAS, opposite lesion.</p></div>
+    <h2>Scenario</h2>
+    <div class="btn-group" role="group" aria-label="Scenarios">
+      <button class="chip" type="button" aria-pressed="false">Healthy</button>
+      <button class="chip" type="button" aria-pressed="true">Heart failure</button>
+      <button class="chip" type="button" aria-pressed="false">Kidney failure</button>
+      <button class="chip" type="button" aria-pressed="false">Salt load</button>
+    </div>
+    <div class="lab-grid"><div>
+      <div class="diagram" role="img" aria-label="Simplified heart and kidney loop: low cardiac output, low filtration, high RAAS. Illustrative.">
+        <div class="fig-head"><span>Figure 1 · Heart–kidney loop (simplified)</span><span>Illustrative</span></div>
+        <svg viewBox="0 0 420 150" width="100%" height="150" aria-hidden="true">
+          <path d="M90 75 c0-28 30-44 45-30 c15-14 45 2 45 30 c0 26-22 48-45 62 c-23-14-45-36-45-62" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="135" y="80" text-anchor="middle" font-size="12" fill="currentColor">Pump ↓</text>
+          <rect x="270" y="35" width="70" height="80" rx="24" fill="none" stroke="currentColor" stroke-width="3"/>
+          <text x="305" y="75" text-anchor="middle" font-size="12" fill="currentColor">Kidney</text>
+          <text x="305" y="90" text-anchor="middle" font-size="12" fill="currentColor">GFR ↓</text>
+          <line x1="180" y1="60" x2="270" y2="60" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="270" y1="100" x2="180" y2="100" stroke="currentColor" stroke-width="2"/>
+          <text x="225" y="50" text-anchor="middle" font-size="12" fill="currentColor">flow ↓</text>
+          <text x="225" y="118" text-anchor="middle" font-size="12" fill="currentColor">RAAS ↑ retains salt + water</text>
+        </svg>
+      </div>
+      <h2>Observations</h2>
+      <dl class="summary" aria-label="Cardiorenal observations">
+        <div><dt>Cardiac output</dt><dd>3.1 <small>L/min</small></dd></div>
+        <div><dt>MAP</dt><dd>78 <small>mmHg</small></dd></div>
+        <div><dt>GFR</dt><dd>48 <small>mL/min</small></dd></div>
+        <div><dt>RAAS</dt><dd>2.40</dd></div>
+        <div><dt>Urine</dt><dd>0.40 <small>mL/min</small></dd></div>
+        <div><dt>Blood volume</dt><dd>5.80 <small>L</small></dd></div>
+      </dl>
+    </div><aside aria-label="Controls">
+      <div class="field"><label for="cr-pump">Pump strength <output for="cr-pump">55%</output></label><input id="cr-pump" type="range" min="10" max="120" value="55"></div>
+      <div class="field"><label for="cr-salt">Salt intake <output for="cr-salt">Normal</output></label><input id="cr-salt" type="range" min="0" max="100" value="50"></div>
+      <div class="field"><label for="cr-kidney">Kidney function <output for="cr-kidney">Intact</output></label><input id="cr-kidney" type="range" min="0" max="100" value="90"><small class="small">Lower this to turn Margaret into Derek: same oedema, opposite pressure.</small></div>
+    </aside></div>
+    <h2>Practice</h2>
+    <fieldset><legend>Margaret's creatinine is rising on a diuretic. The team ask whether to stop it. What is the kidney doing?</legend>
+      <div class="radio"><input id="cr-q1" type="radio" name="cr-q"><label for="cr-q1"><b>Underperfused, not diseased</b> — defending pressure it cannot see</label></div>
+      <div class="radio"><input id="cr-q2" type="radio" name="cr-q"><label for="cr-q2"><b>Primarily failing</b> — the lesion is in the nephron</label></div>
+      <p><button class="btn btn--primary" type="button">Check answer</button></p>
+      <details><summary>Explanation</summary><p>Output is down and everything follows from that one fact. The kidney reads low flow as low volume and turns RAAS on; retaining more volume loads a ventricle that could not cope with the last litre. The creatinine is a consequence, not a second diagnosis — the loop breaks by treating the pump.</p></details>
+    </fieldset>
+  </main></div>
+  <footer class="service-footer" role="contentinfo"><div class="row"><a href="#accessibility">Accessibility statement</a><span>Simplified conceptual model — not a clinical or diagnostic tool.</span></div></footer>
+  </div>
+
+  <!-- ================= NOTES ================= -->
+  <div class="sheet" id="notes"><div class="sheet-inner"><main aria-labelledby="notesTitle">
+    <h1 id="notesTitle">Compliance notes (what changed from concept F, and why)</h1>
+    <h2>What had to change</h2>
+    <ul>
+      <li><b>Light default.</b> Concept F opens dark with glowing vitals. Both UK systems are light-first; dark here is an enhancement behind the second switcher, with identical content and contrast floors.</li>
+      <li><b>Focus you can see.</b> Thin blue outline replaced with a thick yellow block plus dark edge on every interactive element, including the phone-style bed list.</li>
+      <li><b>Acuity is word + tag.</b> CRASH / DUE / CHECK / NEW tags are bold, bordered, and pass 4.5:1 as text. Removing colour still leaves the word — WCAG 1.4.1.</li>
+      <li><b>Vitals become definition lists.</b> Glowing numerals become <span class="mono">&lt;dl&gt;</span> panels with tabular numerals and text alternative for every meter and sparkline (details-table pattern).</li>
+      <li><b>Structure a screen reader can use:</b> skip link, one <span class="mono">h1</span> per service page, ordered headings, landmarks, labelled sliders with values, quiz as fieldset + radios, back links, unique titles, <span class="mono">lang="en-GB"</span>.</li>
+      <li><b>Headers done honestly.</b> NHS variant uses the NHS header pattern. GOV.UK-style variant uses an own-service black header — current guidance says services outside the GOV.UK proposition must not use the crown header/footer. Do not ship the GOV.UK variant with GOV.UK branding.</li>
+      <li><b>Kept from the app deliberately:</b> no XP/coins, no leaderboards, no sounds, no streak punishment, no expiring prescriptions, reference never paywalled, British spelling, reduced-motion respected.</li>
+    </ul>
+    <h2>Data bindings (repo-verbatim)</h2>
+    <ul>
+      <li><span class="mono">RoundBoard → bed list</span> (Amina A04, George A07, Ruth B02, Nadia C01, Brian C05, Colin C09, Margaret D03, Derek D08). Acuity illustrative; app derives it.</li>
+      <li><span class="mono">StudyStrip → summary list</span>; <span class="mono">StudyReport → prescribed rows</span>; <span class="mono">DISCIPLINES → subject grid</span>; <span class="mono">ModulePage slots → diagram / readouts / controls / charts / quiz / explainer</span>.</li>
+      <li><span class="mono">SHOCK_PANEL / ABG_PANEL / CARDIORENAL_PANEL</span> → observation rows above. Values illustrative of shape.</li>
+    </ul>
+    <h2>Before shipping this style</h2>
+    <ul>
+      <li>Publish an accessibility statement and test with keyboard + at least two screen-reader/browser combinations; run an audit at beta.</li>
+      <li>Confirm font licensing (GDS Transport / Frutiger) or document the Arial fallback; confirm button/tag hexes against the live design-system release.</li>
+      <li>Keep fictional-patient and not-a-clinical-tool disclosures on every page, as above.</li>
+    </ul>
+  </main></div></div>
+</div>
+<script>
+(function(){
+  var root=document.documentElement;
+  var sBtns=[...document.querySelectorAll('[data-s]')];
+  var tBtns=[...document.querySelectorAll('[data-t]')];
+  var name=document.getElementById('serviceName');
+  function paint(){
+    sBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s===root.dataset.service)));
+    tBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===(root.dataset.theme||'light'))));
+    if(name)name.textContent=root.dataset.service==='nhs'?'NHS-style service header':'GOV.UK-style service header (own-service, not crown chrome)';
+    try{
+      localStorage.setItem('physio-preview-g-service',root.dataset.service);
+      localStorage.setItem('physio-preview-g-theme',root.dataset.theme||'light');
+    }catch(e){}
+  }
+  sBtns.forEach(b=>b.addEventListener('click',()=>{root.dataset.service=b.dataset.s;paint();}));
+  tBtns.forEach(b=>b.addEventListener('click',()=>{root.dataset.theme=b.dataset.t;paint();}));
+  try{
+    var s=localStorage.getItem('physio-preview-g-service'),t=localStorage.getItem('physio-preview-g-theme');
+    if(s==='nhs'||s==='govuk')root.dataset.service=s;
+    if(t==='light'||t==='dark')root.dataset.theme=t;
+  }catch(e){}
+  paint();
+})();
+</script>
+</body>
+</html>

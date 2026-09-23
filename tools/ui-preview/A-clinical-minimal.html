@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A — Modern clinical minimal · Physiology Lab preview</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --panel:#ffffff; --panel-raised:#eef2f7; --border:#dfe6ef;
+    --text:#0f1f33; --dim:#4b5d75; --faint:#7c8da6;
+    --brand:#0f62d6; --brand-ink:#0b1b33; --on-ink:#fff; --ink-dim:#9db1c9;
+    --ok:#0e7c6b; --warn:#8a5f00; --danger:#c02828;
+    --artery:#c02828; --o2:#0a72b8; --kidney:#7a5c00; --cortisol:#8a5f00;
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --shadow:0 1px 2px rgba(15,31,51,.06),0 8px 24px -12px rgba(15,31,51,.18);
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text","Segoe UI",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#0a1322; --panel:#101c30; --panel-raised:#16273f; --border:#243a56;
+    --text:#eaf1fa; --dim:#b7c6da; --faint:#8ba0b9;
+    --brand:#6ea8fe; --brand-ink:#101c30;
+    --shadow:0 8px 28px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .proto-bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:10px 20px;background:var(--brand-ink);color:var(--on-ink);font-size:13px}
+  .proto-bar b{font-size:13px;letter-spacing:.02em}
+  .proto-bar .pill{border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:2px 10px;font-size:12px}
+  .proto-bar nav{display:flex;gap:14px;margin-left:auto}
+  .proto-bar nav a{color:var(--on-ink);opacity:.85;text-decoration:none;font-size:13px}
+  .proto-bar button{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:12px}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:flex;flex-direction:column;gap:40px}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
+  h1{font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:6px 0 8px}
+  h2{font-size:22px;letter-spacing:-.015em;margin:0 0 6px}
+  h3{font-size:15px;margin:0}
+  .lede{color:var(--dim);max-width:68ch;margin:0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+  /* home */
+  .app-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
+  .brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),#22a0ff);display:grid;place-items:center;color:#fff;font-weight:800}
+  .brand small{display:block;font-weight:600;color:var(--faint);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .account{border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:12px;background:var(--panel)}
+  .account span{display:block;color:var(--faint);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .study-band{display:grid;grid-template-columns:1.2fr auto;gap:16px;align-items:center;background:var(--brand-ink);color:var(--on-ink);border-radius:var(--r-lg);padding:18px 20px}
+  .study-band p{margin:4px 0 0;color:var(--ink-dim);font-size:13px}
+  .stats{display:flex;gap:18px}
+  .stats b{display:block;font-family:var(--mono);font-size:20px}
+  .stats span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+  .btn{font:inherit;font-size:13px;font-weight:700;border-radius:10px;padding:10px 16px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#fff;box-shadow:0 6px 16px -6px rgba(15,98,214,.6)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .tile{padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+  .tile::before{content:"";position:absolute;inset:0;background:radial-gradient(140px 90px at 100% 0%,color-mix(in srgb,var(--accent,#0f62d6) 16%,transparent),transparent 70%);pointer-events:none}
+  .tile .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .tile p{margin:0;color:var(--dim);font-size:13px}
+  .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid var(--border);background:var(--panel-raised);color:var(--dim)}
+  .badge.blue{background:color-mix(in srgb,var(--brand) 10%,var(--panel));color:var(--brand);border-color:color-mix(in srgb,var(--brand) 35%,var(--border))}
+  .meter{height:4px;border-radius:99px;background:var(--panel-raised);overflow:hidden}
+  .meter i{display:block;height:100%;width:62%;background:var(--brand);border-radius:99px}
+  /* simulator */
+  .sim-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .sim-top .back{font-size:12px;font-weight:700;color:var(--dim);text-decoration:none}
+  .sim-top h2{font-size:17px}
+  .sim-top .sub{font-size:12px;color:var(--faint)}
+  .preset{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--panel-raised) 55%,var(--panel))}
+  .chip{font-size:12px;font-weight:700;border:1px solid var(--border);background:var(--panel);border-radius:999px;padding:7px 12px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+  .chip.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--border))}
+  .lab{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0}
+  .lab-main{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+  .diagram{border:1px solid var(--border);border-radius:var(--r-md);background:linear-gradient(180deg,color-mix(in srgb,var(--panel-raised) 60%,var(--panel)),var(--panel));padding:10px}
+  .diagram .fig-head{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:2px 6px 8px}
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .ro{border:1px solid var(--border);border-top:3px solid var(--accent,var(--brand));border-radius:10px;padding:10px 12px;background:var(--panel)}
+  .ro span{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .ro b{display:block;font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}
+  .ro small{color:var(--dim);font-size:11px;font-family:var(--mono)}
+  .trend{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--panel)}
+  .trend h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .quiz{border:1px solid var(--border);border-left:4px solid var(--brand);border-radius:10px;padding:14px;background:var(--panel)}
+  .quiz p{margin:6px 0;color:var(--dim);font-size:13.5px}
+  .rail{border-left:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:14px;background:color-mix(in srgb,var(--panel-raised) 40%,var(--panel))}
+  .transport{display:flex;gap:8px}
+  .icon-btn{flex:1;border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:9px;cursor:pointer;font-weight:800}
+  .slider{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--panel)}
+  .slider label{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+  .slider label output{font-family:var(--mono);color:var(--brand)}
+  input[type=range]{width:100%;accent-color:var(--brand);margin:10px 0 2px}
+  .slider small{color:var(--faint);font-size:11px}
+  /* reference */
+  .ref-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border)}
+  .calc-row:first-of-type{border-top:none}
+  .calc-row input{width:110px;font:inherit;font-family:var(--mono);padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--panel-raised)}
+  .result{font-family:var(--mono);font-weight:800;color:var(--brand)}
+  .drug{padding:12px 16px;border-top:1px solid var(--border)}
+  .drug:first-of-type{border-top:none}
+  .drug small{color:var(--dim)}
+  /* mobile */
+  .phones{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start}
+  .phone{width:390px;max-width:100%;border:1px solid var(--border);border-radius:28px;overflow:hidden;background:var(--panel);box-shadow:var(--shadow)}
+  .phone-status{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);padding:10px 16px 0;font-family:var(--mono)}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel-raised);border-radius:12px;padding:3px;margin:10px 12px}
+  .seg span{text-align:center;font-size:12px;font-weight:700;padding:8px;border-radius:9px}
+  .seg .on{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .m-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px}
+  .m-ro{border:1px solid var(--border);border-top:3px solid var(--accent,var(--brand));border-radius:10px;padding:8px}
+  .m-ro b{font-family:var(--mono);font-size:16px}
+  .m-ro span{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);display:block}
+  .m-diag{margin:10px 12px;border:1px solid var(--border);border-radius:14px;padding:8px;background:var(--panel)}
+  .dock{margin:0 12px 12px;border:1px solid var(--border);border-radius:14px;padding:10px;background:color-mix(in srgb,var(--panel-raised) 55%,var(--panel))}
+  .tabs{display:flex;border-top:1px solid var(--border);background:var(--panel)}
+  .tabs span{flex:1;text-align:center;font-size:10px;color:var(--faint);padding:10px 0 14px}
+  .tabs .on{color:var(--brand);font-weight:800}
+  .token-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .token-table th,.token-table td{text-align:left;padding:8px 10px;border-top:1px solid var(--border)}
+  .swatch{display:inline-block;width:12px;height:12px;border-radius:4px;border:1px solid rgba(0,0,0,.2);vertical-align:-1px;margin-right:8px}
+  .mono{font-family:var(--mono)}
+  @media(max-width:960px){.lab{grid-template-columns:1fr}.rail{border-left:none;border-top:1px solid var(--border)}.ref-grid,.phones{grid-template-columns:1fr}.readouts{grid-template-columns:repeat(2,1fr)}.study-band{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="proto-bar"><b>A · Modern clinical minimal</b><span class="pill">NHS / Epic-inspired</span><nav><a href="#home">Home</a><a href="#sim">Simulator</a><a href="#ref">Reference</a><a href="#tokens">Tokens</a></nav><button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light'">Toggle light / dark</button></div>
+<div class="wrap">
+  <header><div class="kicker">Direction A · for review — static mock, no app code changed</div>
+    <h1>Clean, calm, trustworthy — like the chart you already trust.</h1>
+    <p class="lede">One blue for actions, slate for everything else. Signal colours (arterial red, O<sub>2</sub> blue, renal ochre) only ever mean physiology — never buttons. Designed for pre-clinical students through residents: scannable tiles, vitals-style readouts, exam context always visible.</p>
+  </header>
+
+  <section id="home" class="card">
+    <div class="app-head">
+      <div class="brand"><span class="brand-mark">♡</span><span>Physiology Lab<small>Bentara Medical</small></span></div>
+      <div class="account"><span>Account</span>amina.k@medschool.ac.uk · MRCP</div>
+    </div>
+    <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:14px">
+      <div class="study-band"><div><h3 style="color:#fff">Good evening, Amina — 14 reviews due</h3><p>Spaced repetition across Shock states · ECG conduction · Acid–base. 6-day streak.</p></div>
+        <div style="display:flex;gap:16px;align-items:center"><div class="stats"><div><b style="color:#fff">14</b><span>Due</span></div><div><b style="color:#fff">6</b><span>Streak</span></div><div><b style="color:#fff">68%</b><span>Known</span></div></div><button class="btn primary">Review now</button></div>
+      </div>
+      <div class="badges"><span class="badge blue">UKMLA</span><span class="badge blue">USMLE Step 1</span><span class="badge">MRCP Part 1</span><span class="badge">MRCS Part A</span><span class="badge">FRCA Primary</span></div>
+      <div class="grid">
+        <div class="card tile" style="--accent:#c02828"><div class="row"><h3>Shock states</h3><span class="badge blue">12 sims</span></div><p>Venous return meets arterial load. Haemorrhage, tamponade, sepsis.</p><div class="badges"><span class="badge">UKMLA</span><span class="badge">MRCP</span></div><div class="meter"><i style="width:62%"></i></div></div>
+        <div class="card tile" style="--accent:#0a72b8"><div class="row"><h3>Respiratory</h3><span class="badge blue">9 sims</span></div><p>Alveolar gas, V/Q mismatch, acid–base compensation.</p><div class="badges"><span class="badge">USMLE</span><span class="badge">FRCA</span></div><div class="meter"><i style="width:41%"></i></div></div>
+        <div class="card tile" style="--accent:#7a5c00"><div class="row"><h3>Renal fluids</h3><span class="badge blue">8 sims</span></div><p>Clearance, Starling forces, RAAS vs ANP balance.</p><div class="badges"><span class="badge">UKMLA</span><span class="badge">MRCP</span></div><div class="meter"><i style="width:28%"></i></div></div>
+        <div class="card tile" style="--accent:#6a3fc9"><div class="row"><h3>Endocrine</h3><span class="badge blue">7 sims</span></div><p>HPA / HPT axes, feedback, dynamic testing.</p><div class="badges"><span class="badge">MRCP</span></div><div class="meter"><i style="width:15%"></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sim" class="card">
+    <div class="sim-top"><a class="back" href="#home">‹ Renal fluids</a><div><h2>Shock states — haemorrhagic vs cardiogenic</h2><div class="sub">Interactive simulator · predicts before it reveals · UKMLA / MRCP</div></div><button class="btn primary" style="margin-left:auto">Practise</button></div>
+    <div class="preset"><button class="chip" aria-pressed="true">Resting</button><button class="chip">Haemorrhage 800 mL</button><button class="chip">Tamponade</button><button class="chip">Sepsis</button><button class="chip danger">Apply insult</button></div>
+    <div class="lab">
+      <div class="lab-main">
+        <div class="diagram"><div class="fig-head"><span>Circuit diagram · live</span><span class="mono">HR 112 · MAP 62 mmHg</span></div>
+          <svg viewBox="0 0 560 190" width="100%" height="170" role="img" aria-label="Circulation schematic">
+            <rect x="8" y="8" width="544" height="174" rx="12" fill="none" stroke="var(--border)"/>
+            <rect x="40" y="60" width="110" height="70" rx="12" fill="color-mix(in srgb,#c02828 12%,white)" stroke="#c02828" stroke-width="2"/><text x="95" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Heart</text><text x="95" y="108" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--dim)">CO 3.1 L/min</text>
+            <rect x="230" y="60" width="110" height="70" rx="12" fill="color-mix(in srgb,#0a72b8 10%,white)" stroke="#0a72b8" stroke-width="2"/><text x="285" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Lungs</text><text x="285" y="108" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--dim)">SaO₂ 94%</text>
+            <rect x="410" y="60" width="110" height="70" rx="12" fill="color-mix(in srgb,#7a5c00 10%,white)" stroke="#7a5c00" stroke-width="2"/><text x="465" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Kidney</text><text x="465" y="108" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--dim)">GFR 62</text>
+            <path d="M150 95 H230 M340 95 H410" stroke="#c02828" stroke-width="3" fill="none"/><circle cx="190" cy="95" r="4" fill="#c02828"><animate attributeName="cx" values="150;230" dur="1.2s" repeatCount="indefinite"/></circle>
+          </svg>
+          <div class="badges" style="padding:4px 6px 2px"><span class="badge">■ Arterial</span><span class="badge">■ Venous return</span><span class="badge">■ Renal</span></div>
+        </div>
+        <div class="readouts">
+          <div class="ro" style="--accent:#c02828"><span>Mean arterial pressure</span><b>62 <small>mmHg ▼</small></b><small>target ≥ 65</small></div>
+          <div class="ro" style="--accent:#c02828"><span>Cardiac output</span><b>3.1 <small>L/min</small></b><small>baseline 5.0</small></div>
+          <div class="ro" style="--accent:#0a72b8"><span>Lactate</span><b>4.2 <small>mmol/L ▲</small></b><small>shock threshold 2.0</small></div>
+          <div class="ro" style="--accent:#7a5c00"><span>Urine output</span><b>18 <small>mL/h</small></b><small>oliguria &lt; 30</small></div>
+        </div>
+        <div class="trend"><h4>Mean arterial pressure · frozen baseline vs now</h4>
+          <svg viewBox="0 0 560 90" width="100%" height="80"><path d="M0 30 H560" stroke="#94a3b8" stroke-dasharray="5 5" stroke-width="1.5"/><path d="M0 55 C80 52 140 50 200 58 S340 78 420 74 S520 66 560 64" fill="none" stroke="var(--brand)" stroke-width="2.5"/><circle cx="560" cy="64" r="4" fill="var(--brand)"/></svg>
+        </div>
+        <div class="quiz"><span class="badge blue">Predict then run</span><p><b>After 800 mL haemorrhage, what happens to CVP and pulse pressure?</b> Run the simulator to reveal — the diagram withholds the verdict while blinded.</p><div style="display:flex;gap:8px"><button class="btn primary">Run in simulator</button><button class="btn">Show explanation</button></div></div>
+      </div>
+      <aside class="rail">
+        <div style="display:flex;gap:8px" class="transport"><button class="icon-btn">❚❚</button><button class="icon-btn">Step</button><button class="icon-btn">1×</button><button class="icon-btn">Reset</button></div>
+        <div class="slider"><label>Blood loss <output>800 mL</output></label><input type="range" value="55"><small>Model parameter · alters venous return</small></div>
+        <div class="slider"><label>Vasopressor <output>0.04 µg/kg/min</output></label><input type="range" value="20"><small>Correlate: watch MAP + diastolic lift</small></div>
+        <div class="slider"><label>Fluid bolus <output>250 mL</output></label><input type="range" value="30"><small>See it act in Starling forces</small></div>
+      </aside>
+    </div>
+    <div style="padding:18px"><h3 style="margin-bottom:8px">Native parity — same screen at 390 pt</h3>
+      <div class="phones"><div class="phone"><div class="phone-status"><span>09:41</span><span>Physiology</span></div>
+        <div class="seg"><span class="on">Simulate</span><span>Practice</span><span>Learn</span></div>
+        <div class="m-strip"><div class="m-ro" style="--accent:#c02828"><span>MAP</span><b>62</b></div><div class="m-ro" style="--accent:#c02828"><span>CO</span><b>3.1</b></div><div class="m-ro" style="--accent:#0a72b8"><span>Lactate</span><b>4.2</b></div></div>
+        <div class="m-diag"><svg viewBox="0 0 340 120" width="100%" height="110"><rect x="10" y="25" width="95" height="60" rx="10" fill="#fbe3e3" stroke="#c02828" stroke-width="2"/><text x="57" y="52" text-anchor="middle" font-size="11" font-weight="700">Heart</text><text x="57" y="66" text-anchor="middle" font-size="10" font-family="monospace">CO 3.1</text><rect x="125" y="25" width="95" height="60" rx="10" fill="#e0effa" stroke="#0a72b8" stroke-width="2"/><text x="172" y="52" text-anchor="middle" font-size="11" font-weight="700">Lungs</text><rect x="235" y="25" width="95" height="60" rx="10" fill="#f5edd2" stroke="#7a5c00" stroke-width="2"/><text x="282" y="52" text-anchor="middle" font-size="11" font-weight="700">Kidney</text></svg></div>
+        <div class="dock"><label style="font-size:12px;font-weight:700">Blood loss · <span class="mono" style="color:var(--brand)">800 mL</span></label><input type="range" value="55"><div style="display:flex;gap:8px;margin-top:6px"><button class="icon-btn">❚❚</button><button class="icon-btn">Step</button><button class="icon-btn">Reset</button></div></div>
+        <div class="tabs"><span class="on">Study</span><span>Formulas</span><span>Drugs</span><span>Account</span></div>
+      </div>
+      <div><h3>What changed vs today</h3><p class="lede">Same information architecture — new chrome: hairline cards, single blue CTA, vitals-style tiles with coloured top rules, dashed frozen baseline, blinded quiz callout. On native: segmented Simulate/Practice/Learn, pinned readout strip, bottom-sheet dock.</p><ul class="lede"><li>Buttons: only <i>Review now / Practise / Run</i> are filled blue.</li><li>Signal colours never used for chrome.</li><li>Sliders carry a visible correlate (“watch MAP lift”).</li></ul></div></div>
+    </div>
+  </section>
+
+  <section id="ref" class="card"><div class="app-head"><div><div class="kicker">Reference + medications</div><h2>Formulas that calculate. Drugs that link back.</h2></div><span class="badge blue">UK top-100 classes</span></div>
+    <div class="ref-grid" style="padding:0 20px 20px">
+      <div class="card" style="box-shadow:none"><div class="calc-row"><div><h3>Corrected calcium</h3><small class="lede">Ca<sub>corr</sub> = measured + 0.02 × (40 − albumin)</small></div><div style="display:flex;gap:8px;align-items:center"><input value="2.05" aria-label="calcium"><input value="28" aria-label="albumin" style="width:70px"><span class="result">2.29 mmol/L</span></div></div>
+        <div class="calc-row"><div><h3>MAP</h3><small class="lede">⅓ systolic + ⅔ diastolic</small></div><div style="display:flex;gap:8px;align-items:center"><input value="88/54" style="width:110px"><span class="result">65 mmHg</span></div></div>
+        <div class="calc-row"><div><h3>Winters formula</h3><small class="lede">Expected PaCO₂ in metabolic acidosis</small></div><button class="btn">Watch it move in Acid–base →</button></div>
+      </div>
+      <div class="card" style="box-shadow:none"><div class="drug"><h3>ACE inhibitors <span class="badge">· pril</span></h3><small>Enalapril · Ramipril · Lisinopril — ↓ angiotensin II, ↓ aldosterone. See it act in <b>Shock states</b>.</small></div><div class="drug"><h3>Loop diuretics <span class="badge">· ol</span></h3><small>Furosemide · Bumetanide — block NKCC2, ↑ Ca²⁺ excretion. See it act in <b>Renal tubular</b>.</small></div><div class="drug"><h3>Beta-blockers <span class="badge">· olol</span></h3><small>Metoprolol · Atenolol — ↓ HR, ↓ contractility. See it act in <b>Cardiac output</b>.</small></div></div>
+    </div>
+  </section>
+
+  <section id="tokens" class="card" style="padding:18px 20px"><h2>Token delta (A)</h2><p class="lede">Kept: slate ramp, signal palette, sentence-case micro-labels. Changed: tighter radius (12→10 on tiles), softer shadow, single blue CTA, raised translucency on preset bar, 4px top-rule on readouts.</p>
+    <table class="token-table"><tr><th>Token</th><th>Before</th><th>After</th></tr>
+    <tr><td><span class="swatch" style="background:#ffffff"></span><span class="mono">--panel</span></td><td class="mono">#ffffff</td><td class="mono">#ffffff (kept)</td></tr>
+    <tr><td><span class="swatch" style="background:#0f62d6"></span><span class="mono">--brand</span></td><td class="mono">#2563eb</td><td class="mono">#0f62d6 · deeper, NHS blue</td></tr>
+    <tr><td><span class="swatch" style="background:#dfe6ef"></span><span class="mono">--panel-border</span></td><td class="mono">#e2e8f0</td><td class="mono">#dfe6ef · slightly cooler</td></tr>
+    <tr><td><span class="swatch" style="background:#c02828"></span><span class="mono">--artery</span></td><td class="mono">#c62828</td><td class="mono">kept · physiology only</td></tr></table>
+  </section>
+</div>
+</body>
+</html>

@@ -9,7 +9,7 @@ import type {
   VenousReturnInputs,
   VenousReturnState,
 } from './engine/types';
-import type { FrameNode, ModulePresentation, PresentationContext } from '@/shared/presentation/types';
+import type { FrameNode, ModulePresentation, PresentationContext, ControlSpec } from '@/shared/presentation/types';
 
 /* --- The Guyton plot --------------------------------------------------- */
 
@@ -60,6 +60,27 @@ const PRA_TICKS = [-6, 0, 6, 12, 18, 24];
 const FLOW_TICKS = [0, 5, 10, 15];
 
 type Ctx = PresentationContext<VenousReturnState, VenousReturnDerived, VenousReturnInputs, VenousReturnHistoryPoint>;
+
+/**
+ * The control rail, hoisted out of the builder so the page can read the same ranges the
+ * schema declares.
+ *
+ * `useInputNudge` clamps a button's delta to the slider it writes, and the only honest source
+ * for that range is the slider itself — restating it at the call site is a second place to be
+ * wrong, and the one that would drift. Hoisting also gives the array a stable identity across
+ * the engine's thirty renders a second, which is what lets the hook memoise.
+ */
+export const VENOUS_RETURN_CONTROLS: ReadonlyArray<ControlSpec<VenousReturnInputs>> = [
+  { kind: 'slider', label: 'Blood volume', key: 'bloodVolumeMl', min: 3000, max: 7000, step: 50, unit: ' mL' },
+  { kind: 'slider', label: 'Unstressed volume', key: 'unstressedVolumeFraction', min: 0.6, max: 0.95, step: 0.01, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Venous compliance', key: 'venousCompliance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
+  { kind: 'slider', label: 'Venous resistance', key: 'venousResistance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
+  { kind: 'slider', label: 'AV shunt', key: 'arteriovenousShunt', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
+  { kind: 'slider', label: 'Contractility', key: 'contractility', min: 0, max: 2.5, step: 0.05, format: 'decimal' },
+  { kind: 'slider', label: 'Heart rate', key: 'heartRate', min: 30, max: 200, step: 1, unit: ' bpm' },
+  { kind: 'slider', label: 'Intrathoracic pressure', key: 'intrathoracicPressure', min: -10, max: 20, step: 0.5, unit: ' mmHg' },
+  { kind: 'slider', label: 'Systemic vascular resistance', key: 'systemicVascularResistance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
+];
 
 export function buildVenousReturnPresentation(ctx: Ctx): ModulePresentation<
   VenousReturnState,
@@ -178,17 +199,7 @@ export function buildVenousReturnPresentation(ctx: Ctx): ModulePresentation<
 
   return {
     diagram: [diagram],
-    controls: [
-      { kind: 'slider', label: 'Blood volume', key: 'bloodVolumeMl', min: 3000, max: 7000, step: 50, unit: ' mL' },
-      { kind: 'slider', label: 'Unstressed volume', key: 'unstressedVolumeFraction', min: 0.6, max: 0.95, step: 0.01, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Venous compliance', key: 'venousCompliance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
-      { kind: 'slider', label: 'Venous resistance', key: 'venousResistance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
-      { kind: 'slider', label: 'AV shunt', key: 'arteriovenousShunt', min: 0, max: 1, step: 0.05, unit: '%', format: 'percent' },
-      { kind: 'slider', label: 'Contractility', key: 'contractility', min: 0, max: 2.5, step: 0.05, format: 'decimal' },
-      { kind: 'slider', label: 'Heart rate', key: 'heartRate', min: 30, max: 200, step: 1, unit: ' bpm' },
-      { kind: 'slider', label: 'Intrathoracic pressure', key: 'intrathoracicPressure', min: -10, max: 20, step: 0.5, unit: ' mmHg' },
-      { kind: 'slider', label: 'Systemic vascular resistance', key: 'systemicVascularResistance', min: 0.3, max: 3, step: 0.05, format: 'decimal' },
-    ],
+    controls: VENOUS_RETURN_CONTROLS,
     readouts: [
       {
         label: 'Cardiac output',

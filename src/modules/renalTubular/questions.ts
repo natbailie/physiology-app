@@ -1,8 +1,7 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { RenalTubularDerived, RenalTubularInputs, RenalTubularState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { RenalTubularInputs } from './engine/types';
 import type { RenalTubularPresetName } from './engine/presets';
-
-type Snapshot = { state: RenalTubularState; derived: RenalTubularDerived };
+import { AKI_PANEL, type RenalTubularSnapshot as Snapshot } from './panel';
 export type RenalTubularQuestion = ModuleQuestion<RenalTubularInputs, RenalTubularPresetName, Snapshot>;
 
 export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
@@ -171,13 +170,7 @@ export const RENAL_TUBULAR_QUESTIONS: readonly RenalTubularQuestion[] = [
     stem: 'A hypotensive postoperative patient has a creatinine of 2.4. The panel below was sent before any fluids were given.',
     answer: 'preRenalAzotaemia',
     options: ['preRenalAzotaemia', 'atn', 'type4RTA'],
-    panel: [
-      { label: 'FENa (%)', unit: '%', value: (s: Snapshot) => s.derived.fractionalExcretionNaPct, decimals: 2 },
-      { label: 'Urine Na (mEq/L)', unit: '', value: (s: Snapshot) => s.derived.urineSodiumMeqL, decimals: 0 },
-      { label: 'Urine osmolality (mOsm/kg)', unit: '', value: (s: Snapshot) => s.derived.finalUrineOsmolality, decimals: 0 },
-      { label: 'Serum K (mEq/L)', unit: '', value: (s: Snapshot) => s.derived.serumPotassiumEstimateMeqL, decimals: 1 },
-      { label: 'Creatinine (mg/dL)', unit: '', value: (s: Snapshot) => s.derived.serumCreatinineMgDl, decimals: 2 },
-    ] as readonly PanelField<Snapshot>[],
+    panel: AKI_PANEL,
     settleSeconds: 90000,
     explanation:
       'FENa under 1% with urine sodium below 20 and concentrated urine: an intact, aldosterone-driven nephron is scavenging every millimole it can while the glomerulus starves — prerenal azotaemia, and the right treatment is volume, not diuretics. Acute tubular necrosis produces the same creatinine but sheds sodium (FENa >2%) into an isosthenuric urine, because dead tubules cannot scavenge anything. Type 4 RTA raises the potassium with a positive anion gap but spares the creatinine entirely. One panel, three completely different resuscitation decisions.',

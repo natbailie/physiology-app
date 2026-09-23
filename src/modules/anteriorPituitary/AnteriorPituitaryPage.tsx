@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { PituitaryDiagram } from './components/PituitaryDiagram';
@@ -69,6 +70,7 @@ export function AnteriorPituitaryPage() {
 
   return (
     <ModulePage
+      historyCapacity={pituitaryLoopConfig.historyCapacity}
       moduleId="anteriorPituitary"
       title="Anterior Pituitary: GH & Prolactin"
       subtitle="one hormone is held down by the brain, and that fact organises a differential"
@@ -89,7 +91,17 @@ export function AnteriorPituitaryPage() {
       }
       diagram={<PituitaryDiagram derived={snapshot.derived} />}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={PITUITARY_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={PITUITARY_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={PITUITARY_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

@@ -1,77 +1,10 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { VisionDerived, VisionInputs, VisionInternalState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { VisionInputs } from './engine/types';
 import type { VisionPresetName } from './engine/presets';
 import { perturbBrightGlare, perturbLightsOut, perturbShineTorch } from './engine/engine';
+import { PUPIL_PANEL as PANEL, PRESSURE_PANEL, FIELD_PANEL, type VisionSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: VisionInternalState; derived: VisionDerived };
 export type VisionQuestion = ModuleQuestion<VisionInputs, VisionPresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'Acuity', unit: '/6', value: (s) => s.derived.acuityDenominator, decimals: 0 },
-  { label: 'Right pupil', unit: 'mm', value: (s) => s.derived.pupilRightMm, decimals: 1 },
-  { label: 'Left pupil', unit: 'mm', value: (s) => s.derived.pupilLeftMm, decimals: 1 },
-  { label: 'Anisocoria', unit: 'mm', value: (s) => s.derived.anisocoriaMm, decimals: 1 },
-  { label: 'Perceived brightness', unit: '%', value: (s) => s.derived.perceivedBrightness, decimals: 0 },
-  {
-    label: 'Swinging torch',
-    value: (s) => Math.min(s.derived.directReflexRightScore, s.derived.directReflexLeftScore),
-    decimals: 0,
-    tolerance: 0.25,
-  },
-];
-
-const PRESSURE_PANEL: readonly PanelField<Snapshot>[] = [
-  {
-    label: 'Intraocular pressure',
-    unit: 'mmHg',
-    value: (s) => s.derived.intraocularPressureMmHg,
-    decimals: 0,
-    tolerance: 0.08,
-  },
-  {
-    label: 'Angle closed',
-    unit: '%',
-    value: (s) => s.derived.angleClosureFraction * 100,
-    decimals: 0,
-    tolerance: 0.12,
-  },
-  { label: 'Right pupil', unit: 'mm', value: (s) => s.derived.pupilRightMm, decimals: 1, tolerance: 0.08 },
-  { label: 'Anisocoria', unit: 'mm', value: (s) => s.derived.anisocoriaMm, decimals: 1, tolerance: 0.2 },
-  { label: 'Acuity', unit: '/6', value: (s) => s.derived.acuityDenominator, decimals: 0 },
-];
-
-const FIELD_PANEL: readonly PanelField<Snapshot>[] = [
-  {
-    label: 'R superior temporal',
-    value: (s) => s.derived.fieldSectors.rightEye.superiorTemporal * 100,
-    decimals: 0,
-    tolerance: 0.05,
-  },
-  {
-    label: 'R inferior nasal',
-    value: (s) => s.derived.fieldSectors.rightEye.inferiorNasal * 100,
-    decimals: 0,
-    tolerance: 0.05,
-  },
-  {
-    label: 'L superior temporal',
-    value: (s) => s.derived.fieldSectors.leftEye.superiorTemporal * 100,
-    decimals: 0,
-    tolerance: 0.05,
-  },
-  {
-    label: 'L superior nasal',
-    value: (s) => s.derived.fieldSectors.leftEye.superiorNasal * 100,
-    decimals: 0,
-    tolerance: 0.05,
-  },
-  {
-    label: 'L inferior nasal',
-    value: (s) => s.derived.fieldSectors.leftEye.inferiorNasal * 100,
-    decimals: 0,
-    tolerance: 0.05,
-  },
-];
 
 const SETTLE = 5000;
 

@@ -50,3 +50,19 @@ export const EXERCISE_PRESET_ORDER: ExercisePresetName[] = [
   'dehydratedEffort',
   'athleteRest',
 ];
+
+/**
+ * One line under a scenario's name on a quiz option: what this state IS, never what its numbers
+ * do. See `SHOCK_PRESET_GLOSS` for why that distinction is load-bearing — a gloss reporting a row
+ * of the panel would answer the pattern questions from the options alone. `questions.test.ts`
+ * holds it: no gloss may name a panel row or quote a figure.
+ */
+export const EXERCISE_PRESET_GLOSS: Partial<Record<ExercisePresetName, string>> = {
+  rest: 'no work being done',
+  lightCycling: 'easy work, well inside what the circulation can deliver',
+  vigorousRun: 'hard work, still supplied by oxygen',
+  eliteEffort: 'a trained athlete at the top of what training has bought',
+  untrainedExhaustion: 'demand past what an untrained circulation can deliver',
+  dehydratedEffort: 'the same work with the circulating blood already down',
+  athleteRest: 'a trained heart moving the same blood in fewer, larger beats',
+};

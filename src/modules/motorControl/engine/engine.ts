@@ -26,13 +26,19 @@ export function createInitialState(): MotorInternalState {
   };
 }
 
+/** Whether the stimulator is running: the SETTING, or the state a direct `perturbToggleDbs` left
+ * behind — which is how this module's own engine test drives it. */
+function dbsOn(inputs: MotorInputs, state: MotorInternalState): boolean {
+  return inputs.deepBrainStimulation === 'on' || state.dbsActive;
+}
+
 export function computeDerived(state: MotorInternalState, inputs: MotorInputs): MotorDerived {
   const effectiveDopaminePct = clamp(
     inputs.dopamineFraction + (state.levodopaBurst * LEVODOPA.BURST_FRACTION) / 100,
     0,
     130,
   );
-  const bradykinesia = bradykinesiaIndex(effectiveDopaminePct) * (state.dbsActive ? DBS.BRADYKINESIA_EASING : 1);
+  const bradykinesia = bradykinesiaIndex(effectiveDopaminePct) * (dbsOn(inputs, state) ? DBS.BRADYKINESIA_EASING : 1);
   const latency = initiationLatencyMs(bradykinesia);
   const command = clamp(inputs.movementCommandAmplitude, 0, 100);
   const achieved = achievedAmplitudePct(command, bradykinesia);
@@ -43,11 +49,11 @@ export function computeDerived(state: MotorInternalState, inputs: MotorInputs): 
     100,
   );
 
-  const rest = restingTremorAmp(bradykinesia, command, state.dbsActive);
+  const rest = restingTremorAmp(bradykinesia, command, dbsOn(inputs, state));
   const intent = intentionTremorAmp(inputs.cerebellarCalibration, command);
   const postural = posturalTremorAmp(inputs);
-  const chorea = choreaAmp(inputs.striatalOutputLoss, state.dbsActive);
-  const ballism = ballismAmp(inputs.subthalamicLesion, state.dbsActive);
+  const chorea = choreaAmp(inputs.striatalOutputLoss, dbsOn(inputs, state));
+  const ballism = ballismAmp(inputs.subthalamicLesion, dbsOn(inputs, state));
 
   const dystonia = dystoniaAmp(inputs.dystoniaSeverityPct);
   const coContraction = cocontractionIndex(inputs.dystoniaSeverityPct);

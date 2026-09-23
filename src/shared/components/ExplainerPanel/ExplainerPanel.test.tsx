@@ -175,4 +175,31 @@ describe('module shell scenarios', () => {
     rerender(<App withBar={false} />);
     expect(screen.getByTestId('labels').textContent).toBe('none');
   });
+
+  /**
+   * The panel shuts itself the moment practice starts, because several sections state the answer
+   * and some carry a demo button that would load the scenario being asked about. On the Lessons
+   * tab that leaves a title and a chevron, which reads as a broken page unless it says why.
+   *
+   * The note must sit OUTSIDE the `<details>`: anything inside a closed one that is not the
+   * `<summary>` is not rendered at all, so a note placed there would be invisible in exactly the
+   * state it exists to explain. That was the first version of this, found by looking at it.
+   */
+  describe('while a question has it closed', () => {
+    it('says why it is shut, from OUTSIDE the details element', () => {
+      render(<ExplainerPanel content={SECTIONED} startCollapsed />);
+      const note = screen.getByText(/Closed while a question is open/);
+
+      // The structural half is the assertion that matters, and it has to be made this way:
+      // jsdom renders the children of a closed <details> exactly as it renders an open one, so
+      // `getByText` alone would pass with the note buried inside — invisible in the one state it
+      // exists to explain, which is how the first version of this shipped.
+      expect(note.closest('details')).toBeNull();
+    });
+
+    it('says nothing of the sort when it is open', () => {
+      render(<ExplainerPanel content={SECTIONED} />);
+      expect(screen.queryByText(/Closed while a question is open/)).toBeNull();
+    });
+  });
 });

@@ -98,7 +98,8 @@ function SectionCard({ section, index }: { section: ExplainerSection; index: num
  * A module still authored as flat `paragraphs` renders exactly as it always has. */
 function ExplainerPanelBase({ content, startCollapsed = false }: ExplainerPanelProps) {
   return (
-    <details className={styles.panel} open={!startCollapsed}>
+    <>
+      <details className={styles.panel} open={!startCollapsed}>
       <summary className={styles.summary}>
         <h2 className={styles.title}>{content.title}</h2>
         <span className={styles.chevron} aria-hidden="true" />
@@ -118,7 +119,23 @@ function ExplainerPanelBase({ content, startCollapsed = false }: ExplainerPanelP
           ))}
         </div>
       )}
-    </details>
+      </details>
+      {/* Say why it is shut rather than leaving a title and a chevron.
+          `startCollapsed` is every module's `session.phase !== 'idle'`, so the panel closes the
+          moment practice starts — several sections state the answer outright, and some carry a
+          demo button that would load the very scenario being asked about. That was invisible
+          anti-cheat while the prose sat below the fold; on a tab of its own it reads as a broken
+          page.
+
+          OUTSIDE the <details>, which is the whole trick: anything inside a closed one that is
+          not the <summary> is not rendered, so a note placed there would be hidden in exactly
+          the state it exists to explain. */}
+      {startCollapsed && (
+        <p className={styles.collapsedNote}>
+          Closed while a question is open — several of these sections state the answer.
+        </p>
+      )}
+    </>
   );
 }
 

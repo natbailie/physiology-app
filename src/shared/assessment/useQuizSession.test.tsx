@@ -323,4 +323,41 @@ describe('the review queue', () => {
     act(() => result.current.exit());
     expect(result.current.dueCount).toBe(2);
   });
+
+  /**
+   * Why the ward round ends a session when the bed changes.
+   *
+   * The queue holds question IDS, not questions, so narrowing `questions` under a live session
+   * leaves the cursor pointing at an id that no longer resolves. Nothing throws: `question`
+   * simply goes null while `phase` still says a question is open, and QuizPanel renders
+   * nothing at all. `useBedside`'s `onBedChange` exists to stop the Patients tab reaching this
+   * state — a blank panel mid-question looks like a crash and reads like one.
+   */
+  it('loses its question, but not its phase, if the question list narrows under it', () => {
+    const store = createMemoryProgressStore(emptyProgress(), () => Date.now());
+    const options = {
+      moduleId: 'test',
+      applyInputs: vi.fn(),
+      captureBaseline: vi.fn(),
+      clearBaseline: vi.fn(),
+      resetEngine: vi.fn(),
+      perturbEngine: vi.fn(),
+      fastForwardEngine: vi.fn(),
+      store,
+    };
+    const { result, rerender } = renderHook(
+      ({ questions }) => useQuizSession({ ...options, questions }),
+      { initialProps: { questions: QUESTIONS } },
+    );
+
+    act(() => result.current.start());
+    act(() => result.current.next());
+    expect(result.current.question?.id).toBe('q2');
+
+    // The learner picks a different patient: the list is rebuilt without q2.
+    rerender({ questions: QUESTIONS.filter((q) => q.id === 'q1') });
+
+    expect(result.current.question).toBeNull();
+    expect(result.current.phase).toBe('predicting');
+  });
 });

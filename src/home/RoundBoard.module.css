@@ -1,0 +1,220 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+.summary {
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+/* The one primary action on this page, and the way into the board the beds could not be:
+   eight equally-weighted links are eight primary actions, which is none. Composes the house
+   `.primary` rather than restating --brand here — colour variants live in button.module.css
+   so their emitted order stays deterministic, and consumers add layout only. */
+.start {
+  composes: primary from '../shared/styles/button.module.css';
+  align-self: flex-start;
+  font-size: var(--fs-sm);
+  padding: var(--s-4) var(--s-6);
+  text-decoration: none;
+}
+
+/* On a phone it earns the width: it is the only thing above the fold worth pressing. */
+@media (max-width: 640px) {
+  .start {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* The specialty switcher. Same chip idiom as the catalogue's exam bar — "All" first as a real
+   chip rather than an X on the selected one, because the way OUT of a filter has to be as
+   obvious as the way in. A learner who cannot see why the ward looks short will conclude the
+   app has lost their patients. */
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.filterLegend {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.chip {
+  font: inherit;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-pill);
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--text);
+  border-color: var(--text-faint);
+}
+
+.chip[aria-pressed='true'] {
+  color: var(--on-solid);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+/* A filtered ward with nothing on it is a real answer, not a rendering failure. */
+.empty {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.beds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-4);
+}
+
+.bed {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.bed:hover {
+  border-color: var(--brand);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.oneLiner {
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+}
+
+.module {
+  --micro-label-color: var(--text-faint);
+}
+
+/* The acuity chip. Colour alone does not carry this — each chip also says a word, because a
+   red dot and an amber dot are the same dot to a red-green colourblind reader, and because the
+   words are the vocabulary the round is teaching. */
+.acuity {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.crash {
+  color: var(--danger);
+}
+
+.due {
+  color: var(--warn);
+}
+
+.check {
+  color: var(--ok);
+}
+
+.newAdmission {
+  color: var(--text-faint);
+}
+
+/* Referrals: locked modules. Deliberately NOT an acuity chip — see useRound.
+ *
+ * The border stays DASHED on purpose. This is the revenue surface and it was too quiet, but
+ * the fix is status, not disguise: a solid border would read as a bed, and the whole point of
+ * the referrals split is that a locked module can hold no review state and must not claim one.
+ * What was actually wrong was that the count did not land and the link was coloured text
+ * rather than something to press. */
+.referrals {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding: var(--s-5);
+  border: 1px dashed var(--panel-border);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-size: var(--fs-sm);
+}
+
+.referralText {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The figure, in the instrument idiom the rest of the app reads numbers in. */
+.referralCount {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.referralLink {
+  composes: button from '../shared/styles/button.module.css';
+  padding: var(--s-3) var(--s-5);
+  text-decoration: none;
+}
+
+/* The rest of today's ward, one press away. A quiet button, not a card: the beds are the
+   content and this is chrome. */
+.more {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.more:hover {
+  text-decoration: underline;
+}

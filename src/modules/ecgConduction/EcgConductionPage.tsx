@@ -15,6 +15,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { ecgConductionContent } from './content';
 import { ecgLoopConfig } from './engine/loopConfig';
@@ -59,6 +60,7 @@ export function EcgConductionPage() {
 
   return (
     <ModulePage
+      historyCapacity={ecgLoopConfig.historyCapacity}
       moduleId="ecgConduction"
       title="ECG & Cardiac Conduction"
       subtitle="how depolarisation and repolarisation write each wave"
@@ -92,7 +94,17 @@ export function EcgConductionPage() {
         </>
       }
       readouts={<ReadoutPanel derived={snapshot.derived} inputs={inputs} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={ECG_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={ECG_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={ECG_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} />}
       blindControls={session.blinded}
       controls={<ControlPanel inputs={inputs} onChange={handleChange} />}

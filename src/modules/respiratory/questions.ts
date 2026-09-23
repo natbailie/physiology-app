@@ -1,23 +1,9 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { RespDerived, RespInputs, RespState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { RespInputs } from './engine/types';
 import type { RespPresetName } from './engine/presets';
+import { ABG_PANEL, type RespSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: RespState; derived: RespDerived };
 export type RespQuestion = ModuleQuestion<RespInputs, RespPresetName, Snapshot>;
-
-/**
- * The arterial blood gas, as it is actually reported.
- *
- * Four rows, and no one of them names the disorder alone: pH says how bad it is, PaCO2 and
- * bicarbonate say which half is responsible, and the anion gap separates two acidoses that are
- * otherwise identical. Reading the combination is the skill; these questions show nothing else.
- */
-const ABG_PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'pH', value: (s) => s.derived.pH, decimals: 2, tolerance: 0.004 },
-  { label: 'PaCO2', unit: 'mmHg', value: (s) => s.derived.paCO2, decimals: 0 },
-  { label: 'HCO3-', unit: 'mEq/L', value: (s) => s.derived.plasmaHCO3, decimals: 0 },
-  { label: 'Anion gap', unit: 'mEq/L', value: (s) => s.derived.anionGapMEqL, decimals: 0 },
-];
 
 // Long enough for the slow renal arm to have finished: a settled run in this module is by
 // definition a chronic picture, which is exactly what these questions are asking about.

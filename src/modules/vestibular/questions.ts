@@ -1,29 +1,10 @@
-import type { ModuleQuestion, PanelField } from '@/shared/assessment/types';
-import type { VestibularDerived, VestibularInputs, VestibularInternalState } from './engine/types';
+import type { ModuleQuestion } from '@/shared/assessment/types';
+import type { VestibularInputs } from './engine/types';
 import type { VestibularPresetName } from './engine/presets';
 import { perturbPerformHallpike } from './engine/engine';
+import { VERTIGO_PANEL as PANEL, type VestibularSnapshot as Snapshot } from './panel';
 
-type Snapshot = { state: VestibularInternalState; derived: VestibularDerived };
 export type VestibularQuestion = ModuleQuestion<VestibularInputs, VestibularPresetName, Snapshot>;
-
-const PANEL: readonly PanelField<Snapshot>[] = [
-  { label: 'Spontaneous nystagmus', unit: '°/s', value: (s) => s.derived.slowPhaseVelocityDegPerSec, decimals: 1 },
-  { label: 'Vertigo', unit: '%', value: (s) => s.derived.vertigoIntensityPct, decimals: 0, tolerance: 0.15 },
-  {
-    label: 'VOR gain',
-    value: (s) => s.derived.vorGain,
-    decimals: 2,
-    tolerance: 0.12,
-  },
-  {
-    label: 'Positional nystagmus',
-    unit: '%',
-    value: (s) => s.derived.positionalNystagmusPct,
-    decimals: 0,
-    tolerance: 0.25,
-  },
-  { label: 'Romberg unsteadiness', unit: '%', value: (s) => s.derived.rombergUnsteadinessPct, decimals: 0, tolerance: 0.2 },
-];
 
 const SETTLE = 40;
 

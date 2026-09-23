@@ -7,10 +7,14 @@ const state = vi.hoisted(() => ({
   status: 'free' as 'loading' | 'free' | 'active',
   source: 'none' as 'institution' | 'subscription' | 'none',
   institutionName: null as string | null,
+  targetExam: null as string | null,
 }));
 
 vi.mock('@/auth/AuthContext', () => ({
   useAuth: () => ({ user: state.user }),
+  // `useExamProfile` reaches for the optional form, so the mock has to offer both or the page
+  // throws before it renders anything.
+  useAuthOptional: () => ({ user: state.user }),
 }));
 
 vi.mock('./useEntitlement', () => ({
@@ -26,10 +30,24 @@ const rc = vi.hoisted(() => ({
   offered: null as unknown,
   checkout: { ok: true } as unknown,
   checkoutCalls: [] as unknown[],
+  attributeCalls: [] as unknown[],
 }));
 
 vi.mock('./revenuecat', () => ({
   fetchOfferedPackages: async () => rc.offered,
+  setExamAttributes: async (...args: unknown[]) => {
+    rc.attributeCalls.push(args);
+  },
+}));
+
+vi.mock('@/account/examProfile', () => ({
+  useExamProfile: () => ({
+    targetExam: state.targetExam,
+    trainingLevel: null,
+    ready: true,
+    canSave: true,
+    save: async () => true,
+  }),
 }));
 
 vi.mock('./startCheckout', () => ({
@@ -76,6 +94,8 @@ afterEach(() => {
   rc.offered = null;
   rc.checkout = { ok: true };
   rc.checkoutCalls = [];
+  rc.attributeCalls = [];
+  state.targetExam = null;
   licence.result = { ok: false, message: 'That code was not recognised.' };
   licence.codes = [];
 });
@@ -189,6 +209,28 @@ describe('pricing page', () => {
     await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
     await waitFor(() => expect(screen.queryByText(/card was declined/i)).toBeTruthy());
+  });
+
+  /**
+   * The one page that loads the RevenueCat SDK is the one place the exam attribute can be sent
+   * without pulling an 840 kB chunk for every signed-in learner. If this stops firing, the
+   * audience silently stops being segmentable and nothing else fails.
+   */
+  it('tells RevenueCat which exam the learner is revising for', async () => {
+    state.user = { id: 'u1', email: 'a@b.c' };
+    state.targetExam = 'FRCA_PRIMARY';
+    render(<PricingPage />);
+
+    await waitFor(() => expect(rc.attributeCalls.length).toBeGreaterThan(0));
+    expect(rc.attributeCalls[0]).toEqual(['u1', { targetExam: 'FRCA_PRIMARY', trainingLevel: null }]);
+  });
+
+  it('still sends a null exam for a learner who has not chosen one', async () => {
+    state.user = { id: 'u1', email: 'a@b.c' };
+    render(<PricingPage />);
+
+    await waitFor(() => expect(rc.attributeCalls.length).toBeGreaterThan(0));
+    expect(rc.attributeCalls[0]).toEqual(['u1', { targetExam: null, trainingLevel: null }]);
   });
 
   it('redeems a licence code and names the institution back', async () => {

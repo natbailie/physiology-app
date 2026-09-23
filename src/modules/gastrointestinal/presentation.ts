@@ -74,6 +74,19 @@ export function buildGastrointestinalPresentation(ctx: Ctx): ModulePresentation<
           ...stomach.defs,
         ],
         children: [
+          /* What the meal IS, before it is eaten.
+           *
+           * Fat and carbohydrate reach `derived` as passthroughs nothing drew, so the two sliders
+           * that set up a meal moved no picture at all — and they are the two that decide which
+           * hormone answers it: fat releases CCK, carbohydrate does not. Drawn as the composition
+           * of the bolus waiting at the fundus. */
+          { type: 'text', x: 92, y: 32, text: 'meal', cls: 'caption' },
+          { type: 'path', d: 'M84,44 h60', colorToken: 'text-faint', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none', opacity: 0.25 },
+          { type: 'path', d: `M84,44 h${(clamp(derived.mealFatGrams / 60, 0, 1) * 60).toFixed(1)}`, colorToken: 'cck', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none' },
+          { type: 'text', x: 148, y: 47, text: `fat ${derived.mealFatGrams.toFixed(0)} g`, cls: 'caption' },
+          { type: 'path', d: 'M84,58 h60', colorToken: 'text-faint', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none', opacity: 0.25 },
+          { type: 'path', d: `M84,58 h${(clamp(derived.mealCarbGrams / 120, 0, 1) * 60).toFixed(1)}`, colorToken: 'glucose', strokeWidth: 7, strokeLinecap: 'butt', fill: 'none' },
+          { type: 'text', x: 148, y: 61, text: `carb ${derived.mealCarbGrams.toFixed(0)} g`, cls: 'caption' },
           pancreas.node,
           intestine.node,
           stomach.node,

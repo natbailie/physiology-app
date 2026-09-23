@@ -8,6 +8,7 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
+import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { BloodGroupsDiagram } from './components/BloodGroupsDiagram';
@@ -66,6 +67,7 @@ export function BloodGroupsPage() {
 
   return (
     <ModulePage
+      historyCapacity={bloodLoopConfig.historyCapacity}
       moduleId="bloodGroups"
       title="Blood Groups & Transfusion Reactions"
       subtitle="the antibodies are already there — which is why the wrong unit is a five-minute emergency"
@@ -82,7 +84,17 @@ export function BloodGroupsPage() {
       }
       diagram={<BloodGroupsDiagram derived={snapshot.derived} inputs={inputs} />}
       readouts={<BloodGroupsReadoutPanel derived={snapshot.derived} />}
-      practice={<QuizPanel session={session} summary={summary} presetLabels={BLOOD_PRESET_LABELS} />}
+      questions={
+        <QuestionSet
+          count={BLOOD_QUESTIONS.length}
+          beds={[]}
+          schedule={summary.schedule}
+          snapshot={snapshot}
+          question={session.question}
+        >
+          <QuizPanel session={session} summary={summary} presetLabels={BLOOD_PRESET_LABELS} />
+        </QuestionSet>
+      }
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={
         <>

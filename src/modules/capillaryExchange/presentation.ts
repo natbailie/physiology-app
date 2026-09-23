@@ -1,7 +1,7 @@
 import { clamp, scaleClamped } from '@/shared/lib/math';
 import { MECHANISM_LABELS } from './engine/edemaClassification';
 import type { CapillaryDerived, CapillaryHistoryPoint, CapillaryInputs, CapillaryState } from './engine/types';
-import type { ModulePresentation, PresentationContext } from '@/shared/presentation/types';
+import type { ModulePresentation, PresentationContext, ControlSpec } from '@/shared/presentation/types';
 
 /* The capillary runs between two label columns on a 0..480 viewBox, five stations along its
  * length where net Starling pressure is evaluated so that the point where filtration turns
@@ -41,6 +41,34 @@ function stationPressures(derived: CapillaryDerived): number[] {
     return derived.arteriolarNetPressure + (local - derived.arteriolarEndPressure);
   });
 }
+
+/**
+ * The control rail, hoisted so the page can read the same ranges the schema declares —
+ * `useInputNudge` clamps a button's delta to the slider it writes, and restating that range at
+ * the call site would be a second place to be wrong.
+ */
+export const CAPILLARY_CONTROLS: ReadonlyArray<ControlSpec<CapillaryInputs>> = [
+  {
+    kind: 'toggle',
+    label: 'Tissue bed',
+    key: 'tissueBed',
+    options: [
+      { value: 'systemic', label: 'Systemic' },
+      { value: 'pulmonary', label: 'Lung' },
+      { value: 'hepatic', label: 'Liver' },
+      { value: 'glomerulus', label: 'Glomerulus' },
+    ],
+    colorToken: 'capillary',
+  },
+  { kind: 'slider', label: 'Inflow pressure', key: 'arterialInflowPressure', min: 5, max: 180, step: 1, unit: ' mmHg' },
+  { kind: 'slider', label: 'Outflow pressure', key: 'venousOutflowPressure', min: 0, max: 40, step: 1, unit: ' mmHg' },
+  { kind: 'slider', label: 'Precapillary tone', key: 'precapillaryTone', min: 0.2, max: 3, step: 0.05 },
+  { kind: 'slider', label: 'Plasma albumin', key: 'plasmaAlbuminGDl', min: 1, max: 5.5, step: 0.1, unit: ' g/dL' },
+  { kind: 'slider', label: 'Reflection coefficient', key: 'reflectionCoefficient', min: 0.05, max: 1, step: 0.05 },
+  { kind: 'slider', label: 'Permeability (Kf)', key: 'capillaryPermeability', min: 0.2, max: 5, step: 0.1 },
+  { kind: 'slider', label: 'Lymphatic capacity', key: 'lymphaticFlowCapacity', min: 0, max: 3, step: 0.02 },
+  { kind: 'slider', label: 'Interstitial compliance', key: 'interstitialCompliance', min: 0.3, max: 3, step: 0.05 },
+];
 
 export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation<CapillaryState, CapillaryDerived, CapillaryInputs, CapillaryHistoryPoint> {
   const { derived } = ctx;
@@ -140,7 +168,7 @@ export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation
             d: roundedRect(TISSUE.left, TISSUE.top, TISSUE.right - TISSUE.left, TISSUE.baselineHeight, 0),
             fill: 'none',
             colorToken: 'text',
-            opacity: 0.7, styleVars: { 'stroke-dasharray': '4 3' },
+            opacity: 0.7,
           },
           {
             type: 'rect',
@@ -211,28 +239,7 @@ export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation
         ],
       },
     ],
-    controls: [
-      {
-        kind: 'toggle',
-        label: 'Tissue bed',
-        key: 'tissueBed',
-        options: [
-          { value: 'systemic', label: 'Systemic' },
-          { value: 'pulmonary', label: 'Lung' },
-          { value: 'hepatic', label: 'Liver' },
-          { value: 'glomerulus', label: 'Glomerulus' },
-        ],
-        colorToken: 'capillary',
-      },
-      { kind: 'slider', label: 'Inflow pressure', key: 'arterialInflowPressure', min: 5, max: 180, step: 1, unit: ' mmHg' },
-      { kind: 'slider', label: 'Outflow pressure', key: 'venousOutflowPressure', min: 0, max: 40, step: 1, unit: ' mmHg' },
-      { kind: 'slider', label: 'Precapillary tone', key: 'precapillaryTone', min: 0.2, max: 3, step: 0.05 },
-      { kind: 'slider', label: 'Plasma albumin', key: 'plasmaAlbuminGDl', min: 1, max: 5.5, step: 0.1, unit: ' g/dL' },
-      { kind: 'slider', label: 'Reflection coefficient', key: 'reflectionCoefficient', min: 0.05, max: 1, step: 0.05 },
-      { kind: 'slider', label: 'Permeability (Kf)', key: 'capillaryPermeability', min: 0.2, max: 5, step: 0.1 },
-      { kind: 'slider', label: 'Lymphatic capacity', key: 'lymphaticFlowCapacity', min: 0, max: 3, step: 0.02 },
-      { kind: 'slider', label: 'Interstitial compliance', key: 'interstitialCompliance', min: 0.3, max: 3, step: 0.05 },
-    ],
+    controls: CAPILLARY_CONTROLS,
     readouts: [
       {
         label: 'Capillary pressure',

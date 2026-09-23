@@ -1,0 +1,106 @@
+/* A disclosure, not an alert. The note is evidence a reviewer can open, and it must not compete
+   with the physiology for a learner's attention — so it sits at footnote weight until expanded. */
+.note {
+  grid-column: 1 / -1;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  color: var(--text-faint);
+  border-top: 1px solid var(--panel-border);
+  padding-top: var(--s-3);
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari still paints the default triangle without this, which lands on top of the badge. */
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary::before {
+  content: '▸';
+  flex: none;
+  color: var(--text-faint);
+  transition: transform 120ms ease;
+}
+
+.note[open] .summary::before {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary::before {
+    transition: none;
+  }
+}
+
+.badge {
+  flex: none;
+  padding: 2px var(--s-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-raised);
+  color: var(--text-dim);
+  font-size: var(--fs-micro);
+  white-space: nowrap;
+}
+
+/* The tier is carried by the WORDS in the badge, never by colour alone — the sentence beside it
+   says the same thing in full. Colour here is emphasis for a sighted reader scanning a table of
+   fifty-one modules, and nothing depends on seeing it. */
+.badge[data-tier='oracle'] {
+  border-color: var(--ok-base);
+  color: var(--ok-base);
+}
+
+.badge[data-tier='unsourced'] {
+  border-color: var(--warn-base);
+  color: var(--warn-base);
+}
+
+.sentence {
+  min-width: 0;
+}
+
+.list {
+  margin: var(--s-3) 0 0;
+  display: grid;
+  gap: var(--s-3);
+}
+
+.row {
+  display: grid;
+  gap: 2px;
+}
+
+.term {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.band {
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  color: var(--text-faint);
+}
+
+.detail {
+  margin: 0;
+  color: var(--text-faint);
+  line-height: var(--lh-prose);
+}
+
+.more {
+  display: inline-block;
+  margin-top: var(--s-3);
+  color: var(--brand);
+}

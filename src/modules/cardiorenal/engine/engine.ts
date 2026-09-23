@@ -98,7 +98,7 @@ export function computeDerived(state: SimState, inputs: SimInputs): DerivedValue
   };
 }
 
-export function tick(state: SimState, derived: DerivedValues, dtSeconds: number): SimState {
+export function tick(state: SimState, derived: DerivedValues, inputs: SimInputs, dtSeconds: number): SimState {
   const dBloodVolume = derived.netFluidBalance * SIMULATION.BLOOD_VOLUME_GAIN * dtSeconds;
   const bloodVolume = clamp(
     state.bloodVolume + dBloodVolume,
@@ -106,7 +106,11 @@ export function tick(state: SimState, derived: DerivedValues, dtSeconds: number)
     SIMULATION.BLOOD_VOLUME_MAX_PCT,
   );
 
-  const targetDrive = baroreflexDriveTarget(derived.meanArterialPressure, state.baroreflexSetpointMmHg);
+  const targetDrive = baroreflexDriveTarget(
+    derived.meanArterialPressure,
+    state.baroreflexSetpointMmHg,
+    inputs.baroreflexGain,
+  );
   const targetAnp = anpLevelTarget(derived.preloadFactor);
   const targetRaas = raasActivationTarget(derived.meanArterialPressure, derived.gfr, state.anpLevel);
 
@@ -127,7 +131,7 @@ export function tick(state: SimState, derived: DerivedValues, dtSeconds: number)
 
 export function step(state: SimState, inputs: SimInputs, dtSeconds: number): SimSnapshot {
   const derived = computeDerived(state, inputs);
-  const nextState = tick(state, derived, dtSeconds);
+  const nextState = tick(state, derived, inputs, dtSeconds);
   return { state: nextState, derived };
 }
 

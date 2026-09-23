@@ -29,9 +29,12 @@
 import { describe, it } from 'vitest';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { TOKENS } from '@/theme/tokens.generated';
+import { reviewPage, type FrameMeta } from './reviewPage';
 
 
 const NATIVE = '/Users/natbailie/Developer/physiology-native/src/engine';
+/** This repo's modules, for the web-stylesheet half of the styling-gap check. */
+const WEB = new URL('../../src/modules', import.meta.url).pathname;
 /** The native app's hand-ported per-module class tables, read as text — the web repo cannot
  *  import across projects, and these are plain object literals. */
 function nativeClasses(id: string): any {
@@ -74,7 +77,10 @@ const SHARED: Record<string, any> = {
 
 const col = (t?: string) => (t === undefined ? undefined : t === 'none' ? 'none' : (TOKENS[theme][`--${t}`] ?? '#000000'));
 
-const theme: 'light' | 'dark' = 'light';
+/** Mutable: the audit renders every frame TWICE, once per theme, because a colour that
+ *  carries meaning in one theme and vanishes in the other is invisible to a single-theme
+ *  render. `col()` closes over this, so flipping it and re-serialising is the whole trick. */
+let theme: 'light' | 'dark' = 'light';
 
 /** `--wash-*` from index.css, per theme — the same table `diagramClassTypes.ts` holds natively. */
 const WASH: Record<string, Record<string, number>> = {
@@ -176,10 +182,35 @@ function find<T>(ex: Record<string, unknown>, ok: (v: unknown) => boolean): T | 
   return null;
 }
 
+/** The module is styled on the web and NOT on the phone. `DiagramView.tsx` resolves an unknown
+ *  `cls` to nothing, so every class that lived only in a `Diagram.module.css` draws with default
+ *  fill and no wash natively — the "phone drew it SOLID" fault CLAUDE.md records. 32 of the
+ *  modules are in this state, and a reviewer should not spend taste on a frame that is simply
+ *  missing its stylesheet, so the page flags them. */
+function unstyledOnNative(id: string): boolean {
+  return (
+    existsSync(`${WEB}/${id}/components/Diagram.module.css`) &&
+    !existsSync(`${NATIVE}/${id}/diagramClasses.ts`)
+  );
+}
+
+/** One frame, serialised in the CURRENT theme. `col()` closes over the module-level `theme`. */
+function renderFrame(frame: any, id: string, i: number): string {
+  const [vx, vy, vw, vh] = frame.viewBox;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}"` +
+    ` data-module="${id}" data-frame="${i}" data-theme="${theme}"` +
+    ` style="width:100%;aspect-ratio:${vw}/${vh};background:${col('bg')};font-family:-apple-system,system-ui,sans-serif">` +
+    `<defs>${defs(frame.defs)}</defs>` +
+    `<rect data-frame-bg="1" x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="none" pointer-events="none"/>` +
+    `${frame.children.map((c: any) => node(c, nativeClasses(id))).join('')}</svg>`
+  );
+}
+
 describe('diagram audit', () => {
-  it('renders every module frame to out/', () => {
+  it('renders every module frame to out/, in both themes', () => {
     mkdirSync(OUT, { recursive: true });
-    const cards: string[] = [];
+    const metas: FrameMeta[] = [];
     for (const [path, ex] of Object.entries(configModules)) {
       const id = idOf(path);
       const pres = presentationModules[`../../src/modules/${id}/presentation.ts`];
@@ -192,15 +223,25 @@ describe('diagram audit', () => {
       const secs = config.settleSeconds ?? 30;
       for (let t = 0; t < secs / config.maxDtSeconds && t < 20000; t++) state = config.step(state, defaults, config.maxDtSeconds).state;
       const derived = config.computeDerived(state, defaults);
+      // Built once: a presentation emits colour TOKENS, and the theme only enters at `col()`.
       const p = build({ state, derived, inputs: defaults, history: [], baselineHistory: null });
+      const gap = unstyledOnNative(id);
       p.diagram.forEach((frame: any, i: number) => {
-        const [vx, vy, vw, vh] = frame.viewBox;
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}" data-module="${id}" data-frame="${i}" style="width:100%;aspect-ratio:${vw}/${vh};background:${col('bg')};font-family:-apple-system,system-ui,sans-serif"><defs>${defs(frame.defs)}</defs><rect data-frame-bg="1" x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="none" pointer-events="none"/>${frame.children.map((c: any) => node(c, nativeClasses(id))).join('')}</svg>`;
-        writeFileSync(`${OUT}/${id}${i ? `-${i}` : ''}.svg`, svg);
-        cards.push(`<figure><figcaption>${id}${i ? ` [${i}]` : ''} — viewBox ${vx} ${vy} ${vw} ${vh}</figcaption>${svg}</figure>`);
+        const key = `${id}${i ? `-${i}` : ''}`;
+        theme = 'light';
+        const light = renderFrame(frame, id, i);
+        theme = 'dark';
+        const dark = renderFrame(frame, id, i);
+        theme = 'light';
+        // The standalone files stay light — they are what gets opened on its own and diffed.
+        writeFileSync(`${OUT}/${key}.svg`, light);
+        writeFileSync(`${OUT}/${key}.dark.svg`, dark);
+        metas.push({ id, i, key, viewBox: frame.viewBox, svg: { light, dark }, unstyledOnNative: gap });
       });
     }
-    writeFileSync(`${OUT}/index.html`, `<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:16px;background:#f8fafc;font:13px system-ui}figure{margin:0 0 28px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:8px;max-width:900px}figcaption{font-weight:600;margin-bottom:6px;color:#334155}</style>${cards.join('')}`);
-    console.log('wrote', cards.length, 'frames');
+    writeFileSync(`${OUT}/index.html`, reviewPage(metas));
+    const gaps = new Set(metas.filter((m) => m.unstyledOnNative).map((m) => m.id));
+    console.log(`wrote ${metas.length} frames in both themes`);
+    console.log(`${gaps.size} modules are styled on the web but unstyled on the phone: ${[...gaps].join(', ')}`);
   });
 });

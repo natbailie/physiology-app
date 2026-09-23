@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { RingBuffer } from '@/shared/lib/ringBuffer';
+import { seededBuffer, settledOpening } from '@/shared/engine/settle';
+import { prefersReducedMotion } from '@/shared/lib/prefersReducedMotion';
 
 export interface EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint> {
   createInitialState: () => TState;
@@ -91,40 +92,6 @@ export interface UseEngineLoopResult<TState, TInputs, TDerived, THistoryPoint> {
   baseline: SimBaseline<THistoryPoint>;
 }
 
-/**
- * Settling is pure but not free — the slowest modules integrate tens of thousands of steps — and
- * it is re-run on every mount and every Reset. Keyed by config object, then by the inputs it was
- * settled against, so a remount or a reset back to defaults costs nothing.
- */
-const settledStateCache = new WeakMap<object, Map<string, unknown>>();
-
-function settledState<TState, TInputs, TDerived, THistoryPoint>(
-  cfg: EngineLoopConfig<TState, TInputs, TDerived, THistoryPoint>,
-  inputs: TInputs,
-): TState {
-  const fresh = cfg.createInitialState();
-  const seconds = cfg.settleSeconds ?? 0;
-  if (seconds <= 0) return fresh;
-
-  const key = JSON.stringify(inputs);
-  let perConfig = settledStateCache.get(cfg);
-  if (!perConfig) {
-    perConfig = new Map<string, unknown>();
-    settledStateCache.set(cfg, perConfig);
-  }
-  const cached = perConfig.get(key);
-  if (cached !== undefined) return cached as TState;
-
-  let state = fresh;
-  let remaining = seconds;
-  while (remaining > 0) {
-    const dt = Math.min(remaining, cfg.maxDtSeconds);
-    remaining -= dt;
-    state = cfg.step(state, inputs, dt).state;
-  }
-  perConfig.set(key, state);
-  return state;
-}
 
 /** Inputs are flat records of numbers, strings and booleans, so this settles whether anything
  * actually changed. Guards the input effect below against a caller that rebuilds its inputs
@@ -135,11 +102,6 @@ function sameInputs<TInputs>(a: TInputs, b: TInputs): boolean {
   const keys = Object.keys(a as object);
   if (keys.length !== Object.keys(b as object).length) return false;
   return keys.every((key) => Object.is((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
-}
-
-function webPrefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || !window.matchMedia) return false;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /**
@@ -164,20 +126,20 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
   // and Reset) stay current without reading `config` directly, and so an RN caller's injected
   // function is re-read like every other piece of config rather than captured once.
   const reducedMotion = useCallback(
-    () => (configRef.current.prefersReducedMotion ?? webPrefersReducedMotion)(),
+    () => (configRef.current.prefersReducedMotion ?? prefersReducedMotion)(),
     [],
   );
-  // Lazy initialiser, not `useRef(settledState(...))`: a ref's argument is evaluated on every
+  // Lazy initialiser, not `useRef(settledOpening(...))`: a ref's argument is evaluated on every
   // render, which would re-settle the engine on every pointer move of a slider drag.
-  const [initialState] = useState(() => settledState(config, inputs));
-  const stateRef = useRef(initialState);
-  const historyRef = useRef(new RingBuffer<THistoryPoint>(config.historyCapacity));
+  const [opening] = useState(() => settledOpening(config, inputs));
+  const stateRef = useRef(opening.state);
+  const historyRef = useRef(seededBuffer(config.historyCapacity, opening.history));
 
   const [snapshot, setSnapshot] = useState<{ state: TState; derived: TDerived }>(() => ({
     state: stateRef.current,
     derived: config.computeDerived(stateRef.current, inputs),
   }));
-  const [history, setHistory] = useState<THistoryPoint[]>([]);
+  const [history, setHistory] = useState<THistoryPoint[]>(opening.history);
 
   // Someone who has asked the OS for reduced motion should not be handed a
   // continuously animating diagram unprompted; they start paused and opt in.
@@ -304,13 +266,14 @@ export function useEngineLoop<TState, TInputs, TDerived, THistoryPoint>(
     // is derived against the scenario being reset AWAY from, and a paused module keeps showing
     // the old readouts until something else re-renders it.
     const activeInputs = inputsOverride ?? inputsRef.current;
-    stateRef.current = settledState(cfg, activeInputs);
-    historyRef.current = new RingBuffer<THistoryPoint>(cfg.historyCapacity);
+    const settled = settledOpening(cfg, activeInputs);
+    stateRef.current = settled.state;
+    historyRef.current = seededBuffer(cfg.historyCapacity, settled.history);
     setSnapshot({
       state: stateRef.current,
       derived: cfg.computeDerived(stateRef.current, activeInputs),
     });
-    setHistory([]);
+    setHistory(settled.history);
   }, []);
 
   const stepOnce = useCallback(() => {
