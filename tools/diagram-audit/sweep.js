@@ -9,6 +9,11 @@
  *   3. Does a LINE run through a label?   (a gridline across the value tracking a point)
  *   4. Can any label be READ?             (a word written across a saturated signal colour)
  *
+ * ONLY THE GEOMETRY PASS RUNS AT BOTH WIDTHS. The line-through-label and contrast passes run
+ * once, at whatever width the page's own control is set to — so a sweep run straight after a
+ * fresh load measures the NARROW layout for those two, and reported zero line-crossings on a
+ * set of frames that has four at desktop width. Set the width you mean before reading them.
+ *
  * The page holds both themes and shows one at a time. This measures whichever is ON SCREEN,
  * so run it once per theme: a label that clears its neighbour in light can collide in dark
  * only if the text differs, but contrast differs in both directions and routinely does.
@@ -142,7 +147,11 @@
   function overStrokes() {
     const out = [];
     for (const svg of frames()) {
-      const texts = [...svg.querySelectorAll('text:not([data-halo]):not([data-halo-pass])')]
+      // A rail badge is a numeral on an opaque disc the renderer draws under it, always — the
+      // same "occlude the line" answer a halo gives, taken by construction rather than per label.
+      // Without this every badge whose target sits on a drawn line reports as unreadable, and it
+      // is the one kind of label that cannot be.
+      const texts = [...svg.querySelectorAll('text:not([data-halo]):not([data-halo-pass]):not([data-cls="railBadge"])')]
         .map((t) => ({ t: t.textContent, r: t.getBoundingClientRect() }))
         .filter((x) => x.r.width > 1);
       if (!texts.length) continue;

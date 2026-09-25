@@ -146,7 +146,9 @@ function node(n: any, classes: any): string {
     case 'rect': {
       const s = cls(n.cls, classes, n.styleVars);
       const fill = n.fillGradientId ? `url(#${n.fillGradientId})` : n.fill === 'none' ? 'none' : n.fill ? col(n.fill) : (s.fill ?? 'none');
-      return `<rect${at('x', n.x)}${at('y', n.y)}${at('width', n.width)}${at('height', n.height)}${at('fill', fill)}${at('fill-opacity', s.fillOpacity ?? n.fillOpacity)}${at('stroke', n.stroke ? col(n.stroke) : s.stroke)}${at('stroke-width', n.strokeWidth ?? s.strokeWidth)}${at('stroke-dasharray', s.dash)}${at('opacity', s.opacity ?? n.opacity)}/>`;
+      // `clip-path` was missing here as well as in the native renderer, so a clipped rect drew
+      // full width in the very instrument used to check the phone's rendering.
+      return `<rect${at('x', n.x)}${at('y', n.y)}${at('width', n.width)}${at('height', n.height)}${at('fill', fill)}${at('fill-opacity', s.fillOpacity ?? n.fillOpacity)}${at('stroke', n.stroke ? col(n.stroke) : s.stroke)}${at('stroke-width', n.strokeWidth ?? s.strokeWidth)}${at('stroke-dasharray', s.dash)}${at('opacity', s.opacity ?? n.opacity)}${at('clip-path', n.clipPathId ? `url(#${n.clipPathId})` : undefined)}/>`;
     }
     case 'line': {
       const s = cls(n.cls, classes, undefined);

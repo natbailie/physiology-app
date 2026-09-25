@@ -1244,6 +1244,12 @@ export interface BladderParams {
   internalTone?: number;
   /** 0-1 tone of the external (striated, voluntary) sphincter below it. */
   externalTone?: number;
+  /**
+   * 0-1 detrusor tone. A contracting detrusor thickens, so this rides on top of the thinning
+   * that distension causes — and it keeps that control's visible correlate, which the module's
+   * own slider sweep in `controls.test.tsx` requires of every input.
+   */
+  detrusorTone?: number;
   colorToken?: string;
   urineToken?: string;
 }
@@ -1254,6 +1260,7 @@ export function bladderScene(placement: OrganPlacement, params: BladderParams = 
   const fill = clamp01(params.fillLevel ?? 0.4);
   const internal = clamp01(params.internalTone ?? 0.8);
   const external = clamp01(params.externalTone ?? 0.8);
+  const detrusor = clamp01(params.detrusorTone ?? 0.3);
   const body = bladderBodyPath(fill);
 
   /* The urine surface, in organ coordinates. It never reaches the dome: a bladder at capacity
@@ -1302,7 +1309,7 @@ export function bladderScene(placement: OrganPlacement, params: BladderParams = 
     { type: 'circle', cx: -26, cy: 14, r: 2.6, fill: urine, fillOpacity: 0.9 },
     { type: 'circle', cx: 26, cy: 14, r: 2.6, fill: urine, fillOpacity: 0.9 },
     // The wall last, so nothing inside overdraws its edge. Thicker as the bladder empties.
-    { type: 'path', d: body, fill: 'none', colorToken: token, strokeWidth: 3.4 - fill * 1.2, strokeLinejoin: 'round' },
+    { type: 'path', d: body, fill: 'none', colorToken: token, strokeWidth: 3.4 - fill * 1.2 + detrusor * 3.2, strokeLinejoin: 'round' },
     collar(50, internal),
     collar(70, external),
   ]);

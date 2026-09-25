@@ -1,6 +1,7 @@
 import type { MicturitionDerived, MicturitionHistoryPoint, MicturitionInputs, MicturitionInternalState } from './engine/types';
 import { BLADDER } from './engine/constants';
 import type { ModulePresentation, PresentationContext, SceneNode } from '@/shared/presentation/types';
+import { bladderScene } from '@/shared/diagram/organShapes';
 
 /* The drawing was laid out on its own 200x220 canvas, then scaled into the house 560x440
  * frame as a whole: 1.6x puts the 7-unit labels at ~11, the size every other diagram's
@@ -8,12 +9,6 @@ import type { ModulePresentation, PresentationContext, SceneNode } from '@/share
 const FIT = 'translate(120, 44) scale(1.6)';
 
 type Ctx = PresentationContext<MicturitionInternalState, MicturitionDerived, MicturitionInputs, MicturitionHistoryPoint>;
-
-/** There is no ellipse primitive in the shared schema, so the bladder's wall and lumen are
- *  drawn as two-arc closed paths. */
-function ellipsePath(cx: number, cy: number, rx: number, ry: number): string {
-  return `M ${cx - rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
-}
 
 export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<MicturitionInternalState, MicturitionDerived, MicturitionInputs, MicturitionHistoryPoint> {
   const { derived, inputs } = ctx;
@@ -23,16 +18,32 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
    * mismatch that works because 0 is falsy, and one this drawing must not depend on the shape of. */
   const holding = Boolean(inputs.cortexInhibitsMicturition);
 
-  const detrusorWidth = 4 + derived.detrusorTone * 8;
-  const sphincterGap = 6 + (1 - derived.externalSphincterTone) * 10;
+  /* The bladder is `bladderScene` now rather than two ellipses and a pair of rects. Placed on
+   * the old drawing's own coordinates — the builder's natural size is about 130 by 150 with the
+   * body on the origin, so 1.15 gives it roughly half the plate, which is what every reference
+   * in docs/diagrams/references gives its subject. The three nerves are re-aimed at the wall
+   * that moved: at the old scale they ended where the wall used to be and now ended inside it.
+   *
+   * Every input that used to move a hand-drawn part still moves one: volume drives the dome and
+   * the fluid, detrusor tone the wall, and the two sphincters are collars of their own rather
+   * than two rects that shared `externalSphincterTone` between them — which they did, so the
+   * internal sphincter has never actually been drawn by the nerve that controls it. */
+  const bladder = bladderScene(
+    { x: 100, y: 130, scale: 1.15 },
+    {
+      fillLevel: volumeFraction,
+      detrusorTone: derived.detrusorTone,
+      internalTone: derived.sympatheticActivity,
+      externalTone: derived.externalSphincterTone,
+    },
+  );
+
 
   const parasympatheticWidth = 1 + derived.parasympatheticActivity * 3;
   const sympatheticWidth = 1 + derived.sympatheticActivity * 3;
 
   const afferentRadius = 2 + derived.afferentFiringRate * 6;
 
-  const bladderWall = ellipsePath(100, 140, 45 + derived.detrusorTone * 5, 35 + volumeFraction * 25);
-  const bladderLumen = ellipsePath(100, 140, 40, 30 + volumeFraction * 22);
 
   const volumeColor =
     derived.bladderVolumeML >= BLADDER.MAX_CAPACITY_ML - 10
@@ -46,10 +57,6 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
   const afferentColor = derived.afferentFiringRate > 0.7 ? 'danger' : 'text';
   const flowColor = derived.netFlowRateMLperMin < -10 ? 'o2' : 'text';
 
-  const internalSphincterX = 92 - sphincterGap / 2;
-  const internalSphincterY = 170 + volumeFraction * 20;
-  const externalSphincterX = 88 - sphincterGap / 2 - 4;
-  const externalSphincterY = 180 + volumeFraction * 20;
 
   const bladderChildren: SceneNode[] = [
     /* The descending cortical brake on the voiding reflex.
@@ -86,7 +93,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
     // Parasympathetic nerve (left) — contracts detrusor.
     {
       type: 'path' as const,
-      d: 'M30,40 L75,100',
+      d: 'M30,40 L58,104',
       colorToken: 'danger',
       strokeWidth: parasympatheticWidth,
       opacity: 0.6 + derived.parasympatheticActivity * 0.4,
@@ -96,7 +103,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
     // Sympathetic nerve (right) — relaxes detrusor, contracts internal sphincter.
     {
       type: 'path' as const,
-      d: 'M170,40 L125,100',
+      d: 'M170,40 L142,104',
       colorToken: 'o2',
       strokeWidth: sympatheticWidth,
       opacity: 0.6 + derived.sympatheticActivity * 0.4,
@@ -106,40 +113,22 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
     // Afferent stretch-receptor nerve (bottom-left).
     {
       type: 'path' as const,
-      d: 'M50,185 L85,155',
+      d: 'M40,196 L64,168',
       colorToken: 'cortisol',
       strokeWidth: 1 + derived.afferentFiringRate * 2,
       opacity: 0.5 + derived.afferentFiringRate * 0.5,
     },
     {
       type: 'circle' as const,
-      cx: 45,
-      cy: 190,
+      cx: 34,
+      cy: 202,
       r: afferentRadius,
       fill: 'cortisol',
       opacity: 0.4 + derived.afferentFiringRate * 0.6,
     },
-    { type: 'text' as const, x: 15, y: 205, text: 'Stretch Rx', cls: 'label', colorToken: 'cortisol', opacity: 0.8 },
+    { type: 'text' as const, x: 8, y: 218, text: 'Stretch Rx', cls: 'label', colorToken: 'cortisol', opacity: 0.8 },
 
-    // Bladder wall (detrusor).
-    {
-      type: 'path' as const,
-      d: bladderWall,
-      colorToken: 'artery',
-      fill: 'none',
-      strokeWidth: detrusorWidth,
-      opacity: 0.5 + derived.detrusorTone * 0.5,
-    },
-    { type: 'text' as const, x: 155, y: 140, text: 'Detrusor', cls: 'label', colorToken: 'artery', opacity: 0.8 },
-
-    // Bladder lumen (urine fill).
-    {
-      type: 'path' as const,
-      d: bladderLumen,
-      colorToken: 'o2',
-      fill: 'o2',
-      opacity: 0.15 + volumeFraction * 0.35,
-    },
+    bladder.node,
 
     // Volume text.
     {
@@ -152,45 +141,6 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       anchor: 'middle' as const,
     },
 
-    // Internal sphincter (smooth muscle ring at bladder neck).
-    {
-      type: 'rect' as const,
-      x: internalSphincterX,
-      y: internalSphincterY,
-      width: sphincterGap,
-      height: 6,
-      fill: 'artery',
-      opacity: 0.4 + derived.externalSphincterTone * 0.6,
-    },
-
-    // External sphincter (skeletal muscle ring).
-    {
-      type: 'rect' as const,
-      x: externalSphincterX,
-      y: externalSphincterY,
-      width: sphincterGap + 8,
-      height: 8,
-      fill: 'danger',
-      opacity: 0.3 + derived.externalSphincterTone * 0.7,
-    },
-    {
-      type: 'text' as const,
-      x: 130,
-      y: externalSphincterY + 8,
-      text: 'Ext. sphincter',
-      cls: 'label',
-      colorToken: 'danger',
-      opacity: 0.8,
-    },
-
-    // Urethra.
-    {
-      type: 'path' as const,
-      d: `M100,${internalSphincterY + 12} L100,215`,
-      colorToken: 'text',
-      strokeWidth: 2 + (1 - derived.externalSphincterTone) * 3,
-      opacity: 0.4,
-    },
 
     // Pressure indicator.
     {
@@ -203,14 +153,20 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
       opacity: 0.8,
     },
 
-    // Net flow. The arrow gives the direction; the number says what the phase label above
-    // cannot — both used to read "filling".
+    /* Net flow. The arrow gives the direction; the number says what the phase label above
+     * cannot — both used to read "filling".
+     *
+     * It sat at y=218, under the bladder neck, which was clear space until the organ grew and
+     * the rail put "External sphincter" and "Urethra" through exactly there. Moved up beside
+     * the phase label, which is the other thing on this drawing that is a reading rather than
+     * a part — and below it rather than beside it, because at y=32 it landed on
+     * "released", the cortical state, which is also a reading. */
     ...(derived.netFlowRateMLperMin < -10
       ? [
           {
             type: 'text' as const,
             x: 100,
-            y: 218,
+            y: 58,
             text: `↓ ${Math.abs(derived.netFlowRateMLperMin).toFixed(0)} mL/min`,
             cls: 'valueLabel',
             colorToken: 'o2',
@@ -223,7 +179,7 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
           {
             type: 'text' as const,
             x: 100,
-            y: 218,
+            y: 58,
             text: `↑ ${derived.netFlowRateMLperMin.toFixed(1)} mL/min`,
             cls: 'valueLabel',
             colorToken: 'text',
@@ -249,13 +205,31 @@ export function buildMicturitionPresentation(ctx: Ctx): ModulePresentation<Mictu
     diagram: [
       {
         type: 'frame' as const,
-        viewBox: [0, 0, 560, 440],
-        ariaLabel: 'Bladder with its detrusor, internal and external sphincters, and the pelvic, hypogastric and afferent nerves supplying them',
+        /* Widened by one 120-unit gutter each side for the label rail; the drawing has not moved.
+         * 120 rather than the default 96 because "External sphincter" needs about 100. */
+        viewBox: [-120, 0, 800, 440],
+        ariaLabel:
+          'Bladder in coronal section with its detrusor wall, trigone, both ureteric orifices and the internal and external sphincters in series down the urethra, with the pelvic, hypogastric and afferent nerves supplying them',
+        defs: bladder.defs,
         children: [
           {
             type: 'group' as const,
             transform: FIT,
             children: bladderChildren,
+          },
+          /* Targets are in FRAME coordinates, not the 200x220 local space: the rail sits outside
+           * the `FIT` group, so each one is 120 + local * 1.6. */
+          {
+            type: 'labelRail' as const,
+            gutter: 120,
+            items: [
+              { text: 'Detrusor', target: [206, 197] as [number, number], side: 'left' as const },
+              { text: 'Ureteric orifice', target: [232, 278] as [number, number], side: 'left' as const },
+              { text: 'Trigone', target: [280, 300] as [number, number], side: 'right' as const },
+              { text: 'Internal sphincter', target: [280, 344] as [number, number], side: 'right' as const },
+              { text: 'External sphincter', target: [280, 381] as [number, number], side: 'right' as const },
+              { text: 'Urethra', target: [280, 410] as [number, number], side: 'right' as const },
+            ],
           },
         ],
       },

@@ -11,7 +11,6 @@ import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
-import { BladderDiagram } from './components/Diagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { MICTURITION_QUESTIONS } from './questions';
@@ -24,7 +23,15 @@ import {
   MICTURITION_PRESET_ORDER,
   DEFAULT_MICTURITION_INPUTS,
 } from './engine/presets';
-import type { MicturitionInputs } from './engine/types';
+import type {
+  MicturitionDerived,
+  MicturitionHistoryPoint,
+  MicturitionInputs,
+  MicturitionInternalState,
+} from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildMicturitionPresentation } from './presentation';
 
 export function MicturitionPage() {
   // Opened from the ward round, or null for the catalogue route. The seed means the engine
@@ -82,6 +89,24 @@ export function MicturitionPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* The DIAGRAM comes from the schema now; the readouts, charts and controls are still this
+   * page's own components. Taking one slot rather than all four is deliberate — the drawing is
+   * what has to agree with the phone, and converting the other three is a separate change with
+   * its own failure modes. */
+  const presentationCtx = getPresentationContext<
+    MicturitionInternalState,
+    MicturitionDerived,
+    MicturitionInputs,
+    MicturitionHistoryPoint
+  >(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots(
+    'micturition',
+    buildMicturitionPresentation(presentationCtx),
+    presentationCtx,
+    inputs,
+    handleChange,
+  );
+
   const volumeHistory = useSeries(history, (h) => h.bladderVolumeML);
   const volumeHistoryBaseline = useSeries(baseline.history, (h) => h.bladderVolumeML);
   const pressureHistory = useSeries(history, (h) => h.intravesicalPressureCmH2O);
@@ -107,7 +132,7 @@ export function MicturitionPage() {
         />
       }
       {...cases.page}
-      diagram={<BladderDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

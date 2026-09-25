@@ -1,9 +1,0 @@
-.label {
-  composes: label from '../../../shared/styles/diagramText.module.css';
-  fill-opacity: 0.8;
-}
-
-.value {
-  composes: valueLabel from '../../../shared/styles/diagramText.module.css';
-  font-weight: 600;
-}
