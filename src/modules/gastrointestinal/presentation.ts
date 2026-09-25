@@ -61,7 +61,8 @@ export function buildGastrointestinalPresentation(ctx: Ctx): ModulePresentation<
     diagram: [
       {
         type: 'frame',
-        viewBox: [60, 6, 480, 300],
+        /* Widened by one 96-unit gutter each side for the label rail; the drawing has not moved. */
+        viewBox: [-36, 6, 672, 300],
         ariaLabel:
           'Animated diagram of the stomach in anterior view — fundus, body, antrum and pylorus between the greater and lesser curvatures — emptying into the duodenal C-loop, with the head of the pancreas inside that loop and its duct running out to the tail, connected by the gastrin, somatostatin, CCK and secretin hormone pathways',
         defs: [
@@ -142,12 +143,31 @@ export function buildGastrointestinalPresentation(ctx: Ctx): ModulePresentation<
             labelY: 276,
             markerId: 'secretin-arrow',
           },
-          { type: 'text', x: 406, y: 112, text: 'Stomach', cls: 'organLabel', anchor: 'start' },
+          /* On the drawing, because it names the whole ORGAN. It used to sit off to the right of
+           * the stomach with nothing joining the two; now it is centred on the thing it names,
+           * which is what every reference plate does with an organ's own name. */
+          { type: 'text', x: 340, y: 104, text: 'Stomach', cls: 'organLabel', anchor: 'middle', halo: 'panel' },
+          /* Eight names, all of them for geometry `stomachScene`, `smallIntestineScene` and
+           * `pancreasScene` actually draw. "Duodenum" and "Jejunum" used to float beside the gut
+           * with nothing joining them to it, and the pancreas is too thin a sliver to carry its
+           * own name — a leader is the honest answer to both. Targets measured off the rendered
+           * frame, not derived from the organ-local paths: the stomach is placed flipped and
+           * scaled, and deriving through that is how the respiratory targets came out wrong. */
+          {
+            type: 'labelRail',
+            items: [
+              { text: 'Oesophagus', target: [378, 45] },
+              { text: 'Fundus', target: [372, 88] },
+              { text: 'Body', target: [345, 122] },
+              { text: 'Pancreas', target: [310, 197] },
+              { text: 'Antrum', target: [300, 152], side: 'left' },
+              { text: 'Pylorus', target: [287, 163], side: 'left' },
+              { text: 'Duodenum', target: [222, 160], side: 'left' },
+              { text: 'Jejunum', target: [232, 235], side: 'left' },
+            ],
+          },
           { type: 'path', d: 'M362,212 L346,196', cls: 'leader' },
-          { type: 'text', x: 366, y: 216, text: 'Pancreas', cls: 'organLabel', anchor: 'start' },
           { type: 'path', d: 'M182,166 L198,170', cls: 'leader' },
-          { type: 'text', x: 178, y: 164, text: 'Duodenum', cls: 'anatomy', anchor: 'end' },
-          { type: 'text', x: 282, y: 262, text: 'Jejunum', cls: 'anatomy', anchor: 'start' },
         ] as SceneNode[],
       },
     ],

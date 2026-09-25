@@ -61,7 +61,8 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
     diagram: [
       {
         type: 'frame',
-        viewBox: [64, 33, 360, 228],
+        /* Widened by one 96-unit gutter each side for the label rail; the drawing has not moved. */
+        viewBox: [-32, 33, 552, 228],
         ariaLabel:
           'Animated diagram of the pancreas and liver connected by the bloodstream, with insulin driving glucose uptake, glucagon driving hepatic glucose output, and counter-regulatory hormones engaging during hypoglycemia',
         defs: [
@@ -81,6 +82,23 @@ export function buildGlucosePresentation(ctx: Ctx): ModulePresentation<GlucoseSt
            * which is what the presentation context carries them for: a bolus waiting at the gut and
            * a syringe filled at the bedside are both real, visible things before anything is given.
            */
+          /* Neither organ was named at all, which is odd in the one module whose whole subject is
+           * the conversation between them.
+           *
+           * Both are RAILED rather than lettered on the drawing, which is the opposite of what
+           * gastrointestinal and respiratory do with an organ's own name. This frame is 360 units
+           * across and already carries four pathway labels: "Pancreas" set on the organ landed on
+           * "Insulin → uptake", and "Liver" landed on the gallbladder. Where there is no room on
+           * the drawing, the margin is the room. */
+          {
+            type: 'labelRail',
+            items: [
+              { text: 'Beta islets', target: [140, 204] },
+              { text: 'Alpha islets', target: [176, 216] },
+              { text: 'Pancreas', target: [157, 228] },
+              { text: 'Liver', target: [360, 190] },
+            ],
+          },
           { type: 'text', x: 86, y: 52, text: 'queued', cls: 'caption' },
           { type: 'circle', cx: 100, cy: 70, r: 4 + clamp(ctx.inputs.mealCarbLoadGrams / 150, 0, 1) * 13, fill: 'glucose', fillOpacity: 0.3, stroke: 'glucose', strokeWidth: 1.2 },
           { type: 'text', x: 100, y: 96, text: `${ctx.inputs.mealCarbLoadGrams.toFixed(0)} g carb`, cls: 'caption', anchor: 'middle' },
