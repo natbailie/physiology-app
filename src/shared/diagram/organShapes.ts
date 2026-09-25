@@ -803,3 +803,515 @@ export function liverScene(placement: OrganPlacement, params: LiverParams = {}):
 
   return { node, defs: [bodyGradient('liver', token, { x: -34, y: -36, r: 145 })] };
 }
+
+/* --- The whole tract ------------------------------------------------ */
+/*
+ * Oesophagus to rectum in one anterior view, for the modules whose subject is WHERE along the gut
+ * something happens rather than any one organ. Laid out the way every textbook plate is: the
+ * stomach up and to the image right (the patient's left), the duodenal C wrapped round where the
+ * pancreatic head goes, the jejunum coiled in the upper left of the abdomen (image right) and the
+ * ileum in the lower right (image left), and the colon framing the lot — caecum low on the image
+ * left, the transverse colon sagging across in FRONT of the coils, the splenic flexure higher
+ * than the hepatic one, as it is.
+ *
+ * The coils are a clean serpentine rather than a knot, as in `smallIntestineScene`: they only have
+ * to read as a run of bowel, and no two people's are alike. What the drawing does commit to is
+ * ORDER and CALIBRE — duodenum widest, ileum narrowest, colon wider than any of them — because
+ * that is the order everything along it happens in.
+ *
+ * The liver and pancreas are not drawn here. They are separate organs with their own builders,
+ * and a module draws them in whatever colour it needs them in; `ampulla` and `porta` in the
+ * return are where their ducts and vessels meet this tract.
+ *
+ * Natural size: about 300 wide by 430 tall, centred on the origin.
+ */
+
+type Pt = readonly [number, number];
+type Cubic = readonly [Pt, Pt, Pt];
+
+/** A run of cubic Béziers, kept as numbers rather than as a path string so a builder can place
+ * things ALONG it — folds, pips, chyme — rather than only draw it. */
+interface Chain {
+  start: Pt;
+  curves: readonly Cubic[];
+}
+
+function chainD(chain: Chain): string {
+  const f = (p: Pt) => `${p[0]},${p[1]}`;
+  return `M${f(chain.start)} ${chain.curves.map(([c1, c2, p]) => `C${f(c1)} ${f(c2)} ${f(p)}`).join(' ')}`;
+}
+
+function cubicAt(p0: Pt, [c1, c2, p1]: Cubic, t: number): [number, number] {
+  const u = 1 - t;
+  const a = u * u * u;
+  const b = 3 * u * u * t;
+  const c = 3 * u * t * t;
+  const d = t * t * t;
+  return [a * p0[0] + b * c1[0] + c * c2[0] + d * p1[0], a * p0[1] + b * c1[1] + c * c2[1] + d * p1[1]];
+}
+
+const SAMPLES = new WeakMap<Chain, { points: [number, number][]; lengths: number[] }>();
+
+/** The chain sampled finely enough that walking it by length is honest at diagram scale. Cached:
+ * the chains are module constants, and a tract walks each one dozens of times per frame. */
+function sampleChain(chain: Chain): { points: [number, number][]; lengths: number[] } {
+  const cached = SAMPLES.get(chain);
+  if (cached) return cached;
+  const points: [number, number][] = [[chain.start[0], chain.start[1]]];
+  let from: Pt = chain.start;
+  for (const curve of chain.curves) {
+    for (let i = 1; i <= 24; i += 1) points.push(cubicAt(from, curve, i / 24));
+    from = curve[2];
+  }
+  const lengths = [0];
+  let run = 0;
+  let prev = points[0]!;
+  for (const point of points.slice(1)) {
+    run += Math.hypot(point[0] - prev[0], point[1] - prev[1]);
+    lengths.push(run);
+    prev = point;
+  }
+  const sampled = { points, lengths };
+  SAMPLES.set(chain, sampled);
+  return sampled;
+}
+
+/** Point and unit tangent a fraction `u` (0-1) of the way along a chain, by length. */
+function chainAt(chain: Chain, u: number): { p: [number, number]; t: [number, number] } {
+  const { points, lengths } = sampleChain(chain);
+  const total = lengths[lengths.length - 1] ?? 0;
+  const target = clamp01(u) * total;
+  let i = 1;
+  while (i < lengths.length - 1 && (lengths[i] ?? 0) < target) i += 1;
+  const l0 = lengths[i - 1] ?? 0;
+  const span = (lengths[i] ?? l0) - l0 || 1;
+  const k = (target - l0) / span;
+  const [ax, ay] = points[i - 1] ?? points[0]!;
+  const [bx, by] = points[i] ?? points[0]!;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  return { p: [ax + (bx - ax) * k, ay + (by - ay) * k], t: [(bx - ax) / len, (by - ay) / len] };
+}
+
+/**
+ * Many small dots as ONE path: each a near-zero stroke with round caps, `2r` wide. Chyme, residue,
+ * enzyme beads — a drawing can carry dozens, and a node apiece is paid for on every frame, on
+ * both platforms, and in every render the verification sweeps make.
+ */
+export function dotsPath(points: readonly (readonly [number, number])[], r: number, token: string, opacity = 1): PathNode[] {
+  if (points.length === 0) return [];
+  return [
+    {
+      type: 'path',
+      d: points.map(([x, y]) => `M${x.toFixed(1)},${y.toFixed(1)} h0.01`).join(' '),
+      fill: 'none',
+      colorToken: token,
+      strokeWidth: r * 2,
+      strokeOpacity: opacity,
+      strokeLinecap: 'round',
+    },
+  ];
+}
+
+/** A point in an organ's own coordinates, carried into the caller's frame by the same placement
+ * `placed()` applies — so a module can hang a label or a duct on a builder's anatomy. */
+export function placedPoint(placement: OrganPlacement, p: readonly [number, number]): [number, number] {
+  const s = placement.scale ?? 1;
+  const x = placement.flip ? -p[0] : p[0];
+  return [placement.x + x * s, placement.y + p[1] * s];
+}
+
+export type GiSegment = 'oesophagus' | 'stomach' | 'duodenum' | 'jejunum' | 'ileum' | 'terminalIleum' | 'colon' | 'rectum';
+
+/** Pylorus round the C to the duodenojejunal flexure, which sits just left of the midline. */
+const GI_DUODENUM: Chain = {
+  start: [12, -100],
+  curves: [
+    [[-4, -106], [-28, -110], [-40, -96]],
+    [[-52, -82], [-52, -56], [-42, -44]],
+    [[-30, -30], [0, -30], [22, -36]],
+    [[34, -40], [40, -48], [40, -58]],
+  ],
+};
+/** From the flexure, down behind the transverse colon and into the upper coils. */
+const GI_JEJUNUM: Chain = {
+  start: [40, -58],
+  curves: [
+    [[48, -44], [62, -22], [64, 0]],
+    [[66, 22], [40, 26], [24, 14]],
+    [[8, 2], [-26, 4], [-30, 22]],
+    [[-34, 40], [-2, 46], [24, 40]],
+    [[48, 34], [72, 40], [72, 60]],
+    [[72, 80], [44, 84], [22, 78]],
+  ],
+};
+const GI_ILEUM: Chain = {
+  start: [22, 78],
+  curves: [
+    [[0, 72], [-40, 66], [-50, 84]],
+    [[-60, 102], [-34, 112], [-8, 108]],
+    [[18, 104], [44, 110], [42, 128]],
+    [[40, 146], [8, 150], [-18, 144]],
+    [[-38, 140], [-52, 132], [-64, 126]],
+  ],
+};
+/** The last stretch into the caecum: the only home of the B12 receptor and the bile salt pump. */
+const GI_TERMINAL_ILEUM: Chain = {
+  start: [-64, 126],
+  curves: [[[-72, 122], [-80, 120], [-92, 122]]],
+};
+/** Caecum up the ascending colon, across, down the descending colon and round the sigmoid. */
+const GI_COLON: Chain = {
+  start: [-106, 146],
+  curves: [
+    [[-108, 110], [-110, 40], [-110, -10]],
+    [[-110, -30], [-104, -40], [-90, -38]],
+    [[-50, -30], [-20, -14], [20, -16]],
+    [[60, -18], [90, -40], [106, -46]],
+    [[118, -50], [120, -40], [118, -20]],
+    [[116, 30], [116, 90], [114, 130]],
+    [[112, 160], [90, 160], [70, 164]],
+    [[50, 168], [30, 170], [22, 182]],
+  ],
+};
+const GI_RECTUM: Chain = { start: [22, 182], curves: [[[14, 190], [10, 198], [10, 214]]] };
+/** The blind pouch below the ileocaecal valve, and the appendix hanging from it. */
+const GI_CAECUM_PATH = 'M-92,122 C-92,138 -98,152 -108,152 C-120,152 -124,138 -122,124 C-120,112 -106,110 -96,116 Z';
+const GI_APPENDIX_PATH = 'M-112,151 C-112,160 -108,168 -100,170';
+
+/** Where the stomach goes, so the pylorus lands where the duodenum starts. */
+const GI_STOMACH_PLACEMENT: OrganPlacement = { x: 60, y: -128, flip: true };
+
+const GI_CHAINS: Record<Exclude<GiSegment, 'stomach'>, Chain> = {
+  oesophagus: { start: [104, -216], curves: [[[104, -196], [102, -184], [97, -174]]] },
+  duodenum: GI_DUODENUM,
+  jejunum: GI_JEJUNUM,
+  ileum: GI_ILEUM,
+  terminalIleum: GI_TERMINAL_ILEUM,
+  colon: GI_COLON,
+  rectum: GI_RECTUM,
+};
+
+/** Wall calibre, widest to narrowest in the order the bowel runs. */
+const GI_WIDTH: Record<Exclude<GiSegment, 'stomach'>, number> = {
+  oesophagus: 9,
+  duodenum: 14,
+  jejunum: 13,
+  ileum: 11,
+  terminalIleum: 10,
+  colon: 20,
+  rectum: 20,
+};
+
+/** Below this, a segment is drawn as a broken wall: present in the drawing, gone as a site. */
+export const GI_GHOST_BELOW = 0.25;
+
+export interface GiTractSleeve {
+  segment: GiSegment;
+  token: string;
+  /** Extra width beyond the wall, in natural units: how much of the class's work is done here. */
+  extra: number;
+  /** 0-1: how much of this site is working. */
+  level: number;
+}
+
+export interface GiTractParams {
+  stomachToken?: string;
+  bowelToken?: string;
+  colonToken?: string;
+  /** 0-1 per segment; below `GI_GHOST_BELOW` the wall is drawn broken. Absent means 1. */
+  segmentLevel?: Partial<Record<GiSegment, number>>;
+  /** 0-1: how many circular folds the small bowel carries — the surface it absorbs across. */
+  foldDensity?: number;
+  /** 0-1: how strongly the colon's haustra are marked — a working colon against a failed one. */
+  haustra?: number;
+  /** Highlights drawn UNDER the wall, so a site glows around the bowel rather than over it. */
+  sleeves?: readonly GiTractSleeve[];
+  /** 0-1: how much of a meal is in the small bowel lumen. */
+  chyme?: number;
+  /** How far along the small bowel the meal has spread, 0-1 — faster transit, further. */
+  chymeReach?: number;
+  /** 0-1: unabsorbed solute arriving in the caecum. */
+  colonLoad?: number;
+}
+
+export interface GiTractDrawing extends OrganDrawing {
+  /** A point `u` (0-1) of the way along a segment, in the CALLER's frame. */
+  at: (segment: GiSegment, u: number) => [number, number];
+  /** Where the bile and pancreatic ducts open into the second part of the duodenum. */
+  ampulla: [number, number];
+  /** Where the ileum enters the caecum. */
+  ilealValve: [number, number];
+  pylorus: [number, number];
+}
+
+/** A point on the stomach's greater curvature side of the body, for labels. */
+const GI_STOMACH_BODY: Pt = [-30, 0];
+
+export function giTractScene(placement: OrganPlacement, params: GiTractParams = {}): GiTractDrawing {
+  const bowel = params.bowelToken ?? 'capillary';
+  const colonToken = params.colonToken ?? bowel;
+  const stomachToken = params.stomachToken ?? bowel;
+  const level = (segment: GiSegment) => clamp01(params.segmentLevel?.[segment] ?? 1);
+  const tokenOf = (segment: GiSegment) => (segment === 'colon' || segment === 'rectum' ? colonToken : bowel);
+
+  const stroke = (d: string, token: string, width: number, extra: Partial<PathNode> = {}): PathNode => ({
+    type: 'path',
+    d,
+    fill: 'none',
+    colorToken: token,
+    strokeWidth: width,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    ...extra,
+  });
+
+  /* A wall: occluded first (a stroked organ's `opaqueUnderlay`), then the three-pass tube. A lost
+   * segment keeps its lumen but loses its edge to a dash — still there on the drawing, gone as a
+   * working site — so the difference reads by shape and not only by a paler wash. */
+  const wall = (segment: Exclude<GiSegment, 'stomach'>): PathNode[] => {
+    const d = chainD(GI_CHAINS[segment]);
+    const width = GI_WIDTH[segment];
+    const token = tokenOf(segment);
+    const working = level(segment);
+    if (working < GI_GHOST_BELOW) {
+      return [
+        stroke(d, 'panel', width),
+        stroke(d, token, width, { strokeDasharray: '5 4', strokeOpacity: 0.75, strokeLinecap: 'butt' }),
+        stroke(d, 'panel', Math.max(width - 2.6, 0.6)),
+        stroke(d, token, Math.max(width - 2.6, 0.6), { strokeOpacity: 0.08 }),
+      ];
+    }
+    return [stroke(d, 'panel', width), ...tubeNodes(d, token, width, 0.18 + working * 0.2)];
+  };
+
+  /* Transverse ticks across a segment, evenly by length: the circular folds of the small bowel,
+   * the haustra of the colon. One path of many short strokes, not one node per tick — a tract
+   * carries seventy of them and the node count is paid on every frame. */
+  const ticks = (segment: Exclude<GiSegment, 'stomach'>, count: number, token: string, opacity: number, reach = 0.8): PathNode[] => {
+    if (count <= 0) return [];
+    const chain = GI_CHAINS[segment];
+    const half = (GI_WIDTH[segment] / 2) * reach;
+    const parts: string[] = [];
+    for (let i = 0; i < count; i += 1) {
+      const { p, t } = chainAt(chain, (i + 0.5) / count);
+      const n: [number, number] = [-t[1], t[0]];
+      parts.push(`M${(p[0] - n[0] * half).toFixed(1)},${(p[1] - n[1] * half).toFixed(1)} L${(p[0] + n[0] * half).toFixed(1)},${(p[1] + n[1] * half).toFixed(1)}`);
+    }
+    return [{ type: 'path', d: parts.join(' '), fill: 'none', colorToken: token, strokeWidth: 1, strokeOpacity: opacity, strokeLinecap: 'round' }];
+  };
+
+  const folds = clamp01(params.foldDensity ?? 1);
+  const foldTicks = (segment: 'duodenum' | 'jejunum' | 'ileum', perUnit: number) =>
+    level(segment) < GI_GHOST_BELOW ? [] : ticks(segment, Math.round(perUnit * folds), bowel, 0.55);
+
+  const haustra = clamp01(params.haustra ?? 1);
+
+  const sleeves = (params.sleeves ?? []).flatMap((sleeve): SceneNode[] => {
+    const d = sleeve.segment === 'stomach' ? null : chainD(GI_CHAINS[sleeve.segment]);
+    const lost = sleeve.level < GI_GHOST_BELOW;
+    const opacity = 0.22 + clamp01(sleeve.level) * 0.6;
+    if (d === null) {
+      // The stomach is a sac, not a tube: its sleeve is its own outline, thickened.
+      return [
+        placed(GI_STOMACH_PLACEMENT, undefined, [
+            {
+              type: 'path',
+              d: STOMACH_BODY_PATH,
+              fill: 'none',
+              colorToken: sleeve.token,
+              strokeWidth: 4 + sleeve.extra,
+              strokeOpacity: opacity,
+              strokeLinejoin: 'round',
+              strokeDasharray: lost ? '5 4' : undefined,
+            },
+        ]),
+      ];
+    }
+    const width = GI_WIDTH[sleeve.segment as Exclude<GiSegment, 'stomach'>] + 4 + sleeve.extra;
+    return [stroke(d, sleeve.token, width, { strokeOpacity: opacity, strokeDasharray: lost ? '5 4' : undefined, strokeLinecap: lost ? 'butt' : 'round' })];
+  });
+
+  /* Chyme: what is left of a meal in the lumen, strung out as far along the small bowel as the
+   * transit has carried it. A hurried gut spreads the same meal further and holds it for less. */
+  const chyme = clamp01(params.chyme ?? 0);
+  const reach = Math.max(0.1, clamp01(params.chymeReach ?? 0.5));
+  const chymePoints: [number, number][] = [];
+  const dotCount = chyme > 0.02 ? Math.round(3 + chyme * 11) : 0;
+  for (let i = 0; i < dotCount; i += 1) {
+    const u = ((i + 0.5) / dotCount) * reach * 2;
+    const segment = u < 1 ? GI_JEJUNUM : GI_ILEUM;
+    chymePoints.push(chainAt(segment, u < 1 ? u : u - 1).p);
+  }
+  const chymeDots = dotsPath(chymePoints, 2, stomachToken, 0.85);
+
+  const colonLoad = clamp01(params.colonLoad ?? 0);
+  const residueCount = colonLoad > 0.02 ? Math.round(2 + colonLoad * 8) : 0;
+  const residue = dotsPath(
+    Array.from({ length: residueCount }, (_, i): [number, number] => {
+      const { p } = chainAt(GI_COLON, (i + 0.5) / 22);
+      return [p[0] + (i % 2 ? 2.5 : -2.5), p[1]];
+    }),
+    2.2,
+    'glucose',
+    0.9,
+  );
+
+  const stomach = stomachScene(GI_STOMACH_PLACEMENT, { colorToken: stomachToken, acidIntensity: 0.25 });
+
+  const node = placed(placement, undefined, [
+    ...sleeves,
+    ...wall('terminalIleum'),
+    ...wall('ileum'),
+    ...foldTicks('ileum', 14),
+    ...wall('jejunum'),
+    ...foldTicks('jejunum', 22),
+    ...chymeDots,
+    ...wall('duodenum'),
+    ...foldTicks('duodenum', 8),
+    ...wall('colon'),
+    ...(level('colon') < GI_GHOST_BELOW ? [] : ticks('colon', 30, colonToken, 0.2 + haustra * 0.5, 0.9)),
+    opaqueUnderlay(GI_CAECUM_PATH),
+    { type: 'path', d: GI_CAECUM_PATH, fill: colonToken, fillOpacity: 0.12 + level('colon') * 0.2, colorToken: colonToken, strokeWidth: 2 },
+    stroke(GI_APPENDIX_PATH, colonToken, 3.5, { strokeOpacity: 0.7 }),
+    ...residue,
+    ...wall('rectum'),
+    stomach.node,
+  ]);
+
+  const at = (segment: GiSegment, u: number): [number, number] => {
+    if (segment === 'stomach') return placedPoint(placement, placedPoint(GI_STOMACH_PLACEMENT, GI_STOMACH_BODY));
+    return placedPoint(placement, chainAt(GI_CHAINS[segment], u).p);
+  };
+
+  return {
+    node,
+    defs: stomach.defs,
+    at,
+    ampulla: placedPoint(placement, [-47, -70]),
+    ilealValve: placedPoint(placement, [-92, 122]),
+    pylorus: placedPoint(placement, GI_DUODENUM.start),
+  };
+}
+
+/* --- Bladder --------------------------------------------------------- */
+/*
+ * The bladder in coronal section, with its trigone, both ureteric orifices, and the two
+ * sphincters in series down the urethra.
+ *
+ * The one thing this organ has to do that the others do not is CHANGE SIZE. A bladder is the
+ * subject of micturition precisely because it fills, so the dome is computed from the volume
+ * rather than fixed: a full bladder rises and its walls bulge, an empty one sits flat and thick.
+ * The urine inside it is a rect clipped to the body, the way the liver's conjugated pool is.
+ *
+ * The two sphincters are drawn as collars rather than as colour alone, because their whole
+ * teaching point is that they are in SERIES and independently controlled — one smooth and
+ * autonomic at the neck, one striated and voluntary below it. A tight collar is drawn narrow and
+ * dense, a relaxed one wide and pale, so the two controls have a visible correlate each.
+ *
+ * Natural size: about 130 wide by 150 tall, the body centred on the origin, the urethra running
+ * down to y = 92.
+ */
+
+/** The dome rises and the shoulders bulge as it fills: -26 empty, -56 full. */
+function bladderBodyPath(fill: number): string {
+  const apex = -26 - fill * 30;
+  const shoulder = -2 - fill * 10;
+  return (
+    `M-50,${shoulder} C-50,${apex + 18} -28,${apex} 0,${apex} ` +
+    `C28,${apex} 50,${apex + 18} 50,${shoulder} ` +
+    `C50,22 28,42 0,42 C-28,42 -50,22 -50,${shoulder} Z`
+  );
+}
+
+export const BLADDER_TRIGONE_PATH = 'M-26,14 L26,14 L0,38 Z';
+/* Steep and short, running down the posterolateral wall to the trigone's upper corners. Drawn
+ * before the body so the dome occludes them: a ureter that stays fully visible over a full
+ * bladder reads as an antenna rather than as a tube passing behind it. */
+export const URETER_LEFT_PATH = 'M-46,-62 C-42,-34 -34,-8 -26,14';
+export const URETER_RIGHT_PATH = 'M46,-62 C42,-34 34,-8 26,14';
+export const URETHRA_PATH = 'M0,38 L0,92';
+/** Folds on the posterior wall — the detrusor reading as muscle rather than as a balloon. */
+const DETRUSOR_FOLDS = [
+  'M-38,6 C-34,-6 -24,-14 -12,-16',
+  'M-30,16 C-26,4 -16,-4 -4,-6',
+  'M38,6 C34,-6 24,-14 12,-16',
+] as const;
+
+export interface BladderParams {
+  /** 0-1 of functional capacity. Drives the dome, the wall and the urine inside it. */
+  fillLevel?: number;
+  /** 0-1 tone of the internal (smooth, autonomic) sphincter at the neck. */
+  internalTone?: number;
+  /** 0-1 tone of the external (striated, voluntary) sphincter below it. */
+  externalTone?: number;
+  colorToken?: string;
+  urineToken?: string;
+}
+
+export function bladderScene(placement: OrganPlacement, params: BladderParams = {}): OrganDrawing {
+  const token = params.colorToken ?? 'bladder';
+  const urine = params.urineToken ?? 'urine';
+  const fill = clamp01(params.fillLevel ?? 0.4);
+  const internal = clamp01(params.internalTone ?? 0.8);
+  const external = clamp01(params.externalTone ?? 0.8);
+  const body = bladderBodyPath(fill);
+
+  /* The urine surface, in organ coordinates. It never reaches the dome: a bladder at capacity
+   * still has wall above the fluid, and a fluid line flush with the roof reads as a solid
+   * object rather than as a container with something in it. */
+  const floor = 40;
+  const roof = -18 - fill * 26;
+  const surface = floor - (floor - roof) * fill;
+
+  /* A tight sphincter is a narrow, dense collar and a relaxed one is wide and pale, so each
+   * control changes the picture rather than only a number. */
+  const collar = (cy: number, tone: number): PathNode => ({
+    type: 'path',
+    d: `M${-7 - (1 - tone) * 5},${cy} L${7 + (1 - tone) * 5},${cy}`,
+    fill: 'none',
+    colorToken: token,
+    strokeWidth: 5 + tone * 4,
+    strokeOpacity: 0.35 + tone * 0.6,
+    strokeLinecap: 'round',
+  });
+
+  const node = placed(placement, undefined, [
+    ...tubeNodes(URETER_LEFT_PATH, urine, 9),
+    ...tubeNodes(URETER_RIGHT_PATH, urine, 9),
+    ...tubeNodes(URETHRA_PATH, token, 10),
+    opaqueUnderlay(body),
+    { type: 'path', d: body, fillGradientId: gradientId('bladder', token) },
+    // Clipped to the body, so the fluid takes the shape of whatever the dome is doing.
+    {
+      type: 'rect',
+      x: -52,
+      y: surface,
+      width: 104,
+      height: floor - surface + 2,
+      fill: urine,
+      fillOpacity: 0.5,
+      clipPathId: gradientId('bladder-fluid', token),
+    },
+    /* 0.14 is LABEL_WASH from shared/presentation/types, written out rather than imported: this
+     * file's only import is type-only, which is what lets `node --experimental-strip-types` load
+     * it directly and dump a shape to SVG in a second. A value import would end that. */
+    { type: 'path', d: BLADDER_TRIGONE_PATH, fill: token, fillOpacity: 0.18, colorToken: token, strokeWidth: 1.6, strokeOpacity: 0.85 },
+    ...DETRUSOR_FOLDS.map(
+      (d): PathNode => ({ type: 'path', d, fill: 'none', colorToken: token, strokeWidth: 1.2, strokeOpacity: 0.45 }),
+    ),
+    { type: 'circle', cx: -26, cy: 14, r: 2.6, fill: urine, fillOpacity: 0.9 },
+    { type: 'circle', cx: 26, cy: 14, r: 2.6, fill: urine, fillOpacity: 0.9 },
+    // The wall last, so nothing inside overdraws its edge. Thicker as the bladder empties.
+    { type: 'path', d: body, fill: 'none', colorToken: token, strokeWidth: 3.4 - fill * 1.2, strokeLinejoin: 'round' },
+    collar(50, internal),
+    collar(70, external),
+  ]);
+
+  return {
+    node,
+    defs: [
+      bodyGradient('bladder', token, { x: -18, y: -20, r: 120 }),
+      { type: 'clipPath', id: gradientId('bladder-fluid', token), children: [{ type: 'path', d: body }] },
+    ],
+  };
+}

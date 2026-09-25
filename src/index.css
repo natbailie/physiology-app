@@ -245,7 +245,7 @@
   --myelin-base: #5b7fa6; /* myelin sheath, white matter */
   --nerve-base: #a67b1f; /* peripheral nerve, axon bundles */
   --muscle-base: #a3494d; /* skeletal and smooth muscle belly */
-  --bladder-base: #9a7b3e; /* bladder wall, detrusor */
+  --bladder-base: #9c6a6e; /* bladder wall, detrusor — MUSCLE, deliberately not a urine tone */
   --cartilage-base: #6f8796; /* tracheal rings, bronchial cartilage, ossicles */
   --serosa-base: #8b8071; /* capsule, pleura, peritoneum, dura */
   /* The one house accent: primary actions, the brand caption, the focus ring. It is a base
