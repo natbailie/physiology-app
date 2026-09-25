@@ -26,8 +26,9 @@ export interface FrameMeta {
   /** Stable key for localStorage and the export: `renalTubular` or `cardiacElectro-1`. */
   key: string;
   viewBox: [number, number, number, number];
-  /** Rendered SVG per theme. */
-  svg: { light: string; dark: string };
+  /** Rendered SVG per theme, in both rail layouts — the contact sheet shows what each width
+   *  actually gets, including the narrow layout's cropped viewBox. */
+  svg: { light: string; dark: string; lightNarrow: string; darkNarrow: string };
   /**
    * The module is styled on the web but NOT on the phone: it has a `Diagram.module.css` and no
    * ported `diagramClasses.ts`, so every `cls` from that sheet resolves to nothing natively and
@@ -36,6 +37,9 @@ export interface FrameMeta {
    * missing its stylesheet.
    */
   unstyledOnNative: boolean;
+  /** The frame's label-rail entries, numbered continuously. Rendered as the key under the
+   *  drawing on narrow cards, exactly as `DiagramFrame`'s footer does in the app. */
+  railKey?: readonly { n: number; text: string }[];
 }
 
 const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -55,6 +59,13 @@ export function reviewPage(frames: FrameMeta[]): string {
   <div class="shot">
     <div class="pane" data-theme="light">${f.svg.light}</div>
     <div class="pane" data-theme="dark" hidden>${f.svg.dark}</div>
+    <div class="pane narrowPane" data-theme="light">${f.svg.lightNarrow}</div>
+    <div class="pane narrowPane" data-theme="dark" hidden>${f.svg.darkNarrow}</div>
+    ${
+      f.railKey?.length
+        ? `<ol class="key">${f.railKey.map((e) => `<li><span class="keyNum">${e.n}</span><span>${esc(e.text)}</span></li>`).join('')}</ol>`
+        : ''
+    }
   </div>
   <div class="verdict" role="group">
     <button data-v="keep">keep</button><button data-v="fix">fix</button><button data-v="redraw">redraw</button>
@@ -89,7 +100,24 @@ export function reviewPage(frames: FrameMeta[]): string {
   .vb { margin-left:auto; color:#94a3b8; font-size:10px; font-variant-numeric:tabular-nums; }
   .badge { font-size:10px; padding:1px 6px; border-radius:99px; }
   .badge.gap { background:#fef3c7; color:#92400e; }
+  .shot { container-type: inline-size; }
   .shot svg { display:block; width:100%; height:auto; border-radius:8px; }
+
+  /* Both layouts are rendered and the card's own width picks one, at the same threshold the app
+     measures against — so a reviewer sees what a learner at that width actually gets, cropped
+     viewBox and all. */
+  .narrowPane { display:block; }
+  .pane:not(.narrowPane) { display:none; }
+  .key { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:2px 12px;
+         margin:0; padding:8px 2px 2px; list-style:none; font-size:12px; color:var(--dim); }
+  .key li { display:flex; gap:6px; align-items:baseline; }
+  .keyNum { flex:0 0 auto; min-width:15px; height:15px; padding:0 3px; border-radius:99px;
+            background:#94a3b8; color:#fff; font-size:10px; font-weight:700; line-height:15px;
+            text-align:center; }
+  @container (min-width: 520px) {
+    .narrowPane, .key { display:none !important; }
+    .pane:not(.narrowPane) { display:block; }
+  }
   .verdict { display:flex; gap:4px; margin-top:8px; }
   .verdict button { flex:1; border:1px solid var(--line); background:#fff; border-radius:7px; padding:4px; font:inherit; color:var(--dim); cursor:pointer; }
   .verdict button[aria-pressed="true"] { background:var(--ink); color:#fff; border-color:var(--ink); }

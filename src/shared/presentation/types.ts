@@ -143,6 +143,12 @@ export interface PathNode {
   strokeOpacity?: number;
   strokeLinecap?: 'butt' | 'round' | 'square';
   strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  /**
+   * `stroke-dasharray`, in user units ("4 3"). For a structure that is drawn but no longer
+   * working — a resected or atrophied segment — so a lost site reads by its SHAPE and not by a
+   * paler colour alone. A class's own dash, where it sets one, wins on the phone.
+   */
+  strokeDasharray?: string;
   opacity?: number;
   /** A marker id declared in the frame's defs. */
   markerEnd?: string;
@@ -244,6 +250,47 @@ export interface TextNode {
   styleVars?: StyleVars;
 }
 
+/** One name in a rail, and the point on the drawing it names. */
+export interface LabelRailItem {
+  text: string;
+  /** The point this label names, in frame coordinates. The leader ends in a dot here. */
+  target: [number, number];
+  /** Which margin it sits in. Default: whichever side of the frame's midline `target` is on. */
+  side?: 'left' | 'right';
+  /** Defaults to `anatomy`. */
+  cls?: string;
+}
+
+/**
+ * Every name in a diagram, declared rather than placed.
+ *
+ * Seventeen of the twenty-two reference images in `docs/diagrams/references/` put their labels in
+ * a column down each margin, joined to the drawing by a thin leader ending in a dot. We placed
+ * every label by hand at authored `x`/`y` instead, in fifty-seven separate presentations, which
+ * is why the collision sweep keeps finding new faults and why the diagrams cannot be made to look
+ * like each other by editing anything less than all of them.
+ *
+ * So a presentation says WHAT is named and WHERE it points, and the renderer owns the layout.
+ * Within a column the items stack at a fixed line height in author order, so two labels cannot
+ * collide — not "do not collide today", but cannot.
+ *
+ * The renderer also owns the narrow case, which is the other half of the problem. Text here is
+ * sized in user units and therefore scales with the frame: at the median viewBox width of 480, a
+ * phone renders an 11-unit label at about 8.6px and a 9-unit one at about 7px, which is below
+ * legible. Under a threshold the rail is replaced by numbered dots on the drawing and a numbered
+ * key OUTSIDE the svg, in real CSS pixels that do not scale with it.
+ */
+export interface LabelRailNode {
+  type: 'labelRail';
+  items: readonly LabelRailItem[];
+  /** Width of each margin column, in user units. Default 96. */
+  gutter?: number;
+  /** Distance between consecutive baselines in a column. Default 16. */
+  lineHeight?: number;
+  /** First baseline, in user units from the top of the viewBox. Default 20. */
+  top?: number;
+}
+
 export type SceneNode =
   | GroupNode
   | PathNode
@@ -252,7 +299,8 @@ export type SceneNode =
   | LineNode
   | TextNode
   | VesselNode
-  | AxisNode;
+  | AxisNode
+  | LabelRailNode;
 
 export interface FrameNode {
   type: 'frame';
@@ -352,6 +400,26 @@ export interface OdCurveSpec<Derived> {
 
 export type ChartSpec<History, Derived> = SparklineSpec<History> | OdCurveSpec<Derived>;
 
+/* --- Lens ------------------------------------------------------------ */
+
+/**
+ * A view-only choice about what the DIAGRAM emphasises — which nutrient to trace along the gut —
+ * as opposed to a control, which changes the model.
+ *
+ * It is deliberately not a `ControlSpec`. A control writes an engine input, travels in share links
+ * and question setups, and is swept by `controls.test.tsx` for changing a reading; a lens does
+ * none of that, and would fail that sweep for exactly the reason it exists. It is also never
+ * blinded during practice: it changes no number and names no pattern.
+ *
+ * The page holds the chosen value and passes it back in as `PresentationContext.lens`. A builder
+ * must treat an absent lens as `initial`, which is what every test and the diagram audit build.
+ */
+export interface DiagramLensSpec {
+  label: string;
+  options: ReadonlyArray<{ value: string; label: string; colorToken?: ColorToken }>;
+  initial: string;
+}
+
 /* --- The whole presentation ---------------------------------------- */
 
 export interface ModulePresentation<State, Derived, Inputs, History> {
@@ -359,6 +427,8 @@ export interface ModulePresentation<State, Derived, Inputs, History> {
   controls: ReadonlyArray<ControlSpec<Inputs>>;
   readouts: ReadonlyArray<ReadoutSpec<State, Derived, Inputs>>;
   charts: ReadonlyArray<ChartSpec<History, Derived>>;
+  /** A view-only picker drawn above the diagram, when the module offers one. */
+  lens?: DiagramLensSpec;
 }
 
 /** The context a module's presentation builder reads — one settled/reactive frame plus history. */
@@ -368,6 +438,8 @@ export interface PresentationContext<State, Derived, Inputs, History> {
   inputs: Inputs;
   history: readonly History[];
   baselineHistory: readonly History[] | null;
+  /** The lens option chosen on the page; absent means the presentation's `lens.initial`. */
+  lens?: string;
 }
 
 /** The per-session derived context readouts/charts compute from — already derived by the loop. */

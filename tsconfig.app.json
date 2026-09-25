@@ -31,5 +31,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  /* `tools` is in here as well as `src`. It was not, and the diagram audit went on compiling
+     while a renderFrame() call passed three arguments to a four-parameter function — a silent
+     bug in the one instrument used to judge whether the diagrams are right. The tools import
+     from `src` through the same `@/` alias, so they belong to this project. */
+  "include": ["src", "tools"]
 }

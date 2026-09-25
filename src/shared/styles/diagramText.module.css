@@ -104,3 +104,14 @@
 :global([data-blinded='true']) .verdict {
   visibility: hidden;
 }
+
+/* The numeral inside a label rail's badge, on a frame too narrow for the rail itself. A numeral
+ * rather than a word precisely because this is the size at which words stop working: at the median
+ * viewBox width these 12 units land near 9px on a phone, which a digit survives and "Bowman's
+ * capsule" does not. The name is in the key under the drawing, in real pixels. */
+.railBadge {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--text-dim);
+}

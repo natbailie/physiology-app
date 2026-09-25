@@ -49,7 +49,10 @@ export function buildCardiorenalPresentation(ctx: Ctx): ModulePresentation<SimSt
     diagram: [
       {
         type: 'frame',
-        viewBox: [62, 22, 478, 302],
+        /* Widened by one 96-unit gutter each side for the label rail. The drawing itself has not
+         * moved — these are absolute coordinates and only empty margin was added, which is what
+         * every reference plate in `docs/diagrams/references/` reserves for its names. */
+        viewBox: [-34, 22, 670, 302],
         ariaLabel:
           'Animated diagram of the heart in anterior view — four chambers, aorta, pulmonary trunk and venae cavae — connected by an artery and a vein to a sectioned kidney showing its cortex, medullary pyramids and renal pelvis, with the RAAS and ANP hormone pathways drawn between them',
         defs: [
@@ -97,22 +100,30 @@ export function buildCardiorenalPresentation(ctx: Ctx): ModulePresentation<SimSt
           heart.node,
           kidney.node,
           { type: 'path', d: URINE_PATH, cls: 'urineFlow', styleVars: { 'urine-speed': urineSpeed } },
+          /* Heart and Kidney stay ON the drawing: they name a whole REGION, and a leader out to
+           * the margin for something that fills a third of the frame reads as a mistake. Every
+           * reference does the same — "Superior lobe" sits inside the lung while the bronchus it
+           * contains is railed out. Everything narrower than a region goes to the rail. */
           { type: 'text', x: HEART.x, y: 282, text: 'Heart', cls: 'organLabel', anchor: 'middle' },
           { type: 'text', x: KIDNEY.x + 4, y: 268, text: 'Kidney', cls: 'organLabel', anchor: 'middle' },
-          /* Two structure labels, not ten. The cortex is where the filtration this module models
-           * happens and the medulla is where the gradient it depends on lives; naming every
-           * pyramid and calyx would answer questions the module never asks.
+          /* Five names, not ten. The cortex is where the filtration this module models happens and
+           * the medulla is where the gradient it depends on lives; naming every pyramid and calyx
+           * would answer questions the module never asks.
            *
-           * Both get a leader, because a name floating beside an organ names the organ. The
-           * whole point of these two is that they name DIFFERENT LAYERS of it. */
-          { type: 'path', d: 'M486,124 L458,146', cls: 'leader' },
-          { type: 'text', x: 490, y: 122, text: 'Cortex', cls: 'anatomy', anchor: 'start' },
-          { type: 'path', d: 'M486,212 L450,192', cls: 'leader' },
-          { type: 'text', x: 490, y: 218, text: 'Medulla', cls: 'anatomy', anchor: 'start' },
-          // Written ALONG the vessels they name, so they take a halo rather than a new home.
-          { type: 'text', x: 282, y: 124, text: 'Artery', cls: 'pathLabel', anchor: 'middle', halo: 'bg' },
-          { type: 'text', x: 282, y: 232, text: 'Vein', cls: 'pathLabel', anchor: 'middle', halo: 'bg' },
-          { type: 'text', x: 400, y: 300, text: 'urine', cls: 'pathLabel', anchor: 'start' },
+           * Their positions are no longer authored. The rail stacks them down each margin at a
+           * fixed line height and runs a leader to each target, so they cannot collide with each
+           * other or with a leader, and on a phone the whole rail becomes numbered badges and a
+           * key in real pixels under the drawing. */
+          {
+            type: 'labelRail',
+            items: [
+              { text: 'Artery', target: [282, 124] },
+              { text: 'Vein', target: [282, 232] },
+              { text: 'Cortex', target: [458, 146] },
+              { text: 'Medulla', target: [450, 192] },
+              { text: 'Urine', target: [400, 300] },
+            ],
+          },
         ] as SceneNode[],
       },
     ],

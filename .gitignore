@@ -30,3 +30,7 @@ tools/diagram-audit/out/
 # traced or shipped. The README stays tracked.
 docs/diagrams/references/*
 !docs/diagrams/references/README.md
+
+# Reference images dropped anywhere under docs/diagrams — third-party material that informs
+# the drawings and must never ship. The references/ rule above misses a stray one.
+docs/diagrams/**/*like*

@@ -51,6 +51,8 @@ export interface ResolvedDiagramClasses {
   beatVolume: string;
   breathe: string;
   leader: string;
+  /** The numeral in a label rail's badge, on a frame too narrow for the rail. */
+  railBadge: string;
   /* Module-owned keys for the three schema diagrams that carry their own stylesheet.
    *
    * `resolveClass` returns `undefined` for a key no module registers, and a schema node that
@@ -114,6 +116,7 @@ const shared: Partial<ResolvedDiagramClasses> = {
   beatVolume: anatomy.beatVolume!,
   breathe: anatomy.breathe!,
   leader: anatomy.leader!,
+  railBadge: text.railBadge!,
 };
 
 /** The class keys each module diagram owns, resolved by direct read of the module's own CSS.

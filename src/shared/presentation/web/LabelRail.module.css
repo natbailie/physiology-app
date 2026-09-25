@@ -1,0 +1,43 @@
+/* The numbered key a label rail falls back to on a frame too narrow for its names.
+ *
+ * The choice between the two layouts is made in `DiagramView`, from a measured width, not here.
+ * A container query did it with no JavaScript for one version of this, and cannot do it now: the
+ * narrow layout also crops the frame's viewBox to drop the gutters the rail no longer needs, and
+ * a viewBox is an attribute no stylesheet can reach.
+ *
+ * This sheet is therefore only the key itself — HTML under the svg, in real CSS pixels, because
+ * text inside the drawing is sized in user units and scales down with it. */
+
+.key {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 2px 12px;
+  margin: 0;
+  padding: 8px 12px 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.keyRow {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+/* The numeral matches the badge on the drawing, so the eye can go from one to the other. */
+.keyNum {
+  flex: 0 0 auto;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 99px;
+  background: var(--text-faint);
+  color: var(--panel);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+}

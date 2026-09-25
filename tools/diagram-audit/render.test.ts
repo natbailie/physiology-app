@@ -30,6 +30,7 @@ import { describe, it } from 'vitest';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { TOKENS } from '@/theme/tokens.generated';
 import { reviewPage, type FrameMeta } from './reviewPage';
+import { contentViewBox, layoutRail, RAIL_BADGE_R, RAIL_DOT_R } from '@/shared/presentation/labelRail';
 
 
 const NATIVE = '/Users/natbailie/Developer/physiology-native/src/engine';
@@ -95,12 +96,12 @@ function resolveVal(v: any, vars: any): number | undefined {
   if (v === undefined) return undefined;
   if (typeof v === 'number') return v;
   if (typeof v !== 'object') return undefined;
-  if (v.wash !== undefined) return WASH[theme][v.wash];
+  if (v.wash !== undefined) return WASH[theme]?.[v.wash];
   if (v.var === undefined) return undefined;
   const raw = vars?.[v.var];
   const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number.parseFloat(raw) : NaN;
   const driver = Number.isFinite(n) ? n : 0;
-  if (v.scaleWash !== undefined) return driver * WASH[theme][v.scaleWash];
+  if (v.scaleWash !== undefined) return driver * (WASH[theme]?.[v.scaleWash] ?? 0);
   return (v.base ?? 0) + driver * (v.scale ?? 1);
 }
 function cls(name: string | undefined, classes: any, vars: any) {
@@ -117,6 +118,16 @@ function cls(name: string | undefined, classes: any, vars: any) {
 const at = (k: string, v: any) => (v === undefined || v === null ? '' : ` ${k}="${v}"`);
 const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/** The frame a node is being drawn into: a rail is laid out against the viewBox, and its
+ *  badges are numbered from an offset so two rails do not both start at 1. */
+let RAIL_CTX: {
+  viewBox: [number, number, number, number];
+  offsets: Map<any, number>;
+  /** Which layout this pass is drawing. The page emits both and shows one, so a reviewer can see
+   *  what each width actually gets rather than a third thing neither renderer produces. */
+  narrow: boolean;
+} = { viewBox: [0, 0, 0, 0], offsets: new Map(), narrow: false };
+
 function node(n: any, classes: any): string {
   switch (n.type) {
     case 'group':
@@ -125,7 +136,7 @@ function node(n: any, classes: any): string {
       const s = cls(n.cls, classes, n.styleVars);
       const stroke = (n.colorToken ? col(n.colorToken) : undefined) ?? s.stroke;
       const fill = n.fillGradientId ? `url(#${n.fillGradientId})` : n.fill === 'none' ? 'none' : n.fill ? col(n.fill) : (s.fill ?? 'none');
-      return `<path${at('d', n.d)}${at('stroke', stroke)}${at('fill', fill)}${at('fill-opacity', s.fillOpacity ?? n.fillOpacity)}${at('stroke-width', stroke ? (s.strokeWidth ?? n.strokeWidth ?? 1) : undefined)}${at('stroke-opacity', n.strokeOpacity)}${at('stroke-linecap', s.linecap ?? n.strokeLinecap ?? 'round')}${at('stroke-linejoin', n.strokeLinejoin ?? 'round')}${at('stroke-dasharray', s.dash)}${at('opacity', s.opacity ?? n.opacity)}${at('marker-end', n.markerEnd ? `url(#${n.markerEnd})` : undefined)}${at('clip-path', n.clipPathId ? `url(#${n.clipPathId})` : undefined)}/>`;
+      return `<path${at('d', n.d)}${at('stroke', stroke)}${at('fill', fill)}${at('fill-opacity', s.fillOpacity ?? n.fillOpacity)}${at('stroke-width', stroke ? (s.strokeWidth ?? n.strokeWidth ?? 1) : undefined)}${at('stroke-opacity', n.strokeOpacity)}${at('stroke-linecap', s.linecap ?? n.strokeLinecap ?? 'round')}${at('stroke-linejoin', n.strokeLinejoin ?? 'round')}${at('stroke-dasharray', s.dash ?? n.strokeDasharray)}${at('opacity', s.opacity ?? n.opacity)}${at('marker-end', n.markerEnd ? `url(#${n.markerEnd})` : undefined)}${at('clip-path', n.clipPathId ? `url(#${n.clipPathId})` : undefined)}/>`;
     }
     case 'circle': {
       const s = cls(n.cls, classes, n.styleVars);
@@ -152,6 +163,31 @@ function node(n: any, classes: any): string {
       // The halo pass, as both renderers draw it: the same text stroked in the background colour.
       const halo = col(n.halo);
       return `<g><text${body}${at('fill', halo)}${at('stroke', halo)}${at('stroke-width', n.haloWidth ?? 3)} stroke-linejoin="round" data-halo-pass="1">${esc(n.text)}</text>${label}</g>`;
+    }
+    case 'labelRail': {
+      const { labels, badges } = layoutRail(n, RAIL_CTX.viewBox);
+      const offset = RAIL_CTX.offsets.get(n) ?? 0;
+      if (RAIL_CTX.narrow) {
+        const bs = cls('railBadge', classes, undefined);
+        return badges
+          .map(
+            (b) =>
+              `<circle cx="${b.x}" cy="${b.y}" r="${RAIL_BADGE_R}" fill="${col('panel')}" stroke="${col('text-faint')}" stroke-width="1"/>` +
+              `<text x="${b.x}" y="${b.y + 4}"${at('font-size', bs.fontSize ?? 12)} font-weight="700" text-anchor="middle"${at('fill', bs.fill ?? col('text-dim'))} data-cls="railBadge">${b.n + offset}</text>`,
+          )
+          .join('');
+      }
+      const ls = cls('leader', classes, undefined);
+      return labels
+        .map((l) => {
+          const t = cls(l.cls, classes, undefined);
+          return (
+            `<path d="${l.leader}"${at('stroke', ls.stroke ?? col('text-faint'))} stroke-width="${ls.strokeWidth ?? 1}" fill="none"/>` +
+            `<circle cx="${l.dot[0]}" cy="${l.dot[1]}" r="${RAIL_DOT_R}" fill="${col('text-faint')}"/>` +
+            `<text x="${l.x}" y="${l.y}"${at('font-size', t.fontSize ?? 11)}${at('font-weight', t.fontWeight)} text-anchor="${l.anchor}"${at('fill', t.fill ?? col('text-dim'))} data-cls="${l.cls}">${esc(l.text)}</text>`
+          );
+        })
+        .join('');
     }
     case 'vessel':
       return `<path${at('d', n.path)}${at('stroke', col(n.colorToken))}${at('stroke-width', n.width ?? 2)} fill="none" stroke-linecap="round" opacity="0.6"/>`;
@@ -195,11 +231,42 @@ function unstyledOnNative(id: string): boolean {
 }
 
 /** One frame, serialised in the CURRENT theme. `col()` closes over the module-level `theme`. */
-function renderFrame(frame: any, id: string, i: number): string {
-  const [vx, vy, vw, vh] = frame.viewBox;
+/** Rails may be nested in a group. */
+function collectRails(nodes: readonly any[], out: any[] = []): any[] {
+  for (const n of nodes) {
+    if (n?.type === 'labelRail') out.push(n);
+    else if (n?.type === 'group') collectRails(n.children ?? [], out);
+  }
+  return out;
+}
+
+/** Continuous numbering across every rail in the frame, shared by the badges and the key. Read
+ *  out of the LAYOUT rather than out of `items`, because a rail seats labels beside their targets
+ *  and then numbers the columns — author order is not reading order. */
+function railKey(frame: any): { n: number; text: string }[] {
+  const offsets = new Map<any, number>();
+  let n = 0;
+  const key = collectRails(frame.children).flatMap((r: any) => {
+    offsets.set(r, n);
+    const rows = layoutRail(r, frame.viewBox).key.map((entry) => ({ n: entry.n + n, text: entry.text }));
+    n += rows.length;
+    return rows;
+  });
+  // `narrow` is set by renderFrame straight after this; carry the current value rather than
+  // dropping the field, so the context never has a hole in it.
+  RAIL_CTX = { viewBox: frame.viewBox, offsets, narrow: RAIL_CTX.narrow };
+  return key;
+}
+
+function renderFrame(frame: any, id: string, i: number, narrow: boolean): string {
+  railKey(frame);
+  RAIL_CTX = { ...RAIL_CTX, narrow };
+  const [vx, vy, vw, vh] = narrow
+    ? contentViewBox(collectRails(frame.children), frame.viewBox)
+    : frame.viewBox;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}"` +
-    ` data-module="${id}" data-frame="${i}" data-theme="${theme}"` +
+    ` data-module="${id}" data-frame="${i}" data-theme="${theme}" data-rail="${narrow ? 'narrow' : 'wide'}"` +
     ` style="width:100%;aspect-ratio:${vw}/${vh};background:${col('bg')};font-family:-apple-system,system-ui,sans-serif">` +
     `<defs>${defs(frame.defs)}</defs>` +
     `<rect data-frame-bg="1" x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="none" pointer-events="none"/>` +
@@ -226,18 +293,39 @@ describe('diagram audit', () => {
       // Built once: a presentation emits colour TOKENS, and the theme only enters at `col()`.
       const p = build({ state, derived, inputs: defaults, history: [], baselineHistory: null });
       const gap = unstyledOnNative(id);
-      p.diagram.forEach((frame: any, i: number) => {
-        const key = `${id}${i ? `-${i}` : ''}`;
+      // A view-only lens re-draws the diagram, so every option goes through the sweep, not only
+      // the one the page opens on. The default keeps its plain key so existing links still work.
+      const views: Array<{ suffix: string; diagram: any[] }> = [{ suffix: '', diagram: p.diagram }];
+      for (const option of p.lens?.options ?? []) {
+        if (option.value === p.lens.initial) continue;
+        const lensed = build({ state, derived, inputs: defaults, history: [], baselineHistory: null, lens: option.value });
+        views.push({ suffix: `-lens-${option.value}`, diagram: lensed.diagram });
+      }
+      views.forEach(({ suffix, diagram }) => diagram.forEach((frame: any, i: number) => {
+        const key = `${id}${suffix}${i ? `-${i}` : ''}`;
+        const railEntries = railKey(frame);
+        // Four renders: two themes, and both rail layouts. The narrow one also crops the viewBox
+        // to drop the gutters its names have left, so a reviewer sees the real phone framing.
         theme = 'light';
-        const light = renderFrame(frame, id, i);
+        const light = renderFrame(frame, id, i, false);
+        const lightNarrow = renderFrame(frame, id, i, true);
         theme = 'dark';
-        const dark = renderFrame(frame, id, i);
+        const dark = renderFrame(frame, id, i, false);
+        const darkNarrow = renderFrame(frame, id, i, true);
         theme = 'light';
-        // The standalone files stay light — they are what gets opened on its own and diffed.
+        // The standalone files stay light and wide — they are what gets opened on its own.
         writeFileSync(`${OUT}/${key}.svg`, light);
         writeFileSync(`${OUT}/${key}.dark.svg`, dark);
-        metas.push({ id, i, key, viewBox: frame.viewBox, svg: { light, dark }, unstyledOnNative: gap });
-      });
+        metas.push({
+          id,
+          i,
+          key,
+          viewBox: frame.viewBox,
+          svg: { light, dark, lightNarrow, darkNarrow },
+          unstyledOnNative: gap,
+          railKey: railEntries,
+        });
+      }));
     }
     writeFileSync(`${OUT}/index.html`, reviewPage(metas));
     const gaps = new Set(metas.filter((m) => m.unstyledOnNative).map((m) => m.id));

@@ -31,7 +31,7 @@ const outPath = join(repo, 'src', 'theme', 'tokens.generated.ts');
 const blocks = parseThemeBlocks(readFileSync(cssPath, 'utf8'));
 const tokens = colourTokens(blocks);
 
-function render(theme) {
+function render(theme: 'light' | 'dark') {
   const entries = tokens.map((t) => `    '${t}': '${resolveColor(t, theme, blocks)}',`).join('\n');
   return `  ${theme}: {\n${entries}\n  },`;
 }
