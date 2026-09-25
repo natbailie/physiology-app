@@ -8,7 +8,10 @@ import type { FrameNode, ModulePresentation, PresentationContext, SceneNode } fr
 
 /* Where the two organs sit. Every path below is anchored to them, so moving one is a matter of
  * moving a constant rather than re-typing nine coordinates. */
-const LUNGS = { x: 214, y: 142, scale: 1 };
+/* 1.35, not 1. The rail's gutters take 220 units out of the frame's width, and at the old scale
+ * the lungs were 23% of it — a plate with a lot of margin and a small drawing in it. Every
+ * reference in docs/diagrams/references gives the subject roughly half the plate. */
+const LUNGS = { x: 214, y: 142, scale: 1.35 };
 const KIDNEY = { x: 396, y: 252, scale: 0.85 };
 
 const BLOOD_GAS_PATH = 'M214,222 L214,300';
@@ -117,7 +120,9 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
   const anatomy: FrameNode = {
     type: 'frame',
     key: 'respiratory-anatomy',
-    viewBox: [10, 14, 470, 306],
+    /* Widened by one 110-unit gutter each side for the label rail; the drawing has not moved.
+     * 110 rather than the default 96 because "R. main bronchus" needs 88 units and 96 clipped it. */
+    viewBox: [-100, 14, 690, 306],
     ariaLabel:
       'Animated diagram of the lungs in anterior view — three lobes on the right and two on the left, separated by their fissures, with the trachea dividing at the carina into the main and lobar bronchi — connected by gas exchange to the tissues, by the chemoreceptor reflex to the brainstem, and by bicarbonate handling to a sectioned kidney',
     defs: [
@@ -135,10 +140,13 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
         colorToken: 'co2',
         label: 'Chemoreceptors',
         markerId: 'chemo-arrow',
-        // Centred, so this is the label's MIDDLE: at 26 the word began nine units left of the
-        // frame and arrived on the phone as "hemoreceptors".
-        labelX: 56,
-        labelY: 72,
+        /* Centred, so this is the label's MIDDLE. It used to sit at (56, 72), which was clear
+         * space before the rail existed and is now directly on the leader running out to
+         * "R. main bronchus". It now sits in the clear band between that leader and the one out to
+         * "Horiz. fissure", left of the right lung's outline at x=124 — all three measured off the
+         * rendered frame rather than estimated, because the lungs moved when they were scaled. */
+        labelX: 75,
+        labelY: 110,
       },
       {
         type: 'axis',
@@ -147,17 +155,51 @@ export function buildRespiratoryPresentation(ctx: Ctx): ModulePresentation<RespS
         colorToken: 'bicarb',
         label: 'Renal HCO3-',
         markerId: 'renal-comp-arrow',
-        labelX: 250,
-        labelY: 212,
+        /* Was (250, 212), which the lungs now cover at 1.35 scale. Moved out onto the open run
+         * between the lung base and the kidney, where the pathway it names actually travels. */
+        labelX: 330,
+        labelY: 272,
       },
       lungs.node,
       kidney.node,
-      /* The asymmetry IS the teaching point, and it is the one thing about the lungs a
-       * symmetrical pair of balloons actively taught wrong. Said once, in the corner. */
-      { type: 'text', x: 466, y: 34, text: 'Right 3 lobes · left 2', cls: 'caption', anchor: 'end' },
-      { type: 'text', x: 132, y: 208, text: 'Diaphragm', cls: 'anatomy', anchor: 'end' },
-      { type: 'text', x: 214, y: 312, text: 'tissues', cls: 'pathLabel', anchor: 'middle' },
+      /* The asymmetry IS the teaching point, and the lobes now say it themselves. It used to be
+       * one caption in the corner — "Right 3 lobes · left 2" — which was the right answer while
+       * nothing in the drawing was named; naming them is better, and it is what every reference
+       * plate in docs/diagrams/references does. Lobes stay ON the drawing because they are
+       * REGIONS: a leader out to the margin for something filling a third of a lung reads as a
+       * mistake. Everything narrower than a region is railed. */
+      { type: 'text', x: 153, y: 88, text: 'Superior', cls: 'anatomy', anchor: 'middle' },
+      /* The middle lobe is a narrow wedge between the two right fissures, and there is no position
+       * in it that clears the oblique fissure — so this takes the third answer from CLAUDE.md's
+       * rule about a label a line runs through: keep it on the thing it names, and halo it.
+       * Pushed laterally as well, because at the old centre its narrow-mode badge sat on it. */
+      { type: 'text', x: 178, y: 160, text: 'Middle', cls: 'anatomy', anchor: 'middle', halo: 'panel' },
+      { type: 'text', x: 160, y: 203, text: 'Inferior', cls: 'anatomy', anchor: 'middle' },
+      { type: 'text', x: 275, y: 101, text: 'Superior', cls: 'anatomy', anchor: 'middle' },
+      { type: 'text', x: 275, y: 196, text: 'Inferior', cls: 'anatomy', anchor: 'middle' },
       { type: 'text', x: KIDNEY.x + 2, y: 300, text: 'Kidney', cls: 'organLabel', anchor: 'middle' },
+      /* Eight names for eight things `lungsScene` actually draws. Sides are stated rather than
+       * left to the midline rule: every one of these targets sits near the middle of the frame,
+       * so the automatic split would have put all eight in the left column. Right-lung structures
+       * go left, matching the image — the image's left IS the patient's right. */
+      {
+        type: 'labelRail',
+        gutter: 110,
+        items: [
+          { text: 'Trachea', target: [214, 34], side: 'left' },
+          { text: 'R. main bronchus', target: [198, 72], side: 'left' },
+          /* The fissure's LATERAL end, not its middle. Aimed at the middle, the leader ran
+           * through the "Middle" lobe label and its narrow-mode badge landed on it. */
+          { text: 'Horiz. fissure', target: [146, 146], side: 'left' },
+          { text: 'Oblique fissure', target: [152, 169], side: 'left' },
+          /* Left, though the automatic split would also choose left: from the RIGHT column its
+           * leader ran the full width of the frame and straight through the kidney. */
+          { text: 'Diaphragm', target: [214, 240], side: 'left' },
+          { text: 'Carina', target: [214, 56], side: 'right' },
+          { text: 'L. main bronchus', target: [236, 69], side: 'right' },
+          { text: 'Tissues', target: [214, 306], side: 'right' },
+        ],
+      },
     ] as SceneNode[],
   };
 
