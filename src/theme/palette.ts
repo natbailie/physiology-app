@@ -104,3 +104,31 @@ export function colourTokens(blocks: ThemeBlocks): readonly string[] {
   }
   return out.sort();
 }
+/**
+ * Anatomical identity colours: what an organ IS, as opposed to what a quantity is doing.
+ *
+ * They sit outside the signal palette's 4.5:1 text floor, and the exemption is narrow and
+ * two-sided. It is granted because nothing prints a word in them — holding a fill to a text
+ * floor would force lung pink to a maroon and bowel to a brown without making anything more
+ * readable — and `palette.test.ts` checks the claim from the other side: it fails if any
+ * presentation paints a `text` node in one of these. They are still held to the 3:1 graphical
+ * floor as an outline, which is the job they actually do.
+ *
+ * Declared here rather than in the two files that consume it — `palette.test.ts` and the public
+ * contrast report on `HReviewPage` — because a list duplicated in two places is a list that will
+ * disagree with itself the first time a colour is added.
+ */
+export const ANATOMY_TOKENS = [
+  'bile',
+  'pancreas',
+  'gastric',
+  'bowel',
+  'lung',
+  'bone',
+  'myelin',
+  'nerve',
+  'muscle',
+  'bladder',
+  'cartilage',
+  'serosa',
+] as const;

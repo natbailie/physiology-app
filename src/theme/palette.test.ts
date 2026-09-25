@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contrast, parseHex, type Rgb } from '@/shared/lib/color';
 import { TOKENS } from './tokens.generated';
+import { ANATOMY_TOKENS as ANATOMY } from './palette';
 
 /**
  * The light palette was hand-calibrated on white paper. The dark one is not hand-written at
@@ -24,13 +25,50 @@ const LIGHT = toRgb(TOKENS.light);
 const DARK = toRgb(TOKENS.dark);
 
 // Bare names — 'artery', not '--artery-base'.
-const SIGNALS = Object.keys(LIGHT)
+const ALL_BASES = Object.keys(LIGHT)
   .filter((k) => k.endsWith('-base'))
   .map((k) => k.replace(/^--/, '').replace(/-base$/, ''));
+
+
+const SIGNALS = ALL_BASES.filter((name) => !(ANATOMY as readonly string[]).includes(name));
 
 describe('signal palette', () => {
   it('has the ~93 signal colours the diagrams draw with', () => {
     expect(SIGNALS.length).toBeGreaterThan(90);
+  });
+
+  it('derives the anatomical identity colours too', () => {
+    const missing = ANATOMY.filter((name) => LIGHT[`--${name}`] === undefined);
+    expect(missing.join(', '), `anatomy bases with no derived line: ${missing.join(', ')}`).toBe('');
+  });
+
+  /**
+   * The other half of the anatomy exemption, and the reason it is safe to grant.
+   *
+   * These colours skip the 4.5:1 text floor on the claim that they are fills. If a presentation
+   * ever paints a `text` node in one, that claim is false and the label is somewhere between hard
+   * and impossible to read — so the claim is checked rather than trusted. A text node's colour is
+   * its `colorToken`, which the renderers take in preference to the class.
+   */
+  it('never paints a label in an anatomical colour', () => {
+    const sources = import.meta.glob<string>('../modules/*/presentation.ts', {
+      eager: true,
+      query: '?raw',
+      import: 'default',
+    });
+    // A glob typo would make every assertion below vacuously true.
+    expect(Object.keys(sources).length).toBeGreaterThan(40);
+
+    const anatomy = new Set<string>(ANATOMY);
+    const offenders: string[] = [];
+    for (const [path, src] of Object.entries(sources)) {
+      const id = path.match(/modules\/([^/]+)\//)![1]!;
+      for (const node of src.match(/type: 'text'[\s\S]{0,400}?\}/g) ?? []) {
+        const token = node.match(/colorToken: '([\w-]+)'/)?.[1];
+        if (token && anatomy.has(token)) offenders.push(`${id}: "${token}"`);
+      }
+    }
+    expect(offenders.join(', '), `labels painted in a fill-only colour: ${offenders.join(', ')}`).toBe('');
   });
 
   it('derives every base, so adding a base without a derived line is caught here', () => {
@@ -84,6 +122,15 @@ describe.each([
   it('keeps every signal visible as a stroke', () => {
     const failures = SIGNALS.filter((name) => contrast(theme[`--${name}`]!, panel) < 3);
     expect(failures.join(', ')).toBe('');
+  });
+
+  /* The anatomy colours skip the 4.5:1 text floor, so this is the bar they DO have to clear:
+   * an organ outlined in its own hue has to be visible against the panel it is drawn on. */
+  it('keeps every anatomical colour visible as an outline', () => {
+    const failures = ANATOMY.map((name) => ({ name, ratio: contrast(theme[`--${name}`]!, panel) }))
+      .filter(({ ratio }) => ratio < 3)
+      .map(({ name, ratio }) => `${name} ${ratio.toFixed(2)}:1`);
+    expect(failures.join(', '), `below 3:1 on --panel in ${themeName}: ${failures.join(', ')}`).toBe('');
   });
 
   it('keeps the text ramp itself legible', () => {

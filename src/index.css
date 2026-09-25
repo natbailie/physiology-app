@@ -217,6 +217,37 @@
   --transfusion-base: #2f6db5; /* blood groups & transfusion: donor-recipient matching */
   --thermal-base: #c65200; /* thermoregulation: heat load vs defended set point */
   --exercise-base: #2e7d46; /* exercise physiology: integrated metabolic response */
+  --b12-base: #7a3fb3; /* digestion & absorption: vitamin B12, the terminal ileal site */
+  --scfa-base: #4b7a1c; /* digestion & absorption: short-chain fatty acids, colonic salvage */
+
+  /* --- Anatomical identity ------------------------------------------------
+   *
+   * An organ's OWN colour, as distinct from the signal colours above, which say what a quantity
+   * is doing. Every reference plate in docs/diagrams/references paints the liver maroon and the
+   * bile green and the pancreas tan, and reserves saturated colour for what it is pointing at;
+   * ours painted organs in whichever signal colour the module happened to own, so a signal colour
+   * meant nothing in particular. With these, it always means "read me".
+   *
+   * These are full-strength values, not washes. A wash is this colour at a low `fillOpacity`, the
+   * way `bodyGradient` and LABEL_WASH already do it — which is also what lets them clear the 3:1
+   * stroke floor `palette.test.ts` holds every signal to.
+   *
+   * Only the genuinely missing ones are here. The palette already carries --artery, --venous,
+   * --capillary, --kidney, --medulla, --tubule, --liver, --marrow, --placenta, --pituitary,
+   * --adrenal-medulla, --retina, --cochlea, --vestibular, --thyroid and --sarcomere, and an
+   * organ that has a colour must not be given a second one. */
+  --bile-base: #4a7c23; /* biliary tree, gallbladder, conjugated bilirubin */
+  --pancreas-base: #b07d2a; /* pancreatic parenchyma */
+  --gastric-base: #b5636b; /* stomach wall */
+  --bowel-base: #c07a76; /* small and large intestine wall */
+  --lung-base: #b8607e; /* lung parenchyma, alveolar tissue */
+  --bone-base: #8a7a55; /* cortical and trabecular bone */
+  --myelin-base: #5b7fa6; /* myelin sheath, white matter */
+  --nerve-base: #a67b1f; /* peripheral nerve, axon bundles */
+  --muscle-base: #a3494d; /* skeletal and smooth muscle belly */
+  --bladder-base: #9a7b3e; /* bladder wall, detrusor */
+  --cartilage-base: #6f8796; /* tracheal rings, bronchial cartilage, ossicles */
+  --serosa-base: #8b8071; /* capsule, pleura, peritoneum, dura */
   /* The one house accent: primary actions, the brand caption, the focus ring. It is a base
    * like any other so it lifts into dark mode with the rest of them, and so palette.test.ts
    * holds it to the same contrast floors. */
@@ -388,6 +419,22 @@
   --transfusion: color-mix(in oklab, var(--transfusion-base), var(--signal-tint) var(--signal-lift));
   --thermal: color-mix(in oklab, var(--thermal-base), var(--signal-tint) var(--signal-lift));
   --exercise: color-mix(in oklab, var(--exercise-base), var(--signal-tint) var(--signal-lift));
+  --b12: color-mix(in oklab, var(--b12-base), var(--signal-tint) var(--signal-lift));
+  --scfa: color-mix(in oklab, var(--scfa-base), var(--signal-tint) var(--signal-lift));
+
+  /* Anatomical identity. */
+  --bile: color-mix(in oklab, var(--bile-base), var(--signal-tint) var(--signal-lift));
+  --pancreas: color-mix(in oklab, var(--pancreas-base), var(--signal-tint) var(--signal-lift));
+  --gastric: color-mix(in oklab, var(--gastric-base), var(--signal-tint) var(--signal-lift));
+  --bowel: color-mix(in oklab, var(--bowel-base), var(--signal-tint) var(--signal-lift));
+  --lung: color-mix(in oklab, var(--lung-base), var(--signal-tint) var(--signal-lift));
+  --bone: color-mix(in oklab, var(--bone-base), var(--signal-tint) var(--signal-lift));
+  --myelin: color-mix(in oklab, var(--myelin-base), var(--signal-tint) var(--signal-lift));
+  --nerve: color-mix(in oklab, var(--nerve-base), var(--signal-tint) var(--signal-lift));
+  --muscle: color-mix(in oklab, var(--muscle-base), var(--signal-tint) var(--signal-lift));
+  --bladder: color-mix(in oklab, var(--bladder-base), var(--signal-tint) var(--signal-lift));
+  --cartilage: color-mix(in oklab, var(--cartilage-base), var(--signal-tint) var(--signal-lift));
+  --serosa: color-mix(in oklab, var(--serosa-base), var(--signal-tint) var(--signal-lift));
   --brand: color-mix(in oklab, var(--brand-base), var(--signal-tint) var(--signal-lift));
   --ok: color-mix(in oklab, var(--ok-base), var(--signal-tint) var(--signal-lift));
   --warn: color-mix(in oklab, var(--warn-base), var(--signal-tint) var(--signal-lift));

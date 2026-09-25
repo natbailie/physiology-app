@@ -1,6 +1,7 @@
 import { contrast, parseHex, type Rgb } from '@/shared/lib/color';
 import { TOKENS } from '@/theme/tokens.generated';
 import styles from './HReviewPage.module.css';
+import { ANATOMY_TOKENS as ANATOMY } from '@/theme/palette';
 
 /**
  * The H preview series as a private working paper: what the five `tools/ui-preview/H-*`
@@ -26,9 +27,12 @@ const LIGHT = toRgb(TOKENS.light);
 const DARK = toRgb(TOKENS.dark);
 
 // Bare names — 'artery', not '--artery-base'.
-const SIGNALS = Object.keys(LIGHT)
+const ALL_BASES = Object.keys(LIGHT)
   .filter((k) => k.endsWith('-base'))
   .map((k) => k.replace(/^--/, '').replace(/-base$/, ''));
+
+
+const SIGNALS = ALL_BASES.filter((name) => !(ANATOMY as readonly string[]).includes(name));
 
 const ratio = (theme: Theme, foreground: string, surface: string): number =>
   contrast(theme[foreground]!, theme[surface]!);
