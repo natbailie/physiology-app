@@ -100,13 +100,27 @@ function washInFrame(ctx: Ctx): FrameNode {
       { type: 'text', x: labelX, y: yOf(derived.effectSiteAgentPct) + 12, text: `brain ${derived.effectSiteAgentPct.toFixed(2)}%`, cls: 'valueLabel', colorToken: 'vm', anchor: labelAnchor, halo: 'panel' },
 
       // Axes.
-      { type: 'text', x: xOf(0), y: 236, text: '0', cls: 'tickLabel' },
-      { type: 'text', x: xOf(5), y: 236, text: '5 min', cls: 'tickLabel', anchor: 'middle' },
-      { type: 'text', x: xOf(10), y: 236, text: '10', cls: 'tickLabel', anchor: 'middle' },
-      { type: 'text', x: xOf(15), y: 236, text: '15 min', cls: 'tickLabel', anchor: 'end' },
-      { type: 'text', x: 6, y: yOf(0) + 3, text: '0', cls: 'tickLabel' },
-      { type: 'text', x: 6, y: yOf(4), text: '4%', cls: 'tickLabel' },
-      { type: 'text', x: W / 2, y: H - 2, text: 'minutes since change →   alveolar agent (%) ↑', cls: 'caption', anchor: 'middle' },
+      /* The tick row moved up from 236 and the y ticks out from x=6. Measured, not guessed: the
+       * x title's box ran 231-244 against ticks at 227-238, and the rotated y title occupies
+       * x 3-16, which the old y ticks at x 6-20 sat inside. */
+      { type: 'text', x: xOf(0), y: 228, text: '0', cls: 'tickLabel' },
+      { type: 'text', x: xOf(5), y: 228, text: '5 min', cls: 'tickLabel', anchor: 'middle' },
+      { type: 'text', x: xOf(10), y: 228, text: '10', cls: 'tickLabel', anchor: 'middle' },
+      { type: 'text', x: xOf(15), y: 228, text: '15 min', cls: 'tickLabel', anchor: 'end' },
+      { type: 'text', x: 26, y: yOf(0) + 3, text: '0', cls: 'tickLabel' },
+      { type: 'text', x: 26, y: yOf(4), text: '4%', cls: 'tickLabel' },
+      /* One title per axis, each on its own axis.
+       *
+       * Both used to be a single centred line at y = H - 2: the descenders were clipped by the
+       * frame and it ran straight through the "5 min" and "10" ticks on the row above. Splitting
+       * them is also what the graph register in docs/diagrams/TASTE.md asks for — the y title
+       * rotated along the axis it names, which is a group because a text node takes no transform. */
+      { type: 'text', x: W / 2, y: H - 4, text: 'minutes since change →', cls: 'caption', anchor: 'middle' },
+      {
+        type: 'group',
+        transform: `rotate(-90 14 ${H / 2})`,
+        children: [{ type: 'text', x: 14, y: H / 2, text: 'alveolar agent (%) ↑', cls: 'caption', anchor: 'middle' }],
+      },
     ],
   };
 }

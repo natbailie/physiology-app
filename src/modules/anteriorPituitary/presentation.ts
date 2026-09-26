@@ -223,7 +223,10 @@ export function buildAnteriorPituitaryPresentation(ctx: Ctx): ModulePresentation
           ...[110, 344].flatMap((x) => [
             { type: 'path' as const, d: roundedRect(x, 186, 52, 64, 10), fill: 'venous' as const, colorToken: 'venous' as const },
             { type: 'circle' as const, cx: x + 26, cy: 214, r: 10, fill: 'artery' as const },
-            { type: 'text' as const, x: x + 26, y: 272, text: 'Cavernous sinus' as const, cls: 'anatomy' as const, anchor: 'middle' as const },
+            /* Haloed: the sinus box it names is drawn around it and the carotid runs through
+             * it, so there is no position inside the sinus that is clear of a line — and
+             * outside the sinus the name stops being attached to it. */
+            { type: 'text' as const, x: x + 26, y: 272, text: 'Cavernous sinus' as const, cls: 'anatomy' as const, anchor: 'middle' as const, halo: 'panel' as const },
           ]),
 
           // --- The gland itself ---

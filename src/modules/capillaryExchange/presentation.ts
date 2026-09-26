@@ -186,6 +186,8 @@ export function buildCapillaryExchangePresentation(ctx: Ctx): ModulePresentation
             text: `Interstitium ${derived.interstitialVolumeMl.toFixed(0)} mL (${derived.interstitialExcess >= 0 ? '+' : ''}${(derived.interstitialExcess * 100).toFixed(0)}%)`,
             cls: 'valueLabel',
             anchor: 'middle',
+            // Haloed: the tissue block beneath darkens with oedema, which is the reading.
+            halo: 'panel',
           },
           {
             type: 'path',

@@ -73,13 +73,21 @@ function nomogramFrame(ctx: Ctx): FrameNode {
       { type: 'text', x: Math.min(xOf(derived.hoursSinceIngestion) + 10, W - 4), y: pointScalar(derived) - 8, text: `${derived.plasmaMgL.toFixed(0)} mg/L`, cls: 'valueLabel', anchor: 'start', colorToken: pointToken, halo: 'panel' },
 
       // Axes.
-      { type: 'text', x: xOf(0), y: 236, text: '0', cls: 'tickLabel' },
-      { type: 'text', x: xOf(8), y: 236, text: '8 h', cls: 'tickLabel', anchor: 'middle' },
-      { type: 'text', x: xOf(16), y: 236, text: '16 h', cls: 'tickLabel', anchor: 'middle' },
-      { type: 'text', x: xOf(24), y: 236, text: '24 h', cls: 'tickLabel', anchor: 'end' },
-      { type: 'text', x: 6, y: yOf(0) + 3, text: '0', cls: 'tickLabel' },
-      { type: 'text', x: 6, y: yOf(120), text: '120', cls: 'tickLabel' },
-      { type: 'text', x: W / 2, y: H - 2, text: 'hours since ingestion →   plasma paracetamol (mg/L) ↑', cls: 'caption', anchor: 'middle' },
+      // Same move as anaesthesia: the tick row up, the y ticks out from under the rotated title.
+      { type: 'text', x: xOf(0), y: 228, text: '0', cls: 'tickLabel' },
+      { type: 'text', x: xOf(8), y: 228, text: '8 h', cls: 'tickLabel', anchor: 'middle' },
+      { type: 'text', x: xOf(16), y: 228, text: '16 h', cls: 'tickLabel', anchor: 'middle' },
+      { type: 'text', x: xOf(24), y: 228, text: '24 h', cls: 'tickLabel', anchor: 'end' },
+      { type: 'text', x: 26, y: yOf(0) + 3, text: '0', cls: 'tickLabel' },
+      { type: 'text', x: 26, y: yOf(120), text: '120', cls: 'tickLabel' },
+      /* One title per axis — see the note in anaesthesia's presentation. Combined on one centred
+       * line they were clipped by the frame and ran through the tick row above. */
+      { type: 'text', x: W / 2, y: H - 4, text: 'hours since ingestion →', cls: 'caption', anchor: 'middle' },
+      {
+        type: 'group',
+        transform: `rotate(-90 14 ${H / 2})`,
+        children: [{ type: 'text', x: 14, y: H / 2, text: 'plasma paracetamol (mg/L) ↑', cls: 'caption', anchor: 'middle' }],
+      },
     ],
   };
 }

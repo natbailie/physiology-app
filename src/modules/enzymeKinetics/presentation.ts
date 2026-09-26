@@ -88,7 +88,8 @@ function buildMichaelsMentenFrame(derived: KineticsDerived, inputs: KineticsInpu
         // line itself, which sits at MM.left.
         type: 'text',
         x: 14,
-        y: MM.top - 6,
+        // MM.top is 16, so -6 put the ascenders at y≈0 and the frame clipped them by a pixel.
+        y: MM.top - 3,
         text: 'v (µmol/min)',
         cls: 'caption',
       },

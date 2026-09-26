@@ -102,7 +102,8 @@ export function buildMechanicalVentilationPresentation(
           fill: 'o2',
           styleVars: { 'wash-strong': clamp(inputs.fiO2, 0.2, 1) },
         },
-        { type: 'text', x: 0, y: 3, text: `inspired O₂ ${fiO2Pct}%`, cls: 'valueLabel', anchor: 'middle' },
+        // Haloed for the same reason as respiratoryFailure: the fill under it is the reading.
+        { type: 'text', x: 0, y: 3, text: `inspired O₂ ${fiO2Pct}%`, cls: 'valueLabel', anchor: 'middle', halo: 'panel' },
       ],
     };
   }

@@ -68,7 +68,8 @@ export function buildHpaPresentation(ctx: Ctx): ModulePresentation<HpaState, Hpa
           // The posterior lobe carries "post." across it, so it is washed like its neighbour.
           { type: 'path', d: ellipse(152, 155, 14, 16), fill: 'adh', fillOpacity: LABEL_WASH, colorToken: 'adh' },
           { type: 'text', x: 110, y: 162, text: 'anterior', cls: 'caption', anchor: 'middle' },
-          { type: 'text', x: 152, y: 159, text: 'post.', cls: 'caption', anchor: 'middle' },
+          // Haloed: the circulation band runs under it and the label names the lobe beneath.
+          { type: 'text', x: 152, y: 159, text: 'post.', cls: 'caption', anchor: 'middle', halo: 'panel' },
           { type: 'text', x: 128, y: 210, text: 'Pituitary', cls: 'anatomyStrong', anchor: 'middle' },
 
           // ---- Trophic hormone: ACTH through the blood to the gland ----

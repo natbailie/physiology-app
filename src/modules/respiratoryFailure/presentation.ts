@@ -119,7 +119,10 @@ export function buildRespiratoryFailurePresentation(
             fill: 'o2',
             styleVars: { 'wash-strong': clamp(inputs.fiO2, 0.2, 1) },
           },
-          { type: 'text', x: 0, y: 3, text: `inspired O₂ ${fiO2Pct}%`, cls: 'valueLabel', anchor: 'middle' },
+          /* Haloed. The rect under it is filled `o2` and its intensity IS the reading, so the
+           * usual answer — cap the fill at LABEL_WASH — would delete the thing being read. At
+           * high FiO2 the label measured 1.9:1 in dark mode, which is not dim, it is gone. */
+          { type: 'text', x: 0, y: 3, text: `inspired O₂ ${fiO2Pct}%`, cls: 'valueLabel', anchor: 'middle', halo: 'panel' },
         ],
       },
 

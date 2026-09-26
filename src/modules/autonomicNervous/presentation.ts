@@ -74,7 +74,8 @@ export function buildAutonomicNervousPresentation(ctx: Ctx): ModulePresentation<
             type: 'group',
             transform: 'translate(92,92)',
             children: [
-              { type: 'text', x: 0, y: 42, text: 'Heart', cls: 'organLabel' },
+              // Haloed: the effector's own outline passes under its name at this size.
+              { type: 'text', x: 0, y: 42, text: 'Heart', cls: 'organLabel', halo: 'panel' },
               { type: 'text', x: 0, y: 55, text: `${derived.heartRateBpm.toFixed(0)} bpm`, cls: 'valueLabel', anchor: 'middle' },
             ],
           },

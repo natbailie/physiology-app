@@ -91,7 +91,8 @@ export function buildExercisePhysiologyPresentation(ctx: Ctx): ModulePresentatio
           { type: 'text', x: muscleTextX, y: 186, text: `${derived.muscleFlowSharePct.toFixed(0)}%`, cls: 'caption' },
           // Three units lower: at 196 the MUSCLE bar's bottom edge, not this bar's, ran
           // through the top of the word.
-          { type: 'text', x: 44, y: 199, text: 'other beds', cls: 'caption' },
+          // Haloed: it sits on the redistribution bar it names, which is where it belongs.
+          { type: 'text', x: 44, y: 199, text: 'other beds', cls: 'caption', halo: 'panel' },
           { type: 'rect', x: otherBar.x, y: otherBar.y, width: otherBar.width, height: otherBar.height, cls: 'flowFrame' },
           { type: 'rect', x: 44, y: 202, width: 200 * otherValue, height: 15, fill: 'venous', opacity: 0.85 },
           { type: 'text', x: otherTextX, y: 214, text: 'constricted', cls: 'caption' },
