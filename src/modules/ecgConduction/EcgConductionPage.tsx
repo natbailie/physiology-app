@@ -4,7 +4,6 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { EcgDiagram } from './components/EcgDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { EcgStrip } from '@/shared/components/EcgStrip/EcgStrip';
@@ -21,6 +20,9 @@ import { ecgConductionContent } from './content';
 import { ecgLoopConfig } from './engine/loopConfig';
 import { DEFAULT_ECG_INPUTS, ECG_PRESETS, ECG_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { EcgInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildEcgConductionPresentation } from './presentation';
 
 export function EcgConductionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<EcgInputs>('ecgConduction', DEFAULT_ECG_INPUTS);
@@ -48,6 +50,9 @@ export function EcgConductionPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('ecgConduction', buildEcgConductionPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -77,7 +82,11 @@ export function EcgConductionPage() {
       }
       diagram={
         <>
-          <EcgDiagram derived={snapshot.derived} />
+          {/* The schema's drawing, and then the two things this slot holds that the schema does
+              not describe: a live rhythm strip and an INTERACTIVE twelve-lead grid. Pointing the
+              whole slot at `slots.diagram` would have deleted both, which is the trap CLAUDE.md
+              warns about by name — so only the first child is replaced. */}
+          {slots.diagram}
           <EcgStrip
             label={`Lead ${snapshot.derived.lead}`}
             data={trace}
