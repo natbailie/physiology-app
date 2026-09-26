@@ -45,7 +45,6 @@ const PENETRATOR_GEOMETRY = PENETRATORS.map((angle) => {
 });
 
 const COLLATERAL_PATH = 'M 119.9 121.9 Q 150 60 180.1 121.9';
-const LEADER_PATH = 'M 96 132 L 74 162';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -74,12 +73,19 @@ export function buildCoronaryCirculationPresentation(ctx: Ctx): ModulePresentati
     diagram: [
       {
         type: 'frame',
-        viewBox: [0, 0, 560, 440],
+        /* Widened by one 116-unit gutter on each side for the label rail; the drawing has not
+         * moved. "Epicardial artery" was previously anchored at x=30 and clipped by the frame. */
+        viewBox: [-116, 0, 792, 440],
         ariaLabel: 'Left ventricle in cross-section with its epicardial artery, the lesion, and the two layers of wall it supplies',
         children: [
           // ── Ventricular wall, two layers ──
-          { type: 'circle', cx: HEART.cx, cy: HEART.cy, r: HEART.epi, fill: epiFill },
-          { type: 'circle', cx: HEART.cx, cy: HEART.cy, r: HEART.endo, fill: endoFill },
+          /* The two layers carry different OPACITIES as well as different fills. At rest both
+           * resolved to `artery` at full strength, so the wall read as one band and the legend
+           * below claimed a distinction the drawing never made — the subendocardium only became
+           * visible once it was already ischaemic, which is the one moment it is too late to
+           * learn where it is. */
+          { type: 'circle', cx: HEART.cx, cy: HEART.cy, r: HEART.epi, fill: epiFill, fillOpacity: 0.55 },
+          { type: 'circle', cx: HEART.cx, cy: HEART.cy, r: HEART.endo, fill: endoFill, fillOpacity: 0.92 },
           { type: 'circle', cx: HEART.cx, cy: HEART.cy, r: HEART.cavity, fill: 'panel-raised' },
 
           { type: 'text', x: HEART.cx, y: HEART.cy - 2, text: 'LV', cls: 'anatomy', anchor: 'middle' },
@@ -111,15 +117,22 @@ export function buildCoronaryCirculationPresentation(ctx: Ctx): ModulePresentati
           // Lesion label
           { type: 'text', x: lesionLabel.x, y: lesionLabel.y - 14, text: `lesion · ${(lumenFraction * 100).toFixed(0)}% lumen`, cls: 'anatomy', anchor: 'middle' },
 
-          // Epicardial artery label with leader
-          { type: 'path', d: LEADER_PATH, colorToken: 'text', strokeWidth: 1 },
-          { type: 'text', x: 30, y: 128, text: 'Epicardial artery', cls: 'anatomy' },
-
-          // ── Layer legend ──
-          { type: 'rect', x: 30, y: 330, width: 12, height: 12, fill: epiFill },
-          { type: 'text', x: 50, y: 340, text: 'Subepicardium — outer wall', cls: 'anatomy' },
-          { type: 'rect', x: 30, y: 352, width: 12, height: 12, fill: endoFill },
-          { type: 'text', x: 50, y: 362, text: 'Subendocardium — perfused last, in diastole only', cls: 'anatomy' },
+          /* Four names on one rail, all down the left: every target sits left of the frame's
+           * midline, and a right-column leader would have to cross the whole ventricle to reach
+           * one. A single column is what the Britannica plate in docs/diagrams/references does.
+           *
+           * The two wall layers used to be a swatch legend in the corner. A leader onto the ring
+           * itself is strictly better: it says WHICH ring, which a colour chip can only imply,
+           * and it was implying it with two chips of the same colour. */
+          {
+            type: 'labelRail',
+            gutter: 116,
+            items: [
+              { text: 'Epicardial artery', target: [126, 126] as [number, number], side: 'left' as const },
+              { text: 'Subepicardium', target: [73, 206] as [number, number], side: 'left' as const },
+              { text: 'Subendocardium', target: [94, 224] as [number, number], side: 'left' as const },
+            ],
+          },
 
           // ── Cardiac cycle bar ──
           { type: 'text', x: CYCLE.x, y: CYCLE.y - 12, text: 'One cardiac cycle', cls: 'label' },
