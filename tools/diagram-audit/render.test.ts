@@ -62,6 +62,7 @@ const SHARED: Record<string, any> = {
   alarm: { fill: 'danger', fontSize: 12 },
   verdict: { fill: 'text', fontSize: 9, fontWeight: '600' },
   leader: { stroke: 'text-faint', strokeWidth: 1, fill: 'none' },
+  urineFlow: { stroke: 'urine', strokeWidth: 2.5, dash: '2 6', fill: 'none', linecap: 'round' },
   verdictMixed: { fill: 'danger', fontSize: 9, fontWeight: '600' },
   plotGrid: { stroke: 'grid-line', strokeWidth: 1 },
   plotAxis: { stroke: 'text-faint', strokeWidth: 1.2 },
@@ -220,16 +221,26 @@ function find<T>(ex: Record<string, unknown>, ok: (v: unknown) => boolean): T | 
   return null;
 }
 
-/** The module is styled on the web and NOT on the phone. `DiagramView.tsx` resolves an unknown
- *  `cls` to nothing, so every class that lived only in a `Diagram.module.css` draws with default
- *  fill and no wash natively — the "phone drew it SOLID" fault CLAUDE.md records. 32 of the
- *  modules are in this state, and a reviewer should not spend taste on a frame that is simply
- *  missing its stylesheet, so the page flags them. */
+/**
+ * The module's SCHEMA asks for a class the phone has no value for.
+ *
+ * This used to test whether a module had a web `Diagram.module.css` and no native
+ * `diagramClasses.ts`, and flagged 34 frames across 29 modules. That was the wrong question and
+ * the answer was wrong with it: those stylesheets belong to the hand-written components the phone
+ * never renders. What matters is whether the SCHEMA — the thing both platforms draw from — names
+ * a class the native table cannot resolve, because an unresolved `cls` draws unstyled there.
+ *
+ * Asked properly, seven modules use a module-owned class and all seven already carry a table. The
+ * "3,085 lines to port" this file was reporting did not exist.
+ */
+const SHARED_CLASS_NAMES = new Set(Object.keys(SHARED));
+
 function unstyledOnNative(id: string): boolean {
-  return (
-    existsSync(`${WEB}/${id}/components/Diagram.module.css`) &&
-    !existsSync(`${NATIVE}/${id}/diagramClasses.ts`)
-  );
+  const src = existsSync(`${WEB}/${id}/presentation.ts`) ? readFileSync(`${WEB}/${id}/presentation.ts`, 'utf8') : '';
+  const own = [...src.matchAll(/cls: '(\w+)'/g)].map((m) => m[1]!).filter((c) => !SHARED_CLASS_NAMES.has(c));
+  if (own.length === 0) return false;
+  const table = nativeClasses(id);
+  return own.some((c) => !table || table[c] === undefined);
 }
 
 /** One frame, serialised in the CURRENT theme. `col()` closes over the module-level `theme`. */
