@@ -3,6 +3,7 @@ import { CRANIUM, CLASSIFICATION, FLOW } from './engine/constants';
 import { intracranialPressure } from './engine/cerebralMechanics';
 import type { CerebralDerived, CerebralHistoryPoint, CerebralInputs, CerebralInternalState } from './engine/types';
 import type { ModulePresentation, PresentationContext, FrameNode, ControlSpec } from '@/shared/presentation/types';
+import { skullScene } from '@/shared/diagram/organShapes';
 
 const BOX = { x: 40, y: 90, width: 210, height: 74 };
 const PLOT = { x: 300, y: 60, width: 230, height: 170 };
@@ -56,27 +57,81 @@ export function buildCerebralPerfusionPresentation(ctx: Ctx): ModulePresentation
   const csfWidth = Math.max(0, 140 + derived.csfExcessMl) * scale * 4;
   const brainWidth = Math.max(20, BOX.width - massWidth - bloodWidth - csfWidth);
 
+  /* The box is a SKULL now rather than a rectangle. cerebralPerfusion's subject is the rigid
+   * container, so the container is the one thing on this page that should look like what it is —
+   * and the vault is the single shape in organShapes.ts that responds to no parameter at all.
+   *
+   * Fractions rather than widths: the builder divides its own inner table, which is what keeps
+   * the four compartments adding to exactly the same box however they are split. */
+  const totalWidth = brainWidth + bloodWidth + csfWidth + massWidth;
+  const fractions = {
+    brain: brainWidth / totalWidth,
+    blood: bloodWidth / totalWidth,
+    csf: csfWidth / totalWidth,
+    mass: massWidth / totalWidth,
+  };
+  const SKULL = { x: 150, y: 148, scale: 0.95 };
+  const skull = skullScene(SKULL, {
+    brainFraction: fractions.brain,
+    bloodFraction: fractions.blood,
+    csfFraction: fractions.csf,
+    massFraction: fractions.mass,
+  });
+
+  /* A name per column, aimed at that column's own middle. The builder lays its columns across
+   * 140 organ units from -70, so this walks the same cursor it does. */
+  const ORDER = [
+    { text: 'Brain', fraction: fractions.brain },
+    { text: 'Blood', fraction: fractions.blood },
+    { text: 'CSF', fraction: fractions.csf },
+    { text: 'Mass', fraction: fractions.mass },
+  ];
+  let cursor = -70;
+  const compartments: { text: string; target: [number, number]; side: 'left' | 'right' }[] = [];
+  for (const band of ORDER) {
+    const w = 140 * band.fraction;
+    if (w > 0.4) {
+      compartments.push({
+        text: band.text,
+        target: [SKULL.x + (cursor + w / 2) * SKULL.scale, SKULL.y - 10],
+        /* All four in the LEFT column. Every column sits left of the frame's midline, and from
+         * the right a leader had to cross the whole pressure-volume plot to reach one. */
+        side: 'left',
+      });
+    }
+    cursor += w;
+  }
+
   const kneeX = toX(CRANIUM.COMPENSATORY_RESERVE_ML);
 
   const summary: FrameNode = {
     type: 'frame',
-    viewBox: [0, 0, 560, 440],
+    /* Widened by one 116-unit gutter each side for the label rail; the drawing has not moved. */
+    viewBox: [-116, 0, 792, 440],
+    /* `skullScene` returns a clipPath with its node, and the two travel together for exactly this
+     * reason: without the def the compartment columns draw as plain rectangles straight past the
+     * vault they are supposed to be inside. */
+    defs: skull.defs,
     ariaLabel:
       'Intracranial contents — brain, blood, CSF and any added mass — drawn to scale inside a skull that cannot expand, beside the pressure-volume curve with the current operating point',
     children: [
-      { type: 'path', d: `M ${BOX.x - 8} ${BOX.y - 10} h ${BOX.width + 16} v ${BOX.height + 20} h -${BOX.width + 16} z`, colorToken: 'text-dim', fill: 'none', strokeWidth: 2.5 },
-      { type: 'text', x: BOX.x - 8, y: BOX.y - 18, text: 'A box that cannot expand', cls: 'label' },
+      skull.node,
+      { type: 'text', x: SKULL.x, y: SKULL.y - 88, text: 'A box that cannot expand', cls: 'label', anchor: 'middle' },
       /* These carry their tint as the node's own `opacity`, not as a style variable.
        *
        * They were written `styleVars: { opacity: 0.25 }`, which publishes a custom property
        * called `--opacity` — and no rule in either project reads one, so every shape meant as a
        * wash was painted at full strength on both platforms. The compartment bars were four
        * solid blocks and the two pressure-curve regions were opaque slabs over the plot. */
-      { type: 'rect', x: BOX.x, y: BOX.y, width: brainWidth, height: BOX.height, fill: 'text-dim', opacity: 0.25 },
-      { type: 'rect', x: BOX.x + brainWidth, y: BOX.y, width: bloodWidth, height: BOX.height, fill: 'artery', opacity: 0.45 },
-      { type: 'rect', x: BOX.x + brainWidth + bloodWidth, y: BOX.y, width: csfWidth, height: BOX.height, fill: 'o2', opacity: 0.4 },
-      { type: 'rect', x: BOX.x + brainWidth + bloodWidth + csfWidth, y: BOX.y, width: massWidth, height: BOX.height, fill: 'danger', opacity: 0.5 },
-      { type: 'text', x: BOX.x, y: BOX.y + BOX.height + 30, text: 'Brain · blood · CSF · mass', cls: 'label' },
+      /* The four compartments are named on the rail rather than in a caption reading
+       * "Brain · blood · CSF · mass", which required the reader to map four words onto four
+       * unlabelled bars in the right order. Targets are computed from the same fractions the
+       * columns are drawn from, so a name always points at its own column however thin it is. */
+      {
+        type: 'labelRail' as const,
+        gutter: 116,
+        items: compartments.map((c) => ({ text: c.text, target: c.target, side: c.side })),
+      },
       /* The CSF circuit the compartment bar abstracts away.
        *
        * Hydrocephalus is a drain that has stopped draining — its only edit is

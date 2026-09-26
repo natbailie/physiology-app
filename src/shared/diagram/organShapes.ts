@@ -1764,31 +1764,33 @@ export function skullScene(placement: OrganPlacement, params: SkullParams = {}):
   const csf = clamp01(params.csfFraction ?? 0.1);
   const mass = clamp01(params.massFraction ?? 0);
 
-  /* Stacked from the bottom of the inner table, each band clipped to the vault, so the four
-   * compartments always add up to exactly the same box however they are divided. */
-  const top = -64;
-  const height = 124;
+  /* Columns across the vault, not bands up it, each clipped to the inner table — so the four
+   * compartments always add up to exactly the same box however they are divided, and the
+   * proportions are read the way a stacked bar is read. Vertical stacking was the first
+   * version and it read as fluid levels, which is the one thing intracranial contents are not. */
+  const left = -70;
+  const width = 140;
   const bands: { token: string; fraction: number }[] = [
     { token: 'nerve', fraction: brain },
     { token: 'artery', fraction: blood },
     { token: 'o2', fraction: csf },
-    /* Not `danger`: `artery` is already the blood band and the two reds were indistinguishable
-     * in the one state where telling them apart is the point. */
+    /* Not `danger`: `artery` is already the blood column and the two reds were
+     * indistinguishable in the one state where telling them apart is the point. */
     { token: 'raas', fraction: mass },
   ];
-  let cursor = top;
+  let cursor = left;
   const drawn: PathNode[] = [];
   for (const band of bands) {
-    const h = height * band.fraction;
-    if (h <= 0.4) continue;
+    const w = width * band.fraction;
+    if (w <= 0.4) continue;
     drawn.push({
       type: 'path',
-      d: `M-70,${cursor} L70,${cursor} L70,${cursor + h} L-70,${cursor + h} Z`,
+      d: `M${cursor},-70 L${cursor + w},-70 L${cursor + w},70 L${cursor},70 Z`,
       fill: band.token,
       fillOpacity: 0.42,
       clipPathId: gradientId('skull-inner', 'vault'),
     });
-    cursor += h;
+    cursor += w;
   }
 
   const node = placed(placement, undefined, [
