@@ -13,7 +13,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { FetalDiagram } from './components/FetalDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { FETAL_QUESTIONS } from './questions';
@@ -28,6 +27,9 @@ import {
   FETAL_PRESET_SETTLE_SECONDS,
 } from './engine/presets';
 import type { FetalInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildFetalCirculationPresentation } from './presentation';
 
 export function FetalCirculationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<FetalInputs>('fetalCirculation', DEFAULT_FETAL_INPUTS);
@@ -55,6 +57,12 @@ export function FetalCirculationPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('fetalCirculation', buildFetalCirculationPresentation(presentationCtx), presentationCtx, inputs, handleChange);
   // A duct is held open BY prostaglandin, for as long as the infusion runs — so the button raises
   // the infusion and the slider shows it, rather than writing the patency directly and leaving the
   // learner no way to see what is holding it or to turn it off.
@@ -97,7 +105,7 @@ export function FetalCirculationPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<FetalDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

@@ -4,7 +4,6 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { MembraneDiagram } from './components/MembraneDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -22,6 +21,9 @@ import { perturbStimulate } from './engine/engine';
 import { DEFAULT_MEMBRANE_INPUTS, MEMBRANE_PRESETS, MEMBRANE_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import { CONDUCTANCE } from './engine/constants';
 import type { MembraneInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildMembranePotentialsPresentation } from './presentation';
 
 export function MembranePotentialsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MembraneInputs>('membranePotentials', DEFAULT_MEMBRANE_INPUTS);
@@ -49,6 +51,12 @@ export function MembranePotentialsPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('membranePotentials', buildMembranePotentialsPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -85,7 +93,7 @@ export function MembranePotentialsPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<MembraneDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

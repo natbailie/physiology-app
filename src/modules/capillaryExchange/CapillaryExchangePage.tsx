@@ -6,7 +6,6 @@ import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { useInputNudge } from '@/shared/hooks/useInputNudge';
 import { CAPILLARY_CONTROLS } from './presentation';
-import { CapillaryDiagram } from './components/CapillaryDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -29,6 +28,9 @@ import {
   bedDefaults,
 } from './engine/presets';
 import type { CapillaryInputs, TissueBed } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildCapillaryExchangePresentation } from './presentation';
 
 export function CapillaryExchangePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CapillaryInputs>('capillaryExchange', DEFAULT_CAPILLARY_INPUTS);
@@ -61,6 +63,12 @@ export function CapillaryExchangePage() {
   const capillaryPressureHistory = useSeries(history, (h) => h.capillaryPressure);
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('capillaryExchange', buildCapillaryExchangePresentation(presentationCtx), presentationCtx, inputs, handleChange);
   // You stay standing, and what standing does is raise the venous pressure at the ankle — which is
   // what `perturbStandUp`'s own docblock says it does. The code added to the interstitial volume
   // instead: the oedema rather than its cause, so the pressure it came from was never on the rail.
@@ -97,7 +105,7 @@ export function CapillaryExchangePage() {
           onReset={resetScenario}
         />
       }
-      diagram={<CapillaryDiagram derived={derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={derived} />}
       questions={
         <QuestionSet

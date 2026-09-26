@@ -5,7 +5,6 @@ import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { useInputNudge } from '@/shared/hooks/useInputNudge';
-import { GuytonDiagram } from './components/GuytonDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -30,6 +29,9 @@ import {
 } from './engine/presets';
 import { PLOT } from './engine/constants';
 import type { VenousReturnInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildVenousReturnPresentation } from './presentation';
 
 export function VenousReturnPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<VenousReturnInputs>('venousReturn', DEFAULT_VENOUS_RETURN_INPUTS);
@@ -63,6 +65,12 @@ export function VenousReturnPage() {
   const msfpHistory = useSeries(history, (h) => h.meanSystemicFillingPressure);
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('venousReturn', buildVenousReturnPresentation(presentationCtx), presentationCtx, inputs, handleChange);
   // Blood lost or given is a standing change and moves the slider; a Valsalva is not, and does not.
   // That split is the whole distinction this rail was hiding — `volumeOffsetMl` carried the litre
   // forever while the blood-volume slider went on reading 5000, and the intrathoracic surge decays
@@ -97,7 +105,7 @@ export function VenousReturnPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<GuytonDiagram derived={derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={derived} inputs={inputs} />}
       questions={
         <QuestionSet

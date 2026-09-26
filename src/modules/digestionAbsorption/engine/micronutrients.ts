@@ -15,13 +15,22 @@ export function updateB12Store(current: number, uptakeFraction: number, dtDays: 
 }
 
 /**
+ * How much of the duodenal iron-absorbing surface is working (0-1). Squared, because villous
+ * atrophy costs both the cells and the height of the villi they sit on — which is why coeliac
+ * starves iron long before it troubles anything carried further down.
+ */
+export function ironSurfaceFactor(mucosalSurfaceAreaPct: number): number {
+  const surface = clamp(mucosalSurfaceAreaPct / 100, 0, 1);
+  return surface * surface;
+}
+
+/**
  * Iron uptake through proximal mucosa, against a fixed daily turnover. Mucosal regulation
  * gives the healthy gut just enough headroom that coeliac-grade surface loss cannot keep up.
  */
 export function updateIronStore(current: number, mucosalSurfaceAreaPct: number, dtDays: number): number {
-  const surface = clamp(mucosalSurfaceAreaPct / 100, 0, 1);
   const regulation = clamp(1.6 - current, 0.2, 1.2);
-  const uptake = MICRONUTRIENT.IRON_MAX_UPTAKE_PER_DAY * surface * surface * regulation;
+  const uptake = MICRONUTRIENT.IRON_MAX_UPTAKE_PER_DAY * ironSurfaceFactor(mucosalSurfaceAreaPct) * regulation;
   const net = uptake - MICRONUTRIENT.IRON_TURNOVER_PER_DAY;
   return clamp(current + net * dtDays, 0, 1);
 }

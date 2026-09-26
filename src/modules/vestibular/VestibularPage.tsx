@@ -10,7 +10,6 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { VestibularDiagram } from './components/VestibularDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { VESTIBULAR_QUESTIONS } from './questions';
@@ -26,6 +25,9 @@ import {
   DEFAULT_VESTIBULAR_INPUTS,
 } from './engine/presets';
 import type { VestibularInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildVestibularPresentation } from './presentation';
 
 export function VestibularPage() {
   // Opened from the ward round, or null for the catalogue route. The seed means the engine
@@ -75,6 +77,12 @@ export function VestibularPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('vestibular', buildVestibularPresentation(presentationCtx), presentationCtx, inputs, handleChange);
+
   const spvHistory = useSeries(history, (h) => h.spv);
   const spvBaseline = useSeries(baseline.history, (h) => h.spv);
   const vertigoHistory = useSeries(history, (h) => h.vertigo);
@@ -104,7 +112,7 @@ export function VestibularPage() {
         />
       }
       {...cases.page}
-      diagram={<VestibularDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

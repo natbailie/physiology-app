@@ -5,7 +5,6 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { MuscleDiagram } from './components/MuscleDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -31,6 +30,9 @@ import {
 } from './engine/presets';
 import { FORCE_VELOCITY, LENGTH_TENSION, TENSION } from './engine/constants';
 import type { MuscleInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildMuscleContractionPresentation } from './presentation';
 
 export function MuscleContractionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MuscleInputs>('muscleContraction', DEFAULT_MUSCLE_INPUTS);
@@ -56,11 +58,18 @@ export function MuscleContractionPage() {
     perturbEngine: perturb,
     fastForwardEngine: fastForward,
   });
-  const { derived, state } = snapshot;
+  // `state` was only read by the hand-written diagram; the schema takes the whole snapshot.
+  const { derived } = snapshot;
   const calciumHistory = useSeries(history, (h) => h.calcium);
   const tensionHistory = useSeries(history, (h) => h.tension);
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('muscleContraction', buildMuscleContractionPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -100,7 +109,7 @@ export function MuscleContractionPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<MuscleDiagram derived={derived} excitationPulse={state.excitationPulse} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={derived} />}
       questions={
         <QuestionSet

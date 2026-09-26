@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { NmjDiagram } from './components/NmjDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { NMJ_QUESTIONS } from './questions';
@@ -27,6 +26,9 @@ import {
 } from './engine/presets';
 import type { NmjInputs } from './engine/types';
 import { TrainOfFour } from './components/TrainOfFour';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildNeuromuscularJunctionPresentation } from './presentation';
 
 export function NeuromuscularJunctionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<NmjInputs>('neuromuscularJunction', DEFAULT_NMJ_INPUTS);
@@ -54,6 +56,12 @@ export function NeuromuscularJunctionPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('neuromuscularJunction', buildNeuromuscularJunctionPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -92,7 +100,7 @@ export function NeuromuscularJunctionPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<NmjDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

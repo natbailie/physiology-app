@@ -47,9 +47,12 @@ export const digestionAbsorptionContent: ExplainerContent<DigestionPresetName> =
       heading: 'Site specificity is what turns anatomy into diagnosis',
       paragraphs: [
         'Site specificity turns anatomy into diagnosis. Iron, calcium and folate are taken up proximally, so coeliac disease — an upper-gut lesion — starves them first while B12 rides past untouched. Ileal Crohn\'s does the opposite. The colon is the last reserve: presented with a secretory load it can reclaim litres before stool becomes liquid, which is why the same drive produces annoyance in one patient and collapse in another whose colon has been resected or is itself inflamed.',
+        'The map above the villus draws all of this along the gut. Pick one nutrient to trace it: iron lights the duodenum, B12 a few centimetres of terminal ileum and nothing else, short-chain fatty acids only the colon where bacteria make them. Then press a disease and watch which bands break. Resecting the terminal ileum takes B12 and the bile salts together and leaves iron alone; coeliac disease does the reverse. The villus below shows the same thing a biopsy would — flattened villi over deepened crypts — and traces the picked nutrient through the enterocyte to the vessel that carries it away: the portal capillary for everything water-soluble, the lacteal for fat.',
       ],
       demos: [
         { preset: 'coeliacDisease', watch: 'iron absorption' },
+        { preset: 'terminalIlealResection', watch: 'the B12 band at the terminal ileum' },
+        { preset: 'shortBowelSyndrome', watch: 'colonic salvage' },
       ],
     },
     {

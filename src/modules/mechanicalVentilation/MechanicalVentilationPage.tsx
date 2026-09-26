@@ -4,7 +4,6 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { MvDiagram } from './components/MvDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -20,6 +19,9 @@ import { mechanicalVentilationContent } from './content';
 import { mvLoopConfig } from './engine/loopConfig';
 import { DEFAULT_MV_INPUTS, MV_PRESETS, MV_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { MvInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildMechanicalVentilationPresentation } from './presentation';
 
 export function MechanicalVentilationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MvInputs>('mechanicalVentilation', DEFAULT_MV_INPUTS);
@@ -48,6 +50,12 @@ export function MechanicalVentilationPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('mechanicalVentilation', buildMechanicalVentilationPresentation(presentationCtx), presentationCtx, inputs, handleChange);
+
   const applyPreset = useScenarioPreset({
     setInputs,
     defaults: DEFAULT_MV_INPUTS,
@@ -74,7 +82,7 @@ export function MechanicalVentilationPage() {
           onReset={resetScenario}
         />
       }
-      diagram={<MvDiagram derived={snapshot.derived} inputs={inputs} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

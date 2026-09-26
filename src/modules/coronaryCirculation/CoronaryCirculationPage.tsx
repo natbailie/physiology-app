@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { CoronaryDiagram } from './components/CoronaryDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { CORONARY_QUESTIONS } from './questions';
@@ -26,6 +25,9 @@ import {
   DEFAULT_CORONARY_INPUTS,
 } from './engine/presets';
 import type { CoronaryInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildCoronaryCirculationPresentation } from './presentation';
 
 export function CoronaryCirculationPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CoronaryInputs>('coronaryCirculation', DEFAULT_CORONARY_INPUTS);
@@ -53,6 +55,12 @@ export function CoronaryCirculationPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('coronaryCirculation', buildCoronaryCirculationPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -91,7 +99,7 @@ export function CoronaryCirculationPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<CoronaryDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

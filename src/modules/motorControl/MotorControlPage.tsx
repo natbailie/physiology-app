@@ -11,7 +11,6 @@ import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { MotorDiagram } from './components/MotorDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { MOTOR_QUESTIONS } from './questions';
@@ -27,6 +26,9 @@ import {
 } from './engine/presets';
 import type { MotorInputs } from './engine/types';
 import { TremorStrip } from './components/TremorStrip';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildMotorControlPresentation } from './presentation';
 
 export function MotorControlPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MotorInputs>('motorControl', DEFAULT_MOTOR_INPUTS);
@@ -54,6 +56,12 @@ export function MotorControlPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('motorControl', buildMotorControlPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -90,7 +98,7 @@ export function MotorControlPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<MotorDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

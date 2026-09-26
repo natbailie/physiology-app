@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { AdrenalMedullaDiagram } from './components/AdrenalMedullaDiagram';
 import { AdrenalMedullaReadoutPanel } from './components/AdrenalMedullaReadoutPanel';
 import { ControlPanel as AdrenalMedullaControlPanel } from './components/AdrenalMedullaControlPanel';
 import { MEDULLA_QUESTIONS } from './questions';
@@ -26,6 +25,9 @@ import {
   DEFAULT_MEDULLA_INPUTS,
 } from './engine/presets';
 import type { MedullaInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildAdrenalMedullaPresentation } from './presentation';
 
 export function AdrenalMedullaPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<MedullaInputs>('adrenalMedulla', DEFAULT_MEDULLA_INPUTS);
@@ -53,6 +55,12 @@ export function AdrenalMedullaPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('adrenalMedulla', buildAdrenalMedullaPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -88,7 +96,7 @@ export function AdrenalMedullaPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<AdrenalMedullaDiagram derived={snapshot.derived} inputs={inputs} />}
+      diagram={slots.diagram}
       readouts={<AdrenalMedullaReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

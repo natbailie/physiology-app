@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import { useEngineLoop } from '@/shared/hooks/useEngineLoop';
-import { useSeries } from '@/shared/hooks/useSeries';
 import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
@@ -10,10 +10,6 @@ import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
-import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { AbsorptionDiagram } from './components/AbsorptionDiagram';
-import { ReadoutPanel } from './components/ReadoutPanel';
-import { ControlPanel } from './components/ControlPanel';
 import { DIGESTION_QUESTIONS } from './questions';
 import { ExplainerPanel } from '@/shared/components/ExplainerPanel/ExplainerPanel';
 import { digestionAbsorptionContent } from './content';
@@ -25,7 +21,10 @@ import {
   DIGESTION_PRESET_ORDER,
   DEFAULT_DIGESTION_INPUTS,
 } from './engine/presets';
-import type { DigestionInputs } from './engine/types';
+import { buildDigestionAbsorptionPresentation } from './presentation';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import type { DigestionDerived, DigestionHistoryPoint, DigestionInputs, DigestionInternalState } from './engine/types';
 
 export function DigestionAbsorptionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<DigestionInputs>('digestionAbsorption', DEFAULT_DIGESTION_INPUTS);
@@ -61,14 +60,18 @@ export function DigestionAbsorptionPage() {
     resetEngine: reset,
   });
 
-  const stoolHistory = useSeries(history, (h) => h.stoolWaterMlPerDay);
-  const stoolHistoryBaseline = useSeries(baseline.history, (h) => h.stoolWaterMlPerDay);
-  const poolHistory = useSeries(history, (h) => h.bileSaltPoolG);
-  const poolHistoryBaseline = useSeries(baseline.history, (h) => h.bileSaltPoolG);
-  const nutritionHistory = useSeries(history, (h) => h.nutritionIndex * 100);
-  const nutritionHistoryBaseline = useSeries(baseline.history, (h) => h.nutritionIndex * 100);
-  const fatHistory = useSeries(history, (h) => h.fatAbsorptionPct);
-  const fatHistoryBaseline = useSeries(baseline.history, (h) => h.fatAbsorptionPct);
+  // Which nutrient the map traces. Page state, not an input: it changes what the drawing
+  // emphasises and nothing about the gut, so it stays out of share links and question setups.
+  const [lens, setLens] = useState<string>();
+
+  const ctx = {
+    ...getPresentationContext<DigestionInternalState, DigestionDerived, DigestionInputs, DigestionHistoryPoint>(snapshot, history, baseline, inputs),
+    lens,
+  };
+  const slots = usePresentationSlots('digestionAbsorption', buildDigestionAbsorptionPresentation(ctx), ctx, inputs, handleChange, {
+    value: lens,
+    onChange: setLens,
+  });
 
   return (
     <ModulePage
@@ -90,8 +93,8 @@ export function DigestionAbsorptionPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<AbsorptionDiagram derived={snapshot.derived} />}
-      readouts={<ReadoutPanel derived={snapshot.derived} />}
+      diagram={slots.diagram}
+      readouts={slots.readouts}
       questions={
         <QuestionSet
           count={DIGESTION_QUESTIONS.length}
@@ -104,48 +107,9 @@ export function DigestionAbsorptionPage() {
         </QuestionSet>
       }
       transport={<SimControls transport={transport} baseline={baseline} />}
-      charts={
-        <>
-          <Sparkline
-            label="Stool water"
-            unit="ml/day"
-            data={stoolHistory}
-            baselineData={stoolHistoryBaseline}
-            domainMin={0}
-            domainMax={3000}
-            colorVar="var(--danger)"
-          />
-          <Sparkline
-            label="Bile salt pool"
-            unit="g"
-            data={poolHistory}
-            baselineData={poolHistoryBaseline}
-            domainMin={0}
-            domainMax={5}
-            colorVar="var(--liver)"
-          />
-          <Sparkline
-            label="Fat uptake"
-            unit="%"
-            data={fatHistory}
-            baselineData={fatHistoryBaseline}
-            domainMin={0}
-            domainMax={100}
-            colorVar="var(--o2)"
-          />
-          <Sparkline
-            label="Nutrition"
-            unit="%"
-            data={nutritionHistory}
-            baselineData={nutritionHistoryBaseline}
-            domainMin={0}
-            domainMax={100}
-            colorVar="var(--text)"
-          />
-        </>
-      }
+      charts={slots.charts}
       blindControls={session.blinded}
-      controls={<ControlPanel inputs={inputs} onChange={handleChange} />}
+      controls={slots.controls}
       explainer={<ExplainerPanel content={digestionAbsorptionContent} startCollapsed={session.phase !== 'idle'} />}
       footnote="A simplified conceptual model of luminal digestion and absorption — not a clinical or diagnostic tool. Gastric acid control, gut hormones and motility live in GI Physiology, which sits upstream of this one; the anaemia that follows B12 and iron loss is modelled in Erythropoiesis. Micronutrient stores drain over simulated weeks, compressed heavily so the long game is watchable; bile salt pools move over simulated days. Stool classifications follow mechanism — osmotic, secretory, cholerrhoeic, steatorrhoeic — rather than any single number."
     />

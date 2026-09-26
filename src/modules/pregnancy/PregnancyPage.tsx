@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { PregnancyDiagram } from './components/PregnancyDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { PREGNANCY_QUESTIONS } from './questions';
@@ -26,6 +25,9 @@ import {
   DEFAULT_PREGNANCY_INPUTS,
 } from './engine/presets';
 import type { PregnancyInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildPregnancyPresentation } from './presentation';
 
 export function PregnancyPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<PregnancyInputs>('pregnancy', DEFAULT_PREGNANCY_INPUTS);
@@ -53,6 +55,12 @@ export function PregnancyPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('pregnancy', buildPregnancyPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -91,7 +99,7 @@ export function PregnancyPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<PregnancyDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

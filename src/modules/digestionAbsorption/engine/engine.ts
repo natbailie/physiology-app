@@ -123,6 +123,9 @@ export function computeDerived(state: DigestionInternalState, inputs: DigestionI
     classification,
     patternSummary: patternSummary(classification, state),
 
+    generalUptakeFraction: generalEff,
+    colonicSalvageFraction: clamp(balance.effectiveSalvageMlPerDay / WATER.COLON_SALVAGE_MAX_ML_PER_DAY, 0, 1),
+
     mealFatGrams: inputs.mealFatGrams,
     mealLactoseGrams: inputs.mealLactoseGrams,
     luminalMealLoad: state.luminalMealLoad,

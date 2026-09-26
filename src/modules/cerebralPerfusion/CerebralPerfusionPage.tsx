@@ -13,7 +13,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { CerebralDiagram } from './components/CerebralDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { CEREBRAL_QUESTIONS } from './questions';
@@ -28,6 +27,9 @@ import {
   DEFAULT_CEREBRAL_INPUTS,
 } from './engine/presets';
 import type { CerebralInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildCerebralPerfusionPresentation } from './presentation';
 
 export function CerebralPerfusionPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CerebralInputs>('cerebralPerfusion', DEFAULT_CEREBRAL_INPUTS);
@@ -55,6 +57,12 @@ export function CerebralPerfusionPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('cerebralPerfusion', buildCerebralPerfusionPresentation(presentationCtx), presentationCtx, inputs, handleChange);
   // A haematoma is a MASS in the box, and it stays there — it does not resorb over the minutes a
   // learner watches. It used to be added to the CSF volume instead, which is the wrong compartment
   // and left the intracranial-mass slider reading zero through an intracranial bleed.
@@ -97,7 +105,7 @@ export function CerebralPerfusionPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<CerebralDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

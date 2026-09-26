@@ -94,6 +94,12 @@ export interface DigestionDerived {
   classification: DigestionState_Classification;
   patternSummary: string;
 
+  // Where along the tract the work is being done — read by the absorption map.
+  /** Carbohydrate and amino-acid uptake as a fraction of normal: surface area against contact time. */
+  generalUptakeFraction: number;
+  /** Colonic water salvage actually available, as a fraction of the healthy ceiling (0-1). */
+  colonicSalvageFraction: number;
+
   // Passthroughs so tick() stays pure.
   mealFatGrams: number;
   mealLactoseGrams: number;

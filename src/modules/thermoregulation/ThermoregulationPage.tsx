@@ -10,7 +10,6 @@ import { ModulePage } from '@/shared/components/ModulePage/ModulePage';
 import { PresetBar } from '@/shared/components/PresetBar/PresetBar';
 import { SimControls } from '@/shared/components/SimControls/SimControls';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { ThermoDiagram } from './components/ThermoDiagram';
 import { ThermoReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel as ThermoControlPanel } from './components/ThermoControlPanel';
 import { THERMO_QUESTIONS } from './questions';
@@ -26,6 +25,9 @@ import {
   DEFAULT_THERMO_INPUTS,
 } from './engine/presets';
 import type { ThermoInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildThermoregulationPresentation } from './presentation';
 
 export function ThermoregulationPage() {
   // Opened from the ward round, or null for the catalogue route. The seed means the engine
@@ -75,6 +77,12 @@ export function ThermoregulationPage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('thermoregulation', buildThermoregulationPresentation(presentationCtx), presentationCtx, inputs, handleChange);
+
   const coreHistory = useSeries(history, (h) => h.core);
   const coreBaseline = useSeries(baseline.history, (h) => h.core);
   const setPointHistory = useSeries(history, (h) => h.setPoint);
@@ -105,7 +113,7 @@ export function ThermoregulationPage() {
         />
       }
       {...cases.page}
-      diagram={<ThermoDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ThermoReadoutPanel derived={snapshot.derived} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

@@ -4,7 +4,6 @@ import { useShareableInputs } from '@/shared/hooks/useShareableInputs';
 import { useScenarioReset } from '@/shared/hooks/useScenarioReset';
 import { useScenarioPreset } from '@/shared/hooks/useScenarioPreset';
 import { useInputSetter } from '@/shared/hooks/useInputSetter';
-import { HpaDiagram } from './components/HpaDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -21,6 +20,9 @@ import { hpaLoopConfig } from './engine/loopConfig';
 import { perturbAcuteStressor } from './engine/engine';
 import { DEFAULT_HPA_INPUTS, HPA_PRESETS, HPA_PRESET_LABELS, PRESET_ORDER } from './engine/presets';
 import type { HpaInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildHpaPresentation } from './presentation';
 
 export function HpaPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<HpaInputs>('hpaAxis', DEFAULT_HPA_INPUTS);
@@ -48,6 +50,12 @@ export function HpaPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('hpaAxis', buildHpaPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -85,7 +93,7 @@ export function HpaPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<HpaDiagram derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

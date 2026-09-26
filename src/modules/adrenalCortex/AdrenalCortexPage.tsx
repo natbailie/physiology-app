@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { AdrenalCortexDiagram } from './components/AdrenalCortexDiagram';
 import { AdrenalCortexReadoutPanel } from './components/AdrenalCortexReadoutPanel';
 import { ControlPanel as AdrenalCortexControlPanel } from './components/AdrenalCortexControlPanel';
 import { ADRENAL_QUESTIONS } from './questions';
@@ -25,6 +24,9 @@ import {
   DEFAULT_ADRENAL_INPUTS,
 } from './engine/presets';
 import type { AdrenalCortexInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildAdrenalCortexPresentation } from './presentation';
 
 export function AdrenalCortexPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<AdrenalCortexInputs>('adrenalCortex', DEFAULT_ADRENAL_INPUTS);
@@ -52,6 +54,12 @@ export function AdrenalCortexPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('adrenalCortex', buildAdrenalCortexPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -84,7 +92,7 @@ export function AdrenalCortexPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<AdrenalCortexDiagram derived={snapshot.derived} inputs={inputs} />}
+      diagram={slots.diagram}
       readouts={<AdrenalCortexReadoutPanel derived={snapshot.derived} inputs={inputs} />}
       questions={
         <QuestionSet

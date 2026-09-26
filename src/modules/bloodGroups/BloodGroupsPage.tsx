@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { BloodGroupsDiagram } from './components/BloodGroupsDiagram';
 import { BloodGroupsReadoutPanel } from './components/BloodGroupsReadoutPanel';
 import { ControlPanel as BloodGroupsControlPanel } from './components/BloodGroupsControlPanel';
 import { BLOOD_QUESTIONS } from './questions';
@@ -25,6 +24,9 @@ import {
   DEFAULT_BLOOD_INPUTS,
 } from './engine/presets';
 import type { BloodInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildBloodGroupsPresentation } from './presentation';
 
 export function BloodGroupsPage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<BloodInputs>('bloodGroups', DEFAULT_BLOOD_INPUTS);
@@ -52,6 +54,12 @@ export function BloodGroupsPage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('bloodGroups', buildBloodGroupsPresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -82,7 +90,7 @@ export function BloodGroupsPage() {
           disabled={session.blinded}
         />
       }
-      diagram={<BloodGroupsDiagram derived={snapshot.derived} inputs={inputs} />}
+      diagram={slots.diagram}
       readouts={<BloodGroupsReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet

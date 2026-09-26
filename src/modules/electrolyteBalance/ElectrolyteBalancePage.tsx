@@ -6,7 +6,6 @@ import { useInputSetter } from '@/shared/hooks/useInputSetter';
 import { caseInputs, useModuleCase } from '@/shared/hooks/useModuleCase';
 import { useModuleCases } from '@/shared/hooks/useModuleCases';
 import { ELECTROLYTE_CASES } from './cases';
-import { CompartmentDiagram } from './components/CompartmentDiagram';
 import { ReadoutPanel } from './components/ReadoutPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
@@ -26,6 +25,9 @@ import {
   ELECTROLYTE_PRESET_ORDER,
 } from './engine/presets';
 import type { ElectrolyteInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildElectrolyteBalancePresentation } from './presentation';
 
 export function ElectrolyteBalancePage() {
   // Opened from the ward round, or null for the catalogue route. The seed means the engine
@@ -80,6 +82,12 @@ export function ElectrolyteBalancePage() {
 
   const handleChange = useInputSetter(setInputs);
 
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('electrolyteBalance', buildElectrolyteBalancePresentation(presentationCtx), presentationCtx, inputs, handleChange);
+
   return (
     <ModulePage
       historyCapacity={electrolyteLoopConfig.historyCapacity}
@@ -103,7 +111,7 @@ export function ElectrolyteBalancePage() {
         />
       }
       {...cases.page}
-      diagram={<CompartmentDiagram derived={derived} />}
+      diagram={slots.diagram}
       readouts={<ReadoutPanel derived={derived} />}
       transport={<SimControls transport={transport} baseline={baseline} />}
       charts={

@@ -11,7 +11,6 @@ import { QuizPanel } from '@/shared/components/QuizPanel/QuizPanel';
 import { QuestionSet } from '@/shared/components/QuestionSet/QuestionSet';
 import { useModulePractice } from '@/shared/assessment/useModulePractice';
 import { Sparkline } from '@/shared/components/Sparkline/Sparkline';
-import { CellCycleRing } from './components/CellCycleRing';
 import { CellCycleReadoutPanel } from './components/CellCycleReadoutPanel';
 import { CellCycleControlPanel } from './components/CellCycleControlPanel';
 import { CELL_CYCLE_QUESTIONS } from './questions';
@@ -25,6 +24,9 @@ import {
   CELL_CYCLE_PRESET_ORDER,
 } from './engine/presets';
 import type { CellCycleInputs } from './engine/types';
+import { getPresentationContext } from '@/shared/presentation/context';
+import { usePresentationSlots } from '@/shared/presentation/ModulePresentationContent';
+import { buildCellCyclePresentation } from './presentation';
 
 export function CellCyclePage() {
   const { inputs, setInputs, shareLink } = useShareableInputs<CellCycleInputs>('cellCycle', DEFAULT_CELL_CYCLE_INPUTS);
@@ -52,6 +54,12 @@ export function CellCyclePage() {
   });
 
   const handleChange = useInputSetter(setInputs);
+
+  /* The DIAGRAM is the schema's. The readouts, charts and controls stay this page's own
+   * components: the drawing is what has to agree with the phone, and converting the other
+   * three slots is a separate change with its own failure modes. */
+  const presentationCtx = getPresentationContext(snapshot, history, baseline, inputs);
+  const slots = usePresentationSlots('cellCycle', buildCellCyclePresentation(presentationCtx), presentationCtx, inputs, handleChange);
 
   const applyPreset = useScenarioPreset({
     setInputs,
@@ -82,7 +90,7 @@ export function CellCyclePage() {
           disabled={session.blinded}
         />
       }
-      diagram={<CellCycleRing derived={snapshot.derived} />}
+      diagram={slots.diagram}
       readouts={<CellCycleReadoutPanel derived={snapshot.derived} />}
       questions={
         <QuestionSet
