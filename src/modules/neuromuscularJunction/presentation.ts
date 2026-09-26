@@ -130,7 +130,10 @@ export function buildNeuromuscularJunctionPresentation(ctx: Ctx): ModulePresenta
     diagram: [
       {
         type: 'frame',
-        viewBox: [0, 0, 560, 440],
+        /* Widened on the LEFT only. Every name is in the left column, so a right gutter would be
+         * 124 units of empty margin — and the EPP bar lives at the drawing's right edge, which is
+         * what the right column's leaders were crossing to reach anything. */
+        viewBox: [-124, 0, 684, 440],
         ariaLabel:
           'The neuromuscular junction: the nerve terminal with docked vesicles and voltage-gated calcium channels at its active zones, the synaptic cleft with acetylcholinesterase, and the postsynaptic junctional folds carrying acetylcholine receptors on their crests',
         children: [
@@ -143,18 +146,33 @@ export function buildNeuromuscularJunctionPresentation(ctx: Ctx): ModulePresenta
             strokeWidth: 2,
           },
           { type: 'text', cls: 'anatomyStrong', x: BOUTON.x + 12, y: BOUTON.y + 22, text: 'Nerve terminal' },
+          /* Five names on a rail. All five used to sit at x=20 or x=438 — hard against the frame
+           * edges, with nothing joining them to anything: "Acetylcholinesterase" named an enzyme
+           * drawn 280 units away. "Nerve terminal" stays on the drawing above, because it names
+           * the whole REGION and a leader to something filling half the frame reads as a mistake.
+           *
+           * 124 units of gutter rather than the default 96: "Acetylcholinesterase" is twenty
+           * characters and needs about 110. All five sit in the LEFT column, which is what the
+           * synapse plate in docs/diagrams/references does — its leaders cross the drawing to
+           * reach the far side, and that reads fine where crossing the EPP bar does not. */
+          {
+            type: 'labelRail',
+            gutter: 124,
+            items: [
+              { text: 'Active zones', target: [180, MEMBRANE_Y] as [number, number], side: 'left' as const },
+              { text: 'ACh receptors', target: [250, FOLD.crest] as [number, number], side: 'left' as const },
+              { text: 'Acetylcholinesterase', target: [300, MEMBRANE_Y + 22] as [number, number], side: 'left' as const },
+              { text: 'Cleft', target: [392, MEMBRANE_Y + 30] as [number, number], side: 'left' as const },
+              { text: 'Folds', target: [340, FOLD.trough - 6] as [number, number], side: 'left' as const },
+            ],
+          },
           ...reserveVesicles,
           ...zones,
-          { type: 'text', cls: 'anatomy', x: 20, y: MEMBRANE_Y - 6, text: 'Active zones' },
           // ---- Synaptic cleft and its enzyme ----
-          { type: 'text', cls: 'anatomy', x: 438, y: MEMBRANE_Y + 26, text: 'Cleft' },
           ...esterases,
-          { type: 'text', cls: 'anatomy', x: 20, y: MEMBRANE_Y + 26, text: 'Acetylcholinesterase' },
           // ---- Postsynaptic membrane ----
           { type: 'path', d: foldPath(), colorToken: 'sarcomere', fill: 'none', strokeWidth: 2.5 },
           ...receptors,
-          { type: 'text', cls: 'anatomy', x: FOLD.x1 + 8, y: FOLD.trough, text: 'Folds' },
-          { type: 'text', cls: 'anatomy', x: 20, y: FOLD.crest + 4, text: 'ACh receptors' },
           // ---- Muscle fibre (outlined, strength in the label) ----
           {
             type: 'path',

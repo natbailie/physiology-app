@@ -178,14 +178,35 @@ export function layoutRail(spec: RailSpec, viewBox: readonly [number, number, nu
  *
  * Frames with no rail, and frames whose gutters would leave nothing, are returned untouched.
  */
+/** Which margins a rail actually puts labels in. A frame widened on one side only must not be
+ *  cropped on both — that removes drawing, not empty margin. */
+function railSides(spec: RailSpec, midX: number): { left: boolean; right: boolean } {
+  let left = false;
+  let right = false;
+  for (const item of spec.items) {
+    if (item.side ? item.side === 'left' : item.target[0] < midX) left = true;
+    else right = true;
+  }
+  return { left, right };
+}
+
 export function contentViewBox(
   rails: readonly RailSpec[],
   viewBox: readonly [number, number, number, number],
 ): [number, number, number, number] {
   const [vx, vy, vw, vh] = viewBox;
   if (rails.length === 0) return [vx, vy, vw, vh];
-  // The narrowest gutter wins: cropping past one rail's margin would cut its own targets off.
   const gutter = Math.min(...rails.map((r) => r.gutter ?? GUTTER));
-  if (!Number.isFinite(gutter) || gutter <= 0 || vw - 2 * gutter < vw * 0.3) return [vx, vy, vw, vh];
-  return [vx + gutter, vy, vw - 2 * gutter, vh];
+  if (!Number.isFinite(gutter) || gutter <= 0) return [vx, vy, vw, vh];
+
+  /* Crop only the margins that hold names. neuromuscularJunction widened on the LEFT alone —
+   * every one of its names is in that column — and cropping symmetrically took 124 units off
+   * the right, which is where its EPP bar lives. The sweep caught it as a 77px clip. */
+  const midX = vx + vw / 2;
+  const used = rails.map((r) => railSides(r, midX));
+  const cropLeft = used.some((u) => u.left) ? gutter : 0;
+  const cropRight = used.some((u) => u.right) ? gutter : 0;
+  const width = vw - cropLeft - cropRight;
+  if (width < vw * 0.3) return [vx, vy, vw, vh];
+  return [vx + cropLeft, vy, width, vh];
 }
