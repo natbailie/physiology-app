@@ -18,9 +18,6 @@ export function ReferencePage() {
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href="#">
-          &larr; Modules
-        </a>
         <h1 className={styles.title}>Formula Reference</h1>
         <span className={styles.subtitle}>
           {FORMULAS.length} high-yield equations &amp; calculators — most of them computed by a simulator

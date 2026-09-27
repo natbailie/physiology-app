@@ -1,6 +1,6 @@
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { useEntitlement } from '@/billing/useEntitlement';
-import { DISCIPLINES, MODULES, THEMES, type ThemeId } from './moduleRegistry';
+import { MODULES, THEMES, type ThemeId } from './moduleRegistry';
 import { useModuleProgress } from './useModuleProgress';
 import { ExamFilterBar } from './ExamFilterBar';
 import { matchesExam, useExamFilter } from './examFilter';
@@ -25,20 +25,10 @@ export function ThemePage({ themeId }: ThemePageProps) {
   const inTheme = MODULES.filter((module) => module.theme === themeId);
   const modules = inTheme.filter((module) => matchesExam(module.exams, examFilter));
 
-  // Back goes up one tier, to the subject this theme sits under. A discipline that skips its
-  // own page (its href points straight at a hub) has nowhere for that link to land, so the
-  // trail falls back to the picker.
-  const discipline = DISCIPLINES.find((d) => d.id === theme.discipline);
-  const backHref = discipline?.href ? '#home' : `#discipline/${theme.discipline}`;
-  const backLabel = discipline?.href ? 'All subjects' : (discipline?.name ?? 'All subjects');
-
   return (
     <div className={styles.page}>
       <nav className={styles.backRow}>
         <ThemeBar />
-        <a href={backHref} className={styles.backLink}>
-          ← {backLabel}
-        </a>
       </nav>
 
       <header className={styles.header}>

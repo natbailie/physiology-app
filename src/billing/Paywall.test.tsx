@@ -15,7 +15,9 @@ describe('paywall', () => {
     render(<Paywall moduleId="shockStates" />);
     const links = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(links).toContain('#pricing');
-    expect(links).toContain('#');
+    // No longer asserts a '#' back link: going back belongs to the NavArrows. The way FORWARD
+    // is what this screen owes the learner, and that is the '#pricing' above plus the free
+    // modules the next case checks.
   });
 
   it('points at the modules the learner can already open', () => {

@@ -270,6 +270,9 @@
   /* Spacing. Every gap and pad rounds to one of these eight. */
   --s-1: 0.25rem;
   --s-2: 0.375rem;
+  /* Height of the back/forward dock's band on narrow screens, where it cannot sit in a side
+   * gutter. ModulePage's sticky bar offsets by this so it does not slide under the arrows. */
+  --nav-dock-h: 3.25rem;
   --s-3: 0.5rem;
   --s-4: 0.75rem;
   --s-5: 1rem;

@@ -107,9 +107,6 @@ export function PricingPage() {
   return (
     <div className={styles.page}>
       <ThemeBar />
-      <a href="#" className={styles.backLink}>
-        ← All modules
-      </a>
       <h1 className={styles.title}>Full access</h1>
       <p className={styles.lede}>
         {FREE_SIMULATOR_COUNT} of the {SIMULATORS.length} simulators are free on any account, questions

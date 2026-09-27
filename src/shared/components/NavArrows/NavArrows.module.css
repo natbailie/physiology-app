@@ -1,0 +1,79 @@
+/* Top-left, which is where every browser puts back and forward and therefore the first place a
+ * learner looks for them. Above the module page's sticky header (3) so it never slides under the
+ * title, and below the control dock (5) so an opened dock covers the arrows rather than the other
+ * way round. The tutor launcher keeps the bottom-right to itself. */
+.dock {
+  position: fixed;
+  left: var(--s-4);
+  top: calc(var(--s-3) + env(safe-area-inset-top, 0px));
+  z-index: 4;
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-2);
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  color: var(--on-solid);
+  background: var(--brand);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+
+.arrow:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--brand) 85%, var(--text));
+}
+
+.arrow:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.arrow:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.arrow:disabled {
+  color: var(--text-faint);
+  background: var(--panel-raised);
+  cursor: not-allowed;
+}
+
+/* Narrow screens have no room for a floating dock beside the content, so the arrows shrink and
+ * tuck into the corner rather than sitting on top of the page title. */
+@media (max-width: 1024px) {
+  .dock {
+    left: var(--s-2);
+    top: calc(var(--s-2) + env(safe-area-inset-top, 0px));
+    gap: var(--s-1);
+    padding: var(--s-1);
+  }
+
+  .arrow {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow {
+    transition: none;
+  }
+}

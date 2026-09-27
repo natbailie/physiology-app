@@ -6,6 +6,25 @@
   padding: 0 1.25rem;
 }
 
+/* Room for the back/forward dock, which is fixed in the top-left corner.
+ *
+ * A LEFT gutter rather than a top band, specifically so the rule above survives: content moves
+ * sideways and the sticky bar still reaches y=0. Without this the dock sat on top of every page
+ * title — the app fills its 1400px and there is no margin for it to hide in. */
+@media (min-width: 1024px) {
+  .app {
+    padding-left: 8rem;
+  }
+}
+
+/* Below that there is no width to give away, so the dock takes a band across the top instead and
+ * ModulePage's sticky bar starts beneath it (see --nav-dock-h in index.css). */
+@media (max-width: 1023.98px) {
+  .app {
+    padding-top: var(--nav-dock-h);
+  }
+}
+
 /* Chunk loading placeholder — deliberately invisible content, matching the entitlement
  * loading state rather than advertising a spinner that would flash for a few ms. */
 .loading {

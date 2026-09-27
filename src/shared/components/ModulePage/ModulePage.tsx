@@ -265,9 +265,6 @@ export function ModulePage({
               <BrandMark size="sm" href="#" />
             </span>
             <span className={styles.brandRule} aria-hidden="true" />
-            <a className={styles.backLink} href="#">
-              &larr; Modules
-            </a>
             <h1 className={styles.title}>{title}</h1>
             <span className={styles.subtitle}>{subtitle}</span>
             {/* In the row rather than above it: this bar is sticky and its height is the

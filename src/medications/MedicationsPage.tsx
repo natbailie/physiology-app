@@ -54,9 +54,6 @@ function FamilyHub() {
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href="#home">
-          &larr; All subjects
-        </a>
         <h1 className={styles.title}>Medications</h1>
         <span className={styles.subtitle}>{MEDICATIONS.length} drug classes, grouped by system</span>
       </header>
@@ -110,9 +107,6 @@ function InfectionTiers({ family }: { family: NonNullable<ReturnType<typeof getF
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href="#medications">
-          &larr; All medications
-        </a>
         <h1 className={styles.title}>{family.name}</h1>
         <span className={styles.subtitle}>{family.blurb}</span>
       </header>
@@ -153,26 +147,21 @@ function SubfamilyPage({ familyId, microGroup }: { familyId: string; microGroup:
   const micro = getMicroGroup(microGroup);
   if (!family || !micro) return <FamilyHub />;
 
-  if (micro.hasMoa) return <AntibioticsTiers family={family} micro={micro} />;
+  if (micro.hasMoa) return <AntibioticsTiers micro={micro} />;
 
   return <ClassGrid familyId={family.id} microGroup={micro.id} query="" />;
 }
 
 /** The antibiotics branch: mechanism-of-action tiles leading down to the broad classes. */
 function AntibioticsTiers({
-  family,
   micro,
 }: {
-  family: NonNullable<ReturnType<typeof getFamily>>;
   micro: NonNullable<ReturnType<typeof getMicroGroup>>;
 }) {
   return (
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href={`#medications/${family.id}`}>
-          &larr; {family.name}
-        </a>
         <h1 className={styles.title}>{micro.name}</h1>
         <span className={styles.subtitle}>{micro.blurb}</span>
       </header>
@@ -215,9 +204,6 @@ function MoaPage({ familyId, moa }: { familyId: string; moa: string }) {
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href="#medications/infection/antibiotics">
-          &larr; Antibiotics
-        </a>
         <h1 className={styles.title}>{moaMeta.name}</h1>
         <span className={styles.subtitle}>
           {moaMeta.classCount} class{moaMeta.classCount === 1 ? '' : 'es'} — {moaMeta.blurb}
@@ -280,9 +266,6 @@ function ClassGrid({
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
-        <a className={styles.backLink} href={`#medications/${family.id}`}>
-          &larr; {family.name}
-        </a>
         <h1 className={styles.title}>{label}</h1>
         <span className={styles.subtitle}>{family.blurb}</span>
       </header>

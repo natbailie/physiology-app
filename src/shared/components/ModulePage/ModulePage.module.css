@@ -17,6 +17,8 @@
 
 .topBar {
   position: sticky;
+  /* Flush at the viewport top on wide screens, where the nav dock sits in a left gutter; below
+   * that the dock takes a band across the top and this starts beneath it. */
   top: 0;
   z-index: 3;
   display: flex;
@@ -413,5 +415,11 @@
   .brandRule,
   .brandSlot {
     display: none;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .topBar {
+    top: var(--nav-dock-h);
   }
 }

@@ -6,11 +6,13 @@ import { DisciplinePage } from './DisciplinePage';
 afterEach(cleanup);
 
 describe('DisciplinePage', () => {
-  it('shows the subject title and links back to the picker', () => {
+  it('shows the subject title, and offers no back link of its own', () => {
     render(<DisciplinePage disciplineId="physiology" />);
     expect(screen.getByRole('heading', { name: 'Physiology' })).toBeTruthy();
-    const back = screen.getByRole('link', { name: /All subjects/i });
-    expect(back.getAttribute('href')).toBe('#home');
+    // Going back is the NavArrows' job now, and theirs alone. A page that also offers a worded
+    // link gives two ways to do one thing, and they disagree: the link goes UP the catalogue
+    // while the arrow retraces where the learner has actually been.
+    expect(screen.queryByRole('link', { name: /All subjects/i })).toBeNull();
   });
 
   it('renders the theme cards the registry files under the subject', () => {

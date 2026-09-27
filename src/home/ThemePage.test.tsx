@@ -14,11 +14,11 @@ beforeAll(async () => {
 });
 
 describe('ThemePage', () => {
-  it('shows the theme title and links back to its subject', () => {
+  it('shows the theme title, and offers no back link of its own', () => {
     render(<ThemePage themeId="cardiovascular" />);
     expect(screen.getByRole('heading', { name: 'Cardiovascular' })).toBeTruthy();
-    const back = screen.getByRole('link', { name: /Physiology/i });
-    expect(back.getAttribute('href')).toBe('#discipline/physiology');
+    // Going back is the NavArrows' job now, and theirs alone.
+    expect(screen.queryByRole('link', { name: /^Physiology$/i })).toBeNull();
   });
 
   it('renders the module cards the registry assigns to the theme', () => {

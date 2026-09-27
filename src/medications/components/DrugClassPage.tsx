@@ -1,5 +1,4 @@
 import type { DrugClass } from '../drugs';
-import { getFamily } from '../drugs';
 import { MODULES } from '@/home/moduleRegistry';
 import { getMechanismDiagram } from './diagrams';
 import styles from './DrugClassPage.module.css';
@@ -12,13 +11,9 @@ import styles from './DrugClassPage.module.css';
 export function DrugClassPage({ drug }: { drug: DrugClass }) {
   const module = drug.moduleId ? MODULES.find((m) => m.id === drug.moduleId) : undefined;
   const Diagram = getMechanismDiagram(drug.id);
-  const family = getFamily(drug.family);
 
   return (
     <div className={styles.page}>
-      <a className={styles.backLink} href={`#medications/${family?.id ?? ''}`}>
-        &larr; {family?.name ?? 'All medications'}
-      </a>
 
       <header className={styles.header}>
         <div className={styles.titleRow}>

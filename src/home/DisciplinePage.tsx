@@ -42,9 +42,6 @@ export function DisciplinePage({ disciplineId }: DisciplinePageProps) {
     <div className={styles.page}>
       <nav className={styles.backRow}>
         <ThemeBar />
-        <a href="#home" className={styles.backLink}>
-          ← All subjects
-        </a>
       </nav>
 
       <header className={styles.header}>

@@ -15,9 +15,6 @@ export function Paywall({ moduleId }: { moduleId: string }) {
   return (
     <div className={styles.page}>
       <ThemeBar />
-      <a href="#" className={styles.backLink}>
-        ← All modules
-      </a>
       <h1 className={styles.title}>{module ? module.name : 'This module'} is part of full access</h1>
       <p className={styles.body}>
         {module ? `${module.tagline}. ` : ''}
