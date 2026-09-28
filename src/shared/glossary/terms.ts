@@ -1794,6 +1794,43 @@ const ENTRIES: Record<string, GlossaryEntry> = {
     definition:
       'The uptake index of agent leaving the gas and entering the body — roughly solubility times cardiac output times the current alveolar level. It is the accounting half of anaesthesia: the same dial extracts more from a high-output patient, and that is why the vaporizer has to lead the cardiac output rather than follow it.',
   },
+  // --- Urea and Krebs cycles ---
+  urea: {
+    definition:
+      'Plasma urea, the product of the urea cycle. It rises with protein intake while the liver copes and paradoxically falls when the cycle itself fails — a low urea beside a high ammonia is the cycle confessing, not reassurance.',
+  },
+  'urine nitrogen': {
+    definition:
+      'Nitrogen excreted in the urine per day, mostly as urea. At nitrogen balance it tracks intake gram for gram; when the cycle fails it falls short of the load and the difference accumulates as ammonia.',
+  },
+  'nitrogen load': {
+    definition:
+      'Total nitrogen presented to the liver per day — dietary protein plus endogenous breakdown from bleeding, trauma or sepsis. Blood is protein wherever it is digested, which is why a bleed is a steak eaten backwards.',
+  },
+  'orotic shunt': {
+    definition:
+      'Carbamoyl-phosphate spilling sideways into orotic acid against a distal urea-cycle block. High only when the entry step still runs (intact liver) with OTC, ASS or ASL obstructed downstream — the hyperammonaemia-with-orotate signature that separates an enzyme defect from whole-organ failure.',
+  },
+  encephalopathy: {
+    definition:
+      'Hepatic encephalopathy grade implied by the ammonia, 0 to 4. Coarse, as the clinical mapping is — ammonia correlates with grade poorly enough that the number guides urgency rather than naming the exact stage.',
+  },
+  'atp yield': {
+    definition:
+      'Mitochondrial ATP synthesis rate from the cycle reducing equivalents at textbook phosphate-to-oxygen ratios. It follows flux while the chain can accept electrons and collapses with it in hypoxia, whatever the demand is shouting.',
+  },
+  'oxygen used': {
+    definition:
+      'Oxygen consumed per minute — the electrons the transport chain accepts. Near 250 mL/min at rest, rising severalfold in exercise; a low value beside high demand means delivery or extraction has failed, not that the tissues want less.',
+  },
+  'pdh flux': {
+    definition:
+      'Pyruvate-to-acetyl-CoA throughput at the pyruvate dehydrogenase gate, normalised so resting balance reads 1. The carbohydrate door of the cycle: thiamine, oxygen and the enzyme itself each hold a key, and any one of them can shut it.',
+  },
+  'cycle flux': {
+    definition:
+      'Turns of the cycle per unit time, normalised so resting balance reads 1. Demand pulls it up while oxygen and cofactors permit; a single choked factor stalls the whole throughput rather than shaving a percentage off it.',
+  },
   'performance index': {
     definition:
       'The composite outcome of the Yerkes-Dodson inverted-U: near a hundred percent when arousal sits at the task\'s optimum, the memory ceiling has headroom and demand stays inside the reserve, collapsing toward its floor when any one of those breaks. It is a teaching score, not a clinical test, but every pre-clinical question about "why did performance fall" is really asking for its factors.',
@@ -2046,6 +2083,20 @@ const MODULE_OWNED: Record<string, Record<string, GlossaryEntry>> = {
     'blood volume': {
       definition:
         'Total circulating volume, of which only the stressed portion generates pressure. Adding volume raises mean systemic filling pressure and shifts the venous return curve right; venoconstriction does the same without adding a millilitre.',
+    },
+  },
+
+  ureaCycle: {
+    'cycle state': {
+      definition:
+        'Which nitrogen picture the current load and capacity add up to — balanced, high nitrogen load, liver failure, enzyme block or concentrated. The line beneath is the mechanism in one phrase, and the useful skill is predicting it from the ammonia and urea before reading it.',
+    },
+  },
+
+  krebsCycle: {
+    'cycle state': {
+      definition:
+        'Which mitochondrial picture the current supply, oxygen, demand and cofactors add up to — aerobic balance, high demand, oxygen-limited, cofactor-limited or substrate-limited. The line beneath is the mechanism in one phrase, and the useful skill is predicting it from the lactate and quotient before reading it.',
     },
   },
 };

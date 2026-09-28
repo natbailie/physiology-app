@@ -93,4 +93,6 @@ export const PAGES: Partial<Record<RouteId, PageComponent>> = {
   digestionAbsorption: page(() => import('@/modules/digestionAbsorption/DigestionAbsorptionPage').then(({ DigestionAbsorptionPage }) => ({ default: DigestionAbsorptionPage }))),
   inflammation: page(() => import('@/modules/inflammation/InflammationPage').then(({ InflammationPage }) => ({ default: InflammationPage }))),
   micturition: page(() => import('@/modules/micturition/MicturitionPage').then(({ MicturitionPage }) => ({ default: MicturitionPage }))),
+  ureaCycle: page(() => import('@/modules/ureaCycle/UreaCyclePage').then(({ UreaCyclePage }) => ({ default: UreaCyclePage }))),
+  krebsCycle: page(() => import('@/modules/krebsCycle/KrebsCyclePage').then(({ KrebsCyclePage }) => ({ default: KrebsCyclePage }))),
 };

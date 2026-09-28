@@ -84,6 +84,8 @@ export type RouteId =
   | 'digestionAbsorption'
   | 'inflammation'
   | 'micturition'
+  | 'ureaCycle'
+  | 'krebsCycle'
   | 'reference'
   | 'medications'
   | DisciplineRouteId
@@ -155,6 +157,8 @@ export const VALID_ROUTES: RouteId[] = [
   'digestionAbsorption',
   'inflammation',
   'micturition',
+  'ureaCycle',
+  'krebsCycle',
   'reference',
   'medications',
   ...DISCIPLINES.filter((discipline) => discipline.status === 'available' && !discipline.href).map(

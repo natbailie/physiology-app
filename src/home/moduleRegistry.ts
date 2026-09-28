@@ -690,6 +690,7 @@ export const MODULES: ModuleDescriptor[] = [
       { id: 'erythropoiesis', why: 'where the bilirubin comes from' },
       { id: 'gastrointestinal', why: 'the gut the bile drains into' },
       { id: 'digestionAbsorption', why: 'the bile salts this liver makes keep fat absorption alive' },
+      { id: 'ureaCycle', why: 'the ammonia this liver clears alongside the bilirubin' },
     ],
   },
   {
@@ -797,7 +798,7 @@ export const MODULES: ModuleDescriptor[] = [
       { id: 'respiratory', why: 'what systemic acidaemia does to every reaction at once' },
     ],
   },
-{
+  {
     id: 'metabolism',
     name: 'Metabolism & Energy Balance',
     tagline: 'Fuel mix, ketosis & the cost of catabolic stress',
@@ -808,6 +809,36 @@ export const MODULES: ModuleDescriptor[] = [
     related: [
       { id: 'enzymeKinetics', why: 'the enzymes underneath the fuel-switch decisions' },
       { id: 'glucoseRegulation', why: 'the insulin axis this module read as a dial' },
+      { id: 'ureaCycle', why: 'where the protein this burns ends up as nitrogen' },
+      { id: 'krebsCycle', why: 'the mitochondrial turns underneath every fuel share' },
+    ],
+  },
+  {
+    id: 'ureaCycle',
+    name: 'Urea Cycle & Nitrogen Disposal',
+    tagline: 'Ammonia in, urea out, and where the cycle fails',
+    status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'MRCP_PART_1'],
+    theme: 'metabolism',
+    accentColorVar: 'var(--liver)',
+    related: [
+      { id: 'liverPhysiology', why: 'the organ whose failure this cycle confesses' },
+      { id: 'krebsCycle', why: 'the fumarate bridge coupling nitrogen to energetics' },
+      { id: 'metabolism', why: 'the protein intake this cycle must dispose of' },
+    ],
+  },
+  {
+    id: 'krebsCycle',
+    name: 'Krebs Cycle & Mitochondrial Flux',
+    tagline: 'Eight turns, two doors, one electron sink',
+    status: 'available',
+    exams: ['USMLE_STEP_1', 'UKMLA', 'FRCA_PRIMARY'],
+    theme: 'metabolism',
+    accentColorVar: 'var(--exercise)',
+    related: [
+      { id: 'metabolism', why: 'the fuel mix these turns actually burn' },
+      { id: 'ureaCycle', why: 'the aspartate-argininosuccinate shunt feeding back nitrogen' },
+      { id: 'exercisePhysiology', why: 'the whole-body demand these turns answer' },
     ],
   },
   {
