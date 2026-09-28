@@ -37,9 +37,8 @@ export function ExamFilterBar({ countText }: ExamFilterBarProps) {
           className={styles.chip}
           aria-pressed={active === exam.id}
           onClick={choose(exam.id)}
-          title={exam.name}
         >
-          {exam.short}
+          {exam.name}
         </button>
       ))}
 

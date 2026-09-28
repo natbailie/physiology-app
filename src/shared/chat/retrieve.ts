@@ -26,6 +26,10 @@ const STOPWORDS = new Set([
   'over', 'she', 'so', 'some', 'such', 'than', 'that', 'the', 'their', 'them', 'then', 'there',
   'these', 'they', 'this', 'those', 'to', 'under', 'up', 'was', 'we', 'were', 'what', 'when',
   'where', 'which', 'while', 'who', 'why', 'will', 'with', 'work', 'would', 'you', 'your',
+  // How learners talk to a chatbot, rather than what they are asking about. "Which module should
+  // I use to learn about ADH" otherwise matched ECG and HPG chunks on "module", "use" and "learn".
+  'app', 'could', 'explain', 'know', 'learn', 'like', 'mean', 'module', 'need', 'please',
+  'should', 'tell', 'understand', 'use', 'using', 'want',
 ]);
 
 /**
@@ -76,26 +80,27 @@ const TITLE_WEIGHT = 1.6;
 /** The module a learner is looking at right now is the likeliest thing they are asking about. */
 const CURRENT_MODULE_WEIGHT = 1.3;
 
+/**
+ * Slots kept for the conversation's topic when there are earlier questions.
+ *
+ * Blended rather than weighted in. A follow-up is mostly pronouns, and the one content word it
+ * does carry can be rare in an unrelated sense — "why does that happen at the molecular level?"
+ * outscored every Frank-Starling chunk on "molecular", via an IV-fluids passage about molecular
+ * weight. No weighting fixes that without dragging a genuine change of subject back to the old
+ * one; two reserved slots do both jobs, and the model ignores whichever set is off-topic.
+ */
+const TOPIC_SLOTS = 2;
+
 export interface RetrieveOptions {
   /** The module the learner is on, if any. */
   moduleId?: string;
   limit?: number;
+  /** The learner's earlier questions in this conversation, most recent last. */
+  earlier?: readonly string[];
 }
 
-/**
- * The best chunks for a query, best first.
- *
- * Scores nothing at zero overlap, so an off-topic question returns an empty list rather than the
- * six least-irrelevant paragraphs in the app — which is what lets the tutor say the material does
- * not cover something instead of confabulating around whatever it was handed.
- */
-export function retrieve(
-  index: RetrievalIndex,
-  query: string,
-  { moduleId, limit = 6 }: RetrieveOptions = {},
-): Chunk[] {
-  const queryTerms = new Set(tokenise(query));
-  if (queryTerms.size === 0) return [];
+function rank(index: RetrievalIndex, terms: ReadonlySet<string>, moduleId: string | undefined): Chunk[] {
+  if (terms.size === 0) return [];
 
   const scored: { chunk: Chunk; score: number }[] = [];
 
@@ -104,7 +109,7 @@ export function retrieve(
     const title = new Set(index.titleTerms[position]!);
 
     let score = 0;
-    for (const term of queryTerms) {
+    for (const term of terms) {
       if (!body.has(term)) continue;
       const weight = index.idf.get(term) ?? 1;
       score += title.has(term) ? weight * TITLE_WEIGHT : weight;
@@ -118,6 +123,35 @@ export function retrieve(
 
   return scored
     .sort((a, b) => b.score - a.score || a.chunk.id.localeCompare(b.chunk.id))
-    .slice(0, limit)
     .map((entry) => entry.chunk);
+}
+
+/**
+ * The best chunks for a query, best first.
+ *
+ * Scores nothing at zero overlap, so an off-topic question returns an empty list rather than the
+ * six least-irrelevant paragraphs in the app — which is what lets the tutor say the material does
+ * not cover something instead of confabulating around whatever it was handed.
+ */
+export function retrieve(
+  index: RetrievalIndex,
+  query: string,
+  { moduleId, limit = 6, earlier = [] }: RetrieveOptions = {},
+): Chunk[] {
+  const current = rank(index, new Set(tokenise(query)), moduleId);
+  const topic = rank(index, new Set(earlier.flatMap(tokenise)), moduleId);
+
+  // The current question gets every slot the topic does not need, and the topic gets any the
+  // question cannot fill.
+  const reserved = Math.min(TOPIC_SLOTS, topic.length);
+  const picked = new Map<string, Chunk>();
+  for (const chunk of current) {
+    if (picked.size >= limit - reserved) break;
+    picked.set(chunk.id, chunk);
+  }
+  for (const chunk of [...topic, ...current]) {
+    if (picked.size >= limit) break;
+    picked.set(chunk.id, chunk);
+  }
+  return [...picked.values()];
 }

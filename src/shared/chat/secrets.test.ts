@@ -23,6 +23,7 @@ const SOURCE = import.meta.glob<string>('../../**/*.{ts,tsx}', { eager: true, qu
 /** Secret names that must never appear in client source, however they are referenced. */
 const SERVER_ONLY = [
   'GEMINI_API_KEY',
+  'MISTRAL_API_KEY',
   'ANTHROPIC_API_KEY',
   'SUPABASE_SERVICE_ROLE_KEY',
   // RevenueCat's secret API key and the webhook's shared secret. The WEB BILLING key is a

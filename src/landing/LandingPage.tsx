@@ -30,7 +30,8 @@ export function LandingPage() {
             </p>
             <p className={styles.subtitle}>
               {SIMULATOR_COUNT} interactive feedback-loop simulators and the reasoning practice that goes
-              with them — pre-med through resident level (UKMLA, USMLE, MRCP).
+              with them — pre-med through resident level (USMLE Step 1, MRCS Part A, Primary FRCA, UKMLA,
+              MRCP(UK) Part 1).
             </p>
           </div>
 

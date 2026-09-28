@@ -73,8 +73,13 @@ function SectionCard({ section, index }: { section: ExplainerSection; index: num
           ))}
           {section.demos && section.demos.length > 0 && (
             <div className={styles.demoRow}>
-              {section.demos.map((demo) => (
-                <DemoButton key={demo.preset} demo={demo} />
+              {/* Keyed on the position, not the preset: a section may legitimately offer the same
+                  scenario twice with two different readouts to watch — respiratoryFailure's type II
+                  section loads the neuromuscular patient once for the PaCO2 and once for the pH —
+                  and `key={demo.preset}` made those a duplicate-key pair React is free to drop or
+                  double. The list is authored data with a fixed order, so the index is stable. */}
+              {section.demos.map((demo, i) => (
+                <DemoButton key={`${i}-${demo.preset}`} demo={demo} />
               ))}
             </div>
           )}

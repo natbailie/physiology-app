@@ -3,7 +3,37 @@ import { createElement, type ComponentType } from 'react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 
-afterEach(cleanup);
+/**
+ * Unmount, then let jsdom's own task queue run. Every render in this file goes out through here.
+ *
+ * `cleanup` alone does not release a tree. jsdom queues a `toggle` task for every `<details>`
+ * whose `open` attribute is written — `HTMLDetailsElement-impl.js` does
+ * `setTimeout(this._dispatchToggleEvent.bind(this), 0)` — and the bound callback holds the
+ * element, which holds its ancestors through jsdom's SymbolTree, which holds the whole document.
+ * Every module page opens one `<details>` as it mounts (the explainer; `vision` renders ten in
+ * all), so every mount queues a timer that pins the detached tree until the timer runs, and a
+ * synchronous test body never lets it run.
+ *
+ * Measured on this file: 3165 kB retained per mount without this drain, 44 kB with it. The cost
+ * is not the memory itself — it is that every later render pays for the collector walking it.
+ * The sweep below performs about 300 renders, so by the time it reached `vision`, 48th of 51
+ * alphabetically, the worker was holding 2 GB and the same search that takes 3.7s in a fresh
+ * worker took 27s against a 30s `testTimeout`. That is the whole of the flake: the case did not
+ * assert anything different under load, it ran out of time.
+ *
+ * Drained, the same search costs 3.1s wherever in the file it runs, which is the part that
+ * matters: a module's cost stops depending on the other fifty. `actionReachesScreen`'s search
+ * order then takes it to 1.0s, and the two are independent — this one is why the number no longer
+ * moves, that one is why it is small.
+ */
+const release = async (): Promise<void> => {
+  cleanup();
+  await new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+};
+
+afterEach(release);
 
 /**
  * Proves that the buttons in the sticky top bar do something — the half of "every control moves the
@@ -79,6 +109,11 @@ beforeAll(() => {
  * The engine loop runs on `requestAnimationFrame`, which jsdom does drive — so an unpaused page
  * repaints between any two reads and EVERY comparison would report a change, whether the button did
  * anything or not. Pausing first is what makes a difference in the markup mean something.
+ *
+ * That is also why nothing in this file awaits while a tree is still mounted: `release` unmounts
+ * BEFORE it yields, and every `await` in the sweep is a call to it. Yielding with a page up would
+ * let jsdom run the frames the pause exists to prevent, and the pause is the only reason a
+ * difference in markup is evidence about the button rather than about the clock.
  */
 function openPaused(page: PageUnderTest): HTMLElement {
   const { container } = render(createElement(page.Page, {}));
@@ -105,7 +140,12 @@ const STEPS_AFTER_PRESS = 24;
  * charts on its own, so "the screen changed" is only evidence when the run that did NOT press the
  * button is measured the same way.
  */
-function runWith(page: PageUnderTest, actionLabel: string | null, presetIndex: number | null, primeLabel?: string): string {
+async function runWith(
+  page: PageUnderTest,
+  actionLabel: string | null,
+  presetIndex: number | null,
+  primeLabel?: string,
+): Promise<string> {
   const container = openPaused(page);
   const step = container.querySelector<HTMLButtonElement>('button[class*="step"]');
   const advance = () => {
@@ -129,10 +169,11 @@ function runWith(page: PageUnderTest, actionLabel: string | null, presetIndex: n
   if (actionLabel !== null) press(actionLabel);
   advance();
   const markup = screen(container);
-  // Unmount before returning. `afterEach(cleanup)` is too late once a single test renders the page
-  // hundreds of times — the preset-and-prime search below does exactly that, and holding every one
-  // of those trees alive until the test ends exhausted the worker rather than failing an assertion.
-  cleanup();
+  // Unmount before returning, and drain before the next render. `afterEach` is too late once a
+  // single test renders the page hundreds of times — the preset-and-prime search below does
+  // exactly that, and holding every one of those trees alive until the test ends exhausted the
+  // worker rather than failing an assertion. `release` is what actually lets go; see its docblock.
+  await release();
   return markup;
 }
 
@@ -171,20 +212,64 @@ const CONDITIONAL_ACTIONS = new Set<string>([
  *
  * Plenty of these are conditional by design and inert at rest — there is no abscess to drain on a
  * healthy patient, no duct to reopen once it has closed. Those are correct physiology, not dead
- * buttons, and the scenario that makes one matter is almost always one of the module's own presets.
- * `controls.test.tsx` judges conditional sliders the same way and for the same reason; the resting
- * patient is tried first because that is where a learner meets the button.
+ * buttons, and the state that makes one matter is either one of the module's own scenarios or
+ * something another of its buttons has to do first: there is no abscess until an insult has been
+ * deposited and has had time to collect, and inflammation's own preset comments say as much — its
+ * scenarios are a host, waiting. `controls.test.tsx` judges conditional sliders the same way and
+ * for the same reason.
+ *
+ * The three groups are tried resting, then siblings, then scenarios, and that ORDER is a cost
+ * decision rather than a semantic one — this is an OR over a fixed set of states, so it returns the
+ * same answer whichever end it starts from. The resting patient stays first because that is where a
+ * learner meets the button. What changed is that the module's other actions are now tried before
+ * its fourteen scenarios, because the old order made `vision` the most expensive module in the file
+ * for a reason that has nothing to do with vision: every one of its scenarios spreads
+ * `DEFAULT_VISION_INPUTS`, which has `torchEye: 'off'`, so "Torch off" cannot move from any of them
+ * and the sweep spent thirty renders proving it before the sibling search found the answer on its
+ * second try. Measured across all 51 modules: 294 renders on the old order against 258 on this one,
+ * `vision` 42 against 14 and `inflammation` 20 against 4, paid for with two extra renders on
+ * `anteriorPituitary` and `vestibular` and four on `liverPhysiology`, whose answers really are
+ * mid-sweep scenarios. Reordering leaves the worst module exactly where it was — `hypersensitivity`,
+ * whose two allowlisted buttons are inert from everything this harness can build and so are
+ * exhaustive whichever end the search starts from. The `controls` cache below is what reaches that
+ * one.
  */
-function actionReachesScreen(page: PageUnderTest, label: string, siblings: string[]): boolean {
-  for (let preset = -1; preset < page.presetCount; preset++) {
-    const index = preset < 0 ? null : preset;
-    if (runWith(page, label, index) !== runWith(page, null, index)) return true;
+async function actionReachesScreen(
+  page: PageUnderTest,
+  label: string,
+  siblings: string[],
+  /**
+   * The run that pressed nothing, per state, shared by every button on the module.
+   *
+   * A control run is a function of the STATE — which scenario, which priming action — and not of
+   * the button being judged against it, so recomputing it per button is the one piece of pure
+   * waste in this search. It is also the piece that grew fastest: `hypersensitivity` has two
+   * buttons that are inert from all seventeen states the harness can build (see
+   * `CONDITIONAL_ACTIONS`), so both walked the same seventeen counterfactuals from scratch, and a
+   * module's cost was states TIMES buttons rather than states plus buttons.
+   *
+   * Sound for the same reason the comparison itself is: a run is reproducible from its state, which
+   * is what every assertion in this file already rests on. The cache lives for one module's test
+   * and is handed in rather than held at module scope, so nothing survives into the next page.
+   */
+  controls: Map<string, string>,
+): Promise<boolean> {
+  const control = async (presetIndex: number | null, prime?: string): Promise<string> => {
+    const key = `${presetIndex ?? 'resting'}|${prime ?? ''}`;
+    const seen = controls.get(key);
+    if (seen !== undefined) return seen;
+    const markup = await runWith(page, null, presetIndex, prime);
+    controls.set(key, markup);
+    return markup;
+  };
+
+  if ((await runWith(page, label, null)) !== (await control(null))) return true;
+  for (const prime of siblings) {
+    if (prime === label) continue;
+    if ((await runWith(page, label, null, prime)) !== (await control(null, prime))) return true;
   }
-  // Last resort: the state this action acts on may only exist once ANOTHER action has created it.
-  // There is no abscess to drain until an insult has been deposited and has had time to collect,
-  // and inflammation's own preset comments say as much — its scenarios are a host, waiting.
-  if (siblings.some((prime) => prime !== label && runWith(page, label, null, prime) !== runWith(page, null, null, prime))) {
-    return true;
+  for (let preset = 0; preset < page.presetCount; preset++) {
+    if ((await runWith(page, label, preset)) !== (await control(preset))) return true;
   }
 
   return false;
@@ -343,7 +428,7 @@ const STANDING_BUT_INVISIBLE = new Set<string>([
  * is safe here because the rail is a pure function of the INPUTS — an earlier press can only have
  * moved a slider, and a later press that moves one still reads as a change.
  */
-function actionsThatLeaveTheRail(page: PageUnderTest, labels: string[]): string[] {
+async function actionsThatLeaveTheRail(page: PageUnderTest, labels: string[]): Promise<string[]> {
   const container = openPaused(page);
   const actions = [...buttons(container, 'impulse'), ...buttons(container, 'danger')];
   const unmoved: string[] = [];
@@ -354,7 +439,7 @@ function actionsThatLeaveTheRail(page: PageUnderTest, labels: string[]): string[
     fireEvent.click(action);
     if (railSettings(container) === before) unmoved.push(label);
   }
-  cleanup();
+  await release();
   return unmoved;
 }
 
@@ -381,14 +466,17 @@ describe('every button in the top bar moves the model', () => {
       expect(buttons(container, 'preset').length, `${id}: scenario buttons vs presets in the map`).toBe(page.presetCount);
     });
 
-    it('changes the screen when each action button is pressed', () => {
+    it('changes the screen when each action button is pressed', async () => {
       const labels = [...buttons(openPaused(page), 'impulse'), ...buttons(openPaused(page), 'danger')].map(
         (action) => action.textContent ?? '',
       );
+      await release();
       if (labels.length === 0) return; // Nine modules ship scenarios only; there is nothing to press.
-      const inert = labels
-        .filter((label) => !actionReachesScreen(page, label, labels))
-        .map((label) => `${id}: "${label}"`);
+      const inert: string[] = [];
+      const controls = new Map<string, string>();
+      for (const label of labels) {
+        if (!(await actionReachesScreen(page, label, labels, controls))) inert.push(`${id}: "${label}"`);
+      }
       const unexplained = inert.filter((entry) => !CONDITIONAL_ACTIONS.has(entry));
       const stale = [...CONDITIONAL_ACTIONS].filter((entry) => entry.startsWith(`${id}: `) && !inert.includes(entry));
       expect(
@@ -397,17 +485,17 @@ describe('every button in the top bar moves the model', () => {
       ).toEqual({ inert: [], 'allowlisted but no longer inert — delete them': [] });
     });
 
-    it('moves a control when a standing action is pressed', () => {
-      // One render for the labels, and unmounted before the sweep starts. `afterEach(cleanup)` is
-      // too late when a module has six buttons: the trees pile up inside the test and the worker
-      // exits rather than failing an assertion, which is the trap the docblock above records.
+    it('moves a control when a standing action is pressed', async () => {
+      // One render for the labels, and unmounted before the sweep starts. `afterEach` is too late
+      // when a module has six buttons: the trees pile up inside the test and the worker exits
+      // rather than failing an assertion, which is the trap the docblock above records.
       const opened = openPaused(page);
       const labels = [...buttons(opened, 'impulse'), ...buttons(opened, 'danger')].map(
         (action) => action.textContent ?? '',
       );
-      cleanup();
+      await release();
       if (labels.length === 0) return; // Nine modules ship scenarios only; there is nothing to press.
-      const invisible = actionsThatLeaveTheRail(page, labels).map((label) => `${id}: "${label}"`);
+      const invisible = (await actionsThatLeaveTheRail(page, labels)).map((label) => `${id}: "${label}"`);
       const unexplained = invisible.filter(
         (entry) => !MOMENTARY_BY_DESIGN.has(entry) && !STANDING_BUT_INVISIBLE.has(entry),
       );

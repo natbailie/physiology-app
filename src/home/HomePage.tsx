@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { ModuleCard } from '@/shared/components/ModuleCard/ModuleCard';
 import { DisciplineCard } from '@/shared/components/DisciplineCard/DisciplineCard';
 import { useAuth } from '@/auth/AuthContext';
@@ -12,8 +11,7 @@ import { MEDICATIONS } from '@/medications/drugs';
 import { useModuleProgress } from './useModuleProgress';
 import { ExamPrompt } from './ExamPrompt';
 import { ExamFilterBar } from './ExamFilterBar';
-import { matchesExam, seedExamFilter, useExamFilter } from './examFilter';
-import { useExamProfile } from '@/account/examProfile';
+import { matchesExam, useExamFilter } from './examFilter';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import styles from './HomePage.module.css';
@@ -28,19 +26,7 @@ export function HomePage() {
   const { isUnlocked } = entitlement;
   const { totals, weakSpots } = useModuleProgress();
   const round = useRound(moduleNameOf, entitlement);
-  const { targetExam, ready } = useExamProfile();
   const examFilter = useExamFilter();
-
-  // The saved exam becomes the starting filter on a first visit, and never overrules a learner
-  // who has since chosen to look at something else — see `seedExamFilter`.
-  //
-  // In an effect rather than in the render body, which is where this started. Seeding during
-  // render notified the store's subscribers mid-render, and `examFilter` above had ALREADY been
-  // read as null for this pass — so the counts below were computed unfiltered and the learner
-  // watched "51 simulators" flip to "23". Committing first costs one honest re-render instead.
-  useEffect(() => {
-    if (ready) seedExamFilter(targetExam);
-  }, [ready, targetExam]);
 
   const reference = MODULES.find((module) => module.kind === 'reference');
 
@@ -72,8 +58,8 @@ export function HomePage() {
           </div>
         </div>
         <p className={styles.subtitle}>
-          Interactive feedback-loop simulators for exam prep — pre-med through resident level (UKMLA, USMLE,
-          MRCP). Pick a subject to explore.
+          Interactive feedback-loop simulators for exam prep — pre-med through resident level (USMLE Step 1,
+          MRCS Part A, Primary FRCA, UKMLA, MRCP(UK) Part 1). Pick a subject to explore.
         </p>
       </header>
 

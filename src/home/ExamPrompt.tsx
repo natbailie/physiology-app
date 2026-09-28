@@ -57,8 +57,8 @@ export function ExamPrompt() {
       <span className={styles.question}>Revising for a particular exam?</span>
 
       {EXAMS.map((exam) => (
-        <button key={exam.id} type="button" className={styles.choice} onClick={choose(exam.id)} title={exam.name}>
-          {exam.short}
+        <button key={exam.id} type="button" className={styles.choice} onClick={choose(exam.id)}>
+          {exam.name}
         </button>
       ))}
 

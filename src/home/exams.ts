@@ -8,7 +8,9 @@
  *
  * ## What the list is, and is not
  *
- * Five exams, all of them ones this app's physiology is genuinely examined in. Deliberately no
+ * Five exams, all of them ones this app's physiology is genuinely examined in, under the names
+ * their own colleges use (so "Primary FRCA", not "FRCA Primary"). The ids are storage keys and
+ * never change with the labels. Deliberately no
  * USMLE Step 2: it is a clinical-knowledge paper and tagging a handful of modules for it would
  * offer a filter that empties the catalogue, which is worse than not offering it.
  *
@@ -18,10 +20,10 @@
 
 export const EXAMS = [
   { id: 'USMLE_STEP_1', short: 'USMLE 1', name: 'USMLE Step 1' },
-  { id: 'UKMLA', short: 'UKMLA', name: 'UKMLA' },
-  { id: 'MRCP_PART_1', short: 'MRCP 1', name: 'MRCP Part 1' },
   { id: 'MRCS_PART_A', short: 'MRCS A', name: 'MRCS Part A' },
-  { id: 'FRCA_PRIMARY', short: 'FRCA', name: 'FRCA Primary' },
+  { id: 'FRCA_PRIMARY', short: 'Primary FRCA', name: 'Primary FRCA' },
+  { id: 'UKMLA', short: 'UKMLA', name: 'UKMLA' },
+  { id: 'MRCP_PART_1', short: 'MRCP(UK) 1', name: 'MRCP(UK) Part 1' },
 ] as const;
 
 export type ExamId = (typeof EXAMS)[number]['id'];

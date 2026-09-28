@@ -11,6 +11,7 @@ import { DisciplinePage } from '@/home/DisciplinePage';
 import { DISCIPLINES, THEMES } from '@/home/moduleRegistry';
 import { MedicationsPage } from '@/medications/MedicationsPage';
 import { ChatLauncher } from '@/shared/chat/ChatLauncher';
+import { NavArrows } from '@/shared/components/NavArrows/NavArrows';
 import { SiteFooter } from '@/shared/components/SiteFooter/SiteFooter';
 import { CookieBanner } from '@/analytics/CookieBanner';
 import { installAnalytics } from '@/analytics/ga';
@@ -62,6 +63,11 @@ function App() {
       <CookieBanner />
       <main id="main" className={styles.main} tabIndex={-1}>
         <AuthGate route={route}>
+          {/* Inside the gate, so the signed-out landing screen is not offered arrows into an
+              app it cannot open. BEFORE the page in DOM order: the arrows are drawn in the
+              top-left corner, so as the last tab stops they were the first thing seen and the
+              last thing reached (WCAG 2.4.3). */}
+          <NavArrows />
           <RoutedApp route={route} />
         </AuthGate>
       </main>

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
 import { MODULES } from './moduleRegistry';
-import { EXAMS, type ExamId } from './exams';
-import { clearExamFilterForTests, matchesExam, seedExamFilter, setExamFilter } from './examFilter';
+import { EXAMS } from './exams';
+import { clearExamFilterForTests, matchesExam } from './examFilter';
 
 afterEach(clearExamFilterForTests);
 
@@ -28,31 +28,6 @@ describe('matchesExam', () => {
     expect(matchesExam(undefined, 'MRCS_PART_A')).toBe(true);
   });
 });
-
-describe('seedExamFilter', () => {
-  it('adopts the saved exam when nothing is chosen for this tab', () => {
-    seedExamFilter('MRCP_PART_1');
-    expect(matchesExam(['UKMLA'], readFilter())).toBe(false);
-  });
-
-  /** A learner looking at another syllabus must not have it swapped back under them. */
-  it('never overrules a filter the learner has already set', () => {
-    setExamFilter('FRCA_PRIMARY');
-    seedExamFilter('MRCP_PART_1');
-    expect(readFilter()).toBe('FRCA_PRIMARY');
-  });
-
-  it('does nothing when the learner has saved no exam', () => {
-    seedExamFilter(null);
-    expect(readFilter()).toBeNull();
-  });
-});
-
-/** Reads through the same storage the store hydrates from, rather than exporting internals. */
-function readFilter(): ExamId | null {
-  const stored = sessionStorage.getItem('physiologylab.examFilter');
-  return (EXAMS.find((exam) => exam.id === stored)?.id ?? null) as ExamId | null;
-}
 
 /**
  * The tagging itself, as a ratchet.

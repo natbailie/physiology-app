@@ -39,6 +39,9 @@ export type ChatStatus = 'idle' | 'thinking' | 'streaming';
  * without paying to send the whole module. */
 const EXCERPT_LIMIT = 6;
 
+/** Earlier questions that inform retrieval. Past two, the conversation has usually moved on. */
+const EARLIER_QUESTIONS = 2;
+
 /** Built once per session and shared; the corpus never changes at runtime. */
 let indexPromise: Promise<RetrievalIndex> | null = null;
 function retrievalIndex(): Promise<RetrievalIndex> {
@@ -132,7 +135,12 @@ export function useChat({ moduleId, weakSpots }: UseChatOptions): UseChat {
       void (async () => {
         try {
           const [token, index] = await Promise.all([accessToken(), retrievalIndex()]);
-          retrieved = retrieve(index, question, { moduleId, limit: EXCERPT_LIMIT });
+          // The two questions before this one, so a follow-up stays on the conversation's topic.
+          const earlier = messages
+            .filter((message) => message.role === 'user')
+            .slice(-EARLIER_QUESTIONS)
+            .map((message) => message.content);
+          retrieved = retrieve(index, question, { moduleId, limit: EXCERPT_LIMIT, earlier });
 
           // Only the edge function authenticates. The dev route has nothing to authenticate
           // against, and demanding a session for a localhost route would defeat its purpose.

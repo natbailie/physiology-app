@@ -10,20 +10,20 @@
  * gate, the per-user cap, and Deno's stream plumbing.
  *
  * Deploy:  supabase functions deploy chat
- * Secret:  supabase secrets set GEMINI_API_KEY=...
+ * Secrets: supabase secrets set MISTRAL_API_KEY=... and/or GEMINI_API_KEY=... (either works)
  * Locally: the dev-server route at /api/chat covers local work — no deploy needed.
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@^2.112.3';
 import {
   BLOCKED_MESSAGE,
-  ENDPOINT,
+  KEY_NAMES,
   MAX_REQUEST_BYTES,
+  callModel,
   framePayload,
-  geminiRequestBody,
   parseRequest,
-  readFrame,
   splitFrames,
+  upstreamError,
   upstreamMessage,
 } from '../_shared/gemini.ts';
 
@@ -52,10 +52,10 @@ Deno.serve(async (request: Request): Promise<Response> => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (request.method !== 'POST') return fail(405, 'Method not allowed.');
 
-  const geminiKey = Deno.env.get('GEMINI_API_KEY');
+  const keys = Object.fromEntries(KEY_NAMES.map((name) => [name, Deno.env.get(name)]));
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-  if (!geminiKey || !supabaseUrl || !supabaseAnonKey) {
+  if (!Object.values(keys).some(Boolean) || !supabaseUrl || !supabaseAnonKey) {
     return fail(500, 'The tutor is not configured on this deployment.');
   }
 
@@ -99,27 +99,27 @@ Deno.serve(async (request: Request): Promise<Response> => {
   const { error: usageError } = await supabase.from('chat_usage').insert({ user_id: auth.user.id });
   if (usageError) return fail(500, 'Could not record your usage. Try again in a moment.');
 
-  let upstream: Response;
+  let answered;
   try {
-    upstream = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // In a header rather than the query string, so the key stays out of request logs.
-        'x-goog-api-key': geminiKey,
-      },
-      body: JSON.stringify(geminiRequestBody(parsed)),
-    });
+    answered = await callModel(
+      keys,
+      parsed,
+      (url, headers, body) => fetch(url, { method: 'POST', headers, body }),
+      (message) => console.warn('tutor', message),
+    );
   } catch (error) {
     console.error('tutor upstream unreachable', error);
     return fail(502, 'The tutor could not be reached just now. Try again in a moment.');
   }
+  if (!answered) return fail(500, 'The tutor is not configured on this deployment.');
+  const { response: upstream, provider } = answered;
 
   // Answered as a normal error response rather than an SSE frame: nothing has streamed yet, so
   // the client's `!response.ok` branch reads the message and the panel falls back cleanly.
   if (!upstream.ok || !upstream.body) {
-    const body = (await upstream.json().catch(() => null)) as { error?: { status?: string } } | null;
-    return fail(502, upstreamMessage(upstream.status, body?.error?.status));
+    const rejected: unknown = await upstream.json().catch(() => null);
+    console.error('tutor upstream rejected', upstream.status, upstreamError(rejected)?.message);
+    return fail(502, upstreamMessage(upstream.status, rejected));
   }
 
   const decoder = new TextDecoder();
@@ -142,7 +142,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
           buffer += decoder.decode(value, { stream: true });
 
-          // Gemini's frames are SSE too, but its own shape and CRLF-separated — see splitFrames.
+          // The provider's frames are SSE too, but in its own shape (Gemini's CRLF-separated) —
+          // see splitFrames, which handles both separators.
           const split = splitFrames(buffer);
           buffer = split.rest;
 
@@ -150,7 +151,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
             const payload = framePayload(frame);
             if (!payload) continue;
 
-            const read = readFrame(payload);
+            const read = provider.readFrame(payload);
             for (const text of read.text) send({ type: 'text', text });
             if (read.blocked) blocked = true;
           }

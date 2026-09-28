@@ -488,11 +488,11 @@ a seat.
 
 `supabase/functions/chat/` is the only server-side code in the repo, and it exists for one
 reason: every `VITE_`-prefixed variable is compiled into the bundle, so the model API key cannot
-live in `import.meta.env`. It is an edge-function secret (`GEMINI_API_KEY`), and
+live in `import.meta.env`. It is an edge-function secret (`MISTRAL_API_KEY` and/or `GEMINI_API_KEY`), and
 `supabase/schema-chat.sql` adds the `chat_usage` table the daily cap counts rows in.
 
-It runs on the **Google Gemini free tier**, over raw `fetch` rather than an SDK — the request
-shape is small and a Deno `npm:` resolution is one more thing to break.
+It runs on free tiers (Mistral first, Gemini as the backup), over raw `fetch` rather than an SDK.
+The request shape is small, and a Deno `npm:` resolution is one more thing to break.
 
 Two things about Google's API cost a debugging session each, and both are now load-bearing:
 
@@ -508,6 +508,50 @@ Two things about Google's API cost a debugging session each, and both are now lo
 
 Also: `gemini-2.5-flash` is gone. Google answers it with "no longer available to new users", so a
 key issued today cannot reach it at all.
+
+**The free tier is far smaller than it looks, and it is counted per model.** On the key checked in
+September 2026, `gemini-3.6-flash` allowed 5 requests a minute and **20 a day for the whole
+project**. That's one learner's evening. So `callModel` in the shared module walks `CHAIN` in order
+(`gemini-3.6-flash`, then `gemini-3.5-flash-lite`, a separate quota bucket, after the Mistral entries
+below). It falls through on 429/404/5xx, and only on the last entry waits out a per-minute throttle
+once, if the provider's `retryDelay` is short. Two details matter here:
+
+- `streamGenerateContent` wraps its error body in an **array**, `[{"error": {...}}]`. `upstreamError`
+  unwraps it. Reading `body.error` directly misses every streaming rejection.
+- A 429 is either per-minute (`...PerMinute...` quotaId, clears in seconds) or per-day. They get
+  different messages. Telling a throttled learner "resets tomorrow" sent them away from an answer
+  that would have worked on the next try.
+
+For real traffic, enable billing on the Google project (AI Studio → Billing). Tier 1 takes effect
+immediately and is the actual fix. The fallback only buys headroom.
+
+**Mistral goes first when its key is set.** `CHAIN` in the shared module is `ministral-14b-latest`,
+then `ministral-8b-latest`, then the two Gemini models. Only the ministral models are used because
+the free tier answers `mistral-small`, `-medium` and `magistral` with a permanent `429 Rate limit
+exceeded`, which looks exactly like a throttle and isn't one (see `MISTRAL_MODEL`). `callModel` skips any entry whose key is
+missing, so either key alone works. The free-tier numbers, checked in September 2026, explain the
+order:
+
+| Provider | Free allowance | Tutor requests (about 4–5k tokens each) |
+| --- | --- | --- |
+| Mistral "Experiment" | about 1 request/second, about 1B tokens a month | effectively unlimited for a demo |
+| Groq | 30/min but 8K tokens/min, 200K/day | about 1–2 a minute, about 45 a day |
+| Cerebras | 5/min, 1M tokens/day | about 200 a day |
+| OpenRouter `:free` | 50/day (1,000 after a one-off $10) | 50 a day |
+| Gemini free | 5/min, 20/day per model | 20 a day |
+
+Mistral's free-tier traffic may be used for training, so reconsider it before real learners use it.
+
+Everything except Gemini speaks OpenAI's chat-completions format, so `openAiCompatible(id, baseUrl,
+keyName)` covers all of them. Adding Groq is one line plus a `CHAIN` entry, and its key name belongs
+in `SERVER_ONLY` in `secrets.test.ts`. Two details of that format: the stream ends with a bare
+`data: [DONE]`, which is not JSON, and Mistral puts error `message` at the top level rather than
+under `error`. `readChatCompletionFrame` and `upstreamError` handle both. `callModel` falls through
+on 401 and 403 as well as 429, 404 and 5xx, so a bad Mistral key degrades to Gemini rather than
+breaking the tutor. The host logs a warning naming the provider that failed.
+
+Tests can't name a key literally under `src/`. `secrets.test.ts` fails on it, so use
+`provider.keyName`.
 
 **Two hosts call the model, and they share one module.** `supabase/functions/_shared/gemini.ts`
 holds the persona, the model id, the request body and the frame reader; both
@@ -534,7 +578,16 @@ paid key rather than a code change.
 - **Answers are plain prose because there is no markdown renderer.** Adding one would be a runtime
   dependency for something nothing else needs, so the system prompt forbids markdown and
   `ChatPanel` splits on blank lines. If an answer ever comes back full of asterisks, the prompt
-  is what to fix.
+  is what to fix — except for the ministral models, which bold key terms whatever the prompt says,
+  so `readChatCompletionFrame` strips `*` from every OpenAI-style frame.
+- **Follow-ups keep their topic by blending, not weighting.** `retrieve` takes the learner's two
+  previous questions as `earlier` and reserves `TOPIC_SLOTS` excerpts for them. Weighting them in
+  failed: "why does that happen at the molecular level?" after a Frank-Starling question matched an
+  IV-fluids passage on "molecular weight", because a rare word in the follow-up outscored the
+  down-weighted topic.
+- **The tutor is a general assistant as well as a guide to the app.** The persona tells it to always
+  answer and to ground in EXCERPTS only where they're relevant. It should never deflect because the
+  app lacks a topic.
 - **Retrieval returning nothing is a feature.** `retrieve` scores zero overlap as no result, so
   the tutor is handed an empty excerpt block and can say the app does not cover something, rather
   than reasoning from the six least-irrelevant paragraphs in the corpus.
@@ -551,7 +604,7 @@ paid key rather than a code change.
 
 ### Running it locally, with no deploy
 
-The dev server serves the tutor at `/api/chat` itself. Put `GEMINI_API_KEY=...` in `.env.local`
+The dev server serves the tutor at `/api/chat` itself. Put `MISTRAL_API_KEY=...` and/or `GEMINI_API_KEY=...` in `.env.local`
 (**no `VITE_` prefix** — that prefix compiles a value into the bundle every learner downloads) and
 restart dev. `useChat` picks the dev route whenever `import.meta.env.DEV`, so no Supabase deploy,
 CLI or dashboard is involved, and no signed-in session is required for that route.
@@ -562,22 +615,24 @@ convention and a guarantee, and it has been checked against a deliberate violati
 
 ### Deploying it
 
-Both routes need the same two things: the SQL applied, and `GEMINI_API_KEY` set. Get a free key
-from Google AI Studio (aistudio.google.com/apikey) — it needs no card.
+Both routes need the same two things: the SQL applied, and at least one of `MISTRAL_API_KEY`
+(console.mistral.ai) or `GEMINI_API_KEY` (aistudio.google.com/apikey) set. Neither needs a card.
 
 **Dashboard**, no CLI required:
 
 1. SQL Editor → paste `supabase/schema-chat.sql` → Run. It is idempotent, so re-running is safe.
 2. Edge Functions → Create function, name it `chat` → paste `supabase/functions/chat/index.ts`
    → Deploy.
-3. Edge Functions → Secrets → add `GEMINI_API_KEY`.
+3. Edge Functions → Secrets → add `MISTRAL_API_KEY` and/or `GEMINI_API_KEY`.
+   The function imports `../_shared/gemini.ts`, so a single pasted file will not boot; deploy both
+   files (CLI, or the MCP `deploy_edge_function` tool with `chat/index.ts` and `_shared/gemini.ts`).
 
 **CLI**, for the function and the secret:
 
 ```
 brew install supabase/tap/supabase
 supabase link --project-ref <ref>
-supabase secrets set GEMINI_API_KEY=...
+supabase secrets set MISTRAL_API_KEY=... GEMINI_API_KEY=...
 supabase functions deploy chat
 ```
 
@@ -651,6 +706,20 @@ the tree is clean. `cmp -s` them against the original, then delete.
   the custom property in tests, not the computed result.
 - **Read the DOM in a separate tool call from the clicks.** React has not committed yet within
   the same synchronous block, and reading early has produced two false diagnoses so far.
+- **`cleanup()` does not release a rendered tree, and in a suite that mounts hundreds of them that
+  is the difference between a four-second test and a timeout.** jsdom queues a `toggle` task for
+  every `<details>` whose `open` attribute is written — `setTimeout(this._dispatchToggleEvent.bind(this), 0)`
+  in `HTMLDetailsElement-impl.js` — and the bound callback holds the element, which holds its
+  ancestors through jsdom's SymbolTree, which holds the whole document. A synchronous test body
+  never lets that timer run, so every page it mounted stays live at a measured 3165 kB each, and
+  every module page opens the explainer as it mounts. `actions.test.tsx` was holding 2 GB by the
+  time it reached `vision` — 48th of 51 alphabetically — and its 42-render sweep took 27s there
+  against a 30s `testTimeout`, where the same search costs 3.7s in a fresh worker. That is a test
+  that fails on its POSITION in the file rather than on anything it asserts, and it is what a
+  "flaky under load" report on this file has meant so far. Unmount and then `await` a macrotask;
+  `release` in that file is the one-liner, and it took the file from 145s to 24s. Its converse is
+  load-bearing too: never `await` while a tree is still mounted, or jsdom runs the animation frames
+  a paused page exists to prevent.
 - `inputsRef` in `useEngineLoop` now syncs in a **layout** effect that also republishes the
   snapshot, so a slider moves the readouts and the diagram in the same frame whether the module is
   playing or paused. `reset` and `fastForward` still take an `inputsOverride` for callers changing
@@ -741,6 +810,12 @@ backlog, and `src/shared/diagram/organShapes.ts` is where the next organ goes.
   a readout tile that names the pattern needs `revealsPattern` on its `ReadoutItem`.
 - **Colour that encodes a quantity needs a legend.** The signal palette is load-bearing in these
   drawings and nothing on screen explains it.
+- **A lens is a view, not a control.** `ModulePresentation.lens` offers a picker above the diagram
+  (digestionAbsorption's "Highlight nutrient") and the page passes the pick back as
+  `PresentationContext.lens`. It writes no input, so it never enters share links, question
+  setups or the `controls.test.tsx` sweep, and it is not blinded. A builder must treat an absent
+  lens as `initial` — that is the view every test and the diagram audit see; the audit also
+  renders each other option as `<id>-lens-<value>`.
 - **Motion is emphasis, never the only carrier of meaning.** `index.css` stops all animation
   under `prefers-reduced-motion`, so anything a diagram says only by moving is lost for those
   readers. Say it with position, size or colour as well.

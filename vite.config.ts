@@ -5,13 +5,13 @@ import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import {
   BLOCKED_MESSAGE,
-  ENDPOINT,
+  KEY_NAMES,
   MAX_REQUEST_BYTES,
+  callModel,
   framePayload,
-  geminiRequestBody,
   parseRequest,
-  readFrame,
   splitFrames,
+  upstreamError,
   upstreamMessage,
 } from './supabase/functions/_shared/gemini.ts'
 
@@ -33,7 +33,8 @@ import {
  * copy the omission there. `DEV_MESSAGE_CAP` is a runaway guard, not an access control.
  */
 function tutorDevRoute(mode: string): Plugin {
-  const key = loadEnv(mode, process.cwd(), '').GEMINI_API_KEY
+  const env = loadEnv(mode, process.cwd(), '')
+  const keys = Object.fromEntries(KEY_NAMES.map((name) => [name, env[name]]))
   let sent = 0
 
   /** Per dev-server process. A loop that fires the tutor in a cycle should stop, not keep going. */
@@ -54,8 +55,11 @@ function tutorDevRoute(mode: string): Plugin {
 
         // Named in as many words, because "the tutor is unavailable" would send you looking for a
         // bug when the answer is one line in a file.
-        if (!key) {
-          return json(500, 'No GEMINI_API_KEY in .env.local — add it (no VITE_ prefix) and restart the dev server.')
+        if (!Object.values(keys).some(Boolean)) {
+          return json(
+            500,
+            `No tutor key in .env.local — add one of ${KEY_NAMES.join(', ')} (no VITE_ prefix) and restart the dev server.`,
+          )
         }
         if (sent >= DEV_MESSAGE_CAP) {
           return json(429, `Dev tutor cap of ${DEV_MESSAGE_CAP} messages reached. Restart the dev server to reset it.`)
@@ -77,25 +81,27 @@ function tutorDevRoute(mode: string): Plugin {
 
         sent += 1
 
-        let upstream: Response
+        let answered
         try {
-          upstream = await fetch(ENDPOINT, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              // In a header rather than the query string, so the key stays out of request logs.
-              'x-goog-api-key': key,
-            },
-            body: JSON.stringify(geminiRequestBody(parsed)),
-          })
+          answered = await callModel(
+            keys,
+            parsed,
+            (url, headers, body) => fetch(url, { method: 'POST', headers, body }),
+            (message) => server.config.logger.warn(`[tutor] ${message}`),
+          )
         } catch (error) {
           server.config.logger.error(`[tutor] upstream unreachable: ${String(error)}`)
           return json(502, 'The tutor could not be reached just now. Try again in a moment.')
         }
+        if (!answered) return json(500, 'No tutor key configured.')
+        const { response: upstream, provider } = answered
 
         if (!upstream.ok || !upstream.body) {
-          const body = (await upstream.json().catch(() => null)) as { error?: { status?: string } } | null
-          return json(502, upstreamMessage(upstream.status, body?.error?.status))
+          const body: unknown = await upstream.json().catch(() => null)
+          server.config.logger.error(
+            `[tutor] upstream ${upstream.status}: ${upstreamError(body)?.message ?? '(no error body)'}`,
+          )
+          return json(502, upstreamMessage(upstream.status, body))
         }
 
         response.statusCode = 200
@@ -118,7 +124,8 @@ function tutorDevRoute(mode: string): Plugin {
 
             buffer += decoder.decode(value, { stream: true })
 
-            // Gemini's frames are SSE too, but its own shape and CRLF-separated — see splitFrames.
+            // The provider's frames are SSE too, but in its own shape (Gemini's CRLF-separated) —
+            // see splitFrames, which handles both separators.
             const split = splitFrames(buffer)
             buffer = split.rest
 
@@ -126,7 +133,7 @@ function tutorDevRoute(mode: string): Plugin {
               const payload = framePayload(frame)
               if (!payload) continue
 
-              const read = readFrame(payload)
+              const read = provider.readFrame(payload)
               for (const text of read.text) send({ type: 'text', text })
               if (read.blocked) blocked = true
             }

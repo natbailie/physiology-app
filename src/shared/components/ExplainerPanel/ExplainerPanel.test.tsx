@@ -154,6 +154,47 @@ describe('ExplainerPanel sections', () => {
   });
 });
 
+/**
+ * A section may legitimately name the same scenario twice, because one scenario teaches two
+ * things: respiratoryFailure loads the neuromuscular patient once for the PaCO2 and once for the
+ * pH, and the mixed-failure patient once for each axis it fails on. Keying the row on the preset
+ * made those a duplicate-key pair — React warned on every render of the page and is free to drop
+ * or double a child it cannot tell apart.
+ */
+describe('a section naming one scenario twice', () => {
+  const REPEATED: ExplainerContent<Preset> = {
+    title: 'How the mechanism actually works',
+    sections: [
+      {
+        heading: 'One scenario, two readings',
+        paragraphs: ['The same patient answers two different questions.'],
+        demos: [
+          { preset: 'blocked', watch: 'the precursor' },
+          { preset: 'blocked', watch: 'the product' },
+        ],
+      },
+    ],
+  };
+
+  it('offers a button for each reading', () => {
+    render(<Harness content={REPEATED} />);
+    expect(document.querySelectorAll('[class*="demoButton"]').length).toBe(2);
+    expect(screen.getByText('watch the precursor')).toBeTruthy();
+    expect(screen.getByText('watch the product')).toBeTruthy();
+  });
+
+  it('keys them apart, so React is not asked to tell one from the other', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      render(<Harness content={REPEATED} />);
+      const complaints = error.mock.calls.filter((call) => String(call[0]).includes('same key'));
+      expect(complaints).toEqual([]);
+    } finally {
+      error.mockRestore();
+    }
+  });
+});
+
 describe('module shell scenarios', () => {
   it('unregisters when the preset bar unmounts', () => {
     function Probe() {

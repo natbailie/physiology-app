@@ -98,6 +98,34 @@ describe('retrieve', () => {
     expect(retrieve(INDEX, 'sodium pressure heart', { limit: 2 })).toHaveLength(2);
   });
 
+  it('keeps a follow-up on the topic of the conversation', () => {
+    // "it" names nothing, and both sodium chunks say "reabsorbed"; the earlier question is what
+    // says the conversation is about the proximal tubule.
+    const alone = retrieve(INDEX, 'so why is it reabsorbed');
+    const followUp = retrieve(INDEX, 'so why is it reabsorbed', {
+      limit: 3,
+      earlier: ['what does the proximal tubule do'],
+    });
+
+    expect(retrieve(INDEX, 'so why is it reabsorbed', { limit: 1 })[0]?.moduleId).toBe('adrenalCortex');
+    expect(alone.map((chunk) => chunk.moduleId)).toContain('adrenalCortex');
+    expect(followUp.map((chunk) => chunk.id)).toContain('content:renalTubular:0');
+  });
+
+  it('adds nothing for earlier questions when there were none', () => {
+    expect(retrieve(INDEX, 'aldosterone', { earlier: [] })).toEqual(retrieve(INDEX, 'aldosterone'));
+  });
+
+  it('lets the current question outrank an earlier one', () => {
+    expect(retrieve(INDEX, 'what is the wedge pressure', { earlier: ['aldosterone'] })[0]?.id).toBe(
+      'glossary:wedge pressure',
+    );
+  });
+
+  it('ignores how learners address a chatbot', () => {
+    expect(tokenise('which module should I use to learn about ADH')).toEqual(['adh']);
+  });
+
   it('ranks the same way twice', () => {
     expect(retrieve(INDEX, 'sodium')).toEqual(retrieve(INDEX, 'sodium'));
   });
