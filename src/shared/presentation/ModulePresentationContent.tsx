@@ -6,6 +6,7 @@ import { getDiagramClasses } from './web/diagramClasses';
 import { ControlRailView } from './web/ControlRailView';
 import { ReadoutGridView } from './web/ReadoutGridView';
 import { TrendsView } from './web/TrendsView';
+import { ToggleGroup } from '@/shared/components/ToggleGroup/ToggleGroup';
 
 /**
  * The schema delivered as four slot nodes, matching the four slot props `ModulePage` asks for —
@@ -16,6 +17,12 @@ export interface PresentationSlots {
   readouts: ReactNode;
   charts: ReactNode;
   controls: ReactNode;
+}
+
+/** The page's half of a view-only lens: the value it holds and how to change it. */
+export interface LensBinding {
+  value: string | undefined;
+  onChange: (value: string) => void;
 }
 
 function showCtxOf<State, Derived, Inputs>(ctx: PresentationContext<State, Derived, Inputs, unknown>): ShowContext<State, Derived, Inputs> {
@@ -33,14 +40,32 @@ export function usePresentationSlots<State, Derived, Inputs, History>(
   ctx: PresentationContext<State, Derived, Inputs, History>,
   inputs: Inputs,
   onChange: <K extends keyof Inputs>(key: K, value: Inputs[K]) => void,
+  lens?: LensBinding,
 ): PresentationSlots {
   const classes = useMemo(() => getDiagramClasses(moduleId), [moduleId]);
   const showCtx = showCtxOf(ctx);
+  const lensSpec = presentation.lens;
+  const lensValue = lens?.value ?? lensSpec?.initial;
+  const lensChange = lens?.onChange;
 
-  const diagram = useMemo(
-    () => presentation.diagram.map((frame, i) => <DiagramView key={frame.key ?? i} frame={frame} classes={classes} />),
-    [presentation, classes],
-  );
+  const diagram = useMemo(() => {
+    const frames = presentation.diagram.map((frame, i) => <DiagramView key={frame.key ?? i} frame={frame} classes={classes} />);
+    // The picker sits above the frames it re-draws, and outside `controls`, so blinding the
+    // controls for a pattern question leaves it working: it changes emphasis, not the model.
+    if (!lensSpec || !lensChange || lensValue === undefined) return frames;
+    const selected = lensSpec.options.find((option) => option.value === lensValue);
+    return [
+      <ToggleGroup
+        key="lens"
+        label={lensSpec.label}
+        value={lensValue}
+        options={lensSpec.options.map((option) => ({ value: option.value, label: option.label }))}
+        colorVar={selected?.colorToken ? `var(--${selected.colorToken})` : undefined}
+        onChange={lensChange}
+      />,
+      ...frames,
+    ];
+  }, [presentation, classes, lensSpec, lensValue, lensChange]);
 
   const readouts = <ReadoutGridView readouts={presentation.readouts} ctx={showCtx} />;
   const charts = (
