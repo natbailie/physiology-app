@@ -29,7 +29,7 @@ export function DisciplineCard({
 
   if (status === 'comingSoon' || !href) {
     return (
-      <div className={`${styles.card} ${styles.comingSoon}`} style={style} aria-disabled="true">
+      <div className={`${styles.card} ${styles.comingSoon}`} style={style} data-status="coming-soon">
         <span className={styles.name}>{name}</span>
         <span className={styles.blurb}>{blurb}</span>
         <span className={styles.badge}>Coming soon</span>

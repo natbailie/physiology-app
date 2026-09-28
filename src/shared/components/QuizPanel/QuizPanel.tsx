@@ -50,7 +50,9 @@ function choiceIds<TInputs, TPreset extends string, TSnapshot>(
  * "QUESTION 3 OF 8" line that was set in 11px caps and read as chrome rather than progress. */
 function ProgressDots({ index, total }: { index: number; total: number }) {
   return (
-    <span className={styles.dots} aria-label={`Question ${index} of ${total}`}>
+    // role="img": an aria-label on a plain span is ignored by screen readers, so "Question 3 of 8"
+    // was never read at all.
+    <span className={styles.dots} role="img" aria-label={`Question ${index} of ${total}`}>
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
@@ -87,10 +89,29 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
   const { commit } = session;
   // The panel's own root, so the keyboard shortcut can tell whether anybody can see it.
   const rootRef = useRef<HTMLElement>(null);
+  const stemRef = useRef<HTMLParagraphElement>(null);
+  const verdictRef = useRef<HTMLParagraphElement>(null);
+  const completeRef = useRef<HTMLHeadingElement>(null);
+
+  // Move focus with the question. The button a learner pressed — Start, an answer, Next — is
+  // unmounted by that very press, so without this focus fell to <body> and a screen-reader user
+  // heard neither the new question nor whether they had been right (WCAG 2.4.3, 4.1.3). It is also
+  // what keeps the answer shortcuts below working: they only listen while focus is in here.
+  useEffect(() => {
+    if (rootRef.current?.closest('[inert]')) return;
+    if (phase === 'predicting') stemRef.current?.focus({ preventScroll: true });
+    else if (phase === 'revealed') verdictRef.current?.focus({ preventScroll: true });
+    else if (phase === 'complete') completeRef.current?.focus({ preventScroll: true });
+  }, [phase, index]);
+
   useEffect(() => {
     if (!predicting || choices.length === 0) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      // Single-character shortcuts only while focus is inside this question (WCAG 2.1.4). On the
+      // whole window they fired for speech-input users dictating elsewhere on the page, and for
+      // anyone typing a letter into something that is not an INPUT.
+      if (!rootRef.current?.contains(document.activeElement)) return;
       const target = event.target as HTMLElement | null;
       if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
       // Refuse a keypress aimed at a panel nobody can see.
@@ -160,7 +181,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
       <div className={styles.panel}>
         <div className={styles.idleRow}>
           <div>
-            <h2 className={styles.idleTitle}>
+            <h2 className={styles.idleTitle} ref={completeRef} tabIndex={-1}>
               {score} of {total} correct
             </h2>
             <p className={styles.idleBlurb}>
@@ -205,7 +226,9 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
         </button>
       </header>
 
-      <p className={styles.stem}>{question.stem}</p>
+      <p className={styles.stem} ref={stemRef} tabIndex={-1}>
+        {question.stem}
+      </p>
 
       {!pattern && (
         <p className={styles.prompt}>
@@ -247,7 +270,7 @@ export function QuizPanel<TInputs, TPreset extends string, TSnapshot>({
 
       {phase === 'revealed' && (
         <div className={styles.reveal} data-correct={correct}>
-          <p className={styles.verdict}>
+          <p className={styles.verdict} ref={verdictRef} tabIndex={-1}>
             <span className={styles.verdictTag}>{correct ? 'Correct' : 'Not quite'}</span>
             <span className={styles.verdictDetail}>
               {correct

@@ -553,6 +553,15 @@ button {
   font-family: inherit;
 }
 
+/* Placeholder text at the text ramp's own floor. Left to the browser it is a translucent grey —
+ * Firefox's 0.54 opacity measures about 3.7:1 on the light panel, under 4.5:1 (WCAG 1.4.3). A
+ * placeholder is never the only label (3.3.2) — every field here has a visible one — but it is
+ * still text somebody has to read. */
+::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
 /* Fallback focus ring. Twelve stylesheets declare their own; without this a new
  * component starts with no visible focus at all. Components override freely. */
 :focus-visible {

@@ -7,7 +7,6 @@ const state = vi.hoisted(() => ({
   status: 'free' as 'loading' | 'free' | 'active',
   source: 'none' as 'institution' | 'subscription' | 'none',
   institutionName: null as string | null,
-  targetExam: null as string | null,
 }));
 
 vi.mock('@/auth/AuthContext', () => ({
@@ -30,25 +29,12 @@ const rc = vi.hoisted(() => ({
   offered: null as unknown,
   checkout: { ok: true } as unknown,
   checkoutCalls: [] as unknown[],
-  attributeCalls: [] as unknown[],
 }));
 
 vi.mock('./revenuecat', () => ({
   fetchOfferedPackages: async () => rc.offered,
-  setExamAttributes: async (...args: unknown[]) => {
-    rc.attributeCalls.push(args);
-  },
 }));
 
-vi.mock('@/account/examProfile', () => ({
-  useExamProfile: () => ({
-    targetExam: state.targetExam,
-    trainingLevel: null,
-    ready: true,
-    canSave: true,
-    save: async () => true,
-  }),
-}));
 
 vi.mock('./startCheckout', () => ({
   startCheckout: async (...args: unknown[]) => {
@@ -80,7 +66,7 @@ const LIVE_OFFERING = [
     label: 'Annual',
     price: '£60',
     period: 'year',
-    note: 'Two months free',
+    note: 'Save £60 a year compared with paying each month',
     rcPackage: { identifier: '$rc_annual' },
   },
 ];
@@ -94,8 +80,6 @@ afterEach(() => {
   rc.offered = null;
   rc.checkout = { ok: true };
   rc.checkoutCalls = [];
-  rc.attributeCalls = [];
-  state.targetExam = null;
   licence.result = { ok: false, message: 'That code was not recognised.' };
   licence.codes = [];
 });
@@ -169,6 +153,7 @@ describe('pricing page', () => {
     state.user = { id: 'u1', email: 'a@b.c' };
     render(<PricingPage />);
 
+    fireEvent.click(screen.getByRole('checkbox', { name: /access to start now/i }));
     fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
     await waitFor(() => expect(screen.queryByText(/not configured/i)).toBeTruthy());
     expect(rc.checkoutCalls).toEqual([]);
@@ -181,6 +166,7 @@ describe('pricing page', () => {
 
     await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
     fireEvent.click(screen.getByRole('radio', { name: /monthly/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /access to start now/i }));
     fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
 
     await waitFor(() => expect(rc.checkoutCalls.length).toBe(1));
@@ -195,6 +181,7 @@ describe('pricing page', () => {
     render(<PricingPage />);
 
     await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
+    fireEvent.click(screen.getByRole('checkbox', { name: /access to start now/i }));
     fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
     await waitFor(() => expect(rc.checkoutCalls.length).toBe(1));
     expect(screen.queryByText(/could not/i)).toBeNull();
@@ -207,30 +194,36 @@ describe('pricing page', () => {
     render(<PricingPage />);
 
     await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
+    fireEvent.click(screen.getByRole('checkbox', { name: /access to start now/i }));
     fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
     await waitFor(() => expect(screen.queryByText(/card was declined/i)).toBeTruthy());
   });
 
-  /**
-   * The one page that loads the RevenueCat SDK is the one place the exam attribute can be sent
-   * without pulling an 840 kB chunk for every signed-in learner. If this stops firing, the
-   * audience silently stops being segmentable and nothing else fails.
-   */
-  it('tells RevenueCat which exam the learner is revising for', async () => {
+  it('states the saving it computes from the prices, not a slogan', () => {
+    // 12 × £9 − £55 = £53. "Two months free" was the old claim, and it was wrong.
     state.user = { id: 'u1', email: 'a@b.c' };
-    state.targetExam = 'FRCA_PRIMARY';
     render(<PricingPage />);
-
-    await waitFor(() => expect(rc.attributeCalls.length).toBeGreaterThan(0));
-    expect(rc.attributeCalls[0]).toEqual(['u1', { targetExam: 'FRCA_PRIMARY', trainingLevel: null }]);
+    expect(screen.getByText('Save £53 a year compared with paying each month')).toBeTruthy();
+    expect(screen.queryByText(/two months free/i)).toBeNull();
   });
 
-  it('still sends a null exam for a learner who has not chosen one', async () => {
+  it('discloses auto-renewal, the trader and the refund policy before the button', () => {
     state.user = { id: 'u1', email: 'a@b.c' };
     render(<PricingPage />);
+    expect(screen.getByText(/renews automatically at the end of each billing period/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /refund policy/i }).getAttribute('href')).toBe('#refunds');
+    expect(screen.getByRole('link', { name: /^terms$/i }).getAttribute('href')).toBe('#terms');
+  });
 
-    await waitFor(() => expect(rc.attributeCalls.length).toBeGreaterThan(0));
-    expect(rc.attributeCalls[0]).toEqual(['u1', { targetExam: null, trainingLevel: null }]);
+  it('will not start a checkout until the learner asks for access to start now', async () => {
+    state.user = { id: 'u1', email: 'a@b.c' };
+    rc.offered = LIVE_OFFERING;
+    render(<PricingPage />);
+
+    await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /subscribe/i }));
+    await waitFor(() => expect(screen.queryByText(/confirm you want access to start now/i)).toBeTruthy());
+    expect(rc.checkoutCalls).toEqual([]);
   });
 
   it('redeems a licence code and names the institution back', async () => {
@@ -238,7 +231,7 @@ describe('pricing page', () => {
     render(<PricingPage />);
 
     fireEvent.change(screen.getByLabelText(/given you a code/i), { target: { value: 'QRSTUVWXYZ' } });
-    fireEvent.click(screen.getByRole('button', { name: /apply/i }));
+    fireEvent.click(screen.getByRole('button', { name: /apply code/i }));
 
     await waitFor(() => expect(screen.queryByText(/Access granted through Barts/)).toBeTruthy());
     expect(licence.codes).toEqual(['QRSTUVWXYZ']);
@@ -248,7 +241,7 @@ describe('pricing page', () => {
     render(<PricingPage />);
 
     fireEvent.change(screen.getByLabelText(/given you a code/i), { target: { value: 'WRONGCODE1' } });
-    fireEvent.click(screen.getByRole('button', { name: /apply/i }));
+    fireEvent.click(screen.getByRole('button', { name: /apply code/i }));
 
     await waitFor(() => expect(screen.queryByText(/not recognised/i)).toBeTruthy());
   });

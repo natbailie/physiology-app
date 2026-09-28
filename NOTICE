@@ -14,8 +14,9 @@ Where a physiological mechanism or a calibration target in this repository was d
 Pulse's published methodology documentation, the module's engine constants or its on-page
 footnote cite the relevant methodology page.
 
-This product bundles two typefaces, both under the SIL Open Font License 1.1. Latin subsets
-only, self-hosted under `public/fonts/`; neither is fetched from a third party at runtime.
+This product bundles three typefaces, all under the SIL Open Font License 1.1. Latin subsets
+only, self-hosted under `public/fonts/`; none is fetched from a third party at runtime. The
+full licence text is in `public/fonts/OFL.txt`, which the OFL requires to travel with the fonts.
 
   Inter
   Copyright The Inter Project Authors
@@ -24,3 +25,7 @@ only, self-hosted under `public/fonts/`; neither is fetched from a third party a
   JetBrains Mono
   Copyright The JetBrains Mono Project Authors
   https://github.com/JetBrains/JetBrainsMono
+
+  Literata
+  Copyright The Literata Project Authors
+  https://github.com/googlefonts/literata

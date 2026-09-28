@@ -43,7 +43,11 @@ export function ExamFilterBar({ countText }: ExamFilterBarProps) {
         </button>
       ))}
 
-      {countText && <span className={styles.count}>{countText}</span>}
+      {/* Always mounted: a result count that changes as a filter is pressed is a status message
+          (WCAG 4.1.3), and a region inserted with its text already inside is not announced. */}
+      <span className={styles.count} role="status">
+        {countText}
+      </span>
     </div>
   );
 }

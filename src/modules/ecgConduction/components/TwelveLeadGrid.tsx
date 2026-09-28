@@ -65,7 +65,12 @@ export function TwelveLeadGrid({ inputs, rrIntervalMs, selectedLead, onSelectLea
             onClick={() => onSelectLead(lead)}
           >
             <span className={styles.gridCellLabel}>{lead}</span>
-            <svg viewBox={`0 0 ${CELL.width} ${CELL.height}`} preserveAspectRatio="none" style={{ width: '100%', height: CELL.height }}>
+            <svg
+              viewBox={`0 0 ${CELL.width} ${CELL.height}`}
+              preserveAspectRatio="none"
+              style={{ width: '100%', height: CELL.height }}
+              aria-hidden="true"
+            >
               <line className={styles.gridBaseline} x1={0} y1={CELL.height / 2} x2={CELL.width} y2={CELL.height / 2} />
               <path className={styles.gridTrace} d={d} />
             </svg>

@@ -88,15 +88,18 @@
   line-height: 1.4;
 }
 
+/* Underlined always: told apart from the prose around it by colour alone, it failed 1.4.1. */
 .footerLink {
-  font-size: 0.78rem;
-  color: var(--text-faint);
-  text-decoration: none;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
   align-self: flex-start;
+  min-height: 1.5rem;
 }
 
 .footerLink:hover {
-  text-decoration: underline;
+  color: var(--text);
 }
 
 .dangerZone {
@@ -121,20 +124,6 @@
   background: var(--danger);
   border-color: var(--danger);
   color: var(--on-solid);
-}
-
-.prose {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.privacyList {
-  margin: 0;
-  padding-left: 1.1rem;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  line-height: 1.6;
 }
 
 /* --- Exam and stage. Two selects, saved on change. ------------------------- */

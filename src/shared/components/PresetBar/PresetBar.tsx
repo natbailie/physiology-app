@@ -134,6 +134,11 @@ function PresetBarBase<T extends string>({
             {copied ? 'Link copied' : 'Share'}
           </button>
         )}
+        {onShare && (
+          <span className="sr-only" role="status">
+            {copied ? 'Link copied to the clipboard' : ''}
+          </span>
+        )}
         {actions?.map((action) => (
           <button
             key={action.label}

@@ -9,6 +9,11 @@ interface ImportMetaEnv {
    * server-only and `src/shared/chat/secrets.test.ts` fails the build if either reaches `src/`.
    */
   readonly VITE_REVENUECAT_PUBLIC_KEY?: string;
+  /**
+   * Google Analytics 4 measurement id (`G-…`). Publishable — it is in the page source of every site
+   * that uses GA. Read only by `src/analytics/ga.ts`, and only after consent.
+   */
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {

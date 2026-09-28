@@ -26,8 +26,19 @@
 /* Unbuilt subjects stand down rather than disappear: the roadmap is part of what the
  * picker is saying. Same treatment as a coming-soon ModuleCard. */
 .comingSoon {
-  opacity: 0.55;
   cursor: default;
+  border-style: dashed;
+}
+
+/* Stood down by colour and a dashed edge, never by opacity: the old `opacity: 0.55` took the
+ * tagline to 2.57:1 on the light theme (WCAG 1.4.3). The words must stay readable — the roadmap
+ * is part of what the page is saying. */
+.comingSoon::before {
+  background: color-mix(in srgb, var(--panel-border) 45%, transparent);
+}
+
+.comingSoon .name {
+  color: var(--text-dim);
 }
 
 .badge {

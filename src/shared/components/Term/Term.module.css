@@ -49,10 +49,28 @@
   transition: opacity 0.12s ease;
 }
 
-.trigger:hover + .bubble,
-.trigger:focus-visible + .bubble {
+/* Hover is on the WRAPPER, which contains the bubble, so moving the pointer from the label onto
+   the definition keeps it open (WCAG 1.4.13 "hoverable"). */
+.wrap:hover > .bubble,
+.trigger:focus-visible + .bubble,
+.wrap[data-open] > .bubble {
   opacity: 1;
   visibility: visible;
+}
+
+/* Escape wins over hover and focus until the pointer leaves or focus moves ("dismissible"). */
+.wrap[data-dismissed] > .bubble {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* An invisible bridge over the gap between label and bubble, so the pointer crossing it does not
+   count as leaving. */
+.bubble::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  z-index: -1;
 }
 
 .expansion {

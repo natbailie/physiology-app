@@ -30,7 +30,8 @@
   stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.6;
+  /* Full strength. At 0.6 the curve measured 2.85:1 on white, under the 3:1 floor for a graphic
+     a learner has to read (WCAG 1.4.11); palette.test.ts measures strokes at full opacity only. */
 }
 
 .dot {

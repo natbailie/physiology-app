@@ -50,9 +50,19 @@
   width: min(100%, 24rem);
 }
 
-.search:focus {
-  outline: none;
-  border-color: var(--focus-ring);
+/* It used to be `outline: none; border-color: var(--focus-ring)` — but that token is a
+ * `2px solid …` shorthand, so the border-color was invalid, dropped, and focus showed nothing. */
+.search:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.searchLabel {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--s-1);
 }
 
 /* Two-level tile grid, matching the main-menu surface. */
@@ -98,6 +108,10 @@
 .empty {
   font-size: 0.8rem;
   color: var(--text-faint);
+}
+
+.empty:empty {
+  display: none;
 }
 
 .footnote {

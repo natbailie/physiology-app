@@ -35,7 +35,9 @@ export function BrandMark({ size = 'md', tone = 'paper', href, as: Word = 'span'
 
   if (href) {
     return (
-      <a className={className} href={href}>
+      // Named for where it goes: read out, the lockup alone was "Physiology Lab Bentara Medical"
+      // with nothing saying it is the way home. The visible words stay in the name (2.5.3).
+      <a className={className} href={href} aria-label="Physiology Lab — home">
         {content}
       </a>
     );

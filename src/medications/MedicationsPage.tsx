@@ -271,19 +271,26 @@ function ClassGrid({
       </header>
 
       {!isBranch && (
-        <input
-          className={styles.search}
-          type="search"
-          placeholder={`Search ${family.name}…`}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label={`Search ${family.name}`}
-        />
+        <div>
+          {/* A visible label rather than a placeholder that vanishes on typing (WCAG 3.3.2). */}
+          <label className={styles.searchLabel} htmlFor="medication-search">
+            Search {family.name}
+          </label>
+          <input
+            id="medication-search"
+            className={styles.search}
+            type="search"
+            placeholder="Drug class or mechanism"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       )}
 
-      {search && visible.length === 0 && (
-        <p className={styles.empty}>No classes in {label} match “{search}”.</p>
-      )}
+      {/* Always mounted, so the result of typing is announced without moving focus (4.1.3). */}
+      <p className={styles.empty} role="status">
+        {search && visible.length === 0 ? `No classes in ${label} match “${search}”.` : ''}
+      </p>
 
       <ul className={styles.grid} aria-label={`${label} classes`}>
         {visible.map((drug) => (

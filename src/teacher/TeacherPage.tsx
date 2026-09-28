@@ -73,7 +73,11 @@ export function TeacherPage() {
   return (
     <Shell>
       <CreateCohort onCreate={create} />
-      {error ? <p className={styles.error}>{error}</p> : null}
+      {error ? (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      ) : null}
       {loading ? <p className={styles.muted}>Loading your classes…</p> : null}
       {!loading && cohorts.length === 0 ? (
         <p className={styles.muted}>
@@ -181,7 +185,12 @@ function JoinCode({ code }: { code: string }) {
 function CohortReport({ cohortId }: { cohortId: string }) {
   const { standing, loading, error } = useCohortProgress(cohortId);
 
-  if (error) return <p className={styles.error}>{error}</p>;
+  if (error)
+    return (
+      <p className={styles.error} role="alert">
+        {error}
+      </p>
+    );
   if (loading || !standing) return <p className={styles.muted}>Loading progress…</p>;
 
   if (standing.students === 0) {

@@ -7,6 +7,10 @@
   border-radius: 0;
   padding: var(--s-1) var(--s-3);
   font-size: var(--fs-micro);
+  /* The segments touch, so the spacing exception does not apply: each must be 24px on its own
+     (WCAG 2.5.8). It measured about 23. */
+  min-height: 1.75rem;
+  min-width: 2.75rem;
 }
 
 .option:not(:first-child) {

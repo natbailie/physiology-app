@@ -456,7 +456,12 @@ supabase functions deploy revenuecat-webhook --no-verify-jwt
 ```
 
 Apply the SQL **in this order** — `schema-billing.sql` references `cohorts` and `cohort_members`
-and fails if run before them: `schema.sql`, `schema-teachers.sql`, `schema-billing.sql`.
+and fails if run before them: `schema.sql`, `schema-teachers.sql`, `schema-billing.sql`,
+`schema-chat.sql`, then `schema-privacy.sql` (data minimisation, retention, and the
+`delete_own_account` that also strips billing payloads — re-run it after any re-run of
+`schema.sql`, which reinstates the older function) and `schema-reviews.sql`. Then schedule
+`purge_old_chat_usage()` with pg_cron as the footer of `schema-privacy.sql` says: the privacy
+policy promises 90 days.
 
 `--no-verify-jwt` is required and is not a hole. RevenueCat has no Supabase session to present, so
 the request is authenticated by the shared secret in the Authorization header instead — set the
@@ -589,6 +594,33 @@ converting the four files into ordered migrations — and not a line in a code b
 
 `supabase functions serve chat --env-file supabase/.env.local` runs it locally; that file is
 already gitignored by the `*.local` pattern.
+
+## Legal pages, consent and reviews
+
+- **The words live once, in `src/shared/legal/`, as plain data** — no JSX — and both apps render
+  them: `src/legal/LegalPage.tsx` here, `app/legal/[doc].tsx` on the phone (the directory is
+  synced). Change a policy there, bump its `lastUpdated`, and run native `sync`.
+- **Business details are `{{PLACEHOLDER}}`s in `business.ts` until real ones exist.** Never
+  invent a company number or address to make a page look finished. `LEGAL_PLACEHOLDERS` lists
+  what is still open; `docs/compliance/UK-COMPLIANCE.md` is the pre-launch checklist.
+- **`legal.test.ts` binds the privacy notice to reality**: every entry in `PROCESSORS` and every
+  store in `PERSONAL_DATA_STORES` must be named in it. A new third party or a new table holding
+  personal data goes into those lists in the same change — the old notice claimed "no third
+  parties" while four received data, and nothing caught it.
+- **Analytics is GA4, web only, opt-in.** `src/analytics/ga.ts` injects gtag from Google only
+  after "Accept analytics", strips the query string from every page path (share links and
+  `?case=` ids), and sends no user id. With `VITE_GA_MEASUREMENT_ID` unset the whole path is
+  dead code and vanishes from the build. Any new storage key goes in `STORAGE_ITEMS` in
+  `cookies.ts` — PECR covers localStorage too.
+- **Prices make no claim the prices do not support.** `savingNote` computes the annual saving
+  from the two displayed prices. The old hand-typed "Two months free" was about six months wrong.
+- **Checkout needs the 14-day acknowledgement ticked** (`IMMEDIATE_ACCESS_ACKNOWLEDGEMENT`,
+  Consumer Contracts Regulations 2013 regs 36–37), and sign-up needs the 18+ / Terms box, whose
+  version is stored as auth metadata (`TERMS_VERSION`).
+- **Reviews are moderated in the Supabase Table Editor**, like invoices in Stripe: set `status`.
+  Reject only for abuse, spam, personal data, off-topic or not-own-experience — never for being
+  negative. The average is computed from published rows; nothing anywhere lets a rating be typed
+  in. `schema-reviews.sql` is the whole design.
 
 ## Before pushing
 

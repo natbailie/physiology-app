@@ -1,0 +1,56 @@
+.footer {
+  margin-top: var(--s-8);
+  padding: var(--s-5) 0 var(--s-6);
+  border-top: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.links {
+  list-style: none;
+  margin: 0 0 var(--s-2);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+}
+
+/* Underlined, and tall enough to hit: footer links are the classic 24px-target failure. */
+.link,
+.settings {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  font-size: var(--fs-sm);
+}
+
+.link:hover,
+.settings:hover {
+  color: var(--text);
+}
+
+.settings {
+  font: inherit;
+  font-size: var(--fs-sm);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.settings:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.note {
+  margin: 0;
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+}

@@ -71,6 +71,8 @@
   border-radius: var(--r-pill);
   padding: 0.3rem 0.7rem;
   cursor: pointer;
+  /* Chips sit side by side, so each needs the full 24px target on its own (WCAG 2.5.8). */
+  min-height: 1.75rem;
 }
 
 .chip:hover {

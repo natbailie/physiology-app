@@ -322,6 +322,13 @@
     padding-bottom: 4.5rem;
   }
 
+  /* And clear it for a tabbed-to control too: padding keeps the last item reachable, but a
+     focused control near the bottom of the viewport could still land underneath the fixed dock
+     (WCAG 2.4.11), the bottom-edge twin of the scroll-margin-top rule at the top of this file. */
+  .page :where(a, button, input, select, textarea, summary, [tabindex]) {
+    scroll-margin-bottom: 5.5rem;
+  }
+
   .railSlot {
     /* Collapsed, the dock shows only what a learner needs at a glance: play/pause and speed.
        Step and the baseline control belong to adjusting, which happens with it open. */

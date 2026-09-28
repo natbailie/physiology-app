@@ -1,11 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/auth/AuthContext';
 import { MODULES } from '@/home/moduleRegistry';
-import { FALLBACK_PACKAGES, FREE_MODULE_IDS, PLAN_FEATURES, PLAN_NAME, type PlanPackage } from './config';
+import {
+  AUTO_RENEW_DISCLOSURE,
+  FALLBACK_PACKAGES,
+  FREE_MODULE_IDS,
+  PLAN_FEATURES,
+  PLAN_NAME,
+  type PlanPackage,
+} from './config';
 import { useEntitlement } from './useEntitlement';
-import { useExamProfile } from '@/account/examProfile';
 import { startCheckout } from './startCheckout';
-import { fetchOfferedPackages, setExamAttributes, type OfferedPackage } from './revenuecat';
+import { fetchOfferedPackages, type OfferedPackage } from './revenuecat';
+import { BUSINESS } from '@/shared/legal/business';
+import { IMMEDIATE_ACCESS_ACKNOWLEDGEMENT } from '@/shared/legal/refunds';
 import { redeemLicence } from './licence';
 import styles from './PricingPage.module.css';
 import { ThemeBar } from '@/theme/ThemeBar';
@@ -38,7 +46,12 @@ export function PricingPage() {
   /** Live prices when RevenueCat answers; last known prices when it does not. */
   const [packages, setPackages] = useState<readonly (PlanPackage | OfferedPackage)[]>(FALLBACK_PACKAGES);
   const [selected, setSelected] = useState<string>(DEFAULT_PACKAGE_ID);
-  const { targetExam, trainingLevel, ready: profileReady } = useExamProfile();
+  /**
+   * The express request for access to start inside the 14-day cancellation period, with the
+   * acknowledgement of what cancelling then costs (Consumer Contracts Regulations 2013 regs 36
+   * and 37). Without it a learner who cancels on day 13 is owed every penny back.
+   */
+  const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -51,25 +64,15 @@ export function PricingPage() {
     };
   }, [user]);
 
-  /**
-   * Send the learner's exam to RevenueCat, from the one page that loads the SDK anyway.
-   *
-   * This is the whole reason the attribute is set here rather than at sign-in: the SDK is an
-   * 840 kB dynamic chunk and pulling it for every signed-in learner would undo that. See the
-   * docblock on `setExamAttributes`.
-   *
-   * Fire-and-forget, and after the offering rather than before it — the prices have to render
-   * whatever an analytics call does.
-   */
-  useEffect(() => {
-    if (!user || !profileReady) return;
-    void setExamAttributes(user.id, { targetExam, trainingLevel });
-  }, [user, profileReady, targetExam, trainingLevel]);
-
   const chosen = packages.find((plan) => plan.id === selected) ?? packages[0];
 
   const subscribe = async () => {
     if (!user || !chosen) return;
+    if (!acknowledged) {
+      setNotice({ where: 'plan', text: 'Tick the box above the button to confirm you want access to start now.' });
+      document.getElementById('immediate-access')?.focus();
+      return;
+    }
     if (!hasRcPackage(chosen)) {
       setNotice({ where: 'plan', text: 'Payments are not configured on this deployment yet.' });
       return;
@@ -134,11 +137,14 @@ export function PricingPage() {
             spellCheck={false}
           />
           <button type="submit" className={styles.codeButton} disabled={busy || code.trim() === ''}>
-            Apply
+            Apply code
           </button>
         </form>
       )}
-      {notice?.where === 'code' && <p className={styles.notice}>{notice.text}</p>}
+      {/* Always mounted, so a screen reader hears the result when the text arrives. */}
+      <p className={styles.notice} role="status">
+        {notice?.where === 'code' ? notice.text : ''}
+      </p>
 
       <section className={styles.card}>
         <h2 className={styles.planName}>{PLAN_NAME}</h2>
@@ -189,22 +195,44 @@ export function PricingPage() {
                 : 'This build runs without accounts, so every module is open.'}
           </p>
         ) : user ? (
-          <button type="button" className={styles.cta} disabled={busy} onClick={() => void subscribe()}>
-            {busy ? 'One moment…' : `Subscribe — ${chosen?.price}/${chosen?.period}`}
-          </button>
+          <>
+            <p className={styles.disclosure}>
+              {chosen?.price} per {chosen?.period}. {AUTO_RENEW_DISCLOSURE} Sold by {BUSINESS.legalName} (
+              {BUSINESS.tradingName}). See the <a href="#terms">Terms</a> and the{' '}
+              <a href="#refunds">refund policy</a>.
+            </p>
+            <div className={styles.ackRow}>
+              <input
+                id="immediate-access"
+                type="checkbox"
+                className={styles.ackBox}
+                checked={acknowledged}
+                onChange={(e) => setAcknowledged(e.target.checked)}
+              />
+              <label htmlFor="immediate-access" className={styles.ackLabel}>
+                {IMMEDIATE_ACCESS_ACKNOWLEDGEMENT}
+              </label>
+            </div>
+            <button type="button" className={styles.cta} disabled={busy} onClick={() => void subscribe()}>
+              {busy ? 'One moment…' : `Subscribe — ${chosen?.price}/${chosen?.period}, renews automatically`}
+            </button>
+          </>
         ) : (
           <a href="#" className={styles.cta}>
             Create a free account first
           </a>
         )}
 
-        {notice?.where === 'plan' && <p className={styles.notice}>{notice.text}</p>}
+        <p className={styles.notice} role="status">
+          {notice?.where === 'plan' ? notice.text : ''}
+        </p>
 
       </section>
 
       <p className={styles.freeNote}>
-        Cancel any time. Progress you have already recorded stays on your account whether or not you
-        subscribe.
+        Cancel any time from your <a href="#account">account page</a>. If you cancel within 14 days of
+        first subscribing, you get a pro-rata refund. Progress you have already recorded stays on your
+        account whether or not you subscribe.
       </p>
     </div>
   );

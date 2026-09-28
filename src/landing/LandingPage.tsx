@@ -46,19 +46,15 @@ export function LandingPage() {
         </div>
       </div>
 
+      {/* The legal documents, the methodology and the disclaimer live in the site-wide footer
+          under this, which every route shares. */}
       <p className={styles.footer}>
         <a href="#pricing" className={styles.pricingLink}>
           See what a subscription includes
         </a>
-        <a href="#methodology" className={styles.pricingLink}>
-          How the physiology is checked
+        <a href="#reviews" className={styles.pricingLink}>
+          Read reviews from learners
         </a>
-        <a href="#accessibility" className={styles.pricingLink}>
-          Accessibility statement
-        </a>
-        <span>
-          Simplified, conceptual models built to teach mechanism — not clinical or diagnostic tools.
-        </span>
       </p>
     </div>
   );

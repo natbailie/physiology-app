@@ -83,7 +83,13 @@ function XYTrajectoryChartBase({
           {currentPoint.x.toFixed(0)} / {currentPoint.y.toFixed(0)}
         </span>
       </div>
-      <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <svg
+        className={styles.svg}
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={`${yLabel} against ${xLabel}: a path traced through ${points.length} points, currently at ${xLabel} ${currentPoint.x.toFixed(0)}, ${yLabel} ${currentPoint.y.toFixed(0)}${baselinePath ? ', with the baseline path overlaid' : ''}.`}
+      >
         {referencePaths?.map((reference) => (
           <path key={reference.d} className={styles.reference} d={reference.d} />
         ))}

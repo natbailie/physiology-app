@@ -32,7 +32,7 @@ afterEach(() => {
 
 type AuthOverrides = {
   getSession?: () => Promise<unknown>;
-  signUp?: () => Promise<unknown>;
+  signUp?: (args: never) => Promise<unknown>;
   signInWithPassword?: () => Promise<unknown>;
   signOut?: () => Promise<unknown>;
 };
@@ -72,7 +72,7 @@ describe('auth context when Supabase is not configured', () => {
 
   it('answers sign-up attempts the same way', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    const outcome = await result.current.signUp('student@example.com', 'password');
+    const outcome = await result.current.signUp('student@example.com', 'password', '2026-09-28');
     expect(outcome.ok).toBe(false);
   });
 });
@@ -108,16 +108,20 @@ describe('auth context with a live client', () => {
 
   it('flags the check-your-inbox state when sign-up returns a user but no session', async () => {
     mockState.configured = true;
+    let sent: { options?: { data?: Record<string, unknown> } } | undefined;
     mockState.client = fakeSupabase({
-      signUp: async () => ({
-        data: { session: null, user: { id: 'new-1' } },
-        error: null,
-      }),
+      signUp: async (args: typeof sent) => {
+        sent = args;
+        return { data: { session: null, user: { id: 'new-1' } }, error: null };
+      },
     });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    const outcome = await result.current.signUp('student@example.com', 'password');
+    const outcome = await result.current.signUp('student@example.com', 'password', '2026-09-28');
     expect(outcome).toEqual({ ok: true, needsConfirmation: true });
+    // The record of the contract: which Terms were accepted, and when.
+    expect(sent?.options?.data?.terms_version).toBe('2026-09-28');
+    expect(typeof sent?.options?.data?.terms_accepted_at).toBe('string');
   });
 
   it('signs out through the client', async () => {

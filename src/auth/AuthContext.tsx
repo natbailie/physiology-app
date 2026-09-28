@@ -13,7 +13,12 @@ interface AuthContextValue {
   user: AuthUser | null;
   /** True until the first session lookup resolves — pages must not flash "signed out". */
   initialising: boolean;
-  signUp(email: string, password: string): Promise<AuthResult>;
+  /**
+   * `acceptedTerms` is the Terms version the learner ticked (`TERMS_VERSION` in
+   * `shared/legal/business.ts`). It travels as auth user metadata with the time it was accepted,
+   * which is the record of the contract being formed — no schema change needed.
+   */
+  signUp(email: string, password: string, acceptedTerms: string): Promise<AuthResult>;
   signIn(email: string, password: string): Promise<AuthResult>;
   signOut(): Promise<void>;
   /**
@@ -65,9 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       initialising,
-      async signUp(email, password) {
+      async signUp(email, password, acceptedTerms) {
         if (!supabase) return { ok: false, message: 'Accounts are not configured.' };
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              terms_version: acceptedTerms,
+              terms_accepted_at: new Date().toISOString(),
+              age_confirmed_18_plus: true,
+            },
+          },
+        });
         if (error) return { ok: false, message: tidyError(error.message) };
         // A null session with a user back means confirmation mail is on its way.
         return { ok: true, needsConfirmation: !data.session && Boolean(data.user) };

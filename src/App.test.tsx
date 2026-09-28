@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 
 /** Same guard as AuthGate.test.tsx: vitest loads .env files, so an unmocked run would
  * silently take the network path on any machine with real credentials. */
@@ -64,5 +64,39 @@ describe('app shell landmarks', () => {
     expect(main.textContent).toMatch(/Physiology Lab/);
     const skip = screen.getByRole('link', { name: /skip to main content/i });
     expect(skip.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('skips to the content without navigating away', async () => {
+    // The app routes on the hash, so a plain `href="#main"` used to resolve as an unknown route
+    // and send the learner to the home page instead of past the header.
+    window.location.hash = '#review-h';
+    render(<App />);
+    await screen.findByRole('heading', { name: /accessibility review/i });
+    fireEvent.click(screen.getByRole('link', { name: /skip to main content/i }));
+    expect(window.location.hash).toBe('#review-h');
+    expect(document.activeElement).toBe(screen.getByRole('main'));
+  });
+
+  it('titles the page after the route', async () => {
+    window.location.hash = '#review-h';
+    render(<App />);
+    await screen.findByRole('heading', { name: /accessibility review/i });
+    expect(document.title).toBe('Accessibility review — Physiology Lab');
+  });
+
+  it('carries every legal document in a footer, even signed out', () => {
+    mockState.configured = true;
+    window.location.hash = '#shockStates';
+    render(<App />);
+    const footer = screen.getByRole('contentinfo');
+    const links = within(footer)
+      .getAllByRole('link')
+      .map((a) => a.getAttribute('href'));
+    for (const route of ['#privacy', '#terms', '#cookies', '#refunds', '#accessibility', '#business', '#reviews']) {
+      expect(links).toContain(route);
+    }
+    expect(within(footer).getByRole('button', { name: /cookie settings/i })).toBeTruthy();
+    // Outside <main>: a footer inside the main landmark is not a contentinfo landmark.
+    expect(screen.getByRole('main').contains(footer)).toBe(false);
   });
 });

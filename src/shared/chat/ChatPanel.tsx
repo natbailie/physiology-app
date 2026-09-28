@@ -164,14 +164,25 @@ export function ChatPanel({ moduleId, onClose }: ChatPanelProps) {
           submit(draft);
         }}
       >
-        <label className={styles.srOnly} htmlFor="tutor-question">
+        {/* A visible label, not a placeholder-only field (WCAG 3.3.2), and the disclosure
+            beside it: the learner is told what leaves the device before they press Ask. */}
+        <label className={styles.composerLabel} htmlFor="tutor-question">
           Your question
         </label>
+        <p className={styles.disclosure} id="tutor-disclosure">
+          Answers are AI-generated and can be wrong. Your question, a summary of topics you find
+          difficult and the readings on screen are sent to Mistral AI or Google to answer it — not your
+          name or email. Don&rsquo;t include patient details.{' '}
+          <a href="#privacy" className={styles.disclosureLink}>
+            Privacy
+          </a>
+        </p>
         <textarea
           id="tutor-question"
           ref={inputRef}
           className={styles.input}
           rows={2}
+          aria-describedby="tutor-disclosure"
           value={draft}
           placeholder="Ask a physiology question…"
           onChange={(event) => setDraft(event.target.value)}

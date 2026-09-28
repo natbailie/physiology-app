@@ -1,5 +1,5 @@
 import type { Package, Purchases, PurchasesError } from '@revenuecat/purchases-js';
-import { FALLBACK_PACKAGES, type PlanPackage } from './config';
+import { FALLBACK_PACKAGES, savingNote, type PlanPackage } from './config';
 import { revenueCatPublicKey } from '@/lib/env';
 
 /**
@@ -82,6 +82,12 @@ export async function fetchOfferedPackages(appUserId: string): Promise<OfferedPa
       })
       .filter((entry): entry is OfferedPackage => entry !== null);
 
+    // The fallback's saving was computed from the fallback prices; restate it from the live ones.
+    const monthly = mapped.find((p) => p.id === '$rc_monthly');
+    for (const p of mapped) {
+      if (p.id === '$rc_annual') p.note = monthly ? savingNote(monthly.price, p.price) : undefined;
+    }
+
     return mapped.length > 0 ? mapped : null;
   } catch {
     return null;
@@ -116,41 +122,22 @@ export async function purchasePackage(
 }
 
 /**
- * Tell RevenueCat what this learner is revising for.
+ * Where a web subscriber manages or cancels their subscription: RevenueCat's customer portal.
  *
- * Attributes are what make the audience segmentable — a paywall or a campaign aimed at the people
- * sitting the FRCA rather than at everyone — and they are the reason `exams.ts` asks the question
- * once and both features share the answer.
+ * Loads the SDK, so it is called on a button press rather than on render. Null when RevenueCat
+ * is unconfigured, the learner has no web subscription (a store purchase is managed in the
+ * store), or the portal is unavailable — the caller then falls back to emailing us.
  *
- * ## Why this is not called on sign-in
- *
- * It would be the obvious moment, and it is the wrong one here: `@revenuecat/purchases-js` is
- * 840 kB, larger than the rest of the app, and the whole reason every import of it in this file
- * is dynamic is that a learner who never buys anything never downloads it. Setting an attribute
- * at sign-in would pull that chunk for everybody and undo the one rule `CLAUDE.md` calls
- * non-negotiable about learner-facing dependencies.
- *
- * So it is called where the SDK is already being loaded for its own reasons — the pricing page,
- * and again after a purchase — which is also where the attribute is worth anything. The phone has
- * no such trade to make: `react-native-purchases` is linked into the binary either way, so the
- * native sibling sets them on sign-in.
- *
- * Failure is swallowed on purpose, and the web SDK does not retry: a learner must never be
- * stopped from buying because an analytics attribute would not save.
+ * (There used to be a `setExamAttributes` here sending the learner's target exam and training
+ * stage to RevenueCat for campaign segmentation. Nothing about the contract needs it, so under
+ * UK GDPR data minimisation it went.)
  */
-export async function setExamAttributes(
-  appUserId: string,
-  attributes: { targetExam: string | null; trainingLevel: string | null },
-): Promise<void> {
-  if (!isRevenueCatConfigured) return;
-
+export async function fetchManagementUrl(appUserId: string): Promise<string | null> {
+  if (!isRevenueCatConfigured) return null;
   try {
-    const instance = await sdk(appUserId);
-    await instance.setAttributes({
-      target_exam: attributes.targetExam,
-      training_level: attributes.trainingLevel,
-    });
+    const info = await (await sdk(appUserId)).getCustomerInfo();
+    return info.managementURL ?? null;
   } catch {
-    // Segmentation is not worth an error a learner would see.
+    return null;
   }
 }

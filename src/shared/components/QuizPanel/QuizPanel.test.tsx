@@ -294,6 +294,23 @@ describe('explain-the-miss', () => {
       expect(session.commit).not.toHaveBeenCalled();
     });
 
+    it('ignores the shortcut keys while focus is somewhere else on the page', () => {
+      // WCAG 2.1.4: a single-letter shortcut must not fire for somebody typing or dictating
+      // elsewhere. Focus moves into the question when it opens; move it back out.
+      const session = makeSession();
+      render(
+        <>
+          <button type="button">Elsewhere</button>
+          <QuizPanel session={session} summary={NO_HISTORY} />
+        </>,
+      );
+      screen.getByRole('button', { name: 'Elsewhere' }).focus();
+
+      fireEvent.keyDown(window, { key: '2' });
+
+      expect(session.commit).not.toHaveBeenCalled();
+    });
+
     it('commits by letter, matching the key shown on each choice', () => {
       const session = makeSession();
       render(<QuizPanel session={session} summary={NO_HISTORY} />);

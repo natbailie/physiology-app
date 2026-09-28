@@ -60,7 +60,13 @@ function OxygenDissociationCurveBase({
           {currentX.toFixed(0)} → {currentY.toFixed(0)}
         </span>
       </div>
-      <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <svg
+        className={styles.svg}
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={`${yLabel} against ${xLabel} curve; current point ${xLabel} ${currentX.toFixed(0)}, ${yLabel} ${currentY.toFixed(0)}.`}
+      >
         <path className={styles.curve} d={curvePath} />
         <circle className={styles.dot} cx={dot.px} cy={dot.py} r={3} />
       </svg>

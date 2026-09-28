@@ -1,3 +1,4 @@
+import { radioKeyDown, rovingTabIndex } from '@/shared/hooks/rovingRadio';
 import styles from './ToggleGroup.module.css';
 
 export interface ToggleOption<T extends string> {
@@ -23,6 +24,7 @@ interface ToggleGroupProps<T extends string> {
  * readers announce cannot drift apart, and there is no second colour variable to maintain.
  */
 export function ToggleGroup<T extends string>({ label, value, options, colorVar, onChange }: ToggleGroupProps<T>) {
+  const values = options.map((option) => option.value);
   return (
     <div
       className={styles.group}
@@ -30,7 +32,9 @@ export function ToggleGroup<T extends string>({ label, value, options, colorVar,
       aria-label={label}
       style={colorVar ? ({ '--accent': colorVar } as React.CSSProperties) : undefined}
     >
-      <span className="label">{label}</span>
+      <span className="label" aria-hidden="true">
+        {label}
+      </span>
       <div className={styles.options}>
         {options.map((option) => (
           <button
@@ -38,8 +42,10 @@ export function ToggleGroup<T extends string>({ label, value, options, colorVar,
             type="button"
             role="radio"
             aria-checked={value === option.value}
+            tabIndex={rovingTabIndex(values, value, option.value)}
             className={styles.option}
             onClick={() => onChange(option.value)}
+            onKeyDown={(event) => radioKeyDown(event, values, value, onChange)}
           >
             {option.label}
           </button>

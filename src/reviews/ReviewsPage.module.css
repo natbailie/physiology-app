@@ -1,0 +1,272 @@
+.page {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-5) var(--s-8);
+}
+
+.header {
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--s-3);
+}
+
+.standfirst,
+.prose {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+}
+
+.standfirst {
+  font-size: var(--fs-base);
+}
+
+.section {
+  margin-top: var(--s-7);
+}
+
+.sectionTitle {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--s-3);
+}
+
+.link {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  align-items: center;
+}
+
+.average {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.averageNumber {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.averageOf {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+
+.distribution {
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+
+.distribution th {
+  text-align: left;
+  font-weight: 600;
+  padding: 2px var(--s-3) 2px 0;
+  white-space: nowrap;
+}
+
+.bar {
+  display: block;
+  width: 10rem;
+  height: 0.6rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.barCount {
+  padding-left: var(--s-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-4);
+}
+
+.review {
+  padding: var(--s-4);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--panel);
+}
+
+/* Unfilled stars in a text colour, not a translucent tint: the rating is also in the accessible
+ * name, but a sighted reader should not have to squint to count them (WCAG 1.4.11). */
+.stars {
+  color: var(--brand);
+  font-size: var(--fs-base);
+  letter-spacing: 0.1em;
+}
+
+.starsEmpty {
+  color: var(--text-faint);
+}
+
+.body {
+  margin: var(--s-2) 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.report {
+  color: var(--text-dim);
+  text-decoration: underline;
+}
+
+.policy {
+  margin: 0;
+  padding-left: var(--s-5);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-prose);
+  color: var(--text-dim);
+  display: grid;
+  gap: var(--s-2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  margin-top: var(--s-3);
+}
+
+.ratingField {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.ratingOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.ratingOption {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 2.75rem;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.ratingOption:has(input:checked) {
+  border-color: var(--brand);
+}
+
+.ratingOption:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ratingRadio {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.textarea,
+.input {
+  font: inherit;
+  font-size: var(--fs-base);
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-raised);
+  color: var(--text);
+}
+
+.textarea:focus-visible,
+.input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: var(--lh-snug);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--danger);
+}
+
+.status {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.status:empty {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+
+.submit {
+  composes: primary from '../shared/styles/button.module.css';
+  font-size: var(--fs-sm);
+}
+
+.delete {
+  composes: button from '../shared/styles/button.module.css';
+  font-size: var(--fs-sm);
+}

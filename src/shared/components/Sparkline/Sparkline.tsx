@@ -2,6 +2,53 @@ import { memo, useMemo, type CSSProperties } from 'react';
 import { useModuleShell } from '@/shared/context/moduleShell';
 import styles from './Sparkline.module.css';
 
+/** "rising", "falling" or "steady", judged across the visible trace against 2% of the scale. */
+function trend(series: number[] | undefined, range: number): string | null {
+  if (!series || series.length < 2) return null;
+  const delta = (series.at(-1) ?? 0) - (series[0] ?? 0);
+  if (Math.abs(delta) < range * 0.02) return 'steady';
+  return delta > 0 ? 'rising' : 'falling';
+}
+
+/**
+ * The chart in words, for screen readers (WCAG 1.1.1). The header prints only the primary value;
+ * the secondary series, the frozen baseline and the direction of travel were visible and nothing
+ * else — so a learner who cannot see the line could not tell a falling pressure from a steady one.
+ */
+function describeTrace({
+  label,
+  unit,
+  data,
+  secondaryLabel,
+  secondaryData,
+  baselineData,
+  range,
+}: {
+  label: string;
+  unit?: string;
+  data: number[];
+  secondaryLabel?: string;
+  secondaryData?: number[];
+  baselineData?: number[] | null;
+  range: number;
+}): string {
+  const u = unit ? ` ${unit}` : '';
+  const current = data.at(-1);
+  const parts = [`${label} trace`];
+  if (current !== undefined) {
+    const direction = trend(data, range);
+    parts.push(`now ${current.toFixed(0)}${u}${direction ? `, ${direction}` : ''}`);
+  }
+  const secondary = secondaryData?.at(-1);
+  if (secondaryLabel && secondary !== undefined) {
+    const direction = trend(secondaryData, range);
+    parts.push(`${secondaryLabel} ${secondary.toFixed(0)}${u}${direction ? `, ${direction}` : ''}`);
+  }
+  const baseline = baselineData?.at(-1);
+  if (baseline !== undefined) parts.push(`baseline ${baseline.toFixed(0)}${u}`);
+  return parts.join('; ');
+}
+
 interface SparklineProps {
   label: string;
   unit?: string;
@@ -118,7 +165,13 @@ function SparklineBase({
           {unit ? ` ${unit}` : ''}
         </span>
       </div>
-      <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <svg
+        className={styles.svg}
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={describeTrace({ label, unit, data, secondaryLabel, secondaryData, baselineData, range })}
+      >
         {areaPath && <path className={styles.area} d={areaPath} />}
         {baselinePath && <path className={styles.baselineLine} d={baselinePath} />}
         {secondaryBaselinePath && <path className={styles.baselineLine} d={secondaryBaselinePath} />}

@@ -31,8 +31,37 @@ export interface PlanPackage {
   label: string;
   price: string;
   period: string;
-  /** Set on whichever package is the better deal, so the saving is stated rather than computed. */
+  /**
+   * The saving on the better-value package, COMPUTED from the two prices by `savingNote`.
+   *
+   * It used to be a hand-typed "Two months free" against £9/£55 — which is nearer six months
+   * free, and a price claim that does not match the prices is a misleading action under the DMCC
+   * Act 2024 whichever direction it errs in. Computing it means a dashboard price change cannot
+   * leave the claim behind.
+   */
   note?: string;
+}
+
+/** A formatted price split into currency prefix and amount: "£9.00" → ["£", 9]. */
+function parsePrice(price: string): [string, number] | null {
+  const match = /^([^\d\s.,-]*)\s*(\d+(?:[.,]\d{1,2})?)/.exec(price.trim());
+  if (!match) return null;
+  const amount = Number((match[2] ?? '').replace(',', '.'));
+  return Number.isFinite(amount) ? [match[1] ?? '', amount] : null;
+}
+
+/**
+ * "Save £53 a year compared with paying each month", from the two prices as displayed — or nothing, if
+ * they cannot be compared honestly (different currencies, unparseable, or no saving at all).
+ */
+export function savingNote(monthlyPrice: string, annualPrice: string): string | undefined {
+  const monthly = parsePrice(monthlyPrice);
+  const annual = parsePrice(annualPrice);
+  if (!monthly || !annual || monthly[0] !== annual[0]) return undefined;
+  const saving = monthly[1] * 12 - annual[1];
+  if (saving < 1) return undefined;
+  const amount = Number.isInteger(saving) ? String(saving) : saving.toFixed(2);
+  return `Save ${monthly[0]}${amount} a year compared with paying each month`;
 }
 
 /**
@@ -42,8 +71,15 @@ export interface PlanPackage {
  */
 export const FALLBACK_PACKAGES: readonly PlanPackage[] = [
   { id: '$rc_monthly', label: 'Monthly', price: '£9', period: 'month' },
-  { id: '$rc_annual', label: 'Annual', price: '£55', period: 'year', note: 'Two months free' },
+  { id: '$rc_annual', label: 'Annual', price: '£55', period: 'year', note: savingNote('£9', '£55') },
 ];
+
+/**
+ * Pre-contract information shown beside every Subscribe button (Consumer Contracts Regulations
+ * 2013 Sch. 2; App Store Review Guideline 3.1.2). One wording, so the web and the phone agree.
+ */
+export const AUTO_RENEW_DISCLOSURE =
+  'Your subscription renews automatically at the end of each billing period at the price shown, until you cancel. Cancel any time and keep access to the end of the period you have paid for. Prices include VAT where applicable.';
 
 export const PLAN_FEATURES: readonly string[] = [
   'Every simulator, not just the three free systems',

@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { AccessibilityPage } from './AccessibilityPage';
+import { BUSINESS } from '@/shared/legal/business';
 
 afterEach(cleanup);
 
@@ -14,12 +15,15 @@ describe('AccessibilityPage', () => {
     expect(screen.getAllByText(/interim/i).length).toBeGreaterThan(0);
   });
 
-  it('commits to no calendar date and invents no contact channel', () => {
+  it('commits to no calendar date, and routes feedback to the trader contact', () => {
     const { container } = render(<AccessibilityPage />);
     const text = container.textContent ?? '';
-    // Timings are tied to the external audit event; support contacts do not exist yet.
+    // Timings are tied to the external audit event, never to a date.
     expect(text).toMatch(/before the first institutional sale/);
-    expect(text).not.toMatch(/mailto:/);
+    // The contact is the business mailbox from shared/legal/business.ts — one address, not a
+    // second one invented here — with a response commitment.
+    expect(text).toContain(BUSINESS.contactEmail);
+    expect(text).toMatch(/within 5 working days/);
   });
 
   it('names the enforcement route', () => {
@@ -27,14 +31,10 @@ describe('AccessibilityPage', () => {
     expect(screen.getByText(/Equality and Human Rights Commission/i)).toBeTruthy();
   });
 
-  it('scopes itself to the website and routes complaints via the advisory service', () => {
+  it('scopes itself to the website and the phone app, and routes complaints via the advisory service', () => {
     render(<AccessibilityPage />);
     expect(screen.getByRole('heading', { name: 'Scope' })).toBeTruthy();
-    // Pinned as the full sentence: asserting only the first half is what let a
-    // redundant trailing clause ship uncaught.
-    expect(
-      screen.getByText(/does not cover the\s+separate native mobile apps/i).closest('p')?.textContent,
-    ).toBe('This statement applies to the Physiology Lab website. It does not cover the separate native mobile apps.');
+    expect(screen.getByText(/applies to the Physiology Lab website and the Physiology phone app/i)).toBeTruthy();
     expect(screen.getByText(/Equality Advisory\s+and Support Service/i)).toBeTruthy();
   });
 
@@ -47,7 +47,7 @@ describe('AccessibilityPage', () => {
   it('states when it was last tested and claims no exemptions', () => {
     const { container } = render(<AccessibilityPage />);
     const text = container.textContent ?? '';
-    expect(text).toMatch(/last tested\s+on 14 September 2026/i);
+    expect(text).toMatch(/last tested\s+on 28 September 2026/i);
     expect(text).toMatch(/no disproportionate burden is claimed/i);
   });
 });

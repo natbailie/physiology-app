@@ -93,6 +93,49 @@
   line-height: 1.5;
 }
 
+.notice:empty {
+  display: none;
+}
+
+/* Pre-contract information, set at a size somebody can actually read before paying. */
+.disclosure {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  line-height: var(--lh-prose);
+  margin: 0;
+}
+
+.disclosure a,
+.freeNote a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.ackRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.ackBox {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.ackBox:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ackLabel {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: var(--lh-snug);
+}
+
 .activeNote {
   font-size: 0.85rem;
   color: var(--ok);
@@ -142,9 +185,13 @@
 }
 
 .codeInput:focus {
-  outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 25%, transparent);
+}
+
+/* The house outline, not a 25% halo that measured 1.45:1 against the page (WCAG 1.4.11). */
+.codeInput:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .codeButton {

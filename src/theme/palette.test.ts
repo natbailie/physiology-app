@@ -133,10 +133,29 @@ describe.each([
     expect(failures.join(', '), `below 3:1 on --panel in ${themeName}: ${failures.join(', ')}`).toBe('');
   });
 
-  it('keeps the text ramp itself legible', () => {
-    for (const token of ['--text', '--text-dim', '--text-faint']) {
-      const colour = theme[token]!;
-      expect(contrast(colour, panel), `${token} on --panel in ${themeName}`).toBeGreaterThanOrEqual(4.5);
+  /**
+   * On every surface text actually sits on, not just --panel. The chat input, segmented buttons,
+   * the pricing options and form fields sit on --panel-raised, and page-level prose on --bg; the
+   * text ramp was only ever measured on --panel, and --text-faint clears --panel-raised by a
+   * hair (about 4.5:1), which is exactly the margin a palette edit loses without noticing.
+   * `::placeholder` is set to --text-faint in index.css, so this covers placeholders too.
+   */
+  it('keeps the text ramp itself legible on every surface', () => {
+    const raised = theme['--panel-raised']!;
+    for (const [surfaceName, surface] of [['--panel', panel], ['--panel-raised', raised], ['--bg', bg]] as const) {
+      for (const token of ['--text', '--text-dim', '--text-faint']) {
+        const colour = theme[token]!;
+        expect(contrast(colour, surface), `${token} on ${surfaceName} in ${themeName}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  /** The focus ring is --brand wherever a module sets no accent; 3:1 against every surface a
+   * focusable control sits on (WCAG 1.4.11 / 2.4.13). */
+  it('keeps the default focus ring visible on every surface', () => {
+    const ring = theme['--brand']!;
+    for (const [surfaceName, surface] of [['--panel', panel], ['--panel-raised', theme['--panel-raised']!], ['--bg', bg]] as const) {
+      expect(contrast(ring, surface), `--brand ring on ${surfaceName} in ${themeName}`).toBeGreaterThanOrEqual(3);
     }
   });
 
@@ -152,7 +171,7 @@ describe.each([
    * boundary floor would paint gridlines as heavy as the controls they sit behind.
    */
   it('keeps the neutral border visible against both surfaces it separates', () => {
-    for (const surface of [panel, bg]) {
+    for (const surface of [panel, bg, theme['--panel-raised']!]) {
       const colour = theme['--panel-border']!;
       expect(contrast(colour, surface), `--panel-border in ${themeName}`).toBeGreaterThanOrEqual(3);
     }

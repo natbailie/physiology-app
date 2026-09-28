@@ -22,9 +22,11 @@
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const revenueCatPublicKey = import.meta.env.VITE_REVENUECAT_PUBLIC_KEY;
+/** Google Analytics 4. Web only, and nothing loads until a visitor accepts analytics cookies. */
+const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 export function isDev(): boolean {
   return import.meta.env.DEV;
 }
 
-export { supabaseUrl, supabaseAnonKey, revenueCatPublicKey };
+export { supabaseUrl, supabaseAnonKey, revenueCatPublicKey, gaMeasurementId };

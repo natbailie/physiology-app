@@ -41,7 +41,7 @@ export function ModuleCard({
 
   if (status === 'comingSoon') {
     return (
-      <div className={`${styles.card} ${styles.comingSoon}`} style={style} aria-disabled="true">
+      <div className={`${styles.card} ${styles.comingSoon}`} style={style} data-status="coming-soon">
         <span className={styles.name}>{name}</span>
         <span className={styles.tagline}>{tagline}</span>
         <span className={styles.badge}>Coming soon</span>
@@ -69,8 +69,8 @@ export function ModuleCard({
       <span className={styles.nameRow}>
         <span className={styles.name}>{name}</span>
         {dueCount > 0 && (
-          <span className={styles.due} aria-label={`${dueCount} due for review`}>
-            {dueCount} due
+          <span className={styles.due}>
+            {dueCount} due<span className="sr-only"> for review</span>
           </span>
         )}
       </span>
@@ -81,8 +81,11 @@ export function ModuleCard({
           {exams.map((exam) => (
             // The short form, because five of these have to fit across a card. The full name is
             // on the title so the abbreviation is never the only thing a reader has.
+            // The full name is also given to screen readers, since `title` is unreachable by
+            // keyboard and touch and most screen readers skip it.
             <span key={exam} className={styles.exam} title={examName(exam)}>
-              {examShortName(exam)}
+              <span aria-hidden="true">{examShortName(exam)}</span>
+              <span className="sr-only">{examName(exam)}</span>
             </span>
           ))}
         </span>

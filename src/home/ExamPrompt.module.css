@@ -42,6 +42,7 @@
   background: none;
   border: none;
   padding: 0.3rem 0.2rem;
+  min-height: 1.75rem;
   margin-left: auto;
   cursor: pointer;
   text-decoration: underline;

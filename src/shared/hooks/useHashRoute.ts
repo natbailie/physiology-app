@@ -24,6 +24,11 @@ export type RouteId =
   | 'accessibility'
   | 'account'
   | 'privacy'
+  | 'terms'
+  | 'cookies'
+  | 'refunds'
+  | 'business'
+  | 'reviews'
   | 'methodology'
   | 'review-h'
   | 'teacher'
@@ -90,6 +95,11 @@ export const VALID_ROUTES: RouteId[] = [
   'accessibility',
   'account',
   'privacy',
+  'terms',
+  'cookies',
+  'refunds',
+  'business',
+  'reviews',
   'methodology',
   'review-h',
   'teacher',
@@ -190,6 +200,9 @@ export function useHashRoute(): RouteId {
 
   useEffect(() => {
     const onChange = () => {
+      // The skip link's target, not a route. Its click handler normally stops it arriving here;
+      // this is for the hash getting set some other way, and keeps the current page.
+      if (window.location.hash === '#main') return;
       const next = resolveHash();
       const commit = () => {
         // `flushSync`, because `startViewTransition` captures the page as it is when its callback

@@ -12,6 +12,7 @@ import styles from './AccountPage.module.css';
 import { useRole } from '@/teacher/useTeacher';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { ThemeBar } from '@/theme/ThemeBar';
+import { BUSINESS } from '@/shared/legal/business';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference');
 
@@ -29,7 +30,10 @@ export function AccountPage() {
       </section>
       {isSupabaseConfigured ? <AccountBody /> : <LocalOnlyNotice />}
       <a href="#privacy" className={styles.footerLink}>
-        What data do we hold?
+        What data do we hold? (Privacy policy)
+      </a>
+      <a href="#terms" className={styles.footerLink}>
+        Terms and conditions
       </a>
       <a href="#methodology" className={styles.footerLink}>
         How the physiology is checked
@@ -92,10 +96,16 @@ function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; messa
     <section className={styles.dangerZone}>
       <h2 className={styles.sectionTitle}>Danger zone</h2>
       <p className={styles.muted}>
-        Deleting your account removes your email address, every recorded answer and your access
-        rights from our servers straight away. There is no way back.
+        Deleting your account removes your email address, every recorded answer, your classes, your
+        review and your access rights from our servers straight away. There is no way back. It does
+        not cancel an App Store or Google Play subscription — cancel that in your store settings
+        first. We keep a minimal record of past payments for six years because HMRC requires it.
       </p>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       <button
         type="button"
         className={`${styles.dangerButton} ${armed ? styles.dangerArmed : ''}`}
@@ -110,10 +120,10 @@ function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; messa
 /**
  * The learner's exam and training stage, editable for as long as they have the account.
  *
- * The home page asks this once and can be dismissed forever; this is where it lives afterwards.
- * Both matter beyond the filter — they are the RevenueCat subscriber attributes that make the
- * audience segmentable — so both need somewhere permanent to be corrected when a learner moves
- * from finals to the MRCP.
+ * The home page asks this once and can be dismissed forever; this is where it lives afterwards,
+ * so it can be corrected when a learner moves from finals to the MRCP. Both are optional, and
+ * both stay with us: they used to be copied to RevenueCat for campaign segmentation, which
+ * nothing about the service needs, so that stopped (UK GDPR data minimisation).
  *
  * Saved on change rather than behind a Save button. There are two fields, neither is destructive,
  * and a form that can be left in an unsaved state is a form somebody leaves in an unsaved state.
@@ -132,8 +142,8 @@ function ExamSettings() {
   return (
     <>
       <p className={styles.muted}>
-        Filters the catalogue to what is high-yield for your exam, and nothing else changes — every
-        module stays open. Leave it on “Not sure yet” to see all of them.
+        Optional. Filters the catalogue to what is high-yield for your exam, and nothing else changes —
+        every module stays open. Leave it on “Not sure yet” to see all of them.
       </p>
 
       <div className={styles.fieldRow}>
@@ -185,7 +195,11 @@ function ExamSettings() {
         </select>
       </div>
 
-      {failed && <p className={styles.error}>That did not save. Check your connection and try again.</p>}
+      {failed && (
+        <p className={styles.error} role="alert">
+          That did not save. Check your connection and try again.
+        </p>
+      )}
     </>
   );
 }
@@ -225,10 +239,56 @@ function AccessSummary() {
   }
 
   if (source === 'subscription') {
-    return <p className={styles.muted}>Full access through your own subscription. Cancel any time.</p>;
+    return (
+      <>
+        <p className={styles.muted}>Full access through your own subscription. Cancel any time.</p>
+        <ManageSubscription />
+      </>
+    );
   }
 
   return <p className={styles.muted}>Full access.</p>;
+}
+
+/**
+ * The way out, one press from the account page. A subscription that is easy to start and hard to
+ * leave is exactly what the DMCC Act 2024 subscription rules are aimed at.
+ *
+ * Web subscriptions go to RevenueCat's customer portal. The SDK is 840 kB, so it loads on the
+ * press, never on render. A store subscription has no portal URL here — it is managed in the
+ * store — and then, or if anything fails, the fallback is to email us, which also works.
+ */
+function ManageSubscription() {
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const open = async () => {
+    if (!user) return;
+    setBusy(true);
+    setMessage('');
+    const { fetchManagementUrl } = await import('@/billing/revenuecat');
+    const url = await fetchManagementUrl(user.id);
+    setBusy(false);
+    if (url) {
+      window.location.assign(url);
+    } else {
+      setMessage(
+        `If you subscribed in the App Store or Google Play, cancel in your device's subscription settings. Otherwise email ${BUSINESS.contactEmail} and we will cancel it for you.`,
+      );
+    }
+  };
+
+  return (
+    <>
+      <button type="button" className={styles.secondaryButton} disabled={busy} onClick={() => void open()}>
+        {busy ? 'Opening…' : 'Manage or cancel your subscription'}
+      </button>
+      <p className={styles.muted} role="status">
+        {message}
+      </p>
+    </>
+  );
 }
 
 function LocalOnlyNotice() {

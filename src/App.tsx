@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, type MouseEvent } from 'react';
 import { useHashRoute, type RouteId } from '@/shared/hooks/useHashRoute';
 import { useLinkPrefetch } from '@/shared/hooks/useLinkPrefetch';
 import { PAGES } from './pages';
@@ -11,6 +11,10 @@ import { DisciplinePage } from '@/home/DisciplinePage';
 import { DISCIPLINES, THEMES } from '@/home/moduleRegistry';
 import { MedicationsPage } from '@/medications/MedicationsPage';
 import { ChatLauncher } from '@/shared/chat/ChatLauncher';
+import { SiteFooter } from '@/shared/components/SiteFooter/SiteFooter';
+import { CookieBanner } from '@/analytics/CookieBanner';
+import { installAnalytics } from '@/analytics/ga';
+import { useRouteFocus } from '@/shared/hooks/useRouteFocus';
 import styles from './App.module.css';
 
 /**
@@ -23,6 +27,11 @@ const UNGATED_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>([
   'accessibility',
   'account',
   'privacy',
+  'terms',
+  'cookies',
+  'refunds',
+  'business',
+  'reviews',
   'methodology',
   'review-h',
   'teacher',
@@ -35,15 +44,22 @@ function App() {
   const route = useHashRoute();
   // One delegated listener for the whole app, mounted above the route so it survives every swap.
   useLinkPrefetch();
+  useRouteFocus(route);
+  // Follows the cookie choice from here on; loads nothing from Google until analytics is accepted.
+  useEffect(() => installAnalytics(), []);
 
   // The single landmark pair for the whole site, above the auth gate: the signed-out landing
   // screen and the session-check splash render instead of RoutedApp, and a skip link that only
   // exists past sign-in would leave the first screen every visitor sees failing 2.4.1.
   return (
     <div className={styles.app}>
-      <a href="#main" className={styles.skipLink}>
+      {/* The href stays for middle-click and no-JS, but the click must not reach the router:
+          this app routes on the hash, so `#main` used to resolve as an unknown route and send the
+          learner to the home page instead of past the header. */}
+      <a href="#main" className={styles.skipLink} onClick={skipToMain}>
         Skip to main content
       </a>
+      <CookieBanner />
       <main id="main" className={styles.main} tabIndex={-1}>
         <AuthGate route={route}>
           <RoutedApp route={route} />
@@ -53,8 +69,16 @@ function App() {
       {/* The only element rendered on every route, which is why the tutor mounts here. It
           stands aside entirely when there is no backend or nobody signed in. */}
       <ChatLauncher route={route} />
+      <SiteFooter />
     </div>
   );
+}
+
+function skipToMain(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  const main = document.getElementById('main');
+  main?.focus();
+  main?.scrollIntoView?.({ block: 'start' });
 }
 
 function RoutedApp({ route }: { route: RouteId }) {

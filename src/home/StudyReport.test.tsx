@@ -90,6 +90,6 @@ describe('StudyReport', () => {
 
     cleanup();
     render(<StudyReport weakSpots={[spot({ moduleId: 'respiratory', reason: 'stale', dueCount: 3 })]} />);
-    expect(screen.getByLabelText('3 due for review')).toBeTruthy();
+    expect(screen.getByText(/for review/).parentElement?.textContent).toBe('3 due for review');
   });
 });

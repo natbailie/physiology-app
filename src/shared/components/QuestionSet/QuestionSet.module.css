@@ -95,12 +95,10 @@
   font-size: var(--fs-sm);
 }
 
+/* Underlined always: inside a sentence, colour and weight alone do not mark a link (1.4.1). */
 .bedLink {
   color: var(--brand);
   font-weight: 700;
-  text-decoration: none;
-}
-
-.bedLink:hover {
   text-decoration: underline;
+  text-underline-offset: 0.15em;
 }

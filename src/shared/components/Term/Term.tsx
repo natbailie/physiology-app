@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { lookupTerm } from '@/shared/glossary/terms';
 import styles from './Term.module.css';
 
@@ -23,11 +23,15 @@ const FALLBACK_TOPBAR_PX = 88;
  * ignore it, and it cannot be reached by keyboard. A focusable element with `aria-describedby`
  * costs about the same and does not have to be redone before a sale.
  *
- * The VISIBILITY is pure CSS — `:hover` and `:focus-visible` on the trigger reveal the bubble —
- * so there is no open state to manage, nothing to close, and no way for a stuck tooltip to
- * cover the numbers a learner is trying to read. Only the PLACEMENT is measured, and it is
- * written straight to the element rather than held in state, so hovering a label never
- * re-renders a page that is already animating at 60Hz.
+ * WCAG 1.4.13 asks three things of content that appears on hover or focus, and each has a
+ * mechanism here. HOVERABLE: hover is on the wrapper, which contains the bubble, and the bubble
+ * carries an invisible bridge over the gap, so the pointer can travel onto it and read. DISMISSIBLE:
+ * Escape hides it without moving focus or the pointer. PERSISTENT: it stays until then. A tap
+ * toggles it too — touch has no hover, and a tap does not reliably focus a button on iOS.
+ *
+ * None of that is React state. The open/dismissed flags are data attributes written straight to
+ * the element, like the placement, so hovering a label never re-renders a page that is already
+ * animating at 60Hz.
  *
  * The bubble is `position: fixed` because the readout grid clips its overflow — that clip is
  * what rounds the panel's corners when an odd tile count leaves the last cell empty, so it
@@ -90,10 +94,66 @@ export function Term({ label, moduleId }: TermProps) {
     bubble.style.top = `${top}px`;
   }, []);
 
+  const wrapRef = useRef<HTMLSpanElement>(null);
+
+  const reset = useCallback(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    delete wrap.dataset.dismissed;
+    delete wrap.dataset.open;
+  }, []);
+
+  const toggle = useCallback(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    place();
+    if (wrap.dataset.open) {
+      delete wrap.dataset.open;
+      return;
+    }
+    delete wrap.dataset.dismissed;
+    wrap.dataset.open = 'true';
+    // Close on the next press anywhere else — the touch equivalent of moving the pointer away.
+    const outside = (event: PointerEvent) => {
+      if (!wrap.contains(event.target as Node)) {
+        delete wrap.dataset.open;
+        document.removeEventListener('pointerdown', outside, true);
+      }
+    };
+    document.addEventListener('pointerdown', outside, true);
+  }, [place]);
+
+  const onKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return;
+    const wrap = wrapRef.current;
+    if (!wrap || wrap.dataset.dismissed) return;
+    // Hide the definition without taking the Escape away from anything else only when there was
+    // something to hide; otherwise let it through (the tutor panel closes on Escape).
+    wrap.dataset.dismissed = 'true';
+    delete wrap.dataset.open;
+    event.stopPropagation();
+  }, []);
+
   if (!entry) return <>{label}</>;
 
   return (
-    <span className={styles.wrap}>
+    <span
+      ref={wrapRef}
+      className={styles.wrap}
+      onPointerEnter={(event) => {
+        // Hovered with focus elsewhere: Escape must still dismiss, without moving the pointer.
+        if (event.pointerType !== 'mouse') return;
+        const wrap = wrapRef.current;
+        const onEscape = (key: globalThis.KeyboardEvent) => {
+          if (key.key === 'Escape' && wrap) wrap.dataset.dismissed = 'true';
+        };
+        document.addEventListener('keydown', onEscape);
+        wrap?.addEventListener('pointerleave', () => document.removeEventListener('keydown', onEscape), { once: true });
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') delete wrapRef.current?.dataset.dismissed;
+      }}
+    >
       <button
         ref={triggerRef}
         type="button"
@@ -101,6 +161,9 @@ export function Term({ label, moduleId }: TermProps) {
         aria-describedby={id}
         onPointerEnter={place}
         onFocus={place}
+        onBlur={reset}
+        onClick={toggle}
+        onKeyDown={onKeyDown}
       >
         {label}
       </button>

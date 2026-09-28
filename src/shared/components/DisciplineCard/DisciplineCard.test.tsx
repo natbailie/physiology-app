@@ -34,6 +34,7 @@ describe('DisciplineCard', () => {
     );
     expect(screen.queryByRole('link')).toBeNull();
     expect(screen.getByText('Coming soon')).toBeTruthy();
-    expect(screen.getByText('Anatomy').closest('[aria-disabled="true"]')).toBeTruthy();
+    // Marked by the visible badge, not `aria-disabled` — which means nothing on a <div>.
+    expect(screen.getByText('Anatomy').closest('[data-status="coming-soon"]')).toBeTruthy();
   });
 });

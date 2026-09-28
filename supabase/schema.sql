@@ -22,7 +22,6 @@ create table if not exists public.profiles (
   -- Billing. Written only by the Stripe webhook (service role), never by the client — see the
   -- column grants at the bottom of this file.
   subscription_status text not null default 'free',
-  stripe_customer_id text,
   current_period_end timestamptz,
   -- Who the learner is revising as. Both are self-declared, both nullable, and both are written
   -- by the client — hence the explicit column grant at the bottom of this file.
@@ -52,8 +51,11 @@ language plpgsql
 security definer set search_path = ''
 as $$
 begin
+  -- No display name is invented from the email address any more: nothing reads one, and a copy
+  -- of part of somebody's email in a second table is data held for no purpose (UK GDPR art.
+  -- 5(1)(c)). A learner who wants one can set it. See schema-privacy.sql.
   insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1)))
+  values (new.id, new.raw_user_meta_data ->> 'display_name')
   on conflict (id) do nothing;
   return new;
 end;
@@ -116,6 +118,8 @@ create policy "delete own attempts"
 
 -- Self-service deletion (UK GDPR): one rpc wipes the auth user; profiles, attempts and any
 -- future cohort memberships follow via ON DELETE CASCADE.
+-- SUPERSEDED by schema-privacy.sql, which also strips billing_events payloads. Re-running this
+-- file after that one reinstates the simpler version, so re-run schema-privacy.sql afterwards.
 create or replace function public.delete_own_account ()
 returns void
 language sql
@@ -134,7 +138,6 @@ grant execute on function public.delete_own_account () to authenticated;
 -- ---------------------------------------------------------------------------
 alter table public.profiles
   add column if not exists subscription_status text not null default 'free',
-  add column if not exists stripe_customer_id text,
   add column if not exists current_period_end timestamptz;
 
 -- ---------------------------------------------------------------------------

@@ -6,14 +6,23 @@ import { useAuth } from './AuthContext';
 import styles from './AuthGate.module.css';
 
 /** Routes a signed-out visitor may still see. Pricing is the one thing worth reading before
- * joining; the privacy notice must be readable without an account or it protects no one;
+ * joining; the privacy notice, terms, cookie and refund policies and business details must be
+ * readable without an account or they protect no one — a contract's terms are read BEFORE
+ * agreeing to them; reviews are for deciding whether to join; the methodology page is linked
+ * from the landing screen and used to bounce straight back to it;
  * the accessibility statement is a statutory document and must be readable the same way;
  * the H accessibility review is shared by URL into an audit or a procurement conversation,
  * so an external auditor or university buyer without an account must be able to open it. */
 const PUBLIC_ROUTES: ReadonlySet<RouteId> = new Set<RouteId>([
   'pricing',
   'privacy',
+  'terms',
+  'cookies',
+  'refunds',
+  'business',
+  'reviews',
   'accessibility',
+  'methodology',
   'review-h',
 ]);
 

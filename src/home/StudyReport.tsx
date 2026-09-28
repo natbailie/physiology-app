@@ -79,8 +79,8 @@ export function StudyReport({ weakSpots }: StudyReportProps) {
               />
             </span>
             {spot.dueCount > 0 && (
-              <span className={styles.due} aria-label={`${spot.dueCount} due for review`}>
-                {spot.dueCount} due
+              <span className={styles.due}>
+                {spot.dueCount} due<span className="sr-only"> for review</span>
               </span>
             )}
           </li>
