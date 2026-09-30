@@ -7,7 +7,7 @@ export const hpgAxisContent: ExplainerContent<HpgPresetName> = {
     {
       heading: 'The one axis in this app that reverses its own feedback',
       paragraphs: [
-        'Every other feedback loop in this app is permanently negative: the output suppresses its own drive, and the system settles. The female HPG axis is the exception. Through the follicular phase, rising estrogen suppresses LH in the ordinary way — but once estrogen has been high for long enough, the sign flips and estrogen begins to drive LH instead, producing the ovulatory surge. Watch the feedback arrow on the diagram change from inhibitory to stimulatory as it happens.',
+        'Every other feedback loop in this app is permanently negative: the output suppresses its own drive, and the system settles. The female HPG axis is the exception. Through the follicular phase, rising oestrogen suppresses LH in the ordinary way — but once oestrogen has been high for long enough, the sign flips and oestrogen begins to drive LH instead, producing the ovulatory surge. Watch the feedback arrow on the diagram change from inhibitory to stimulatory as it happens.',
       ],
       demos: [
         { preset: 'normalFemaleCycle', watch: 'LH' },
@@ -16,7 +16,7 @@ export const hpgAxisContent: ExplainerContent<HpgPresetName> = {
     {
       heading: 'The switch depends on duration, which is why it fires once',
       paragraphs: [
-        'The switch depends on duration as well as level, which is why it fires cleanly once per cycle rather than oscillating. A transient estrogen rise accumulates a little exposure and decays away harmlessly; only the sustained climb of a maturing dominant follicle crosses the threshold. That follicle becomes progressively FSH-independent as it grows, which is exactly what lets its estrogen output escape the negative feedback that would otherwise throttle it. After ovulation the ruptured follicle becomes the corpus luteum, and its progesterone promptly restores negative feedback — closing the window.',
+        'The switch depends on duration as well as level, which is why it fires cleanly once per cycle rather than oscillating. A transient oestrogen rise accumulates a little exposure and decays away harmlessly; only the sustained climb of a maturing dominant follicle crosses the threshold. That follicle becomes progressively FSH-independent as it grows, which is exactly what lets its oestrogen output escape the negative feedback that would otherwise throttle it. After ovulation the ruptured follicle becomes the corpus luteum, and its progesterone promptly restores negative feedback — closing the window.',
       ],
     },
     {

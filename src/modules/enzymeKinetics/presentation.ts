@@ -125,7 +125,7 @@ function buildMichaelsMentenFrame(derived: KineticsDerived, inputs: KineticsInpu
         type: 'text',
         x: MM.left,
         y: MM.HEIGHT - 10,
-        text: `Km′ ${km < 0.1 ? km.toFixed(3) : km.toFixed(2)} mmol/L  ·  Vmax′ ${derived.apparentVmaxUmPerMin.toFixed(0)} µmol/min  ·  saturation ${derived.saturationPct.toFixed(0)}%  ·  residual activity ${derived.residualActivityPct.toFixed(0)}%`,
+        text: `Km′ ${km < 0.1 ? km.toFixed(3) : km.toFixed(2)} mmol/L · Vmax′ ${derived.apparentVmaxUmPerMin.toFixed(0)} µmol/min · saturation ${derived.saturationPct.toFixed(0)}% · activity ${derived.residualActivityPct.toFixed(0)}%`,
         cls: 'caption',
       },
     ],

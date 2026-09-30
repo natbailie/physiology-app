@@ -461,7 +461,7 @@ export function buildEcgConductionPresentation(ctx: Ctx): ModulePresentation<Ecg
       { kind: 'slider', label: 'Left bundle conduction', key: 'leftBundleConduction', min: 0, max: 1, step: 0.05, unit: ' %', format: 'percent' },
       { kind: 'slider', label: 'Ventricular APD', key: 'ventricularAPD', min: 200, max: 500, step: 5, unit: ' ms' },
       { kind: 'slider', label: 'Serum potassium', key: 'serumPotassium', min: 2.5, max: 8, step: 0.1, unit: ' mEq/L' },
-      { kind: 'slider', label: 'Ischemic injury', key: 'ischemicInjury', min: 0, max: 1, step: 0.05, unit: ' %', format: 'percent' },
+      { kind: 'slider', label: 'Ischaemic injury', key: 'ischemicInjury', min: 0, max: 1, step: 0.05, unit: ' %', format: 'percent' },
       {
         kind: 'toggle',
         label: 'Injury territory',

@@ -7,7 +7,7 @@ export const erythropoiesisContent: ExplainerContent<ErythroPresetName> = {
     {
       heading: 'A slow feedback loop with its sensor in the kidney',
       paragraphs: [
-        'Erythropoiesis is a slow negative-feedback loop with an unusual sensor. Peritubular cells in the kidney detect tissue oxygen and release erythropoietin, which drives the marrow to make red cells, which carry oxygen, which switches the signal back off. Because the sensor and the hormone are both renal, chronic kidney disease causes anemia through hormone deficiency while the marrow itself remains perfectly capable — which is exactly why recombinant EPO treats it and iron alone does not.',
+        'Erythropoiesis is a slow negative-feedback loop with an unusual sensor. Peritubular cells in the kidney detect tissue oxygen and release erythropoietin, which drives the marrow to make red cells, which carry oxygen, which switches the signal back off. Because the sensor and the hormone are both renal, chronic kidney disease causes anaemia through hormone deficiency while the marrow itself remains perfectly capable — which is exactly why recombinant EPO treats it and iron alone does not.',
       ],
       demos: [
         { preset: 'normal', watch: 'EPO' },
@@ -26,7 +26,7 @@ export const erythropoiesisContent: ExplainerContent<ErythroPresetName> = {
     {
       heading: 'The reticulocyte index answers what the haemoglobin cannot',
       paragraphs: [
-        'The reticulocyte index then answers the question the haemoglobin cannot: is the marrow actually responding? Below about 2 it is not — a hypoproliferative anemia, where the marrow lacks the signal (renal failure), the raw materials (iron, B12) or the capacity (aplasia). Above it, the marrow is working hard and the problem lies downstream in destruction or loss. Two patients can sit at an identical haemoglobin with completely different diagnoses, and it is this index that separates them.',
+        'The reticulocyte index then answers the question the haemoglobin cannot: is the marrow actually responding? Below about 2 it is not — a hypoproliferative anaemia, where the marrow lacks the signal (renal failure), the raw materials (iron, B12) or the capacity (aplasia). Above it, the marrow is working hard and the problem lies downstream in destruction or loss. Two patients can sit at an identical haemoglobin with completely different diagnoses, and it is this index that separates them.',
       ],
       demos: [
         { preset: 'hemolyticAnemia', watch: 'reticulocyte index' },
@@ -51,7 +51,7 @@ export const erythropoiesisContent: ExplainerContent<ErythroPresetName> = {
     {
       heading: 'Compare the presets on EPO as well as on reticulocytes',
       paragraphs: [
-        'Compare the presets on EPO as well as on retics and you get the full logic. In aplastic anemia EPO is maximal and the retic index is near zero — the signal is deafening and there is nothing left to answer it. In anemia of CKD the retic index is equally low but the EPO is inappropriately low too, because the failing organ is the one that makes it. In haemolysis the retic index climbs above 2: the marrow is doing everything right and the cells are being destroyed faster than it can replace them. And altitude shows the loop working exactly as designed on a person who is not ill at all — low inspired oxygen is sensed as hypoxia at a perfectly normal haemoglobin, and the red cell mass rises until delivery is restored.',
+        'Compare the presets on EPO as well as on retics and you get the full logic. In aplastic anaemia EPO is maximal and the retic index is near zero — the signal is deafening and there is nothing left to answer it. In anaemia of CKD the retic index is equally low but the EPO is inappropriately low too, because the failing organ is the one that makes it. In haemolysis the retic index climbs above 2: the marrow is doing everything right and the cells are being destroyed faster than it can replace them. And altitude shows the loop working exactly as designed on a person who is not ill at all — low inspired oxygen is sensed as hypoxia at a perfectly normal haemoglobin, and the red cell mass rises until delivery is restored.',
       ],
       demos: [
         { preset: 'aplasticAnemia', watch: 'EPO' },

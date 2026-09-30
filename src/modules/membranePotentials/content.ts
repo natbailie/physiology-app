@@ -49,7 +49,7 @@ export const membranePotentialsContent: ExplainerContent<MembranePresetName> = {
     {
       heading: 'Drugs and disease map cleanly onto these parameters',
       paragraphs: [
-        'Drugs and disease map cleanly onto these parameters. Local anesthetics and class I antiarrhythmics block sodium channels, abolishing the upstroke; class III antiarrhythmics block potassium channels, delaying repolarization and prolonging both the action potential and the refractory period. Cooling slows every gate through the same Q10 relationship, prolonging the spike and slowing conduction. Demyelination is different in kind — the axon still fires perfectly well, but saltatory conduction collapses, so this is a conduction problem rather than an excitability one.',
+        'Drugs and disease map cleanly onto these parameters. Local anaesthetics and class I antiarrhythmics block sodium channels, abolishing the upstroke; class III antiarrhythmics block potassium channels, delaying repolarization and prolonging both the action potential and the refractory period. Cooling slows every gate through the same Q10 relationship, prolonging the spike and slowing conduction. Demyelination is different in kind — the axon still fires perfectly well, but saltatory conduction collapses, so this is a conduction problem rather than an excitability one.',
       ],
       demos: [
         { preset: 'localAnesthetic', watch: 'upstroke' },

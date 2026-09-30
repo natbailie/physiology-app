@@ -235,7 +235,7 @@ export function buildSomaticSensationPresentation(ctx: Ctx): ModulePresentation<
             // 246, not 266: the sentence is wider than the room left of the frame edge.
             x: 246,
             y: 204,
-            text: 'pain crosses at the segment · touch crosses in the medulla',
+            text: 'pain crosses at the segment · touch in the medulla',
             cls: 'caption',
           },
 

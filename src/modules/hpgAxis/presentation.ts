@@ -313,7 +313,7 @@ export function buildHpgPresentation(ctx: Ctx): ModulePresentation<HpgState, Hpg
       { kind: 'slider', label: 'Gonadal function', key: 'gonadalFunction', min: 0, max: 1.5, step: 0.05, unit: '%', format: 'percent' },
       {
         kind: 'slider',
-        label: isFemale ? 'Exogenous estrogen/progestin' : 'Exogenous testosterone',
+        label: isFemale ? 'Exogenous oestrogen/progestin' : 'Exogenous testosterone',
         key: isFemale ? 'exogenousEstrogenProgesterone' : 'exogenousTestosterone',
         min: 0,
         max: 200,

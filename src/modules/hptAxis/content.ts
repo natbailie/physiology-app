@@ -35,7 +35,7 @@ export const hptAxisContent: ExplainerContent<HptPresetName> = {
     {
       heading: 'T4 turns over in a week, and that governs how it is managed',
       paragraphs: [
-        'T4 turns over over about a week, and that one number governs how the axis is managed. It is by far the slowest actuator here, so nothing about a dose change is visible quickly: after altering levothyroxine, several weeks must pass before the level — and the TSH responding to it — mean anything. This is why thyroid function is rechecked at around six weeks rather than at one, and why a patient who feels no different after a few days has not yet been given the chance to.',
+        'T4 turns over about a week, and that one number governs how the axis is managed. It is by far the slowest actuator here, so nothing about a dose change is visible quickly: after altering levothyroxine, several weeks must pass before the level — and the TSH responding to it — mean anything. This is why thyroid function is rechecked at around six weeks rather than at one, and why a patient who feels no different after a few days has not yet been given the chance to.',
       ],
     },
     {
