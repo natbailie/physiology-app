@@ -26,7 +26,12 @@ create table if not exists public.profiles (
   -- Who the learner is revising as. Both are self-declared, both nullable, and both are written
   -- by the client — hence the explicit column grant at the bottom of this file.
   target_exam text,
-  training_level text
+  training_level text,
+  -- Self-declared study details, also client-written and nullable. Free text columns validated
+  -- in the app against `src/home/studyProfile.ts`; study_year is bounded here as well.
+  university text,
+  degree_type text,
+  study_year smallint check (study_year between 1 and 6)
 );
 
 create table if not exists public.question_attempts (
@@ -99,6 +104,9 @@ create policy "update own profile"
 -- This pair is load-bearing and easy to undo by accident: any later `grant update on
 -- public.profiles` anywhere re-opens the hole for every column, including the billing ones.
 revoke update on public.profiles from authenticated;
+-- Only the columns that exist in every database at this point. The study columns are added by the
+-- ALTER further down and granted there: naming them here fails (42703) on a table created before
+-- they existed, because `create table if not exists` above does not add columns to it.
 grant update (display_name, target_exam, training_level) on public.profiles to authenticated;
 
 drop policy if exists "read own attempts" on public.question_attempts;
@@ -147,7 +155,10 @@ alter table public.profiles
 -- ---------------------------------------------------------------------------
 alter table public.profiles
   add column if not exists target_exam text,
-  add column if not exists training_level text;
+  add column if not exists training_level text,
+  add column if not exists university text,
+  add column if not exists degree_type text,
+  add column if not exists study_year smallint check (study_year between 1 and 6);
 
 -- Re-assert the column grants after the ALTERs, in case either re-granted anything.
 --
@@ -156,4 +167,4 @@ alter table public.profiles
 -- learner and — because PostgREST reports that as a silent no-op on an otherwise successful
 -- request — the failure looks exactly like a UI that forgot to save.
 revoke update on public.profiles from authenticated;
-grant update (display_name, target_exam, training_level) on public.profiles to authenticated;
+grant update (display_name, target_exam, training_level, university, degree_type, study_year) on public.profiles to authenticated;

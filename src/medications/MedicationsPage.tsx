@@ -280,7 +280,7 @@ function ClassGrid({
             id="medication-search"
             className={styles.search}
             type="search"
-            placeholder="Drug class or mechanism"
+            placeholder="Try “beta blocker” or “reduces preload”"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

@@ -73,6 +73,11 @@
    * 3.45:1 on slate — below the floor — so the brand panels get their own step. One value
    * for both themes: it clears 4.5:1 on either ink. */
   --brand-on-ink: #60a5fa;
+  /* The far stop of the house gradient (--brand -> --brand-deep): hero banners, the filled
+   * primary button, progress fills. Deeper than --brand in light, so white type keeps its
+   * contrast along the whole ramp; a touch darker than the cyan in dark, where the type is
+   * the near-black --on-solid. Not a signal colour — nothing physiological is drawn with it. */
+  --brand-deep: #0a3f94;
 
   /* Instrument ground: the recessed slab a bedside vitals tile is printed on.
    *
@@ -252,6 +257,12 @@
    * like any other so it lifts into dark mode with the rest of them, and so palette.test.ts
    * holds it to the same contrast floors. */
   --brand-base: #0f62d6;
+  /* The one SELECTION colour. The house rule is two colours: --brand for what you can do, and
+   * this for what you have chosen — the picked plan, the active chip, the current tab. Warm
+   * against the cool brand so the eye reads "chosen" before it reads the label, and kept well
+   * away from --danger's red so a selected card never looks like an error. A base like the
+   * others, so it lifts into dark mode with them and palette.test.ts holds it to the same floors. */
+  --select-base: #c2410c;
   --ok-base: #007a6f;
   --warn-base: #9c6608;
   --danger-base: #c62828;
@@ -439,6 +450,7 @@
   --cartilage: color-mix(in oklab, var(--cartilage-base), var(--signal-tint) var(--signal-lift));
   --serosa: color-mix(in oklab, var(--serosa-base), var(--signal-tint) var(--signal-lift));
   --brand: color-mix(in oklab, var(--brand-base), var(--signal-tint) var(--signal-lift));
+  --select: color-mix(in oklab, var(--select-base), var(--signal-tint) var(--signal-lift));
   --ok: color-mix(in oklab, var(--ok-base), var(--signal-tint) var(--signal-lift));
   --warn: color-mix(in oklab, var(--warn-base), var(--signal-tint) var(--signal-lift));
   --danger: color-mix(in oklab, var(--danger-base), var(--signal-tint) var(--signal-lift));
@@ -520,6 +532,11 @@
    * The monitor accent is therefore stated outright. palette.test.ts measures it on the new
    * panel exactly as it measures a derived one, which is what keeps this honest. */
   --brand: #4cc3ff;
+  --brand-deep: #2b8fdc;
+  /* Stated outright for the reason --brand is: the automatic lift towards white turns the
+   * warm orange into a dusty salmon, which stops reading as "chosen". A clear amber-orange
+   * keeps the pairing with the cyan; palette.test.ts measures it like any derived signal. */
+  --select: #ff9d5c;
 }
 
 * {

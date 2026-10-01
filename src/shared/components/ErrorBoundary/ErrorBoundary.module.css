@@ -1,0 +1,38 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 32rem;
+  margin: var(--s-6) auto;
+  padding: var(--s-7) var(--s-6);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+}
+
+.title {
+  margin: 0 0 var(--s-2);
+  font-size: var(--fs-lg, 1.25rem);
+}
+
+.text {
+  margin: 0 0 var(--s-4);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  width: 100%;
+}
+
+/* One obvious way forward, full width; the heavier fix sits quietly under it. */
+.primary {
+  composes: primary block from '../../styles/button.module.css';
+}
+
+.button {
+  composes: block ghost from '../../styles/button.module.css';
+  min-height: 2.75rem;
+}

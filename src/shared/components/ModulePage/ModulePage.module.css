@@ -319,7 +319,7 @@
 
   .main {
     /* Clear the collapsed dock so the footnote stays reachable. */
-    padding-bottom: 4.5rem;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* And clear it for a tabbed-to control too: padding keeps the last item reachable, but a
@@ -339,6 +339,11 @@
     max-height: none;
     gap: 0;
     z-index: 5;
+    /* Clears the home indicator, and rises with an on-screen keyboard (see useKeyboardInset). */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    bottom: var(--kb-inset, 0px);
     background: var(--panel);
     border-top: 1px solid var(--panel-border);
     box-shadow: var(--shadow-up);

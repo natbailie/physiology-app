@@ -1,6 +1,6 @@
 # Physiology Lab
 
-Fifty-one interactive physiology simulators for medical students, plus an interactive formula
+Fifty-three interactive physiology simulators for medical students, plus an interactive formula
 reference and a pharmacology hub. Every module runs a real quantitative model — named equations,
 constants calibrated so baseline lands on textbook values — and each carries verified practice
 questions.
@@ -13,7 +13,7 @@ MRCS Part A and FRCA Primary.
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm test             # 2,900 tests across 211 files
+npm test             # 3,829 tests across 264 files
 npm run build        # tsc -b && vite build
 npm run lint         # oxlint
 npm run verify       # all four, in CI order
@@ -35,7 +35,7 @@ npm run verify       # all four, in CI order
 | Special senses | vision, hearing, vestibular |
 | Reproduction & development | fetal circulation, pregnancy |
 | Integrative | thermoregulation, exercise physiology |
-| Metabolism | metabolism, toxicology, anaesthesia |
+| Metabolism | metabolism, toxicology, anaesthesia, Krebs cycle, urea cycle |
 | Cell & molecular | enzyme kinetics, cell cycle |
 
 The physiology is not decorative. Guyton's two-curve analysis, Suga-Sagawa time-varying
@@ -58,6 +58,16 @@ the controls hidden and you name it from the readouts.
 Supabase, behind the same `ProgressStore` interface, so the quiz code is identical either way —
 and the app works fully without an account.
 
+## Mobile app and RevenueCat
+
+The same engines ship as a React Native (Expo) app in the sibling `../physiology-native` project,
+kept identical by a file-sync script rather than a shared package. Subscriptions run on RevenueCat
+on both platforms — Web Billing here (`src/billing/revenuecat.ts`), the native SDK there — with one
+entitlement (`full_access`), the Supabase user id as the App User ID, and one webhook
+(`supabase/functions/revenuecat-webhook`) that mirrors state into Postgres. Schools pay by Stripe
+invoice instead and redeem a licence code. Three simulators (cardiorenal, respiratory, glucose
+regulation) and the formula and medications pages are free. See `CLAUDE.md`, "Selling it".
+
 ## Where the numbers come from
 
 Every module carries `engine/references.ts`, pairing each asserted physiological band with a
@@ -65,7 +75,7 @@ provenance record saying where it came from. Three kinds, in descending order of
 are to fake:
 
 - **Analytic** — the reference is a published *equation*, written out inside the test and
-  importing nothing from the engine. Thirteen modules have one. Some are identities that must
+  importing nothing from the engine. Fifteen modules have one. Some are identities that must
   hold for any input at all: `ecgConduction` checks Einthoven's law against arbitrary dipoles and
   it holds to ten decimal places.
 - **Trace** — the reference is a committed trace from the [Pulse Physiology
@@ -73,7 +83,7 @@ are to fake:
   the same physiology. Five modules and nineteen traces. See `tools/pulse-oracle/`.
 - **Reference range** — the reference is a published interval. Every module has this.
 
-Of 265 asserted bands, 236 (89%) name an external source; the remaining 29 say so explicitly and
+Of 274 asserted bands, 245 (89%) name an external source; the remaining 29 say so explicitly and
 record what would settle them. That percentage is asserted as a ratchet in
 `src/shared/verification/references.test.ts` and should only ever rise.
 

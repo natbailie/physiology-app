@@ -62,7 +62,7 @@ function Turn({ message }: { message: ChatMessage }) {
  */
 export function ChatPanel({ moduleId, onClose }: ChatPanelProps) {
   const { weakSpots } = useModuleProgress();
-  const { messages, status, error, send, stop, clear } = useChat({ moduleId, weakSpots });
+  const { messages, status, error, send, retry, stop, clear } = useChat({ moduleId, weakSpots });
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const transcriptRef = useRef<HTMLOListElement>(null);
@@ -152,9 +152,12 @@ export function ChatPanel({ moduleId, onClose }: ChatPanelProps) {
       </ol>
 
       {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
+        <div className={styles.error} role="alert">
+          <p className={styles.errorText}>{error}</p>
+          <button type="button" className={styles.ghostButton} onClick={retry} disabled={busy}>
+            Retry
+          </button>
+        </div>
       )}
 
       <form

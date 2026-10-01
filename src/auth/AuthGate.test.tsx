@@ -19,7 +19,10 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 const authState = vi.hoisted(() => ({
-  value: { user: null as { id: string; email: string } | null, initialising: false },
+  value: { user: null as { id: string; email: string; onboarded: boolean } | null,
+    initialising: false,
+    markOnboarded: async () => {},
+  },
 }));
 
 vi.mock('./AuthContext', () => ({
@@ -31,7 +34,7 @@ import { AuthGate } from './AuthGate';
 afterEach(() => {
   cleanup();
   mockState.configured = false;
-  authState.value = { user: null, initialising: false };
+  authState.value = { user: null, initialising: false, markOnboarded: async () => {} };
 });
 
 function renderGate(route = 'shockStates') {
@@ -71,7 +74,7 @@ describe('auth gate', () => {
 
   it('shows neither while the session lookup is still in flight', () => {
     mockState.configured = true;
-    authState.value = { user: null, initialising: true };
+    authState.value = { user: null, initialising: true, markOnboarded: async () => {} };
     renderGate();
     expect(screen.queryByText('the module grid')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Physiology Lab' })).toBeNull();
@@ -79,7 +82,10 @@ describe('auth gate', () => {
 
   it('renders the app once there is a session', () => {
     mockState.configured = true;
-    authState.value = { user: { id: 'u1', email: 'student@med.ac.uk' }, initialising: false };
+    authState.value = { user: { id: 'u1', email: 'student@med.ac.uk', onboarded: true },
+      initialising: false,
+      markOnboarded: async () => {},
+    };
     renderGate();
     expect(screen.queryByText('the module grid')).toBeTruthy();
   });

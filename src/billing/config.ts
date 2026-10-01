@@ -34,7 +34,7 @@ export interface PlanPackage {
   /**
    * The saving on the better-value package, COMPUTED from the two prices by `savingNote`.
    *
-   * It used to be a hand-typed "Two months free" against £9/£55 — which is nearer six months
+   * It used to be a hand-typed "Two months free" against £9/£55 (the prices at the time) — which is nearer six months
    * free, and a price claim that does not match the prices is a misleading action under the DMCC
    * Act 2024 whichever direction it errs in. Computing it means a dashboard price change cannot
    * leave the claim behind.
@@ -51,7 +51,7 @@ function parsePrice(price: string): [string, number] | null {
 }
 
 /**
- * "Save £53 a year compared with paying each month", from the two prices as displayed — or nothing, if
+ * "Save £20.88 a year compared with paying each month", from the two prices as displayed — or nothing, if
  * they cannot be compared honestly (different currencies, unparseable, or no saving at all).
  */
 export function savingNote(monthlyPrice: string, annualPrice: string): string | undefined {
@@ -70,8 +70,8 @@ export function savingNote(monthlyPrice: string, annualPrice: string): string | 
  * discounted enough to say so.
  */
 export const FALLBACK_PACKAGES: readonly PlanPackage[] = [
-  { id: '$rc_monthly', label: 'Monthly', price: '£9', period: 'month' },
-  { id: '$rc_annual', label: 'Annual', price: '£55', period: 'year', note: savingNote('£9', '£55') },
+  { id: '$rc_monthly', label: 'Monthly', price: '£9.99', period: 'month' },
+  { id: '$rc_annual', label: 'Annual', price: '£99', period: 'year', note: savingNote('£9.99', '£99') },
 ];
 
 /**

@@ -155,6 +155,9 @@ function tutorDevRoute(mode: string): Plugin {
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tutorDevRoute(mode)],
+  // Explicit rather than left to the default: a source map shipped to production publishes the
+  // original source next to the bundle.
+  build: { sourcemap: false },
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

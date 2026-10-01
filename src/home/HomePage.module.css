@@ -58,17 +58,150 @@
   white-space: nowrap;
 }
 
+/* The hero: the house gradient, the day's one question, and the search box. The study strip is
+ * pulled up over its bottom edge (.overlap), which is what makes the two read as one object. */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-6);
+  padding: var(--s-7);
+  border-radius: var(--r-lg);
+  color: var(--on-brand-ink);
+  background: linear-gradient(135deg, var(--brand-ink), color-mix(in srgb, var(--brand-deep) 70%, var(--brand-ink)));
+  border: 1px solid var(--brand-ink-border);
+  box-shadow: var(--shadow-3);
+}
+
+.heroUnderStrip {
+  padding-bottom: calc(var(--s-8) + var(--s-3));
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.heroTitle {
+  font-size: var(--fs-2xl);
+  color: var(--on-brand-ink);
+}
+
+.heroArt {
+  flex: none;
+}
+
 .subtitle {
   font-size: var(--fs-sm);
-  color: var(--text-dim);
+  color: var(--brand-ink-dim);
   max-width: 52ch;
   line-height: var(--lh-prose);
+}
+
+.searchWrap {
+  display: block;
+  max-width: 34rem;
+}
+
+/* Filled, rounded and tall: a search box on a phone is a thumb target first. */
+.search {
+  width: 100%;
+  min-height: 3rem;
+  font: inherit;
+  font-size: var(--fs-base);
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--brand-ink-border);
+  background: color-mix(in srgb, var(--on-brand-ink) 10%, var(--brand-ink));
+  color: var(--on-brand-ink);
+}
+
+.search::placeholder {
+  color: var(--brand-ink-dim);
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--brand-on-ink);
+  outline-offset: 2px;
+}
+
+.overlap {
+  margin: calc(-1 * (var(--s-8) + var(--s-3)) - var(--s-6)) var(--s-5) 0;
+  position: relative;
+}
+
+.overlap:empty {
+  display: none;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--s-5);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-7) var(--s-5);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.emptyBody {
+  max-width: 40ch;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  line-height: var(--lh-prose);
+}
+
+.clear {
+  composes: primary block from '../shared/styles/button.module.css';
+  max-width: 20rem;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: var(--s-6) var(--s-5);
+  }
+
+  .heroUnderStrip {
+    padding-bottom: calc(var(--s-8) + var(--s-3));
+  }
+
+  .heroArt {
+    display: none;
+  }
+
+  .overlap {
+    margin-inline: var(--s-3);
+  }
 }
 
 .disciplineGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--s-5);
+}
+
+.disciplineGrid[hidden] {
+  display: none;
 }
 
 .tools {

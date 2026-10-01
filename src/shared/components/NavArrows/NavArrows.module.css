@@ -1,79 +1,114 @@
 /* Top-left, which is where every browser puts back and forward and therefore the first place a
  * learner looks for them. Above the module page's sticky header (3) so it never slides under the
- * title, and below the control dock (5) so an opened dock covers the arrows rather than the other
- * way round. The tutor launcher keeps the bottom-right to itself. */
+ * title, and below the control dock (5) so an opened dock covers the rail rather than the other
+ * way round. The tutor launcher keeps the bottom-right to itself.
+ *
+ * A vertical rail in the left gutter on wide screens (narrower than the old horizontal pill, so
+ * App.module.css gives the width back), and a horizontal strip in the corner below that. */
 .dock {
   position: fixed;
   left: var(--s-4);
   top: calc(var(--s-3) + env(safe-area-inset-top, 0px));
   z-index: 4;
   display: flex;
-  gap: var(--s-2);
-  padding: var(--s-2);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-1);
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   box-shadow: var(--shadow-2);
 }
 
-.arrow {
+@supports (backdrop-filter: blur(1px)) {
+  .dock {
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter: blur(10px);
+  }
+}
+
+.item {
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
-  color: var(--on-solid);
-  background: var(--brand);
+  color: var(--text-dim);
+  background: transparent;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--r-sm);
   cursor: pointer;
+  text-decoration: none;
   transition:
-    transform var(--dur) var(--ease),
-    background-color var(--dur) var(--ease);
+    transform var(--dur-fast) var(--ease),
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
-.arrow:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--brand) 85%, var(--text));
+.item:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--panel-raised);
 }
 
-.arrow:active:not(:disabled) {
+.item:active:not(:disabled) {
   transform: scale(0.94);
 }
 
-.arrow:focus-visible {
+.item:focus-visible {
   outline: var(--focus-ring);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
-.arrow:disabled {
+.item:disabled {
   color: var(--text-faint);
-  background: var(--panel-raised);
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* Narrow screens have no room for a floating dock beside the content, so the arrows shrink and
- * tuck into the corner rather than sitting on top of the page title. */
-@media (max-width: 1024px) {
+/* Where you are: the one place the accent appears in the rail. */
+.item[aria-current='page'] {
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+}
+
+.divider {
+  align-self: stretch;
+  margin: 0 var(--s-2);
+  height: 1px;
+  background: var(--panel-border);
+  opacity: 0.6;
+}
+
+/* Narrow screens have no room for a gutter, so the rail lies down and tucks into the corner
+ * rather than sitting on top of the page title. */
+@media (max-width: 1023.98px) {
   .dock {
-    left: var(--s-2);
+    left: calc(var(--s-2) + env(safe-area-inset-left, 0px));
     top: calc(var(--s-2) + env(safe-area-inset-top, 0px));
-    gap: var(--s-1);
-    padding: var(--s-1);
+    flex-direction: row;
   }
 
-  .arrow {
+  .item {
     width: 2.25rem;
     height: 2.25rem;
   }
 
-  .arrow svg {
-    width: 18px;
-    height: 18px;
+  .item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .divider {
+    align-self: stretch;
+    margin: var(--s-2) 0;
+    width: 1px;
+    height: auto;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arrow {
+  .item {
     transition: none;
   }
 }

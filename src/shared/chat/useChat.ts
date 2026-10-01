@@ -90,6 +90,8 @@ export interface UseChat {
   /** Set when a send failed. Rendered beside the transcript, not thrown. */
   error: string | null;
   send: (text: string) => void;
+  /** Re-asks the last question after a failure, dropping any fallback answer shown for it. */
+  retry: () => void;
   stop: () => void;
   clear: () => void;
 }
@@ -114,11 +116,12 @@ export function useChat({ moduleId, weakSpots }: UseChatOptions): UseChat {
     setStatus('idle');
   }, []);
 
-  const send = useCallback(
-    (text: string) => {
+  const ask = useCallback(
+    (text: string, base: ChatMessage[]) => {
       const question = text.trim();
       if (question.length === 0 || status !== 'idle') return;
 
+      const messages = base;
       const history: ChatMessage[] = [...messages, { role: 'user', content: question }];
       setMessages(history);
       setError(null);
@@ -232,10 +235,22 @@ export function useChat({ moduleId, weakSpots }: UseChatOptions): UseChat {
         }
       })();
     },
-    [messages, moduleId, status, weakSpots],
+    [moduleId, status, weakSpots],
   );
 
-  return { messages, status, error, send, stop, clear };
+  const send = useCallback((text: string) => ask(text, messages), [ask, messages]);
+
+  const retry = useCallback(() => {
+    let lastUser = -1;
+    messages.forEach((message, index) => {
+      if (message.role === 'user') lastUser = index;
+    });
+    if (lastUser < 0) return;
+    const last = messages[lastUser];
+    if (last) ask(last.content, messages.slice(0, lastUser));
+  }, [ask, messages]);
+
+  return { messages, status, error, send, retry, stop, clear };
 }
 
 /**

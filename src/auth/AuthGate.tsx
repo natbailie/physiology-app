@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { LandingPage } from '@/landing/LandingPage';
 import type { RouteId } from '@/shared/hooks/useHashRoute';
 import { useAuth } from './AuthContext';
+import { OnboardingRedirect } from './OnboardingRedirect';
 import styles from './AuthGate.module.css';
 
 /** Routes a signed-out visitor may still see. Pricing is the one thing worth reading before
@@ -47,5 +48,10 @@ export function AuthGate({ route, children }: { route: RouteId; children: ReactN
 
   if (!user && !PUBLIC_ROUTES.has(route)) return <LandingPage />;
 
-  return <>{children}</>;
+  return (
+    <>
+      {user && <OnboardingRedirect />}
+      {children}
+    </>
+  );
 }

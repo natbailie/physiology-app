@@ -60,18 +60,33 @@
 .primary {
   composes: button;
   color: var(--on-solid);
-  background: var(--brand);
+  /* A gentle brand -> brand-deep sweep: the filled button reads as a surface, not a flat swatch,
+   * and stays inside one hue so --on-solid keeps its contrast along the whole ramp. */
+  background: linear-gradient(135deg, var(--brand), var(--brand-deep));
   border-color: transparent;
   font-weight: 700;
   border-radius: var(--r-md);
   padding: var(--s-3) var(--s-5);
   box-shadow: var(--shadow-brand);
+  /* A touch target, not a link: 44px is the floor on a phone. */
+  min-height: 2.75rem;
 }
 
 .primary:hover:not(:disabled) {
   color: var(--on-solid);
   border-color: transparent;
-  background: color-mix(in srgb, var(--brand) 86%, var(--text));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 86%, var(--text)), var(--brand-deep));
+}
+
+/* Full width. Compose it with .primary (or any variant) for the ONE call to action on a page or
+ * card — sign in, subscribe, continue. */
+.block {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
 }
 
 /* Carries the module accent: the primary action in its context. */

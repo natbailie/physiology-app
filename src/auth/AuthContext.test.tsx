@@ -72,8 +72,17 @@ describe('auth context when Supabase is not configured', () => {
 
   it('answers sign-up attempts the same way', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
+    const outcome = await result.current.signUp('student@example.com', 'Str0ng!pass', '2026-09-28');
+    expect(outcome.ok).toBe(false);
+  });
+
+  it('rejects a weak password before any network call', async () => {
+    mockState.configured = true;
+    mockState.client = fakeSupabase();
+    const { result } = renderHook(() => useAuth(), { wrapper });
     const outcome = await result.current.signUp('student@example.com', 'password', '2026-09-28');
     expect(outcome.ok).toBe(false);
+    if (!outcome.ok) expect(outcome.message).toContain('capital letter');
   });
 });
 
@@ -82,13 +91,17 @@ describe('auth context with a live client', () => {
     mockState.configured = true;
     mockState.client = fakeSupabase({
       getSession: async () => ({
-        data: { session: { user: { id: 'u7', email: 'student@med.ac.uk' } } },
+        data: {
+          session: {
+            user: { id: 'u7', email: 'student@med.ac.uk', created_at: '2026-01-01T00:00:00Z' },
+          },
+        },
       }),
     });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.initialising).toBe(false));
-    expect(result.current.user).toEqual({ id: 'u7', email: 'student@med.ac.uk' });
+    expect(result.current.user).toEqual({ id: 'u7', email: 'student@med.ac.uk', onboarded: true });
   });
 
   it('translates credential failures into learner-speak', async () => {
@@ -106,6 +119,20 @@ describe('auth context with a live client', () => {
     if (!outcome.ok) expect(outcome.message).toContain('do not match');
   });
 
+  it('shows our wording for Supabase composition-rule errors', async () => {
+    mockState.configured = true;
+    mockState.client = fakeSupabase({
+      signUp: async () => ({
+        data: { user: null, session: null },
+        error: { message: 'Password should contain at least one character of each: abc, ABC, 123' },
+      }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    const outcome = await result.current.signUp('student@example.com', 'Str0ng!pass', '2026-09-28');
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) expect(outcome.message).toContain('capital letter');
+  });
+
   it('flags the check-your-inbox state when sign-up returns a user but no session', async () => {
     mockState.configured = true;
     let sent: { options?: { data?: Record<string, unknown> } } | undefined;
@@ -117,7 +144,7 @@ describe('auth context with a live client', () => {
     });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    const outcome = await result.current.signUp('student@example.com', 'password', '2026-09-28');
+    const outcome = await result.current.signUp('student@example.com', 'Str0ng!pass', '2026-09-28');
     expect(outcome).toEqual({ ok: true, needsConfirmation: true });
     // The record of the contract: which Terms were accepted, and when.
     expect(sent?.options?.data?.terms_version).toBe('2026-09-28');
@@ -137,5 +164,30 @@ describe('auth context with a live client', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     await result.current.signOut();
     expect(signOutCalled).toBe(true);
+  });
+
+  it('clears the route on sign-out so the login screen is not left on a stale hash', async () => {
+    mockState.configured = true;
+    mockState.client = fakeSupabase();
+    window.location.hash = '#shockStates';
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await result.current.signOut();
+    expect(window.location.hash).toBe('');
+  });
+
+  it('treats a recently created account without onboarded_at as not yet onboarded', async () => {
+    mockState.configured = true;
+    mockState.client = fakeSupabase({
+      getSession: async () => ({
+        data: {
+          session: {
+            user: { id: 'u8', email: 'new@med.ac.uk', created_at: '2027-01-01T00:00:00Z' },
+          },
+        },
+      }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.initialising).toBe(false));
+    expect(result.current.user?.onboarded).toBe(false);
   });
 });

@@ -13,7 +13,7 @@
  * title — the app fills its 1400px and there is no margin for it to hide in. */
 @media (min-width: 1024px) {
   .app {
-    padding-left: 8rem;
+    padding-left: 5rem;
   }
 }
 

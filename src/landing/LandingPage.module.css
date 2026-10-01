@@ -2,6 +2,7 @@
 
 .page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -26,11 +27,25 @@
    rather than the full ink panel — see the note in panel.module.css. */
 .brandPanel {
   composes: inkSurface from '../shared/styles/panel.module.css';
+  position: relative;
+  /* The ink, warming towards the brand along a diagonal — depth without a second colour. */
+  background: linear-gradient(
+    150deg,
+    var(--brand-ink) 35%,
+    color-mix(in srgb, var(--brand-deep) 62%, var(--brand-ink))
+  );
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--s-7);
   padding: var(--s-7);
+}
+
+.art {
+  align-self: flex-start;
+  /* Sits over the seam between the two halves on a wide card, so the card reads as one piece. */
+  margin-right: calc(-1 * var(--s-8));
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.25));
 }
 
 .pitch {
@@ -107,6 +122,10 @@
 
 .pricingLink {
   color: var(--text-dim);
+  /* 44px target for a tap, without changing how the line reads. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
 }
 
 /* One column below the width where two halves stop being halves. The brand panel keeps its
@@ -127,5 +146,11 @@
 
   .panelFoot {
     display: none;
+  }
+
+  .art {
+    width: 88px;
+    height: 88px;
+    margin-right: 0;
   }
 }

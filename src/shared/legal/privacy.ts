@@ -22,7 +22,7 @@ export const PRIVACY: LegalDoc = {
   id: 'privacy',
   title: 'Privacy policy',
   summary: 'What we collect, why, who else sees it, how long we keep it, and your rights.',
-  lastUpdated: '2026-09-28',
+  lastUpdated: '2026-10-01',
   sections: [
     {
       heading: 'Who we are',
@@ -45,7 +45,7 @@ export const PRIVACY: LegalDoc = {
       paragraphs: ['We store:'],
       list: [
         'Your email address and a password hash — we can never read the password itself (auth.users). Also the version of the Terms you accepted and when.',
-        'Your profile (profiles): subscription status and renewal date, your role (learner or teacher), and — only if you choose them — your target exam and training stage.',
+        'Your profile (profiles): subscription status and renewal date, your role (learner or teacher), and — only if you choose them — your target exam, training stage, university, degree type and year of study. These are used only to tailor the app to you and are never shared.',
         'Each practice question you answer: which module, which question, right or wrong, and when (question_attempts).',
         'Classes you join and institutional licence seats you redeem (cohort_members, licence_seats).',
         'A timestamp each time you send the AI tutor a message, so we can apply the daily limit (chat_usage). The message itself is not stored.',

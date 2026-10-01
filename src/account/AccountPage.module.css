@@ -75,6 +75,7 @@
 }
 
 .secondaryButton {
+  min-height: 2.75rem;
   composes: button from '../shared/styles/button.module.css';
   align-self: flex-start;
   font-size: var(--fs-sm);
@@ -156,4 +157,10 @@
 .select:disabled {
   color: var(--text-faint);
   cursor: not-allowed;
+}
+
+.loadingRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
 }

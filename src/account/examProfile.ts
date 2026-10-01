@@ -2,6 +2,14 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useAuthOptional } from '@/auth/AuthContext';
 import { isExamId, isTrainingLevelId, type ExamId, type TrainingLevelId } from '@/home/exams';
+import {
+  isDegreeTypeId,
+  isStudyYear,
+  isUniversityId,
+  type DegreeTypeId,
+  type StudyYear,
+  type UniversityId,
+} from '@/home/studyProfile';
 
 /**
  * What the learner says they are revising for.
@@ -20,9 +28,18 @@ import { isExamId, isTrainingLevelId, type ExamId, type TrainingLevelId } from '
 export interface ExamProfile {
   targetExam: ExamId | null;
   trainingLevel: TrainingLevelId | null;
+  university: UniversityId | null;
+  degreeType: DegreeTypeId | null;
+  studyYear: StudyYear | null;
 }
 
-const EMPTY: ExamProfile = { targetExam: null, trainingLevel: null };
+const EMPTY: ExamProfile = {
+  targetExam: null,
+  trainingLevel: null,
+  university: null,
+  degreeType: null,
+  studyYear: null,
+};
 
 const cache = new Map<string, ExamProfile>();
 const inFlight = new Map<string, Promise<ExamProfile>>();
@@ -61,7 +78,7 @@ async function fetchExamProfile(userId: string): Promise<ExamProfile> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('target_exam, training_level')
+    .select('target_exam, training_level, university, degree_type, study_year')
     .eq('id', userId)
     .maybeSingle();
 
@@ -72,6 +89,9 @@ async function fetchExamProfile(userId: string): Promise<ExamProfile> {
   return {
     targetExam: isExamId(data.target_exam) ? data.target_exam : null,
     trainingLevel: isTrainingLevelId(data.training_level) ? data.training_level : null,
+    university: isUniversityId(data.university) ? data.university : null,
+    degreeType: isDegreeTypeId(data.degree_type) ? data.degree_type : null,
+    studyYear: isStudyYear(data.study_year) ? data.study_year : null,
   };
 }
 
@@ -148,15 +168,24 @@ export function useExamProfile(): ExamProfileHandle {
     async (next: Partial<ExamProfile>): Promise<boolean> => {
       if (!supabase || userId === null) return false;
 
+      const known = cache.get(userId) ?? EMPTY;
       const merged: ExamProfile = {
-        targetExam: next.targetExam !== undefined ? next.targetExam : (cache.get(userId)?.targetExam ?? null),
-        trainingLevel:
-          next.trainingLevel !== undefined ? next.trainingLevel : (cache.get(userId)?.trainingLevel ?? null),
+        targetExam: next.targetExam !== undefined ? next.targetExam : known.targetExam,
+        trainingLevel: next.trainingLevel !== undefined ? next.trainingLevel : known.trainingLevel,
+        university: next.university !== undefined ? next.university : known.university,
+        degreeType: next.degreeType !== undefined ? next.degreeType : known.degreeType,
+        studyYear: next.studyYear !== undefined ? next.studyYear : known.studyYear,
       };
 
       const { error } = await supabase
         .from('profiles')
-        .update({ target_exam: merged.targetExam, training_level: merged.trainingLevel })
+        .update({
+          target_exam: merged.targetExam,
+          training_level: merged.trainingLevel,
+          university: merged.university,
+          degree_type: merged.degreeType,
+          study_year: merged.studyYear,
+        })
         .eq('id', userId);
 
       if (error) return false;

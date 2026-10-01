@@ -17,6 +17,7 @@ import { IMMEDIATE_ACCESS_ACKNOWLEDGEMENT } from '@/shared/legal/refunds';
 import { redeemLicence } from './licence';
 import styles from './PricingPage.module.css';
 import { ThemeBar } from '@/theme/ThemeBar';
+import { Illustration } from '@/shared/components/Illustration/Illustration';
 
 const SIMULATORS = MODULES.filter((m) => m.kind !== 'reference' && m.status === 'available');
 const FREE_SIMULATOR_COUNT = SIMULATORS.filter((m) => FREE_MODULE_IDS.has(m.id)).length;
@@ -110,12 +111,23 @@ export function PricingPage() {
   return (
     <div className={styles.page}>
       <ThemeBar />
-      <h1 className={styles.title}>Full access</h1>
-      <p className={styles.lede}>
-        {FREE_SIMULATOR_COUNT} of the {SIMULATORS.length} simulators are free on any account, questions
-        included. Full access opens the rest.
-      </p>
+      <header className={styles.hero}>
+        <div className={styles.heroText}>
+          <h1 className={styles.title}>Full access</h1>
+          <p className={styles.lede}>
+            {FREE_SIMULATOR_COUNT} of the {SIMULATORS.length} simulators are free on any account,
+            questions included. Full access opens the rest.
+          </p>
+          {user && (
+            <a href="#home" className={styles.skipLink}>
+              Not now, continue with free access
+            </a>
+          )}
+        </div>
+        <Illustration kind="access" size={104} className={styles.heroArt} />
+      </header>
 
+      <div className={styles.body}>
       {/* Above the cards, not in small print below them.
        *
        * UK medical schools buy by purchase order, so for a large share of the people who reach
@@ -164,6 +176,7 @@ export function PricingPage() {
                   checked={plan.id === selected}
                   onChange={() => setSelected(plan.id)}
                 />
+                {plan.id === DEFAULT_PACKAGE_ID && <span className={styles.badge}>Best value</span>}
                 <span className={styles.packageLabel}>{plan.label}</span>
                 <span className={`${styles.packagePrice} numeral`}>{plan.price}</span>
                 <span className={styles.packagePeriod}>per {plan.period}</span>
@@ -228,6 +241,7 @@ export function PricingPage() {
         </p>
 
       </section>
+      </div>
 
       <p className={styles.freeNote}>
         Cancel any time from your <a href="#account">account page</a>. If you cancel within 14 days of

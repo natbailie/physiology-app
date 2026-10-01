@@ -17,8 +17,38 @@
   text-decoration: underline;
 }
 
+/* The hero: the house brand gradient with the offer written on it, and the plan card below it
+ * pulled up to overlap its bottom edge so the two read as one object rather than a banner over a
+ * form. The ink ramp is used for type, so contrast does not depend on the page theme. */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-5);
+  padding: var(--s-6) var(--s-6) calc(var(--s-8) + var(--s-2));
+  border-radius: var(--r-lg);
+  color: var(--on-brand-ink);
+  background: linear-gradient(135deg, var(--brand-ink), color-mix(in srgb, var(--brand-deep) 70%, var(--brand-ink)));
+  border: 1px solid var(--brand-ink-border);
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  align-items: flex-start;
+}
+
+.heroArt {
+  flex: none;
+}
+
 .title {
   font-size: var(--fs-2xl);
+}
+
+.hero .title {
+  color: var(--on-brand-ink);
 }
 
 .lede {
@@ -27,13 +57,46 @@
   line-height: 1.6;
 }
 
+.hero .lede {
+  color: var(--brand-ink-dim);
+}
+
 .card {
   composes: panel from '../shared/styles/panel.module.css';
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  gap: var(--s-5);
   padding: var(--s-6);
   border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+}
+
+/* Everything under the hero rides up over its bottom edge together, whichever of the code row or
+ * the plan card comes first. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin: calc(-1 * var(--s-8)) var(--s-4) 0;
+  position: relative;
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: var(--s-5) var(--s-5) calc(var(--s-8) + var(--s-2));
+  }
+
+  .heroArt {
+    display: none;
+  }
+
+  .body {
+    margin-inline: var(--s-2);
+  }
+
+  .card {
+    padding: var(--s-5);
+  }
 }
 
 .planName {
@@ -79,7 +142,7 @@
 }
 
 .cta {
-  composes: primary from '../shared/styles/button.module.css';
+  composes: primary block from '../shared/styles/button.module.css';
   align-self: stretch;
   font-size: var(--fs-base);
   padding: var(--s-4) var(--s-6);
@@ -154,8 +217,11 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--panel-border);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--panel);
+  box-shadow: var(--shadow-2);
 }
 
 .codeLabel {
@@ -173,6 +239,7 @@
 .codeInput {
   flex: 1;
   min-width: 8rem;
+  min-height: 2.75rem;
   font: inherit;
   /* An access code is an identifier, so it is set in the identifier face. */
   font-family: var(--mono);
@@ -196,6 +263,7 @@
 
 .codeButton {
   composes: button from '../shared/styles/button.module.css';
+  min-height: 2.75rem;
   padding: var(--s-3) var(--s-5);
 }
 
@@ -220,24 +288,48 @@
 
 .packageOption {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  padding: var(--s-4);
+  padding: var(--s-5) var(--s-4) var(--s-4);
   border: 1px solid var(--panel-border);
   border-radius: var(--r-md);
   background: var(--panel-raised);
   cursor: pointer;
+  /* A big target: the whole tile is the radio. */
+  min-height: 5.5rem;
+  transition:
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
 }
 
+/* The selection colour, and only here and on the other "chosen" states. The fill is a tint, not
+ * a wash, so the price underneath keeps its contrast. */
 .packageOption:has(input:checked) {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 1px var(--brand);
+  border-color: var(--select);
+  box-shadow: 0 0 0 1px var(--select);
+  background: color-mix(in srgb, var(--select) 9%, var(--panel));
 }
 
 .packageOption:has(input:focus-visible) {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+/* "Best value", straddling the top edge of the tile it describes. */
+.badge {
+  position: absolute;
+  top: 0;
+  right: var(--s-4);
+  transform: translateY(-50%);
+  padding: 0.1rem var(--s-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--on-solid);
+  background: var(--select);
 }
 
 .packageRadio {
@@ -263,7 +355,7 @@
 
 .packageNote {
   font-size: 0.72rem;
-  color: var(--ok);
+  color: var(--text-dim);
 }
 
 /* Where access comes from, when a learner already has it. */
@@ -271,4 +363,16 @@
   font-size: 0.8rem;
   color: var(--text-dim);
   line-height: 1.6;
+}
+
+/* New accounts land here once; the free tier must stay one click away. On the hero, so it takes
+ * the ink ramp's accent and keeps a 44px target. */
+.skipLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--brand-on-ink);
 }

@@ -16,6 +16,9 @@ import { SiteFooter } from '@/shared/components/SiteFooter/SiteFooter';
 import { CookieBanner } from '@/analytics/CookieBanner';
 import { installAnalytics } from '@/analytics/ga';
 import { useRouteFocus } from '@/shared/hooks/useRouteFocus';
+import { useKeyboardInset } from '@/shared/hooks/useKeyboardInset';
+import { OfflineBanner } from '@/shared/components/OfflineBanner/OfflineBanner';
+import { ErrorBoundary } from '@/shared/components/ErrorBoundary/ErrorBoundary';
 import styles from './App.module.css';
 
 /**
@@ -46,6 +49,7 @@ function App() {
   // One delegated listener for the whole app, mounted above the route so it survives every swap.
   useLinkPrefetch();
   useRouteFocus(route);
+  useKeyboardInset();
   // Follows the cookie choice from here on; loads nothing from Google until analytics is accepted.
   useEffect(() => installAnalytics(), []);
 
@@ -61,7 +65,9 @@ function App() {
         Skip to main content
       </a>
       <CookieBanner />
+      <OfflineBanner />
       <main id="main" className={styles.main} tabIndex={-1}>
+        <ErrorBoundary resetKey={route}>
         <AuthGate route={route}>
           {/* Inside the gate, so the signed-out landing screen is not offered arrows into an
               app it cannot open. BEFORE the page in DOM order: the arrows are drawn in the
@@ -70,6 +76,7 @@ function App() {
           <NavArrows />
           <RoutedApp route={route} />
         </AuthGate>
+        </ErrorBoundary>
       </main>
 
       {/* The only element rendered on every route, which is why the tutor mounts here. It

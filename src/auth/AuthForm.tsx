@@ -1,9 +1,20 @@
 import { useId, useState, type FormEvent } from 'react';
 import { TERMS_VERSION } from '@/shared/legal/business';
 import { useAuth } from './AuthContext';
+import {
+  MIN_PASSWORD_LENGTH,
+  PASSWORD_RULE_LABELS,
+  WEAK_PASSWORD_MESSAGE,
+  checkPassword,
+  isStrongPassword,
+  type PasswordChecks,
+} from './passwordRules';
 import styles from './AuthForm.module.css';
 
 type AuthMode = 'signIn' | 'create';
+
+/** Deliberately loose: one @, something either side, a dot after it. The server is the authority. */
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface AuthFormProps {
   /** 'wide' stretches the controls to the container — used where the form is the whole page. */
@@ -22,32 +33,50 @@ export function AuthForm({ layout = 'inline' }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  /** One error at a time, tagged with the field it belongs to so it is drawn beside that field. */
+  const [problem, setProblem] = useState<{ where: 'email' | 'password' | 'agree' | 'form'; text: string } | null>(
+    null,
+  );
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const ids = useId();
   const errorId = `${ids}-error`;
+  const emailId = `${ids}-email`;
   const hintId = `${ids}-hint`;
   const agreeId = `${ids}-agree`;
+  const passwordId = `${ids}-password`;
+  const checks = checkPassword(password);
 
   const wide = layout === 'wide' ? styles.wide : '';
 
+  const fail = (where: 'email' | 'password' | 'agree' | 'form', text: string, focusId?: string) => {
+    setProblem({ where, text });
+    if (focusId) document.getElementById(focusId)?.focus();
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    // `required` on the checkbox stops most submits first; this is the backstop, with words.
+    // The form is `noValidate`, so the browser's own one-at-a-time tooltips never get in first and
+    // each problem is written out next to the field it is about, in words.
+    if (email.trim() === '') return fail('email', 'Add your email address so we know who you are.', emailId);
+    if (!EMAIL_SHAPE.test(email.trim())) {
+      return fail('email', "That doesn't look like an email address. Check for a typo before the @ or after the dot.", emailId);
+    }
+    if (password === '') return fail('password', 'Enter your password to continue.', passwordId);
+    if (mode === 'create' && !isStrongPassword(password)) {
+      return fail('password', WEAK_PASSWORD_MESSAGE, passwordId);
+    }
     if (mode === 'create' && !agreed) {
-      setError('To create an account, confirm you are 18 or over and agree to the Terms.');
-      document.getElementById(agreeId)?.focus();
-      return;
+      return fail('agree', 'To create an account, confirm you are 18 or over and agree to the Terms.', agreeId);
     }
     setBusy(true);
-    setError(null);
+    setProblem(null);
     try {
       const result =
         mode === 'create'
           ? await signUp(email.trim(), password, TERMS_VERSION)
           : await signIn(email.trim(), password);
-      if (!result.ok) setError(result.message);
+      if (!result.ok) setProblem({ where: 'form', text: result.message });
       else if (result.needsConfirmation) setAwaitingConfirmation(true);
     } finally {
       setBusy(false);
@@ -85,39 +114,62 @@ export function AuthForm({ layout = 'inline' }: AuthFormProps) {
         </button>
       </div>
 
-      <form className={`${styles.form} ${wide}`} onSubmit={(e) => void submit(e)}>
-        <label className={styles.label}>
-          Email
+      <form className={`${styles.form} ${wide}`} noValidate onSubmit={(e) => void submit(e)}>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={emailId}>
+            Email
+          </label>
           <input
+            id={emailId}
             type="email"
             required
             value={email}
+            placeholder="you@university.ac.uk"
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? errorId : undefined}
+            aria-invalid={problem?.where === 'email' ? true : undefined}
+            aria-describedby={problem?.where === 'email' ? errorId : undefined}
             className={styles.input}
           />
-        </label>
-        <label className={styles.label}>
-          Password
+          {problem?.where === 'email' && <FieldError id={errorId} text={problem.text} />}
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={passwordId}>
+            Password
+          </label>
           <input
+            id={passwordId}
             type="password"
             required
-            minLength={6}
+            minLength={mode === 'create' ? MIN_PASSWORD_LENGTH : undefined}
             value={password}
+            placeholder="Password"
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={mode === 'create' ? 'new-password' : 'current-password'}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={[mode === 'create' ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ') || undefined}
+            aria-invalid={problem?.where === 'password' ? true : undefined}
+            aria-describedby={
+              [mode === 'create' ? hintId : '', problem?.where === 'password' ? errorId : '']
+                .filter(Boolean)
+                .join(' ') || undefined
+            }
             className={styles.input}
           />
-        </label>
+          {problem?.where === 'password' && <FieldError id={errorId} text={problem.text} />}
+        </div>
 
         {mode === 'create' && (
-          <p id={hintId} className={styles.hint}>
-            Six characters minimum. We send a confirmation link before the account goes live.
-          </p>
+          <div id={hintId} className={styles.hint}>
+            <ul className={styles.rules} aria-label="Password requirements">
+              {(Object.keys(PASSWORD_RULE_LABELS) as (keyof PasswordChecks)[]).map((rule) => (
+                <li key={rule} className={checks[rule] ? styles.ruleMet : styles.rule}>
+                  {/* Words as well as a mark, so the state never rests on colour alone. */}
+                  <span aria-hidden="true">{checks[rule] ? '✓' : '○'}</span> {PASSWORD_RULE_LABELS[rule]}
+                  <span className={styles.srOnly}>{checks[rule] ? ' (met)' : ' (not met)'}</span>
+                </li>
+              ))}
+            </ul>
+            We send a confirmation link before the account goes live.
+          </div>
         )}
 
         {mode === 'create' && (
@@ -126,6 +178,8 @@ export function AuthForm({ layout = 'inline' }: AuthFormProps) {
               id={agreeId}
               type="checkbox"
               required
+              aria-describedby={problem?.where === 'agree' ? errorId : undefined}
+              aria-invalid={problem?.where === 'agree' ? true : undefined}
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
               className={styles.checkbox}
@@ -144,11 +198,8 @@ export function AuthForm({ layout = 'inline' }: AuthFormProps) {
           </div>
         )}
 
-        {error && (
-          <p id={errorId} className={styles.error} role="alert">
-            {error}
-          </p>
-        )}
+        {problem?.where === 'agree' && <FieldError id={errorId} text={problem.text} />}
+        {problem?.where === 'form' && <FieldError id={errorId} text={problem.text} />}
 
         <button type="submit" disabled={busy} className={styles.primaryButton}>
           {busy ? 'One moment…' : mode === 'create' ? 'Create account' : 'Sign in'}
@@ -169,5 +220,17 @@ export function AuthForm({ layout = 'inline' }: AuthFormProps) {
         </p>
       )}
     </div>
+  );
+}
+
+/** A problem, drawn beside the field it is about: a mark and words, never colour alone. */
+function FieldError({ id, text }: { id: string; text: string }) {
+  return (
+    <p id={id} className={styles.error} role="alert">
+      <span aria-hidden="true" className={styles.errorMark}>
+        !
+      </span>
+      {text}
+    </p>
   );
 }

@@ -7,7 +7,18 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { useEntitlement } from '@/billing/useEntitlement';
 import { EXAMS, TRAINING_LEVELS, isExamId, isTrainingLevelId } from '@/home/exams';
 import { setExamFilter } from '@/home/examFilter';
+import {
+  DEGREE_TYPES,
+  STUDY_YEARS,
+  UK_MEDICAL_SCHOOLS,
+  isDegreeTypeId,
+  isStudyYear,
+  isUniversityId,
+} from '@/home/studyProfile';
 import { useExamProfile } from './examProfile';
+import { ProgressBar } from '@/shared/components/ProgressBar/ProgressBar';
+import { Skeleton } from '@/shared/components/Skeleton/Skeleton';
+import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import styles from './AccountPage.module.css';
 import { useRole } from '@/teacher/useTeacher';
 import { ThemeToggle } from '@/theme/ThemeToggle';
@@ -21,6 +32,7 @@ export function AccountPage() {
     <div className={styles.page}>
       <ThemeBar />
       <header className={styles.header}>
+        <BrandMark size="sm" href="#home" />
         <h1 className={styles.title}>Your account</h1>
       </header>
       {/* Reachable without a session: the theme is a device preference, not account data. */}
@@ -129,10 +141,21 @@ function DangerZone({ onDelete }: { onDelete: () => Promise<{ ok: boolean; messa
  * and a form that can be left in an unsaved state is a form somebody leaves in an unsaved state.
  */
 function ExamSettings() {
-  const { targetExam, trainingLevel, ready, canSave, save } = useExamProfile();
+  const { targetExam, trainingLevel, university, degreeType, studyYear, ready, canSave, save } = useExamProfile();
   const [failed, setFailed] = useState(false);
 
-  if (!ready) return <p className={styles.muted}>Loading…</p>;
+  if (!ready) {
+    // Two field rows' worth of placeholder, so the section keeps its height while it loads.
+    return (
+      <div aria-busy="true" aria-label="Loading your exam settings" className={styles.loadingRows}>
+        <Skeleton height="2.75rem" />
+        <Skeleton height="2.75rem" />
+        <Skeleton height="2.75rem" />
+        <Skeleton height="2.75rem" />
+        <Skeleton height="2.75rem" />
+      </div>
+    );
+  }
 
   const update = (next: Parameters<typeof save>[0]) => {
     setFailed(false);
@@ -195,6 +218,75 @@ function ExamSettings() {
         </select>
       </div>
 
+      <div className={styles.fieldRow}>
+        <label className={styles.fieldLabel} htmlFor="university">
+          University
+        </label>
+        <select
+          id="university"
+          className={styles.select}
+          value={university ?? ''}
+          disabled={!canSave}
+          onChange={(event) => {
+            const value = event.target.value;
+            update({ university: isUniversityId(value) ? value : null });
+          }}
+        >
+          <option value="">Prefer not to say</option>
+          {UK_MEDICAL_SCHOOLS.map((school) => (
+            <option key={school.id} value={school.id}>
+              {school.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.fieldRow}>
+        <label className={styles.fieldLabel} htmlFor="degree-type">
+          Degree
+        </label>
+        <select
+          id="degree-type"
+          className={styles.select}
+          value={degreeType ?? ''}
+          disabled={!canSave}
+          onChange={(event) => {
+            const value = event.target.value;
+            update({ degreeType: isDegreeTypeId(value) ? value : null });
+          }}
+        >
+          <option value="">Prefer not to say</option>
+          {DEGREE_TYPES.map((degree) => (
+            <option key={degree.id} value={degree.id}>
+              {degree.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.fieldRow}>
+        <label className={styles.fieldLabel} htmlFor="study-year">
+          Year
+        </label>
+        <select
+          id="study-year"
+          className={styles.select}
+          value={studyYear ?? ''}
+          disabled={!canSave}
+          onChange={(event) => {
+            const value = Number(event.target.value);
+            update({ studyYear: isStudyYear(value) ? value : null });
+          }}
+        >
+          <option value="">Prefer not to say</option>
+          {STUDY_YEARS.map((year) => (
+            <option key={year} value={year}>
+              Year {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {failed && (
         <p className={styles.error} role="alert">
           That did not save. Check your connection and try again.
@@ -214,7 +306,7 @@ function ExamSettings() {
 function AccessSummary() {
   const { status, source, institutionName } = useEntitlement();
 
-  if (status === 'loading') return <p className={styles.muted}>Checking your access…</p>;
+  if (status === 'loading') return <p className={styles.muted}>One moment, checking your access…</p>;
 
   if (status === 'free') {
     return (
@@ -331,6 +423,7 @@ function SignedInView({ email, onSignOut }: { email: string; onSignOut: () => vo
           <p className={styles.total}>
             {correct} of {attempted} answers correct ({attempted === 0 ? 0 : Math.round((correct / attempted) * 100)}%)
           </p>
+          <ProgressBar value={correct} max={attempted} label="Answers correct" />
           <ul className={styles.moduleList}>
             {rows.map(({ module, summary }) => (
               <li key={module.id} className={styles.moduleRow}>

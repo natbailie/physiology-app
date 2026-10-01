@@ -24,7 +24,7 @@ app is; this file is about how to work in it.
   settle it). `src/shared/verification/references.test.ts` discovers them, fails if a module has
   none, and fails if a baseline falls outside its own band.
 
-  **`unsourced` is a first-class answer, not a failure.** 29 of 265 bands are unsourced, and almost
+  **`unsourced` is a first-class answer, not a failure.** 29 of 274 bands are unsourced, and almost
   all of them for the same reason: the quantity is a 0-1 or 0-100 index, so no published reference
   interval CAN apply until the engine changes units. Reading those `needs` strings end to end is
   the most useful validation backlog in the repo. Do not convert one to `literature` without a
@@ -35,7 +35,7 @@ app is; this file is about how to work in it.
 
 ## Adding or changing physiology
 
-Engine tests first, then the module. Write them as clinical assertions, the way the existing 87
+Engine tests first, then the module. Write them as clinical assertions, the way the existing 92
 engine test files do, not as numeric snapshots. A test named "produces high calcium with LOW
 phosphate" survives refactoring; one asserting `toBe(11.14)` does not.
 
@@ -55,7 +55,7 @@ and backward failure had to load the right heart before cardiogenic shock raised
 - **The settle keeps its own tail as the opening TRACE, and steps at the loop's own step.** Both
   halves are load-bearing. History used to start empty, so every chart drew blank, then a two-point
   line across the whole frame, then compressed leftwards on every tick until the buffer filled —
-  on all 51 modules, and on every Reset and preset press. And the settle used to chunk at
+  on all 53 modules, and on every Reset and preset press. And the settle used to chunk at
   `maxDtSeconds` while the live loop sub-steps at `min(maxDtSeconds, frame * timeScale)`, which is
   smaller for half the modules: muscleContraction settled to a tension of 9.6 and the loop then
   relaxed it to 0.12 over five real seconds, which looked exactly like a module that had not been
@@ -64,7 +64,7 @@ and backward failure had to load the right heart before cardiogenic shock raised
 - **`Sparkline` takes the capacity, not just the points.** `ModulePage` passes `historyCapacity`
   into the shell and every chart on the page reads it from there, including the ones `TrendsView`
   builds from a schema and no page names. Without it a partial trace is stretched across the frame
-  rather than growing in from the left. `cases.test.ts` requires it on all 51 pages, because a
+  rather than growing in from the left. `cases.test.ts` requires it on all 53 pages, because a
   settle shortened during calibration would otherwise take the x-axis with it, silently.
 - A module whose baseline is a TRAJECTORY declares none — cellCycle progresses through phases,
   micturition fills a bladder, inflammation resolves an insult, cerebralPerfusion accumulates CSF.
@@ -97,14 +97,15 @@ Three kinds of oracle, in descending order of how hard they are to fake:
   checks Einthoven's law (II = I + III) against arbitrary dipoles and it holds to ten decimal
   places, which no amount of miscalibration could produce.
 
-  Thirteen modules have one: `membranePotentials` (Nernst, Goldman), `enzymeKinetics`
+  Fifteen modules have one: `membranePotentials` (Nernst, Goldman), `enzymeKinetics`
   (Michaelis-Menten, the three inhibition transforms, Lineweaver-Burk), `respiratory`
   (Henderson-Hasselbalch, the alveolar gas equation, Winters), `ecgConduction` (Einthoven,
   Bazett), `muscleContraction` (Gordon-Huxley, Hill), `venousReturn` (Guyton), `capillaryExchange`
   (Starling, Landis-Pappenheimer), `electrolyteBalance` (Edelman, the osmolar gap, the glucose
   correction), `renalTubular` (the clearance identities), `mechanicalVentilation` (inverse
   Severinghaus, the content-based shunt equation), `respiratoryFailure` (the shunt and alveolar
-  gas equations), `vision` (Watson-Yellott) and `vestibular` (Steinhausen).
+  gas equations), `vision` (Watson-Yellott), `vestibular` (Steinhausen), `krebsCycle` (per-turn cycle stoichiometry)
+  and `ureaCycle`.
 
   Where our model is not the published equation, say so and test the SHAPE rather than widening a
   tolerance until point agreement appears. `membranePotentials` inverts Goldman to recover the
@@ -166,7 +167,7 @@ A case is a patient: one scenario the module already produces, given a name, a h
 reason to care. `src/modules/<module>/cases.ts`, verified by `cases.test.ts`. The ward round on
 `#home` is built entirely out of them.
 
-**Every module is tabbed.** All 51 show **Lab | Questions | Lessons**; the modules with
+**Every module is tabbed.** All 53 show **Lab | Questions | Lessons**; the modules with
 beds add **Patients** second. The Lab tab is the instrument alone — diagram, readouts, charts,
 transport, sliders — and practice lives on the Questions tab everywhere, each question under
 its own instrument. **Lessons** is the
@@ -305,7 +306,7 @@ Things that have caught this out:
   and the sections are hidden rather than unmounted — so a learner who leaves a question open,
   crosses to Lessons to read, and then types anything would otherwise commit an answer to a
   question off screen, into the persisted review ladder. `rootRef.current?.closest('[inert]')`
-  is what stops it, and it works for all 51 without any page knowing which tab is showing.
+  is what stops it, and it works for all 53 without any page knowing which tab is showing.
 - **The preset bar is MOUNTED on every tab**, hidden with CSS, and this is the least obvious
   invariant on the page. `PresetBar` registers the module's scenario labels with the shell, and
   the explainer's 415 "show me" demo buttons read their text from that registration — only 4 set
@@ -365,6 +366,10 @@ rule. `supabase/schema-billing.sql` is the whole design; `src/billing/useEntitle
 
 There was a `TEST_ACCESS_CODE` compiled into the bundle. It is gone, and `licence.ts` replaced it;
 if it reappears, `vite build` plus a grep of `dist/` is how that gets caught.
+
+The phone app (`../physiology-native`) sells the same subscription through `react-native-purchases`,
+with the same App User ID, offering and `full_access` entitlement; see its README. It gates on
+Supabase's `v_entitlement` OR RevenueCat's own `customerInfo`, so a fresh purchase is never paywalled.
 
 ### Invoicing a school
 

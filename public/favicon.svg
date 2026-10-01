@@ -1,7 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Physiology Lab">
-  <!-- The house mark: two beats of an arterial pressure waveform, dicrotic notch and all. The same
-       drawing as the phone app's icon (physiology-native/assets/icon.png), redrawn as vector. -->
+  <!-- The house mark, cut down for a 16px tab: the phone app's icon (physiology-native/assets/icon.png)
+       is a head, an open book and a heart on the app's navy. Its network lines and wordmark turn to mud
+       at this size, so only the three shapes survive, drawn with heavier strokes. -->
   <rect width="64" height="64" rx="12" fill="#0f172a"/>
-  <path d="M11.5 51.5 C12 36 12.5 20 13.7 13 C15.5 12 18.5 22 20.3 30.5 C21 34 21.5 34 22 30.5 C22.6 27 23.5 28 24.2 33.5 C26.5 41 30 47.5 37 50 L37.2 50.8 C37.8 36 38.3 20 39.3 13 C41 12 44 22 45.9 30.5 C46.6 34 47.1 34 47.6 30.5 C48.2 27 49.1 28 49.8 33.5 C50.8 36.8 51.6 39.2 52.4 42"
-        fill="none" stroke="#60a5fa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(-18 -12) scale(0.1)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M448 610 L448 548 C418 542 374 528 364 502 C359 488 367 478 362 466 L340 458 C334 452 340 440 340 432 L302 410 C298 404 302 398 306 392 L338 352 C348 330 352 316 352 300 C352 212 430 152 520 152 C618 152 702 222 702 330 C702 420 694 500 692 548 L692 610" stroke="#60a5fa" stroke-width="42"/>
+    <path d="M520 384 C490 358 446 348 404 352 L404 250 C446 246 490 258 520 284 C550 258 594 246 636 250 L636 352 C594 348 550 358 520 384 Z" stroke="#bfdbfe" stroke-width="36"/>
+    <path d="M520 386 L520 560" stroke="#60a5fa" stroke-width="34"/>
+    <path d="M520 736 C462 692 436 660 436 626 C436 596 458 578 484 578 C500 578 513 587 520 600 C527 587 540 578 556 578 C582 578 604 596 604 626 C604 660 578 692 520 736 Z" fill="#fb7185" stroke="#fb7185" stroke-width="20"/>
+  </g>
 </svg>

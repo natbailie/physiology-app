@@ -28,8 +28,11 @@ export function BrandMark({ size = 'md', tone = 'paper', href, as: Word = 'span'
 
   const content = (
     <>
-      <Word className={styles.word}>Physiology Lab</Word>
-      <span className={styles.parent}>Bentara Medical</span>
+      <img className={styles.logo} src="/favicon.svg" alt="" width={32} height={32} />
+      <span className={styles.text}>
+        <Word className={styles.word}>Physiology Lab</Word>
+        <span className={styles.parent}>Bentara Medical</span>
+      </span>
     </>
   );
 

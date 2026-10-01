@@ -132,7 +132,7 @@ describe('ChatPanel', () => {
     await act(async () => ask('anything'));
 
     await waitFor(() =>
-      expect(screen.getByRole('alert').textContent).toBe('You have used all 25 tutor messages for today.'),
+      expect(screen.getByRole('alert').textContent).toContain('You have used all 25 tutor messages for today.'),
     );
   });
 
@@ -289,5 +289,16 @@ describe('ChatPanel', () => {
     await act(async () => ask('anything'));
 
     await waitFor(() => expect(screen.getByText('Thinking…')).toBeTruthy());
+  });
+});
+
+describe('ChatPanel retry', () => {
+  it('offers a Retry button alongside an error', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+    render(<ChatPanel onClose={() => {}} />);
+    fireEvent.change(screen.getByLabelText('Your question'), { target: { value: 'What is preload?' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Ask' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy());
+    vi.unstubAllGlobals();
   });
 });

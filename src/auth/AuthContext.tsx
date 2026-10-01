@@ -1,11 +1,21 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { WEAK_PASSWORD_MESSAGE, isStrongPassword } from './passwordRules';
 
 export interface AuthUser {
   id: string;
   email: string;
+  /**
+   * False until the learner has been shown the licence-code / plans page once. Stored as
+   * `onboarded_at` in auth user metadata, so it follows the account across devices — the
+   * confirmation email is often opened somewhere other than where they signed up.
+   */
+  onboarded: boolean;
 }
+
+/** Accounts created before the onboarding step shipped are treated as already onboarded. */
+const ONBOARDING_LAUNCHED_AT = Date.parse('2026-09-30T00:00:00Z');
 
 export type AuthResult = { ok: true; needsConfirmation: boolean } | { ok: false; message: string };
 
@@ -20,6 +30,8 @@ interface AuthContextValue {
    */
   signUp(email: string, password: string, acceptedTerms: string): Promise<AuthResult>;
   signIn(email: string, password: string): Promise<AuthResult>;
+  /** Records that the post-sign-up plans / licence-code page has been shown. */
+  markOnboarded(): Promise<void>;
   signOut(): Promise<void>;
   /**
    * Permanent self-service deletion (UK GDPR): the server-side rpc removes the auth user and
@@ -32,7 +44,10 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function toUser(session: Session | null): AuthUser | null {
   const u = session?.user;
-  return u ? { id: u.id, email: u.email ?? '' } : null;
+  if (!u) return null;
+  const onboarded =
+    Boolean(u.user_metadata?.onboarded_at) || Date.parse(u.created_at) < ONBOARDING_LAUNCHED_AT;
+  return { id: u.id, email: u.email ?? '', onboarded };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -72,6 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       initialising,
       async signUp(email, password, acceptedTerms) {
         if (!supabase) return { ok: false, message: 'Accounts are not configured.' };
+        // Backstop for the form's own check: the policy must hold however signUp is reached.
+        if (!isStrongPassword(password)) return { ok: false, message: WEAK_PASSWORD_MESSAGE };
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -93,8 +110,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) return { ok: false, message: tidyError(error.message) };
         return { ok: true, needsConfirmation: false };
       },
+      async markOnboarded() {
+        if (!supabase) return;
+        // The session's user updates via onAuthStateChange, which flips `onboarded` for us.
+        await supabase.auth.updateUser({ data: { onboarded_at: new Date().toISOString() } });
+      },
       async signOut() {
         await supabase?.auth.signOut();
+        // Land on the login screen at a clean route rather than a stale module hash.
+        if (typeof window !== 'undefined') window.location.hash = '';
       },
       async deleteAccount() {
         if (!supabase) return { ok: false, message: 'Accounts are not configured.' };
@@ -117,9 +141,11 @@ function tidyError(message: string): string {
   const lower = message.toLowerCase();
   if (lower.includes('invalid login')) return 'That email and password do not match an account.';
   if (lower.includes('already registered')) return 'An account already exists for that email.';
-  if (lower.includes('password should be')) return 'Passwords need at least six characters.';
-  if (lower.includes('email not confirmed')) return 'Confirm your email first — check your inbox.';
-  if (lower.includes('rate limit')) return 'Too many attempts just now — wait a moment and retry.';
+  // Covers "Password should be at least N characters" and the newer "Password should contain at
+  // least one character of each: ..." wording Supabase returns for its composition rules.
+  if (lower.includes('password should') || lower.includes('weak password')) return WEAK_PASSWORD_MESSAGE;
+  if (lower.includes('email not confirmed')) return 'Confirm your email first, then check your inbox.';
+  if (lower.includes('rate limit')) return 'Too many attempts just now. Wait a moment and retry.';
   if (lower.includes('permission denied') || lower.includes('not found'))
     return 'Deletion is not available on this deployment yet.';
   return message;

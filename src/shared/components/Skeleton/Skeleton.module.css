@@ -1,0 +1,34 @@
+/* A still block with a soft highlight sweeping across it. The base is the raised surface, so it
+ * reads as "the card is here, its contents are not yet" in both themes. */
+.skeleton {
+  display: block;
+  border-radius: var(--r-sm);
+  background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in srgb, var(--text) 9%, transparent) 50%,
+      transparent 70%
+    )
+    var(--panel-raised);
+  background-size: 220% 100%;
+  animation: sweep 1.3s var(--ease) infinite;
+}
+
+.round {
+  border-radius: var(--r-pill);
+}
+
+@keyframes sweep {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -30% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

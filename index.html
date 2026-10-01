@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#050a13" />
     <link
@@ -21,6 +22,20 @@
       crossorigin
     />
     <title>Physiology Lab</title>
+    <meta
+      name="description"
+      content="Interactive physiology simulators for pre-clinical medical students. Move the inputs, watch the whole system respond."
+    />
+    <!-- Share previews. No og:url or og:image yet: both must be absolute, so they wait for the
+         production domain. Add them together with a canonical link when it is known. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Physiology Lab" />
+    <meta property="og:title" content="Physiology Lab" />
+    <meta
+      property="og:description"
+      content="Interactive physiology simulators for pre-clinical medical students. Move the inputs, watch the whole system respond."
+    />
+    <meta name="twitter:card" content="summary" />
     <!--
       Resolve the theme before first paint. The stylesheet expresses dark in exactly one
       `:root[data-theme='dark']` block rather than duplicating the palette for

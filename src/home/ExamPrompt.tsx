@@ -54,7 +54,7 @@ export function ExamPrompt() {
 
   return (
     <div className={styles.prompt}>
-      <span className={styles.question}>Revising for a particular exam?</span>
+      <span className={styles.question}>Which exam are you working towards? We'll put the most useful simulators first.</span>
 
       {EXAMS.map((exam) => (
         <button key={exam.id} type="button" className={styles.choice} onClick={choose(exam.id)}>
@@ -63,7 +63,7 @@ export function ExamPrompt() {
       ))}
 
       <button type="button" className={styles.dismiss} onClick={dismiss}>
-        Not right now
+        Skip for now
       </button>
     </div>
   );

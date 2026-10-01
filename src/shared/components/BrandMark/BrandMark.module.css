@@ -1,13 +1,25 @@
-/* Two lines, tight over tracked — the whole lockup. Deliberately typographic: the app has no
- * runtime image dependencies and a wordmark survives every surface a logo file would need
- * three sizes for. */
+/* The app icon (the same SVG as the favicon, so no extra asset) beside two lines of type, tight
+ * over tracked — the whole lockup. The icon is sized in em so it scales with each size below. */
 
 .mark {
   display: inline-flex;
-  flex-direction: column;
-  gap: 0.1em;
+  align-items: center;
+  gap: 0.6em;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.logo {
+  flex: none;
+  width: 2em;
+  height: 2em;
+  border-radius: 22%;
+}
+
+.text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1em;
 }
 
 .word {

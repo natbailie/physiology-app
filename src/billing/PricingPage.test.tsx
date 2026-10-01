@@ -114,8 +114,8 @@ describe('pricing page', () => {
     // one showing the last known one.
     state.user = { id: 'u1', email: 'a@b.c' };
     render(<PricingPage />);
-    expect(screen.getByText('£55')).toBeTruthy();
-    expect(screen.getByText('£9')).toBeTruthy();
+    expect(screen.getByText('£99')).toBeTruthy();
+    expect(screen.getByText('£9.99')).toBeTruthy();
   });
 
   it('prefers the dashboard’s prices over the fallback once the offering lands', async () => {
@@ -124,7 +124,7 @@ describe('pricing page', () => {
     render(<PricingPage />);
 
     await waitFor(() => expect(screen.queryByText('£60')).toBeTruthy());
-    expect(screen.queryByText('£55')).toBeNull();
+    expect(screen.queryByText('£99')).toBeNull();
   });
 
   it('says nothing to sell to someone who already has full access', () => {
@@ -200,10 +200,10 @@ describe('pricing page', () => {
   });
 
   it('states the saving it computes from the prices, not a slogan', () => {
-    // 12 × £9 − £55 = £53. "Two months free" was the old claim, and it was wrong.
+    // 12 × £9.99 − £99 = £20.88. "Two months free" was the old claim, and it was wrong.
     state.user = { id: 'u1', email: 'a@b.c' };
     render(<PricingPage />);
-    expect(screen.getByText('Save £53 a year compared with paying each month')).toBeTruthy();
+    expect(screen.getByText('Save £20.88 a year compared with paying each month')).toBeTruthy();
     expect(screen.queryByText(/two months free/i)).toBeNull();
   });
 

@@ -3,6 +3,7 @@ import { BrandMark } from '@/shared/components/BrandMark/BrandMark';
 import { MODULES } from '@/home/moduleRegistry';
 import styles from './LandingPage.module.css';
 import { ThemeBar } from '@/theme/ThemeBar';
+import { Illustration } from '@/shared/components/Illustration/Illustration';
 
 const SIMULATOR_COUNT = MODULES.filter((m) => m.kind !== 'reference' && m.status === 'available').length;
 
@@ -22,6 +23,8 @@ export function LandingPage() {
         <div className={styles.brandPanel}>
           <BrandMark size="lg" tone="ink" as="h1" />
 
+          <Illustration kind="welcome" size={132} className={styles.art} />
+
           <div className={styles.pitch}>
             {/* A tagline, not the page's heading. The product name above it is that — and it is
                 also what a signed-out visitor is looking for when they land here. */}
@@ -40,8 +43,8 @@ export function LandingPage() {
 
         <div className={styles.formPanel}>
           <div className={styles.formHead}>
-            <h2 className={styles.formTitle}>Sign in</h2>
-            <p className={styles.formHint}>Pick up where you left off.</p>
+            <h2 className={styles.formTitle}>Welcome back</h2>
+            <p className={styles.formHint}>Sign in to pick up where you left off, or make a free account in a minute.</p>
           </div>
           <AuthForm layout="wide" />
         </div>

@@ -117,8 +117,8 @@ export function QuestionSet<TInputs, TPreset extends string, TSnapshot>({
         <h2 className={styles.title}>Questions</h2>
         <p className={styles.blurb}>
           {count === 1
-            ? 'The one question in this module that belongs to no patient.'
-            : `${count} questions that belong to no patient — the scenarios with no bed, and the mechanism drills.`}
+            ? 'One question that tests whether you can predict what the system will do, and explain why.'
+            : `${count} questions that test whether you can predict what the system will do, and explain why.`}
         </p>
       </div>
 

@@ -5,11 +5,17 @@
 .panel {
   composes: lifted from '../styles/panel.module.css';
   position: fixed;
-  right: var(--s-4);
-  bottom: var(--s-4);
+  right: calc(var(--s-4) + env(safe-area-inset-right, 0px));
+  /* --kb-inset lifts the sheet clear of an on-screen keyboard where the browser does not resize
+   * the layout viewport (iOS Safari); see useKeyboardInset. */
+  bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px) + var(--kb-inset, 0px));
   z-index: 6;
   width: min(24rem, calc(100vw - 2 * var(--s-4)));
   max-height: min(34rem, calc(100vh - var(--topbar-h, 0px) - 2 * var(--s-4)));
+  max-height: min(
+    34rem,
+    calc(100dvh - var(--topbar-h, 0px) - 2 * var(--s-4) - env(safe-area-inset-bottom, 0px) - var(--kb-inset, 0px))
+  );
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -175,6 +181,10 @@ a.citation:focus-visible {
 }
 
 .error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
   margin: 0;
   padding: var(--s-2) var(--s-4);
   font-size: var(--fs-xs);
@@ -242,4 +252,9 @@ a.citation:focus-visible {
     max-height: 70vh;
     border-radius: var(--r-lg) var(--r-lg) 0 0;
   }
+}
+
+.errorText {
+  margin: 0;
+  min-width: 0;
 }

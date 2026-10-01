@@ -15,13 +15,13 @@ export const REFUNDS: LegalDoc = {
   id: 'refunds',
   title: 'Refund and cancellation policy',
   summary: 'Your 14-day right to cancel, and how refunds work after that.',
-  lastUpdated: '2026-09-28',
+  lastUpdated: '2026-10-01',
   sections: [
     {
       heading: 'Your 14-day right to cancel',
       paragraphs: [
         'When you first take out a subscription on our website you have 14 days to change your mind, starting the day you subscribe.',
-        'Because you ask for access to start straight away, if you cancel within those 14 days we refund what you paid minus a proportionate amount for the days you had access. For example, cancelling a £9 monthly plan after 3 days of a 30-day month refunds £8.10.',
+        'Because you ask for access to start straight away, if you cancel within those 14 days we refund what you paid minus a proportionate amount for the days you had access. For example, cancelling a £9.99 monthly plan after 3 days of a 30-day month refunds £8.99.',
         `To cancel, use "Manage or cancel your subscription" on your account page, or email ${BUSINESS.contactEmail} with your account email address and the words "I cancel my subscription". You do not have to give a reason. We refund within 14 days to the card you paid with.`,
       ],
       links: [

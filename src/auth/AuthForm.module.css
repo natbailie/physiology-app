@@ -45,11 +45,36 @@
   box-shadow: var(--shadow-1);
 }
 
+/* A field: label and input on one row where there is room (the wide landing card), stacked where
+ * there is not; an error, when there is one, spans the row underneath. */
+.field {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-2);
+}
+
+.wide .field {
+  grid-template-columns: 6.5rem 1fr;
+  align-items: center;
+  column-gap: var(--s-4);
+}
+
+.wide .field > :nth-child(3) {
+  grid-column: 2;
+}
+
+@media (max-width: 480px) {
+  .wide .field {
+    grid-template-columns: 1fr;
+  }
+
+  .wide .field > :nth-child(3) {
+    grid-column: 1;
+  }
+}
+
 .label {
   composes: microLabel from '../shared/styles/text.module.css';
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
 }
 
 .input {
@@ -61,11 +86,16 @@
   letter-spacing: normal;
   text-transform: none;
   padding: var(--s-4);
+  min-height: 2.75rem;
   border-radius: var(--r-md);
   border: 1px solid var(--panel-border);
   background: var(--panel-raised);
   color: var(--text);
   transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger);
 }
 
 /* The house focus outline. The field used to swap it for a 25% brand halo, which measured
@@ -80,14 +110,30 @@
 }
 
 .error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
   font-size: var(--fs-sm);
   color: var(--danger);
   line-height: var(--lh-snug);
 }
 
+.errorMark {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.05rem;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: var(--on-solid);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+}
+
 .primaryButton {
-  composes: primary from '../shared/styles/button.module.css';
-  align-self: flex-start;
+  composes: primary block from '../shared/styles/button.module.css';
   font-size: var(--fs-sm);
   padding: var(--s-4) var(--s-6);
 }
@@ -158,4 +204,33 @@
 
 .wide .primaryButton {
   text-align: center;
+}
+
+/* Live password requirements (create mode). Met rules gain a tick and a stronger ink; the
+ * words carry the state, colour only reinforces it. */
+.rules {
+  list-style: none;
+  margin: 0 0 var(--s-2);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.rule {
+  color: var(--text-dim);
+}
+
+.ruleMet {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

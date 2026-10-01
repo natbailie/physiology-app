@@ -185,7 +185,7 @@ describe('useModuleCases', () => {
     act(() => h.api().session.start());
 
     // Both beds claimed their questions, so one is left — the mechanism drill.
-    expect(screen.getByText(/the one question in this module/i)).toBeDefined();
+    expect(screen.getByText(/one question that tests whether you can predict/i)).toBeDefined();
     expect(h.api().session.question).toBe(FREE_Q);
     expect(panels()).toHaveLength(1);
   });
