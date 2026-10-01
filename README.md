@@ -8,6 +8,8 @@ questions.
 Aimed at pre-clinical medicine (UKMLA, USMLE Step 1, MBBS), with modules tagged for MRCP Part 1,
 MRCS Part A and FRCA Primary.
 
+A React Native (Expo) companion app renders the same modules on iOS and Android: [natbailie/physiology-native](https://github.com/natbailie/physiology-native).
+
 ## Running it
 
 ```bash
